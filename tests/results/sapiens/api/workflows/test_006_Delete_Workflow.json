@@ -1,0 +1,12 @@
+{
+  "test_name": "Delete Workflow",
+  "success": true,
+  "details": "Deleted workflow 24d2b516-2ae6-4e48-828b-12eb290e3277",
+  "duration_seconds": 0.00126775,
+  "input": null,
+  "output": {
+    "body": "",
+    "status_code": 204
+  },
+  "timestamp": "2025-12-24T04:02:35.799205Z"
+}

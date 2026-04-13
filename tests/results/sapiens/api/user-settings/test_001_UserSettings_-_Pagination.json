@@ -1,0 +1,116 @@
+{
+  "test_name": "UserSettings - Pagination",
+  "success": true,
+  "details": "Pagination works correctly",
+  "duration_seconds": 0.003007459,
+  "input": {
+    "endpoint": "/api/v1/user_settings?page=1&per_page=5",
+    "method": "GET",
+    "params": {
+      "page": 1,
+      "per_page": 5
+    }
+  },
+  "output": {
+    "body": {
+      "data": {
+        "data": [
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-12T15:03:51.859643+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-12T15:03:51.859648+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "c28c440f-8ba5-4d7d-ad5c-1e662ff10d3c"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-12T15:03:51.863631+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-12T15:03:51.863632+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "bc6cf33f-60ac-4932-aea3-961d8599bc73"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-12T15:03:51.870687+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-12T15:03:51.870688+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "ae1c57d6-cba3-4893-804f-a8808a9f58bd"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-12T15:03:51.863623+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-12T15:03:51.863624+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "6bed0176-31f0-44cb-a37a-f44e4810eac3"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-12T15:03:51.863614+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-12T15:03:51.863615+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "67c3dc72-1aa7-425c-8281-e4484f530974"
+          }
+        ],
+        "meta": {
+          "limit": 20,
+          "page": 1,
+          "total": 5,
+          "total_pages": 1
+        }
+      },
+      "success": true
+    },
+    "status_code": 200
+  },
+  "timestamp": "2025-12-12T15:50:21.037100Z"
+}

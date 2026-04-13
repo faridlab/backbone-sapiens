@@ -1,0 +1,16 @@
+{
+  "test_name": "MfaDevice - Get Not Found",
+  "success": true,
+  "details": "Correctly returned 404 for non-existent entity",
+  "duration_seconds": 0.000974708,
+  "input": {
+    "endpoint": "/api/v1/mfa_devices/9bbb252a-987d-4bbd-8d83-d9bf6d5bdc3b",
+    "id": "9bbb252a-987d-4bbd-8d83-d9bf6d5bdc3b",
+    "method": "GET"
+  },
+  "output": {
+    "body": "{\"success\":false,\"error\":\"MFADevice with id '9bbb252a-987d-4bbd-8d83-d9bf6d5bdc3b' not found\"}",
+    "status_code": 404
+  },
+  "timestamp": "2025-12-12T15:50:20.890547Z"
+}

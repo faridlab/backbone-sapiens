@@ -1,0 +1,16 @@
+{
+  "test_name": "UserPermission - Get Not Found",
+  "success": true,
+  "details": "Correctly returned 404 for non-existent entity",
+  "duration_seconds": 0.001024,
+  "input": {
+    "endpoint": "/api/v1/user_permissions/f32160d6-9353-4595-b1b7-523bb57cfb78",
+    "id": "f32160d6-9353-4595-b1b7-523bb57cfb78",
+    "method": "GET"
+  },
+  "output": {
+    "body": "{\"success\":false,\"error\":\"UserPermission with id 'f32160d6-9353-4595-b1b7-523bb57cfb78' not found\"}",
+    "status_code": 404
+  },
+  "timestamp": "2025-12-24T04:02:35.661209Z"
+}

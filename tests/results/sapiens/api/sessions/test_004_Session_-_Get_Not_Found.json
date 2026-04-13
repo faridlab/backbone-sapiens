@@ -1,0 +1,16 @@
+{
+  "test_name": "Session - Get Not Found",
+  "success": true,
+  "details": "Correctly returned 404 for non-existent entity",
+  "duration_seconds": 0.001236917,
+  "input": {
+    "endpoint": "/api/v1/sessions/51db67cc-7d4a-489c-a987-e2f8fbaee823",
+    "id": "51db67cc-7d4a-489c-a987-e2f8fbaee823",
+    "method": "GET"
+  },
+  "output": {
+    "body": "{\"success\":false,\"error\":\"Session with id '51db67cc-7d4a-489c-a987-e2f8fbaee823' not found\"}",
+    "status_code": 404
+  },
+  "timestamp": "2025-12-24T04:02:35.597948Z"
+}

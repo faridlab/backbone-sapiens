@@ -1,0 +1,15 @@
+{
+  "test_name": "AuditLog - List",
+  "success": true,
+  "details": "List retrieved successfully",
+  "duration_seconds": 0.028899833,
+  "input": {
+    "endpoint": "/api/v1/audit_logs",
+    "method": "GET"
+  },
+  "output": {
+    "body_preview": "{\"success\":true,\"data\":{\"data\":[{\"id\":\"fd181138-926c-469f-8a6e-bdd87ab228cd\",\"user_id\":\"5ca3a39b-9fab-4847-a6c3-18b77ff1354b\",\"action\":\"user.action-87fb8f9b\",\"details\":{\"operation\":\"create\",\"timestamp\":\"2024-01-01T00:00:00Z\"},\"severity\":\"info\",\"ip_address\":\"192.168.1.100\",\"user_agent\":\"Mozilla/5.0 Test Agent\",\"session_id\":\"a95d4386-a017-4bfb-98bc-357b0ea99ef1\",\"resource_type\":\"user\",\"resource_id\":\"80fce150-d04c-4176-b7ec-cfb1b23e7549\",\"timestamp\":\"2025-12-20T03:38:58.579046Z\",\"archived\":false,\"a",
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.228307Z"
+}

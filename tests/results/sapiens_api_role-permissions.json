@@ -1,0 +1,271 @@
+{
+  "suite_name": "role_permission_api_test",
+  "start_time": "2025-12-12T15:50:20.932866Z",
+  "end_time": "2025-12-12T15:50:20.946481Z",
+  "results": [
+    {
+      "test_name": "RolePermission - List",
+      "success": true,
+      "details": "List retrieved successfully",
+      "duration_seconds": 0.003654375,
+      "input": {
+        "endpoint": "/api/v1/role_permissions",
+        "method": "GET"
+      },
+      "output": {
+        "body_preview": "{\"success\":true,\"data\":{\"data\":[{\"id\":\"e9b40b42-59ef-4a01-b817-52ae381554f5\",\"role_id\":\"294775cd-1a15-46dd-a643-c2be98381450\",\"permission_id\":\"645ccf06-a7b2-424d-b6c8-361e4ab5b544\",\"granted_at\":\"2025-12-12T15:03:51.771692Z\",\"metadata\":{\"created_at\":\"2025-12-12T15:03:51.771693+00:00\",\"source\":\"integration_test\",\"test\":true,\"updated_at\":\"2025-12-12T15:03:51.771694+00:00\"}},{\"id\":\"9e480710-c34c-4752-b821-77453235ed1f\",\"role_id\":\"742c4e2c-7034-4fbf-9940-c74a646d7ad0\",\"permission_id\":\"cafda988-5156-4",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-12T15:50:20.936525Z"
+    },
+    {
+      "test_name": "RolePermission - Pagination",
+      "success": true,
+      "details": "Pagination works correctly",
+      "duration_seconds": 0.00253975,
+      "input": {
+        "endpoint": "/api/v1/role_permissions?page=1&per_page=5",
+        "method": "GET",
+        "params": {
+          "page": 1,
+          "per_page": 5
+        }
+      },
+      "output": {
+        "body": {
+          "data": {
+            "data": [
+              {
+                "granted_at": "2025-12-12T15:03:51.771692Z",
+                "id": "e9b40b42-59ef-4a01-b817-52ae381554f5",
+                "metadata": {
+                  "created_at": "2025-12-12T15:03:51.771693+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-12T15:03:51.771694+00:00"
+                },
+                "permission_id": "645ccf06-a7b2-424d-b6c8-361e4ab5b544",
+                "role_id": "294775cd-1a15-46dd-a643-c2be98381450"
+              },
+              {
+                "granted_at": "2025-12-12T15:03:51.768660Z",
+                "id": "9e480710-c34c-4752-b821-77453235ed1f",
+                "metadata": {
+                  "created_at": "2025-12-12T15:03:51.768663+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-12T15:03:51.768664+00:00"
+                },
+                "permission_id": "cafda988-5156-4d65-b749-c61fa0a404ba",
+                "role_id": "742c4e2c-7034-4fbf-9940-c74a646d7ad0"
+              },
+              {
+                "granted_at": "2025-12-12T15:03:51.771677Z",
+                "id": "432e1e41-bc97-493b-b17f-ae7b66704486",
+                "metadata": {
+                  "created_at": "2025-12-12T15:03:51.771679+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-12T15:03:51.771680+00:00"
+                },
+                "permission_id": "4b85c8d3-603a-42f7-80f3-c152e0f60fa6",
+                "role_id": "e67fc3af-9d85-4ec5-8bef-714eeecd591e"
+              },
+              {
+                "granted_at": "2025-12-12T15:03:51.771685Z",
+                "id": "21f207a2-c995-4c51-b8ea-b0c0e2f6f1de",
+                "metadata": {
+                  "created_at": "2025-12-12T15:03:51.771687+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-12T15:03:51.771687+00:00"
+                },
+                "permission_id": "13c709f4-785e-4e7a-8aaf-f98c4b7bcf36",
+                "role_id": "49318e1b-2b35-4d10-95dd-cc7019f07de1"
+              }
+            ],
+            "meta": {
+              "limit": 20,
+              "page": 1,
+              "total": 4,
+              "total_pages": 1
+            }
+          },
+          "success": true
+        },
+        "status_code": 200
+      },
+      "timestamp": "2025-12-12T15:50:20.939129Z"
+    },
+    {
+      "test_name": "RolePermission - Create",
+      "success": true,
+      "details": "Entity created successfully",
+      "duration_seconds": 0.001739709,
+      "input": {
+        "body": {
+          "granted_at": "2025-12-12T15:50:20.939154+00:00",
+          "metadata": {
+            "created_at": "2025-12-12T15:50:20.939156+00:00",
+            "source": "integration_test",
+            "test": true,
+            "updated_at": "2025-12-12T15:50:20.939157+00:00"
+          },
+          "permission_id": "46c1166a-36a8-4600-b570-fe9e3ec5f6fc",
+          "role_id": "e1eb0b6b-99f9-462f-9c82-2f17264712da"
+        },
+        "endpoint": "/api/v1/role_permissions",
+        "method": "POST"
+      },
+      "output": {
+        "body": {
+          "data": {
+            "granted_at": "2025-12-12T15:50:20.939154Z",
+            "id": "50b8e676-f4a4-4e18-944f-cb2713f388d0",
+            "metadata": {
+              "created_at": "2025-12-12T15:50:20.939156+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-12T15:50:20.939157+00:00"
+            },
+            "permission_id": "46c1166a-36a8-4600-b570-fe9e3ec5f6fc",
+            "role_id": "e1eb0b6b-99f9-462f-9c82-2f17264712da"
+          },
+          "success": true
+        },
+        "status_code": 201
+      },
+      "timestamp": "2025-12-12T15:50:20.940905Z"
+    },
+    {
+      "test_name": "RolePermission - Create Invalid",
+      "success": true,
+      "details": "Validation correctly rejected invalid data",
+      "duration_seconds": 0.000265292,
+      "input": {
+        "body": {
+          "permission_id": "not-uuid",
+          "role_id": ""
+        },
+        "endpoint": "/api/v1/role_permissions",
+        "method": "POST"
+      },
+      "output": {
+        "body": "Failed to deserialize the JSON body into the target type: permission_id: UUID parsing failed: invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1 at line 1 column 27",
+        "status_code": 422
+      },
+      "timestamp": "2025-12-12T15:50:20.941176Z"
+    },
+    {
+      "test_name": "RolePermission - Get Not Found",
+      "success": true,
+      "details": "Correctly returned 404 for non-existent entity",
+      "duration_seconds": 0.000988625,
+      "input": {
+        "endpoint": "/api/v1/role_permissions/d531583c-84cd-4db9-a0ee-43b3a8aedd90",
+        "id": "d531583c-84cd-4db9-a0ee-43b3a8aedd90",
+        "method": "GET"
+      },
+      "output": {
+        "body": "{\"success\":false,\"error\":\"RolePermission with id 'd531583c-84cd-4db9-a0ee-43b3a8aedd90' not found\"}",
+        "status_code": 404
+      },
+      "timestamp": "2025-12-12T15:50:20.942169Z"
+    },
+    {
+      "test_name": "RolePermission - Bulk Create",
+      "success": true,
+      "details": "3 entities created in bulk",
+      "duration_seconds": 0.00424025,
+      "input": {
+        "body": [
+          {
+            "granted_at": "2025-12-12T15:50:20.942177+00:00",
+            "metadata": {
+              "created_at": "2025-12-12T15:50:20.942178+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-12T15:50:20.942179+00:00"
+            },
+            "permission_id": "505d85ff-3546-4de5-a19b-fe465b54686b",
+            "role_id": "da074aca-d1c5-4a1f-bed3-0325a64e8f08"
+          },
+          {
+            "granted_at": "2025-12-12T15:50:20.942184+00:00",
+            "metadata": {
+              "created_at": "2025-12-12T15:50:20.942185+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-12T15:50:20.942186+00:00"
+            },
+            "permission_id": "88b26e0e-eff4-4c69-99d3-b650619f0faf",
+            "role_id": "30666601-7f13-40f8-9e38-c1f21888f822"
+          },
+          {
+            "granted_at": "2025-12-12T15:50:20.942191+00:00",
+            "metadata": {
+              "created_at": "2025-12-12T15:50:20.942192+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-12T15:50:20.942193+00:00"
+            },
+            "permission_id": "633bab96-4907-437e-a0ab-8987962f2765",
+            "role_id": "db4efa60-098f-4fb0-a96d-8ecfea5b15a4"
+          }
+        ],
+        "endpoint": "/api/v1/role_permissions/bulk",
+        "method": "POST"
+      },
+      "output": {
+        "body": {
+          "data": {
+            "errors": [],
+            "failed": 0,
+            "items": [
+              {
+                "granted_at": "2025-12-12T15:50:20.942177Z",
+                "id": "fca189a5-ff1b-4de8-9e08-75caf4971cc2",
+                "metadata": {
+                  "created_at": "2025-12-12T15:50:20.942178+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-12T15:50:20.942179+00:00"
+                },
+                "permission_id": "505d85ff-3546-4de5-a19b-fe465b54686b",
+                "role_id": "da074aca-d1c5-4a1f-bed3-0325a64e8f08"
+              },
+              {
+                "granted_at": "2025-12-12T15:50:20.942184Z",
+                "id": "1996e702-0d69-4630-8a07-5fcb5cd770c0",
+                "metadata": {
+                  "created_at": "2025-12-12T15:50:20.942185+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-12T15:50:20.942186+00:00"
+                },
+                "permission_id": "88b26e0e-eff4-4c69-99d3-b650619f0faf",
+                "role_id": "30666601-7f13-40f8-9e38-c1f21888f822"
+              },
+              {
+                "granted_at": "2025-12-12T15:50:20.942191Z",
+                "id": "f24ed389-a1ec-418e-aa0d-432b5c41d516",
+                "metadata": {
+                  "created_at": "2025-12-12T15:50:20.942192+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-12T15:50:20.942193+00:00"
+                },
+                "permission_id": "633bab96-4907-437e-a0ab-8987962f2765",
+                "role_id": "db4efa60-098f-4fb0-a96d-8ecfea5b15a4"
+              }
+            ],
+            "total": 3
+          },
+          "success": true
+        },
+        "status_code": 201
+      },
+      "timestamp": "2025-12-12T15:50:20.946458Z"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "test_name": "List Users - No Auth",
+  "success": true,
+  "details": "Got expected status: 200",
+  "duration_seconds": 0.011337166,
+  "input": null,
+  "output": {
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.736805Z"
+}

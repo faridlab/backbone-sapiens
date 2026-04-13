@@ -1,0 +1,95 @@
+{
+  "test_name": "Permission - Bulk Create",
+  "success": true,
+  "details": "3 entities created in bulk",
+  "duration_seconds": 0.012301042,
+  "input": {
+    "body": [
+      {
+        "action": "read",
+        "description": "Permission to read perm-fdde0509 resources",
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.466180+00:00",
+          "test": true,
+          "updated_at": "2025-12-24T04:02:35.466185+00:00"
+        },
+        "name": "read_perm-fdde0509",
+        "resource": "perm-fdde0509"
+      },
+      {
+        "action": "read",
+        "description": "Permission to read perm-39d9f415 resources",
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.466190+00:00",
+          "test": true,
+          "updated_at": "2025-12-24T04:02:35.466191+00:00"
+        },
+        "name": "read_perm-39d9f415",
+        "resource": "perm-39d9f415"
+      },
+      {
+        "action": "read",
+        "description": "Permission to read perm-61a0b150 resources",
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.466200+00:00",
+          "test": true,
+          "updated_at": "2025-12-24T04:02:35.466201+00:00"
+        },
+        "name": "read_perm-61a0b150",
+        "resource": "perm-61a0b150"
+      }
+    ],
+    "endpoint": "/api/v1/permissions/bulk",
+    "method": "POST"
+  },
+  "output": {
+    "body": {
+      "data": {
+        "errors": [],
+        "failed": 0,
+        "items": [
+          {
+            "action": "read",
+            "description": "Permission to read perm-fdde0509 resources",
+            "id": "6a7892f0-3ff0-481c-a783-8ed444fe45db",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.466180+00:00",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.466185+00:00"
+            },
+            "name": "read_perm-fdde0509",
+            "resource": "perm-fdde0509"
+          },
+          {
+            "action": "read",
+            "description": "Permission to read perm-39d9f415 resources",
+            "id": "319cf53f-9626-4d30-b258-023c8e614eff",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.466190+00:00",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.466191+00:00"
+            },
+            "name": "read_perm-39d9f415",
+            "resource": "perm-39d9f415"
+          },
+          {
+            "action": "read",
+            "description": "Permission to read perm-61a0b150 resources",
+            "id": "7ebe08aa-6855-41d8-9783-f9703f5da816",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.466200+00:00",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.466201+00:00"
+            },
+            "name": "read_perm-61a0b150",
+            "resource": "perm-61a0b150"
+          }
+        ],
+        "total": 3
+      },
+      "success": true
+    },
+    "status_code": 201
+  },
+  "timestamp": "2025-12-24T04:02:35.478605Z"
+}

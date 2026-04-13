@@ -1,0 +1,51 @@
+{
+  "test_name": "UserSettings - Upsert",
+  "success": true,
+  "details": "Upsert completed",
+  "duration_seconds": 0.001612541,
+  "input": {
+    "body": {
+      "email_notifications": true,
+      "id": "455e1c32-0d2b-419a-8e15-c4e8789b4b55",
+      "language": "en",
+      "metadata": {
+        "created_at": "2025-12-12T15:50:21.047755+00:00",
+        "source": "integration_test",
+        "test": true,
+        "updated_at": "2025-12-12T15:50:21.047756+00:00"
+      },
+      "mfa_enabled": false,
+      "notifications_enabled": true,
+      "sms_notifications": false,
+      "theme": "dark",
+      "timezone": "Asia/Jakarta",
+      "user_id": "8ad52be3-55a0-4dfd-92c4-9acf937b9951"
+    },
+    "endpoint": "/api/v1/user_settings/upsert",
+    "method": "POST"
+  },
+  "output": {
+    "body": {
+      "data": {
+        "custom_settings": null,
+        "email_notifications": true,
+        "language": "en",
+        "metadata": {
+          "created_at": "2025-12-12T15:50:21.047755+00:00",
+          "source": "integration_test",
+          "test": true,
+          "updated_at": "2025-12-12T15:50:21.047756+00:00"
+        },
+        "mfa_enabled": false,
+        "notifications_enabled": true,
+        "sms_notifications": false,
+        "theme": "dark",
+        "timezone": "Asia/Jakarta",
+        "user_id": "8ad52be3-55a0-4dfd-92c4-9acf937b9951"
+      },
+      "success": true
+    },
+    "status_code": 200
+  },
+  "timestamp": "2025-12-12T15:50:21.049381Z"
+}

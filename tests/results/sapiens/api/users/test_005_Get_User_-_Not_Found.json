@@ -1,0 +1,12 @@
+{
+  "test_name": "Get User - Not Found",
+  "success": true,
+  "details": "Correctly returned 404 for non-existent user",
+  "duration_seconds": 0.000935209,
+  "input": null,
+  "output": {
+    "body": "{\"success\":false,\"error\":\"User with id '598a7294-8b69-488d-994b-19758fe2f86f' not found\"}",
+    "status_code": 404
+  },
+  "timestamp": "2025-12-24T04:02:35.760371Z"
+}

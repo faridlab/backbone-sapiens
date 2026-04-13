@@ -1,0 +1,371 @@
+{
+  "test_name": "UserSettings - Pagination",
+  "success": true,
+  "details": "Pagination works correctly",
+  "duration_seconds": 0.004556875,
+  "input": {
+    "endpoint": "/api/v1/user_settings?page=1&per_page=5",
+    "method": "GET",
+    "params": {
+      "page": 1,
+      "per_page": 5
+    }
+  },
+  "output": {
+    "body": {
+      "data": {
+        "data": [
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-13T18:20:54.586438+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-13T18:20:54.586442+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "fabf505f-ce31-4a5e-a711-28923149edfe"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T10:47:02.442743+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:47:02.442744+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "fa553dde-9dcd-4064-a6b2-6bde1d7577b8"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T10:42:10.674400+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:42:10.674401+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "fa1618f1-0887-42b3-9dae-d70024bd3d71"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-19T13:54:05.329791+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-19T13:54:05.329792+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "f9420409-6a17-4a1e-b7b8-85e22662ffa5"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T10:53:27.736444+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:53:27.736445+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "f73924ce-6df0-4e6a-a431-0971527fce0f"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T10:53:27.736461+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:53:27.736462+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "f69a79d3-ccdb-4449-a651-429e71378e0b"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-13T18:50:14.691695+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-13T18:50:14.691696+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "ed3be14a-4316-40dd-906a-43e6f5507bc4"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T10:24:44.918542+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:24:44.918543+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "ea2d7b18-6880-414e-85f1-0ec3768934ea"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T17:23:13.153492+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T17:23:13.153493+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "e78917e1-7416-4965-9c58-9d88b7a67481"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T17:17:13.352663+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T17:17:13.352666+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "e4af53bd-75f1-41ac-ab1a-03a7c7ad8345"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T03:48:50.252955+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T03:48:50.252957+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "e3384707-8353-4dd6-aa29-76b3e3bac6a2"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-19T15:19:07.027223+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-19T15:19:07.027225+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "e2ceb86a-6086-4be6-9bf1-d2781dca67cd"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T17:23:13.153500+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T17:23:13.153501+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "e15ec30f-739f-48c8-9539-12b1debf46de"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T10:24:44.922995+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:24:44.922997+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "e0f259bc-1a5e-4c70-b338-798039b995ab"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T10:54:57.407154+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:54:57.407158+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "dfd966b5-50bb-487a-82bb-715bd54215aa"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T03:48:50.252987+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T03:48:50.252988+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "df772051-951d-474b-8447-f7c0c5dadb7b"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-19T17:37:03.105218+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-19T17:37:03.105221+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "deb593aa-9d4a-42e4-8eca-7ac88cc76f69"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T10:54:57.419575+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:54:57.419578+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "de3a50fd-7e61-4a18-8669-6dfb1184ce3d"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T10:22:46.182254+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:22:46.182258+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "dc24169e-8c8f-46cf-81a0-680d188797c6"
+          },
+          {
+            "custom_settings": null,
+            "email_notifications": true,
+            "language": "en",
+            "metadata": {
+              "created_at": "2025-12-20T03:55:12.876966+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T03:55:12.876968+00:00"
+            },
+            "mfa_enabled": false,
+            "notifications_enabled": true,
+            "sms_notifications": false,
+            "theme": "dark",
+            "timezone": "Asia/Jakarta",
+            "user_id": "db632d04-38aa-4cfb-bb5c-c4945b07eda3"
+          }
+        ],
+        "meta": {
+          "limit": 20,
+          "page": 1,
+          "total": 115,
+          "total_pages": 6
+        }
+      },
+      "success": true
+    },
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.709285Z"
+}

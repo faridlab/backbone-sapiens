@@ -1,0 +1,20 @@
+{
+  "test_name": "SystemSettings - Create Invalid",
+  "success": true,
+  "details": "Validation correctly rejected invalid data",
+  "duration_seconds": 0.000288,
+  "input": {
+    "body": {
+      "is_readonly": "not-a-boolean",
+      "key": "",
+      "value_type": "INVALID_TYPE"
+    },
+    "endpoint": "/api/v1/system_settings",
+    "method": "POST"
+  },
+  "output": {
+    "body": "Failed to deserialize the JSON body into the target type: missing field `value` at line 1 column 68",
+    "status_code": 422
+  },
+  "timestamp": "2025-12-24T04:02:35.630376Z"
+}

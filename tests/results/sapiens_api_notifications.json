@@ -1,0 +1,140 @@
+{
+  "suite_name": "notification_api_test",
+  "start_time": "2025-12-24T04:02:35.308243Z",
+  "end_time": "2025-12-24T04:02:35.361041Z",
+  "results": [
+    {
+      "test_name": "Create Notification - Success",
+      "success": true,
+      "details": "Notification created successfully",
+      "duration_seconds": 0.017185834,
+      "input": {
+        "action_text": null,
+        "action_url": null,
+        "category": null,
+        "channel": "in_app",
+        "data": null,
+        "delivered_at": null,
+        "expires_at": null,
+        "is_read": false,
+        "message": "Your account has been successfully created!",
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.308330+00:00",
+          "updated_at": "2025-12-24T04:02:35.308330+00:00"
+        },
+        "notification_type": "welcome",
+        "priority": "high",
+        "read_at": null,
+        "sent_at": null,
+        "title": "Welcome to Sapiens",
+        "user_id": "9ca348bf-3ff6-4ee3-8773-78fe1530fa04"
+      },
+      "output": {
+        "body": "{\"success\":true,\"data\":{\"id\":\"1b2928bc-2582-4f1a-a5ee-dd37b6507486\",\"user_id\":\"9ca348bf-3ff6-4ee3-8773-78fe1530fa04\",\"notification_type\":\"welcome\",\"channel\":\"in_app\",\"title\":\"Welcome to Sapiens\",\"message\":\"Your account has been successfully created!\",\"data\":null,\"is_read\":false,\"read_at\":null,\"sent_at\":null,\"delivered_at\":null,\"expires_at\":null,\"priority\":\"high\",\"action_url\":null,\"action_text\":null,\"category\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.308330+00:00\",\"updated_at\":\"2025-12-24T04:02:35.308330+00:00\"}}}",
+        "status_code": 201
+      },
+      "timestamp": "2025-12-24T04:02:35.325514Z"
+    },
+    {
+      "test_name": "List User Notifications",
+      "success": true,
+      "details": "User notifications listed successfully",
+      "duration_seconds": 0.007271792,
+      "input": null,
+      "output": {
+        "body": "{\"success\":true,\"data\":{\"data\":[{\"id\":\"1b2928bc-2582-4f1a-a5ee-dd37b6507486\",\"user_id\":\"9ca348bf-3ff6-4ee3-8773-78fe1530fa04\",\"notification_type\":\"welcome\",\"channel\":\"in_app\",\"title\":\"Welcome to Sapiens\",\"message\":\"Your account has been successfully created!\",\"data\":null,\"is_read\":false,\"read_at\":null,\"sent_at\":null,\"delivered_at\":null,\"expires_at\":null,\"priority\":\"high\",\"action_url\":null,\"action_text\":null,\"category\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.308330+00:00\",\"updated_at\":\"2025-12-24T04:02:35.308330+00:00\"}}],\"meta\":{\"total\":1,\"page\":1,\"limit\":20,\"total_pages\":1}}}",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.332819Z"
+    },
+    {
+      "test_name": "Get Notification",
+      "success": true,
+      "details": "Retrieved notification 1b2928bc-2582-4f1a-a5ee-dd37b6507486",
+      "duration_seconds": 0.0036345,
+      "input": null,
+      "output": {
+        "body": "{\"success\":true,\"data\":{\"id\":\"1b2928bc-2582-4f1a-a5ee-dd37b6507486\",\"user_id\":\"9ca348bf-3ff6-4ee3-8773-78fe1530fa04\",\"notification_type\":\"welcome\",\"channel\":\"in_app\",\"title\":\"Welcome to Sapiens\",\"message\":\"Your account has been successfully created!\",\"data\":null,\"is_read\":false,\"read_at\":null,\"sent_at\":null,\"delivered_at\":null,\"expires_at\":null,\"priority\":\"high\",\"action_url\":null,\"action_text\":null,\"category\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.308330+00:00\",\"updated_at\":\"2025-12-24T04:02:35.308330+00:00\"}}}",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.336455Z"
+    },
+    {
+      "test_name": "Update Notification Status",
+      "success": true,
+      "details": "Updated notification status 1b2928bc-2582-4f1a-a5ee-dd37b6507486",
+      "duration_seconds": 0.008226042,
+      "input": {
+        "action_text": null,
+        "action_url": null,
+        "category": null,
+        "channel": "in_app",
+        "data": null,
+        "delivered_at": null,
+        "expires_at": null,
+        "is_read": true,
+        "message": "Your account has been successfully created!",
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.336457+00:00",
+          "updated_at": "2025-12-24T04:02:35.336457+00:00"
+        },
+        "notification_type": "welcome",
+        "priority": "high",
+        "read_at": "2025-12-24T04:02:35.336457Z",
+        "sent_at": null,
+        "title": "Welcome to Sapiens",
+        "user_id": "9ca348bf-3ff6-4ee3-8773-78fe1530fa04"
+      },
+      "output": {
+        "body": "{\"success\":true,\"data\":{\"id\":\"1b2928bc-2582-4f1a-a5ee-dd37b6507486\",\"user_id\":\"9ca348bf-3ff6-4ee3-8773-78fe1530fa04\",\"notification_type\":\"welcome\",\"channel\":\"in_app\",\"title\":\"Welcome to Sapiens\",\"message\":\"Your account has been successfully created!\",\"data\":null,\"is_read\":true,\"read_at\":\"2025-12-24T04:02:35.336457Z\",\"sent_at\":null,\"delivered_at\":null,\"expires_at\":null,\"priority\":\"high\",\"action_url\":null,\"action_text\":null,\"category\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.336457+00:00\",\"updated_at\":\"2025-12-24T04:02:35.336457+00:00\"}}}",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.344682Z"
+    },
+    {
+      "test_name": "Mark Notification as Read (via PATCH)",
+      "success": true,
+      "details": "Marked notification 1b2928bc-2582-4f1a-a5ee-dd37b6507486 as read",
+      "duration_seconds": 0.012391583,
+      "input": null,
+      "output": {
+        "body": "{\"success\":true,\"data\":{\"id\":\"1b2928bc-2582-4f1a-a5ee-dd37b6507486\",\"user_id\":\"9ca348bf-3ff6-4ee3-8773-78fe1530fa04\",\"notification_type\":\"welcome\",\"channel\":\"in_app\",\"title\":\"Welcome to Sapiens\",\"message\":\"Your account has been successfully created!\",\"data\":null,\"is_read\":true,\"read_at\":\"2025-12-24T04:02:35.344706Z\",\"sent_at\":null,\"delivered_at\":null,\"expires_at\":null,\"priority\":\"high\",\"action_url\":null,\"action_text\":null,\"category\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.336457+00:00\",\"updated_at\":\"2025-12-24T04:02:35.336457+00:00\"}}}",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.357095Z"
+    },
+    {
+      "test_name": "Delete Notification",
+      "success": true,
+      "details": "Deleted notification 1b2928bc-2582-4f1a-a5ee-dd37b6507486",
+      "duration_seconds": 0.003516375,
+      "input": null,
+      "output": {
+        "body": "",
+        "status_code": 204
+      },
+      "timestamp": "2025-12-24T04:02:35.360617Z"
+    },
+    {
+      "test_name": "Create Notification - Invalid Data",
+      "success": true,
+      "details": "Correctly rejected invalid notification data",
+      "duration_seconds": 0.000407833,
+      "input": {
+        "channel": "invalid_channel",
+        "is_read": false,
+        "message": "",
+        "metadata": {},
+        "notification_type": "invalid_type",
+        "priority": "invalid_priority",
+        "title": "",
+        "user_id": "invalid-uuid"
+      },
+      "output": {
+        "body": "Failed to deserialize the JSON body into the target type: channel: unknown variant `invalid_channel`, expected one of `email`, `sms`, `push`, `in_app`, `webhook` at line 1 column 28",
+        "status_code": 422
+      },
+      "timestamp": "2025-12-24T04:02:35.361028Z"
+    }
+  ]
+}

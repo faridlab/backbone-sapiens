@@ -1,0 +1,20 @@
+{
+  "test_name": "Session - Create Invalid",
+  "success": true,
+  "details": "Validation correctly rejected invalid data",
+  "duration_seconds": 0.001042708,
+  "input": {
+    "body": {
+      "device_type": "INVALID",
+      "token_hash": "short",
+      "user_id": "not-a-uuid"
+    },
+    "endpoint": "/api/v1/sessions",
+    "method": "POST"
+  },
+  "output": {
+    "body": "Failed to deserialize the JSON body into the target type: device_type: unknown variant `INVALID`, expected one of `web`, `mobile`, `tablet`, `desktop`, `unknown` at line 1 column 24",
+    "status_code": 422
+  },
+  "timestamp": "2025-12-24T04:02:35.596700Z"
+}

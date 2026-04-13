@@ -1,0 +1,15 @@
+{
+  "test_name": "RolePermission - List",
+  "success": true,
+  "details": "List retrieved successfully",
+  "duration_seconds": 0.013596666,
+  "input": {
+    "endpoint": "/api/v1/role_permissions",
+    "method": "GET"
+  },
+  "output": {
+    "body_preview": "{\"success\":true,\"data\":{\"data\":[{\"id\":\"fa9b7d33-632a-4c99-b9f2-05d9a43cfde4\",\"role_id\":\"cf80777c-082b-4f7d-9e21-7a3c6c3cf5cd\",\"permission_id\":\"0cafd146-9885-4d56-b23d-aad53c0e8d9d\",\"granted_at\":\"2025-12-20T10:47:02.349666Z\",\"metadata\":{\"created_at\":\"2025-12-20T10:47:02.349667+00:00\",\"source\":\"integration_test\",\"test\":true,\"updated_at\":\"2025-12-20T10:47:02.349668+00:00\"}},{\"id\":\"f6804305-6251-454a-95e9-c1669326fdbd\",\"role_id\":\"37cf669f-3aea-4a85-8144-c85c97872155\",\"permission_id\":\"fc8cb8bd-7044-4",
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.496305Z"
+}

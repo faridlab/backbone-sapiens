@@ -1,0 +1,19 @@
+{
+  "test_name": "Permission - Create Invalid",
+  "success": true,
+  "details": "Validation correctly rejected invalid data",
+  "duration_seconds": 0.000841625,
+  "input": {
+    "body": {
+      "action": "INVALID_ACTION",
+      "name": ""
+    },
+    "endpoint": "/api/v1/permissions",
+    "method": "POST"
+  },
+  "output": {
+    "body": "Failed to deserialize the JSON body into the target type: missing field `resource` at line 1 column 37",
+    "status_code": 422
+  },
+  "timestamp": "2025-12-24T04:02:35.464682Z"
+}

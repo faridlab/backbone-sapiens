@@ -1,0 +1,101 @@
+{
+  "test_name": "SystemSettings - Bulk Create",
+  "success": true,
+  "details": "3 entities created in bulk",
+  "duration_seconds": 0.005485167,
+  "input": {
+    "body": [
+      {
+        "description": "Test setting for integration tests",
+        "key": "test.setting.key_bf4a09cd",
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.631367+00:00",
+          "source": "integration_test",
+          "test": true,
+          "updated_at": "2025-12-24T04:02:35.631371+00:00"
+        },
+        "value": "test_value_123"
+      },
+      {
+        "description": "Test setting for integration tests",
+        "key": "test.setting.key_fe7d35a7",
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.631376+00:00",
+          "source": "integration_test",
+          "test": true,
+          "updated_at": "2025-12-24T04:02:35.631377+00:00"
+        },
+        "value": "test_value_123"
+      },
+      {
+        "description": "Test setting for integration tests",
+        "key": "test.setting.key_c486f34f",
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.631382+00:00",
+          "source": "integration_test",
+          "test": true,
+          "updated_at": "2025-12-24T04:02:35.631383+00:00"
+        },
+        "value": "test_value_123"
+      }
+    ],
+    "endpoint": "/api/v1/system_settings/bulk",
+    "method": "POST"
+  },
+  "output": {
+    "body": {
+      "data": {
+        "errors": [],
+        "failed": 0,
+        "items": [
+          {
+            "description": "Test setting for integration tests",
+            "id": "d78a7f74-48be-455a-9b3c-6a5a4919834c",
+            "key": "test.setting.key_bf4a09cd",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.631367+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.631371+00:00"
+            },
+            "updated_at": "2025-12-24T04:02:35.631628Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "42647e7c-2e4c-4e31-bee2-2bda00b14c1f",
+            "key": "test.setting.key_fe7d35a7",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.631376+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.631377+00:00"
+            },
+            "updated_at": "2025-12-24T04:02:35.631630Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "d17388b0-d7de-4070-9982-64c448d9e101",
+            "key": "test.setting.key_c486f34f",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.631382+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.631383+00:00"
+            },
+            "updated_at": "2025-12-24T04:02:35.631631Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          }
+        ],
+        "total": 3
+      },
+      "success": true
+    },
+    "status_code": 201
+  },
+  "timestamp": "2025-12-24T04:02:35.636904Z"
+}

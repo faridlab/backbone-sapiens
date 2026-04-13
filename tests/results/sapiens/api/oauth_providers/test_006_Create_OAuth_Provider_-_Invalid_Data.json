@@ -1,0 +1,24 @@
+{
+  "test_name": "Create OAuth Provider - Invalid Data",
+  "success": true,
+  "details": "Correctly rejected invalid provider data",
+  "duration_seconds": 0.000314625,
+  "input": {
+    "authorization_url": "",
+    "client_id": "",
+    "client_secret": "",
+    "display_name": "",
+    "is_active": true,
+    "metadata": {},
+    "provider_name": "invalid_provider",
+    "redirect_uri": "",
+    "scopes": [],
+    "token_url": "",
+    "user_info_url": ""
+  },
+  "output": {
+    "body": "Failed to deserialize the JSON body into the target type: provider_name: unknown variant `invalid_provider`, expected one of `google`, `github`, `facebook`, `apple`, `microsoft`, `twitter`, `linkedin`, `discord` at line 1 column 141",
+    "status_code": 422
+  },
+  "timestamp": "2025-12-24T04:02:35.393789Z"
+}

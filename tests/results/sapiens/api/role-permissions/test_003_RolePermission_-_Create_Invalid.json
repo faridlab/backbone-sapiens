@@ -1,0 +1,19 @@
+{
+  "test_name": "RolePermission - Create Invalid",
+  "success": true,
+  "details": "Validation correctly rejected invalid data",
+  "duration_seconds": 0.000265292,
+  "input": {
+    "body": {
+      "permission_id": "not-uuid",
+      "role_id": ""
+    },
+    "endpoint": "/api/v1/role_permissions",
+    "method": "POST"
+  },
+  "output": {
+    "body": "Failed to deserialize the JSON body into the target type: permission_id: UUID parsing failed: invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1 at line 1 column 27",
+    "status_code": 422
+  },
+  "timestamp": "2025-12-12T15:50:20.941176Z"
+}

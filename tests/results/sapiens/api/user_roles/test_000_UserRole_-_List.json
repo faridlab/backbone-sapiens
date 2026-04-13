@@ -1,0 +1,15 @@
+{
+  "test_name": "UserRole - List",
+  "success": true,
+  "details": "List retrieved successfully",
+  "duration_seconds": 0.008427666,
+  "input": {
+    "endpoint": "/api/v1/user_roles",
+    "method": "GET"
+  },
+  "output": {
+    "body_preview": "{\"success\":true,\"data\":{\"data\":[{\"id\":\"fe2b4ccc-dfd6-4152-a993-38b0bcedefb4\",\"user_id\":\"2cb51ba9-c3a0-4aae-a5ae-59e3afd36329\",\"role_id\":\"2f2ede82-052a-4593-bdc9-ea7258836ebe\",\"assigned_at\":\"2025-12-19T15:02:29.430007Z\",\"assigned_by\":\"a989acd1-b6ef-4250-be8b-39908b3d08a7\",\"metadata\":{\"created_at\":\"2025-12-19T15:02:29.430008+00:00\",\"source\":\"integration_test\",\"test\":true,\"updated_at\":\"2025-12-19T15:02:29.430009+00:00\"}},{\"id\":\"f9432803-f857-4e32-ab4a-78e9d3b2b78e\",\"user_id\":\"cf60bc20-1aae-46ae-a6b",
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.677390Z"
+}

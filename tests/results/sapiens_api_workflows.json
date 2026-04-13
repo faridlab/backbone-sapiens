@@ -1,0 +1,169 @@
+{
+  "suite_name": "workflow_api_test",
+  "start_time": "2025-12-24T04:02:35.767983Z",
+  "end_time": "2025-12-24T04:02:35.799497Z",
+  "results": [
+    {
+      "test_name": "Create Workflow - Success",
+      "success": true,
+      "details": "Workflow created successfully",
+      "duration_seconds": 0.013279459,
+      "input": {
+        "context": {
+          "source": "registration",
+          "steps": [
+            "verify_email",
+            "complete_profile",
+            "welcome"
+          ]
+        },
+        "current_step": 0,
+        "description": "Automated user onboarding workflow",
+        "initiator_id": "76fccf40-8ece-4d5c-affe-19bd7102c0b0",
+        "max_retries": 3,
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.768069+00:00",
+          "updated_at": "2025-12-24T04:02:35.768069+00:00"
+        },
+        "progress_percentage": 0.0,
+        "retry_count": 0,
+        "status": "pending",
+        "title": "User Onboarding",
+        "total_steps": 3,
+        "workflow_type": "sequential"
+      },
+      "output": {
+        "body": "{\"success\":true,\"data\":{\"id\":\"24d2b516-2ae6-4e48-828b-12eb290e3277\",\"workflow_type\":\"sequential\",\"status\":\"pending\",\"initiator_id\":\"76fccf40-8ece-4d5c-affe-19bd7102c0b0\",\"target_user_id\":null,\"title\":\"User Onboarding\",\"description\":\"Automated user onboarding workflow\",\"context\":{\"source\":\"registration\",\"steps\":[\"verify_email\",\"complete_profile\",\"welcome\"]},\"current_step\":0,\"total_steps\":3,\"progress_percentage\":0.0,\"started_at\":null,\"completed_at\":null,\"failed_at\":null,\"expires_at\":null,\"retry_count\":0,\"max_retries\":3,\"error_message\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.768069+00:00\",\"updated_at\":\"2025-12-24T04:02:35.768069+00:00\"}}}",
+        "status_code": 201
+      },
+      "timestamp": "2025-12-24T04:02:35.781347Z"
+    },
+    {
+      "test_name": "List Workflows",
+      "success": true,
+      "details": "Workflows listed successfully",
+      "duration_seconds": 0.005113875,
+      "input": null,
+      "output": {
+        "body": "{\"success\":true,\"data\":{\"data\":[{\"id\":\"24d2b516-2ae6-4e48-828b-12eb290e3277\",\"workflow_type\":\"sequential\",\"status\":\"pending\",\"initiator_id\":\"76fccf40-8ece-4d5c-affe-19bd7102c0b0\",\"target_user_id\":null,\"title\":\"User Onboarding\",\"description\":\"Automated user onboarding workflow\",\"context\":{\"source\":\"registration\",\"steps\":[\"verify_email\",\"complete_profile\",\"welcome\"]},\"current_step\":0,\"total_steps\":3,\"progress_percentage\":0.0,\"started_at\":null,\"completed_at\":null,\"failed_at\":null,\"expires_at\":null,\"retry_count\":0,\"max_retries\":3,\"error_message\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.768069+00:00\",\"updated_at\":\"2025-12-24T04:02:35.768069+00:00\"}}],\"meta\":{\"total\":1,\"page\":1,\"limit\":20,\"total_pages\":1}}}",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.786476Z"
+    },
+    {
+      "test_name": "Get Workflow",
+      "success": true,
+      "details": "Retrieved workflow 24d2b516-2ae6-4e48-828b-12eb290e3277",
+      "duration_seconds": 0.003449584,
+      "input": null,
+      "output": {
+        "body": "{\"success\":true,\"data\":{\"id\":\"24d2b516-2ae6-4e48-828b-12eb290e3277\",\"workflow_type\":\"sequential\",\"status\":\"pending\",\"initiator_id\":\"76fccf40-8ece-4d5c-affe-19bd7102c0b0\",\"target_user_id\":null,\"title\":\"User Onboarding\",\"description\":\"Automated user onboarding workflow\",\"context\":{\"source\":\"registration\",\"steps\":[\"verify_email\",\"complete_profile\",\"welcome\"]},\"current_step\":0,\"total_steps\":3,\"progress_percentage\":0.0,\"started_at\":null,\"completed_at\":null,\"failed_at\":null,\"expires_at\":null,\"retry_count\":0,\"max_retries\":3,\"error_message\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.768069+00:00\",\"updated_at\":\"2025-12-24T04:02:35.768069+00:00\"}}}",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.789927Z"
+    },
+    {
+      "test_name": "Update Workflow",
+      "success": true,
+      "details": "Updated workflow 24d2b516-2ae6-4e48-828b-12eb290e3277",
+      "duration_seconds": 0.004504541,
+      "input": {
+        "context": {
+          "source": "registration",
+          "steps": [
+            "verify_email",
+            "complete_profile",
+            "welcome"
+          ]
+        },
+        "current_step": 1,
+        "description": "Updated automated user onboarding workflow",
+        "initiator_id": "76fccf40-8ece-4d5c-affe-19bd7102c0b0",
+        "max_retries": 3,
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.789944+00:00",
+          "updated_at": "2025-12-24T04:02:35.789944+00:00"
+        },
+        "progress_percentage": 33.3,
+        "retry_count": 0,
+        "started_at": "2025-12-24T04:02:35.789944+00:00",
+        "status": "active",
+        "title": "User Onboarding v2",
+        "total_steps": 3,
+        "workflow_type": "sequential"
+      },
+      "output": {
+        "body": "{\"success\":true,\"data\":{\"id\":\"24d2b516-2ae6-4e48-828b-12eb290e3277\",\"workflow_type\":\"sequential\",\"status\":\"active\",\"initiator_id\":\"76fccf40-8ece-4d5c-affe-19bd7102c0b0\",\"target_user_id\":null,\"title\":\"User Onboarding v2\",\"description\":\"Updated automated user onboarding workflow\",\"context\":{\"source\":\"registration\",\"steps\":[\"verify_email\",\"complete_profile\",\"welcome\"]},\"current_step\":1,\"total_steps\":3,\"progress_percentage\":33.3,\"started_at\":\"2025-12-24T04:02:35.789944Z\",\"completed_at\":null,\"failed_at\":null,\"expires_at\":null,\"retry_count\":0,\"max_retries\":3,\"error_message\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.789944+00:00\",\"updated_at\":\"2025-12-24T04:02:35.789944+00:00\"}}}",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.794448Z"
+    },
+    {
+      "test_name": "Update Workflow Status (via PATCH)",
+      "success": true,
+      "details": "Updated workflow status 24d2b516-2ae6-4e48-828b-12eb290e3277",
+      "duration_seconds": 0.002023916,
+      "input": {
+        "started_at": "2025-12-24T04:02:35.794464+00:00",
+        "status": "active"
+      },
+      "output": {
+        "body": "{\"success\":true,\"data\":{\"id\":\"24d2b516-2ae6-4e48-828b-12eb290e3277\",\"workflow_type\":\"sequential\",\"status\":\"active\",\"initiator_id\":\"76fccf40-8ece-4d5c-affe-19bd7102c0b0\",\"target_user_id\":null,\"title\":\"User Onboarding v2\",\"description\":\"Updated automated user onboarding workflow\",\"context\":{\"source\":\"registration\",\"steps\":[\"verify_email\",\"complete_profile\",\"welcome\"]},\"current_step\":1,\"total_steps\":3,\"progress_percentage\":33.3,\"started_at\":\"2025-12-24T04:02:35.794464Z\",\"completed_at\":null,\"failed_at\":null,\"expires_at\":null,\"retry_count\":0,\"max_retries\":3,\"error_message\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.789944+00:00\",\"updated_at\":\"2025-12-24T04:02:35.789944+00:00\"}}}",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.796487Z"
+    },
+    {
+      "test_name": "Complete Workflow (via PATCH)",
+      "success": true,
+      "details": "Completed workflow 24d2b516-2ae6-4e48-828b-12eb290e3277",
+      "duration_seconds": 0.001442709,
+      "input": {
+        "completed_at": "2025-12-24T04:02:35.796491+00:00",
+        "current_step": 3,
+        "progress_percentage": 100.0,
+        "status": "completed"
+      },
+      "output": {
+        "body": "{\"success\":true,\"data\":{\"id\":\"24d2b516-2ae6-4e48-828b-12eb290e3277\",\"workflow_type\":\"sequential\",\"status\":\"completed\",\"initiator_id\":\"76fccf40-8ece-4d5c-affe-19bd7102c0b0\",\"target_user_id\":null,\"title\":\"User Onboarding v2\",\"description\":\"Updated automated user onboarding workflow\",\"context\":{\"source\":\"registration\",\"steps\":[\"verify_email\",\"complete_profile\",\"welcome\"]},\"current_step\":3,\"total_steps\":3,\"progress_percentage\":100.0,\"started_at\":\"2025-12-24T04:02:35.794464Z\",\"completed_at\":\"2025-12-24T04:02:35.796491Z\",\"failed_at\":null,\"expires_at\":null,\"retry_count\":0,\"max_retries\":3,\"error_message\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.789944+00:00\",\"updated_at\":\"2025-12-24T04:02:35.789944+00:00\"}}}",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.797933Z"
+    },
+    {
+      "test_name": "Delete Workflow",
+      "success": true,
+      "details": "Deleted workflow 24d2b516-2ae6-4e48-828b-12eb290e3277",
+      "duration_seconds": 0.00126775,
+      "input": null,
+      "output": {
+        "body": "",
+        "status_code": 204
+      },
+      "timestamp": "2025-12-24T04:02:35.799205Z"
+    },
+    {
+      "test_name": "Create Workflow - Invalid Data",
+      "success": true,
+      "details": "Correctly rejected invalid workflow data",
+      "duration_seconds": 0.000278042,
+      "input": {
+        "current_step": -1,
+        "initiator_id": "invalid-uuid",
+        "max_retries": -1,
+        "metadata": {},
+        "progress_percentage": -10.0,
+        "retry_count": -1,
+        "status": "invalid_status",
+        "title": "",
+        "total_steps": 0,
+        "workflow_type": "invalid_type"
+      },
+      "output": {
+        "body": "Failed to deserialize the JSON body into the target type: initiator_id: UUID parsing failed: invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `i` at 1 at line 1 column 48",
+        "status_code": 422
+      },
+      "timestamp": "2025-12-24T04:02:35.799484Z"
+    }
+  ]
+}

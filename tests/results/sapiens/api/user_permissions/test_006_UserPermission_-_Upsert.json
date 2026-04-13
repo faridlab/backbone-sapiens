@@ -1,0 +1,52 @@
+{
+  "test_name": "UserPermission - Upsert",
+  "success": true,
+  "details": "Upsert completed",
+  "duration_seconds": 0.001748,
+  "input": {
+    "body": {
+      "granted_at": "2025-12-24T04:02:35.666746+00:00",
+      "granted_by": "b05e6acf-77b5-49d9-a111-15bd121821b1",
+      "is_active": true,
+      "metadata": {
+        "created_at": "2025-12-24T04:02:35.666752+00:00",
+        "source": "integration_test",
+        "test": true,
+        "updated_at": "2025-12-24T04:02:35.666753+00:00"
+      },
+      "permission_id": "9cf66ce4-2670-4494-8cd5-da8e16e04ce4",
+      "reason": "Temporary access granted for testing - reason-41f7915e",
+      "user_id": "6bba51d4-0790-406b-88b8-3e4a95477a14"
+    },
+    "endpoint": "/api/v1/user_permissions/upsert",
+    "method": "POST"
+  },
+  "output": {
+    "body": {
+      "data": {
+        "expires_at": null,
+        "granted_at": "2025-12-24T04:02:35.666746Z",
+        "granted_by": "b05e6acf-77b5-49d9-a111-15bd121821b1",
+        "id": "5bb26072-f245-49d1-b02b-b4c707082c49",
+        "is_active": true,
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.666752+00:00",
+          "source": "integration_test",
+          "test": true,
+          "updated_at": "2025-12-24T04:02:35.666753+00:00"
+        },
+        "permission_id": "9cf66ce4-2670-4494-8cd5-da8e16e04ce4",
+        "reason": "Temporary access granted for testing - reason-41f7915e",
+        "resource_id": null,
+        "resource_type": null,
+        "revoked_at": null,
+        "revoked_by": null,
+        "revoked_reason": null,
+        "user_id": "6bba51d4-0790-406b-88b8-3e4a95477a14"
+      },
+      "success": true
+    },
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.668520Z"
+}

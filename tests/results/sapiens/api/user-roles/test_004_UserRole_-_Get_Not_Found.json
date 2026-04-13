@@ -1,0 +1,16 @@
+{
+  "test_name": "UserRole - Get Not Found",
+  "success": true,
+  "details": "Correctly returned 404 for non-existent entity",
+  "duration_seconds": 0.000882875,
+  "input": {
+    "endpoint": "/api/v1/user_roles/4c62fa29-fe55-4b6c-84a1-e7c53e04354f",
+    "id": "4c62fa29-fe55-4b6c-84a1-e7c53e04354f",
+    "method": "GET"
+  },
+  "output": {
+    "body": "{\"success\":false,\"error\":\"UserRole with id '4c62fa29-fe55-4b6c-84a1-e7c53e04354f' not found\"}",
+    "status_code": 404
+  },
+  "timestamp": "2025-12-12T15:50:21.025049Z"
+}

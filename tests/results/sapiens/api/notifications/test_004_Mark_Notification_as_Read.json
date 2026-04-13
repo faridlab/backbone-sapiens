@@ -1,0 +1,9 @@
+{
+  "test_name": "Mark Notification as Read",
+  "success": true,
+  "details": "No notification to mark (skipped)",
+  "duration_seconds": 2.08e-7,
+  "input": null,
+  "output": null,
+  "timestamp": "2025-12-19T15:19:06.862741Z"
+}

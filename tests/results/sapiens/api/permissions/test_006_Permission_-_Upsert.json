@@ -1,0 +1,40 @@
+{
+  "test_name": "Permission - Upsert",
+  "success": true,
+  "details": "Upsert completed",
+  "duration_seconds": 0.003004375,
+  "input": {
+    "body": {
+      "action": "read",
+      "description": "Permission to read perm-bb7ab9ba resources",
+      "metadata": {
+        "created_at": "2025-12-24T04:02:35.478651+00:00",
+        "test": true,
+        "updated_at": "2025-12-24T04:02:35.478659+00:00"
+      },
+      "name": "read_perm-bb7ab9ba",
+      "resource": "perm-bb7ab9ba"
+    },
+    "endpoint": "/api/v1/permissions/upsert",
+    "method": "POST"
+  },
+  "output": {
+    "body": {
+      "data": {
+        "action": "read",
+        "description": "Permission to read perm-bb7ab9ba resources",
+        "id": "259f34b0-d159-4438-b0ee-6537f2b60f9c",
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.478651+00:00",
+          "test": true,
+          "updated_at": "2025-12-24T04:02:35.478659+00:00"
+        },
+        "name": "read_perm-bb7ab9ba",
+        "resource": "perm-bb7ab9ba"
+      },
+      "success": true
+    },
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.481690Z"
+}

@@ -1,0 +1,170 @@
+{
+  "test_name": "AuditLog - Bulk Create",
+  "success": true,
+  "details": "3 entities created in bulk",
+  "duration_seconds": 0.011719458,
+  "input": {
+    "body": [
+      {
+        "action": "user.action-8d20a6af",
+        "archived": false,
+        "details": {
+          "operation": "create",
+          "timestamp": "2024-01-01T00:00:00Z"
+        },
+        "ip_address": "192.168.1.100",
+        "metadata": {
+          "created_at": "2025-12-12T15:50:20.860326+00:00",
+          "request_id": "req-d68e322e",
+          "test": true,
+          "updated_at": "2025-12-12T15:50:20.860327+00:00"
+        },
+        "request_id": "req-97d87c27",
+        "resource_id": "6b63343b-a994-45f4-9241-e6a150675c95",
+        "resource_type": "user",
+        "session_id": "8a7530fa-c78e-4bbb-a6db-a1d95f0eac77",
+        "severity": "info",
+        "timestamp": "2025-12-12T15:50:20.860319+00:00",
+        "user_agent": "Mozilla/5.0 Test Agent",
+        "user_id": "6503fedc-91b9-42ee-bd73-721d840b01fd"
+      },
+      {
+        "action": "user.action-1f9795d5",
+        "archived": false,
+        "details": {
+          "operation": "create",
+          "timestamp": "2024-01-01T00:00:00Z"
+        },
+        "ip_address": "192.168.1.100",
+        "metadata": {
+          "created_at": "2025-12-12T15:50:20.860346+00:00",
+          "request_id": "req-62cbecd9",
+          "test": true,
+          "updated_at": "2025-12-12T15:50:20.860347+00:00"
+        },
+        "request_id": "req-1462bf4f",
+        "resource_id": "472ea359-7415-4cdf-82e0-8714b7fd9336",
+        "resource_type": "user",
+        "session_id": "24b6ecef-5a3e-4440-b4e1-8cee6f8209b1",
+        "severity": "info",
+        "timestamp": "2025-12-12T15:50:20.860343+00:00",
+        "user_agent": "Mozilla/5.0 Test Agent",
+        "user_id": "ad6607c8-e9f8-421f-a8d2-2a902429068b"
+      },
+      {
+        "action": "user.action-11b6ae7a",
+        "archived": false,
+        "details": {
+          "operation": "create",
+          "timestamp": "2024-01-01T00:00:00Z"
+        },
+        "ip_address": "192.168.1.100",
+        "metadata": {
+          "created_at": "2025-12-12T15:50:20.860365+00:00",
+          "request_id": "req-8afa663b",
+          "test": true,
+          "updated_at": "2025-12-12T15:50:20.860366+00:00"
+        },
+        "request_id": "req-0c5788e2",
+        "resource_id": "9ddddf53-8caa-414e-9785-3749195d92dd",
+        "resource_type": "user",
+        "session_id": "4efcaa09-0b82-4abc-aecc-33f09486c693",
+        "severity": "info",
+        "timestamp": "2025-12-12T15:50:20.860362+00:00",
+        "user_agent": "Mozilla/5.0 Test Agent",
+        "user_id": "39534d0e-cb49-4480-9d9c-2099950a0958"
+      }
+    ],
+    "endpoint": "/api/v1/audit_logs/bulk",
+    "method": "POST"
+  },
+  "output": {
+    "body": {
+      "data": {
+        "errors": [],
+        "failed": 0,
+        "items": [
+          {
+            "action": "user.action-8d20a6af",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "b73dacb2-492e-4452-9c06-02ce0f02e8df",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-12T15:50:20.860326+00:00",
+              "request_id": "req-d68e322e",
+              "test": true,
+              "updated_at": "2025-12-12T15:50:20.860327+00:00"
+            },
+            "resource_id": "6b63343b-a994-45f4-9241-e6a150675c95",
+            "resource_type": "user",
+            "session_id": "8a7530fa-c78e-4bbb-a6db-a1d95f0eac77",
+            "severity": "info",
+            "timestamp": "2025-12-12T15:50:20.860319Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "6503fedc-91b9-42ee-bd73-721d840b01fd"
+          },
+          {
+            "action": "user.action-1f9795d5",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "35efce38-8807-468e-beaf-ed0a4ae90c2e",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-12T15:50:20.860346+00:00",
+              "request_id": "req-62cbecd9",
+              "test": true,
+              "updated_at": "2025-12-12T15:50:20.860347+00:00"
+            },
+            "resource_id": "472ea359-7415-4cdf-82e0-8714b7fd9336",
+            "resource_type": "user",
+            "session_id": "24b6ecef-5a3e-4440-b4e1-8cee6f8209b1",
+            "severity": "info",
+            "timestamp": "2025-12-12T15:50:20.860343Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "ad6607c8-e9f8-421f-a8d2-2a902429068b"
+          },
+          {
+            "action": "user.action-11b6ae7a",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "f1f86ef2-5e90-4dd0-a41d-fb9d36c7a120",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-12T15:50:20.860365+00:00",
+              "request_id": "req-8afa663b",
+              "test": true,
+              "updated_at": "2025-12-12T15:50:20.860366+00:00"
+            },
+            "resource_id": "9ddddf53-8caa-414e-9785-3749195d92dd",
+            "resource_type": "user",
+            "session_id": "4efcaa09-0b82-4abc-aecc-33f09486c693",
+            "severity": "info",
+            "timestamp": "2025-12-12T15:50:20.860362Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "39534d0e-cb49-4480-9d9c-2099950a0958"
+          }
+        ],
+        "total": 3
+      },
+      "success": true
+    },
+    "status_code": 201
+  },
+  "timestamp": "2025-12-12T15:50:20.872129Z"
+}

@@ -1,0 +1,12 @@
+{
+  "test_name": "Delete Notification",
+  "success": true,
+  "details": "Deleted notification 1b2928bc-2582-4f1a-a5ee-dd37b6507486",
+  "duration_seconds": 0.003516375,
+  "input": null,
+  "output": {
+    "body": "",
+    "status_code": 204
+  },
+  "timestamp": "2025-12-24T04:02:35.360617Z"
+}

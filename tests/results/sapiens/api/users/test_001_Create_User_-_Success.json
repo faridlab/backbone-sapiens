@@ -1,0 +1,24 @@
+{
+  "test_name": "Create User - Success",
+  "success": true,
+  "details": "User created successfully",
+  "duration_seconds": 0.014000042,
+  "input": {
+    "email": "testuser-89b377a0@test.local",
+    "email_verified": false,
+    "failed_login_attempts": 0,
+    "id": "1d94cb36-52e1-4150-9186-da5e4a27378b",
+    "metadata": {
+      "created_at": "2025-12-24T04:02:35.736830+00:00",
+      "updated_at": "2025-12-24T04:02:35.736830+00:00"
+    },
+    "password_hash": "$argon2id$v=19$m=19456,t=2,p=1$salt-c4dddf3b$hash-39632bfdxxxxxxxxxxxxxxxxxxxx",
+    "status": "active",
+    "username": "testuser-6ac4c4d9"
+  },
+  "output": {
+    "body": "{\"success\":true,\"data\":{\"id\":\"f4c667f3-c400-4537-9b07-d54638f2265e\",\"username\":\"testuser-6ac4c4d9\",\"email\":\"testuser-89b377a0@test.local\",\"password_hash\":\"$argon2id$v=19$m=19456,t=2,p=1$salt-c4dddf3b$hash-39632bfdxxxxxxxxxxxxxxxxxxxx\",\"status\":\"active\",\"email_verified\":false,\"failed_login_attempts\":0,\"locked_until\":null,\"last_login\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.737034+00:00\",\"updated_at\":\"2025-12-24T04:02:35.737034+00:00\"}}}",
+    "status_code": 201
+  },
+  "timestamp": "2025-12-24T04:02:35.750821Z"
+}

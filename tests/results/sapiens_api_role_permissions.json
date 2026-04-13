@@ -1,0 +1,463 @@
+{
+  "suite_name": "role_permission_api_test",
+  "start_time": "2025-12-24T04:02:35.482692Z",
+  "end_time": "2025-12-24T04:02:35.513094Z",
+  "results": [
+    {
+      "test_name": "RolePermission - List",
+      "success": true,
+      "details": "List retrieved successfully",
+      "duration_seconds": 0.013596666,
+      "input": {
+        "endpoint": "/api/v1/role_permissions",
+        "method": "GET"
+      },
+      "output": {
+        "body_preview": "{\"success\":true,\"data\":{\"data\":[{\"id\":\"fa9b7d33-632a-4c99-b9f2-05d9a43cfde4\",\"role_id\":\"cf80777c-082b-4f7d-9e21-7a3c6c3cf5cd\",\"permission_id\":\"0cafd146-9885-4d56-b23d-aad53c0e8d9d\",\"granted_at\":\"2025-12-20T10:47:02.349666Z\",\"metadata\":{\"created_at\":\"2025-12-20T10:47:02.349667+00:00\",\"source\":\"integration_test\",\"test\":true,\"updated_at\":\"2025-12-20T10:47:02.349668+00:00\"}},{\"id\":\"f6804305-6251-454a-95e9-c1669326fdbd\",\"role_id\":\"37cf669f-3aea-4a85-8144-c85c97872155\",\"permission_id\":\"fc8cb8bd-7044-4",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.496305Z"
+    },
+    {
+      "test_name": "RolePermission - Pagination",
+      "success": true,
+      "details": "Pagination works correctly",
+      "duration_seconds": 0.003717334,
+      "input": {
+        "endpoint": "/api/v1/role_permissions?page=1&per_page=5",
+        "method": "GET",
+        "params": {
+          "page": 1,
+          "per_page": 5
+        }
+      },
+      "output": {
+        "body": {
+          "data": {
+            "data": [
+              {
+                "granted_at": "2025-12-20T10:47:02.349666Z",
+                "id": "fa9b7d33-632a-4c99-b9f2-05d9a43cfde4",
+                "metadata": {
+                  "created_at": "2025-12-20T10:47:02.349667+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T10:47:02.349668+00:00"
+                },
+                "permission_id": "0cafd146-9885-4d56-b23d-aad53c0e8d9d",
+                "role_id": "cf80777c-082b-4f7d-9e21-7a3c6c3cf5cd"
+              },
+              {
+                "granted_at": "2025-12-20T03:55:12.751477Z",
+                "id": "f6804305-6251-454a-95e9-c1669326fdbd",
+                "metadata": {
+                  "created_at": "2025-12-20T03:55:12.751478+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:55:12.751479+00:00"
+                },
+                "permission_id": "fc8cb8bd-7044-4cf7-be7b-9827e37ed70d",
+                "role_id": "37cf669f-3aea-4a85-8144-c85c97872155"
+              },
+              {
+                "granted_at": "2025-12-20T03:38:58.696766Z",
+                "id": "f5fdce89-9f92-42cb-8937-beb3bf14772d",
+                "metadata": {
+                  "created_at": "2025-12-20T03:38:58.696767+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:38:58.696768+00:00"
+                },
+                "permission_id": "daff8b11-3c30-4893-8327-e20ef33f0b91",
+                "role_id": "f00be1d5-be07-4314-8f3d-1031c3428caf"
+              },
+              {
+                "granted_at": "2025-12-20T10:53:39.448367Z",
+                "id": "f46a4a7b-6ca2-4792-ada5-19f381927b2a",
+                "metadata": {
+                  "created_at": "2025-12-20T10:53:39.448370+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T10:53:39.448371+00:00"
+                },
+                "permission_id": "5cea763d-09f9-4f2d-9397-bdcc590be736",
+                "role_id": "bf5bcb16-51a1-4d96-a631-530b66a5bd57"
+              },
+              {
+                "granted_at": "2025-12-20T03:55:12.751484Z",
+                "id": "f1b5a116-40bd-4921-8641-5dbdb9e199b0",
+                "metadata": {
+                  "created_at": "2025-12-20T03:55:12.751485+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:55:12.751486+00:00"
+                },
+                "permission_id": "d53e6a60-0e0b-47d5-9572-3a08bba4d789",
+                "role_id": "f9809de4-7aab-44e0-9928-559ea6fb0480"
+              },
+              {
+                "granted_at": "2025-12-13T18:50:14.554326Z",
+                "id": "ea5c3b14-3c51-471f-b8d2-2a7cffbe4b8f",
+                "metadata": {
+                  "created_at": "2025-12-13T18:50:14.554327+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-13T18:50:14.554328+00:00"
+                },
+                "permission_id": "4565f6a5-f03b-49f0-a896-288607e73468",
+                "role_id": "b96798f0-7631-4412-a70f-a232d466b796"
+              },
+              {
+                "granted_at": "2025-12-20T10:30:13.398532Z",
+                "id": "e9b8d322-6aed-4867-b4c8-498507c7cd09",
+                "metadata": {
+                  "created_at": "2025-12-20T10:30:13.398533+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T10:30:13.398534+00:00"
+                },
+                "permission_id": "e94922ad-6b37-4685-9e9e-9e3a2b3aaa3b",
+                "role_id": "d393eb32-4d00-46af-9107-640fdcbf757c"
+              },
+              {
+                "granted_at": "2025-12-13T18:20:54.469711Z",
+                "id": "e8902b49-cc6b-489a-b05c-6ed51613ea65",
+                "metadata": {
+                  "created_at": "2025-12-13T18:20:54.469713+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-13T18:20:54.469715+00:00"
+                },
+                "permission_id": "af3c1daa-cffe-4cde-aea0-e1842b168b20",
+                "role_id": "cb5933fa-4e50-44e5-8a7d-99c0203e5c5d"
+              },
+              {
+                "granted_at": "2025-12-19T15:02:29.326653Z",
+                "id": "e86256bf-2b87-441c-9374-40b4dcd91fce",
+                "metadata": {
+                  "created_at": "2025-12-19T15:02:29.326656+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-19T15:02:29.326657+00:00"
+                },
+                "permission_id": "e153851b-d8e8-4257-9ef2-aee590ad1133",
+                "role_id": "a45e8dd8-7d4f-485d-9293-8f40d02eaeb8"
+              },
+              {
+                "granted_at": "2025-12-20T17:17:13.197783Z",
+                "id": "e1d8e852-2d1c-48d1-9e4e-6aeac260f868",
+                "metadata": {
+                  "created_at": "2025-12-20T17:17:13.197785+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T17:17:13.197786+00:00"
+                },
+                "permission_id": "01a737af-9638-4448-8ee8-ae72f2346f64",
+                "role_id": "4bc08927-1577-48e4-b728-98e71f7edf1b"
+              },
+              {
+                "granted_at": "2025-12-20T10:42:10.575519Z",
+                "id": "e1a6630e-5b13-4209-83c0-d9fb3dbadd2a",
+                "metadata": {
+                  "created_at": "2025-12-20T10:42:10.575520+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T10:42:10.575521+00:00"
+                },
+                "permission_id": "00aeddfe-b84c-4a35-9e64-9e1ee6df7c4d",
+                "role_id": "1e0a0325-e71f-4cdc-83c3-92b08f34fc15"
+              },
+              {
+                "granted_at": "2025-12-20T03:32:37.817627Z",
+                "id": "e182d21a-be9f-4e6d-a9c6-21eac44d9e88",
+                "metadata": {
+                  "created_at": "2025-12-20T03:32:37.817628+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:32:37.817629+00:00"
+                },
+                "permission_id": "24c6d1dd-7dfa-48ab-99e0-a257873e17c2",
+                "role_id": "207c90e6-427e-4af5-8d75-413eb84d5b76"
+              },
+              {
+                "granted_at": "2025-12-19T13:54:05.115521Z",
+                "id": "e138c0a6-3819-4b96-868d-c90d0288e062",
+                "metadata": {
+                  "created_at": "2025-12-19T13:54:05.115523+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-19T13:54:05.115525+00:00"
+                },
+                "permission_id": "f1912549-733f-4862-85ea-aa6181921ec7",
+                "role_id": "819f53c0-52d1-4eae-b92b-5ee583575728"
+              },
+              {
+                "granted_at": "2025-12-20T03:32:37.817612Z",
+                "id": "dc1a7a40-6ab7-467b-a28c-6a84f897944c",
+                "metadata": {
+                  "created_at": "2025-12-20T03:32:37.817615+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:32:37.817616+00:00"
+                },
+                "permission_id": "2d8c49a8-81cd-4a4f-adf3-82f17623b0e8",
+                "role_id": "a3dbde3f-7a45-4523-b1cd-5219848bf554"
+              },
+              {
+                "granted_at": "2025-12-20T10:22:46.065580Z",
+                "id": "d966e0a7-dfa5-4d84-a9e7-2638028de7ee",
+                "metadata": {
+                  "created_at": "2025-12-20T10:22:46.065581+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T10:22:46.065582+00:00"
+                },
+                "permission_id": "3262650d-5caa-4be4-ae68-d4f59eb4a36d",
+                "role_id": "bf6fe337-2b63-4c15-8f98-883040f0fc9f"
+              },
+              {
+                "granted_at": "2025-12-20T03:48:50.141347Z",
+                "id": "d4a6aeb9-28a9-4edc-8ef9-144edc76d7b9",
+                "metadata": {
+                  "created_at": "2025-12-20T03:48:50.141348+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:48:50.141349+00:00"
+                },
+                "permission_id": "000feb95-fd09-4015-b7c5-9831f741abef",
+                "role_id": "a9c7fdc5-a90a-4971-9be7-4d2609e97f20"
+              },
+              {
+                "granted_at": "2025-12-20T03:38:58.692991Z",
+                "id": "d36f41e8-86a3-4be9-a7d3-6f0f565ae7e7",
+                "metadata": {
+                  "created_at": "2025-12-20T03:38:58.692994+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:38:58.692995+00:00"
+                },
+                "permission_id": "c8cca969-c982-47a4-a708-2c35e6257d56",
+                "role_id": "089d9585-aeb4-484d-bec1-d61e80dad240"
+              },
+              {
+                "granted_at": "2025-12-20T03:48:50.137921Z",
+                "id": "c652ad6c-0ab7-4296-8a0b-c70a05596764",
+                "metadata": {
+                  "created_at": "2025-12-20T03:48:50.137924+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:48:50.137925+00:00"
+                },
+                "permission_id": "320b157c-ec11-47dd-83c4-553b650a360d",
+                "role_id": "0b22a61d-a503-4300-9f3e-f4abb2571432"
+              },
+              {
+                "granted_at": "2025-12-19T15:02:29.330483Z",
+                "id": "c2425154-40a5-4b85-961b-b3ab9ad5a343",
+                "metadata": {
+                  "created_at": "2025-12-19T15:02:29.330484+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-19T15:02:29.330485+00:00"
+                },
+                "permission_id": "5887478f-aed4-41e5-9ecf-7721519ab592",
+                "role_id": "56173292-ad59-4484-ba7e-9e5c955f8e00"
+              },
+              {
+                "granted_at": "2025-12-20T10:53:39.450554Z",
+                "id": "bd2ebdd7-445f-4457-89c7-b1283d9381bd",
+                "metadata": {
+                  "created_at": "2025-12-20T10:53:39.450555+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T10:53:39.450556+00:00"
+                },
+                "permission_id": "efc3c872-d0bd-4d09-b919-5946a3f2d381",
+                "role_id": "bae6ed09-91b6-47b3-bd69-d4bd456b1867"
+              }
+            ],
+            "meta": {
+              "limit": 20,
+              "page": 1,
+              "total": 92,
+              "total_pages": 5
+            }
+          },
+          "success": true
+        },
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.500350Z"
+    },
+    {
+      "test_name": "RolePermission - Create",
+      "success": true,
+      "details": "Entity created successfully",
+      "duration_seconds": 0.003508583,
+      "input": {
+        "body": {
+          "granted_at": "2025-12-24T04:02:35.500387+00:00",
+          "metadata": {
+            "created_at": "2025-12-24T04:02:35.500392+00:00",
+            "source": "integration_test",
+            "test": true,
+            "updated_at": "2025-12-24T04:02:35.500393+00:00"
+          },
+          "permission_id": "a75d9102-da5f-4971-9855-f301db18a773",
+          "role_id": "97bbe135-be2d-4d1b-94d5-068328ff3bb7"
+        },
+        "endpoint": "/api/v1/role_permissions",
+        "method": "POST"
+      },
+      "output": {
+        "body": {
+          "data": {
+            "granted_at": "2025-12-24T04:02:35.500387Z",
+            "id": "3faaa271-1239-4031-84bf-9730a73e4517",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.500392+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.500393+00:00"
+            },
+            "permission_id": "a75d9102-da5f-4971-9855-f301db18a773",
+            "role_id": "97bbe135-be2d-4d1b-94d5-068328ff3bb7"
+          },
+          "success": true
+        },
+        "status_code": 201
+      },
+      "timestamp": "2025-12-24T04:02:35.503910Z"
+    },
+    {
+      "test_name": "RolePermission - Create Invalid",
+      "success": true,
+      "details": "Validation correctly rejected invalid data",
+      "duration_seconds": 0.000335333,
+      "input": {
+        "body": {
+          "permission_id": "not-uuid",
+          "role_id": ""
+        },
+        "endpoint": "/api/v1/role_permissions",
+        "method": "POST"
+      },
+      "output": {
+        "body": "Failed to deserialize the JSON body into the target type: permission_id: UUID parsing failed: invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1 at line 1 column 27",
+        "status_code": 422
+      },
+      "timestamp": "2025-12-24T04:02:35.504253Z"
+    },
+    {
+      "test_name": "RolePermission - Get Not Found",
+      "success": true,
+      "details": "Correctly returned 404 for non-existent entity",
+      "duration_seconds": 0.001732625,
+      "input": {
+        "endpoint": "/api/v1/role_permissions/589e06d5-d9b4-473e-835b-a4dccb889927",
+        "id": "589e06d5-d9b4-473e-835b-a4dccb889927",
+        "method": "GET"
+      },
+      "output": {
+        "body": "{\"success\":false,\"error\":\"RolePermission with id '589e06d5-d9b4-473e-835b-a4dccb889927' not found\"}",
+        "status_code": 404
+      },
+      "timestamp": "2025-12-24T04:02:35.505991Z"
+    },
+    {
+      "test_name": "RolePermission - Bulk Create",
+      "success": true,
+      "details": "3 entities created in bulk",
+      "duration_seconds": 0.007016708,
+      "input": {
+        "body": [
+          {
+            "granted_at": "2025-12-24T04:02:35.506016+00:00",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.506021+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.506022+00:00"
+            },
+            "permission_id": "009377b1-b823-45f0-94e7-fa9512b2de55",
+            "role_id": "ee7d8c8d-34c4-47f5-ae20-7eb302ab4bb5"
+          },
+          {
+            "granted_at": "2025-12-24T04:02:35.506027+00:00",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.506028+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.506029+00:00"
+            },
+            "permission_id": "8881cc0a-93b9-43f8-9f0c-12dac693732f",
+            "role_id": "08083d60-d41b-49a9-b625-c0303b7786ef"
+          },
+          {
+            "granted_at": "2025-12-24T04:02:35.506034+00:00",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.506035+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.506036+00:00"
+            },
+            "permission_id": "53c2a757-2570-4baa-8060-e02c23aa44a9",
+            "role_id": "59e8054d-866a-4e86-bb21-3922c56ab6d3"
+          }
+        ],
+        "endpoint": "/api/v1/role_permissions/bulk",
+        "method": "POST"
+      },
+      "output": {
+        "body": {
+          "data": {
+            "errors": [],
+            "failed": 0,
+            "items": [
+              {
+                "granted_at": "2025-12-24T04:02:35.506016Z",
+                "id": "91221dc7-8318-4bf2-8166-4709a06eca43",
+                "metadata": {
+                  "created_at": "2025-12-24T04:02:35.506021+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-24T04:02:35.506022+00:00"
+                },
+                "permission_id": "009377b1-b823-45f0-94e7-fa9512b2de55",
+                "role_id": "ee7d8c8d-34c4-47f5-ae20-7eb302ab4bb5"
+              },
+              {
+                "granted_at": "2025-12-24T04:02:35.506027Z",
+                "id": "13cc683b-57ba-4712-b7e6-a5e687984bcb",
+                "metadata": {
+                  "created_at": "2025-12-24T04:02:35.506028+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-24T04:02:35.506029+00:00"
+                },
+                "permission_id": "8881cc0a-93b9-43f8-9f0c-12dac693732f",
+                "role_id": "08083d60-d41b-49a9-b625-c0303b7786ef"
+              },
+              {
+                "granted_at": "2025-12-24T04:02:35.506034Z",
+                "id": "35d5d03c-d5d0-4022-b120-0e5129f977a2",
+                "metadata": {
+                  "created_at": "2025-12-24T04:02:35.506035+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-24T04:02:35.506036+00:00"
+                },
+                "permission_id": "53c2a757-2570-4baa-8060-e02c23aa44a9",
+                "role_id": "59e8054d-866a-4e86-bb21-3922c56ab6d3"
+              }
+            ],
+            "total": 3
+          },
+          "success": true
+        },
+        "status_code": 201
+      },
+      "timestamp": "2025-12-24T04:02:35.513078Z"
+    }
+  ]
+}

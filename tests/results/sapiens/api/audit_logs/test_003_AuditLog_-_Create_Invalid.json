@@ -1,0 +1,21 @@
+{
+  "test_name": "AuditLog - Create Invalid",
+  "success": true,
+  "details": "Validation correctly rejected invalid data",
+  "duration_seconds": 0.000359917,
+  "input": {
+    "body": {
+      "action": "",
+      "resource_type": "",
+      "result": "INVALID_RESULT",
+      "severity": "INVALID"
+    },
+    "endpoint": "/api/v1/audit_logs",
+    "method": "POST"
+  },
+  "output": {
+    "body": "Failed to deserialize the JSON body into the target type: severity: unknown variant `INVALID`, expected one of `info`, `warning`, `error`, `critical` at line 1 column 78",
+    "status_code": 422
+  },
+  "timestamp": "2025-12-24T04:02:35.249398Z"
+}

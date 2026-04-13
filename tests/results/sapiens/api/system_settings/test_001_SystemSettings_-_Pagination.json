@@ -1,0 +1,311 @@
+{
+  "test_name": "SystemSettings - Pagination",
+  "success": true,
+  "details": "Pagination works correctly",
+  "duration_seconds": 0.003942833,
+  "input": {
+    "endpoint": "/api/v1/system_settings?page=1&per_page=5",
+    "method": "GET",
+    "params": {
+      "page": 1,
+      "per_page": 5
+    }
+  },
+  "output": {
+    "body": {
+      "data": {
+        "data": [
+          {
+            "description": "Test setting for integration tests",
+            "id": "fedc7b0b-1653-49f5-8065-2a18fe7bdbf5",
+            "key": "test.setting.key_bfefeccc",
+            "metadata": {
+              "created_at": "2025-12-20T10:22:46.100424+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:22:46.100427+00:00"
+            },
+            "updated_at": "2025-12-20T10:22:46.100705Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "fc8f1f00-ebf2-4ccc-884c-52f6d4bf050d",
+            "key": "test.setting.key_7b12674b",
+            "metadata": {
+              "created_at": "2025-12-20T17:17:13.292187+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T17:17:13.292188+00:00"
+            },
+            "updated_at": "2025-12-20T17:17:13.292408Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "fc3e0af8-ec8a-46f8-9ba1-f942dc75e705",
+            "key": "test.setting.key_26221ae9",
+            "metadata": {
+              "created_at": "2025-12-20T16:24:13.217170+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T16:24:13.217171+00:00"
+            },
+            "updated_at": "2025-12-20T16:24:13.217389Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "f5d54e6f-8399-4e4d-8bc9-a64e116b91ad",
+            "key": "test.setting.key_e08b9f6d",
+            "metadata": {
+              "created_at": "2025-12-20T10:54:57.342588+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:54:57.342589+00:00"
+            },
+            "updated_at": "2025-12-20T10:54:57.342817Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "f5caefe1-dcbb-45b5-b74f-a2847727967c",
+            "key": "test.setting.key_fd4e2c34",
+            "metadata": {
+              "created_at": "2025-12-20T10:53:39.502459+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:53:39.502462+00:00"
+            },
+            "updated_at": "2025-12-20T10:53:39.502644Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "f1e44de2-b7c3-4424-812d-551a87ba182c",
+            "key": "test.setting.key_31825c04",
+            "metadata": {
+              "created_at": "2025-12-13T18:20:54.519540+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-13T18:20:54.519541+00:00"
+            },
+            "updated_at": "2025-12-13T18:20:54.519749Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "f0564b97-e1f8-4f8b-86d3-f120cc34b959",
+            "key": "test.setting.key_19af7503",
+            "metadata": {
+              "created_at": "2025-12-19T15:19:06.963758+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-19T15:19:06.963761+00:00"
+            },
+            "updated_at": "2025-12-19T15:19:06.963934Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "efbf7e6e-e717-4367-9495-949d756679c6",
+            "key": "test.setting.key_1ebee716",
+            "metadata": {
+              "created_at": "2025-12-20T03:55:12.803212+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T03:55:12.803213+00:00"
+            },
+            "updated_at": "2025-12-20T03:55:12.803438Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "edaddd75-a357-4d48-af98-1cc6f47a957e",
+            "key": "test.setting.key_0a727e4d",
+            "metadata": {
+              "created_at": "2025-12-20T03:48:50.194258+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T03:48:50.194260+00:00"
+            },
+            "updated_at": "2025-12-20T03:48:50.194474Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "eb7c4103-e593-448b-a1c3-e160194327e1",
+            "key": "test.setting.key_b3590efd",
+            "metadata": {
+              "created_at": "2025-12-20T10:30:13.451429+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:30:13.451430+00:00"
+            },
+            "updated_at": "2025-12-20T10:30:13.451606Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "e86f1c71-3227-44a8-ae06-6b2c2279bc5f",
+            "key": "test.setting.key_a1075d74",
+            "metadata": {
+              "created_at": "2025-12-20T10:24:44.880858+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:24:44.880860+00:00"
+            },
+            "updated_at": "2025-12-20T10:24:44.880969Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "e2bd902f-49df-4b62-81dd-f5c54cae2cfb",
+            "key": "test.setting.key_fe8486c5",
+            "metadata": {
+              "created_at": "2025-12-20T16:24:13.213329+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T16:24:13.213332+00:00"
+            },
+            "updated_at": "2025-12-20T16:24:13.213519Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "e20cef36-b87b-4c61-8d39-132eb90a5e92",
+            "key": "test.setting.key_a4616c9d",
+            "metadata": {
+              "created_at": "2025-12-13T18:50:14.626701+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-13T18:50:14.626702+00:00"
+            },
+            "updated_at": "2025-12-13T18:50:14.626951Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "e1dd7408-0775-4553-a00d-754d5ea983ba",
+            "key": "test.setting.key_f36881d3",
+            "metadata": {
+              "created_at": "2025-12-19T15:19:06.967097+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-19T15:19:06.967098+00:00"
+            },
+            "updated_at": "2025-12-19T15:19:06.967316Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "e0cdfe59-e51f-44a1-bbb1-194e7e14bcf9",
+            "key": "test.setting.key_7afe7c85",
+            "metadata": {
+              "created_at": "2025-12-20T04:09:23.293893+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T04:09:23.293896+00:00"
+            },
+            "updated_at": "2025-12-20T04:09:23.294149Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "e09ff947-fd95-498a-8417-054f2c317e80",
+            "key": "test.setting.key_2dbc398c",
+            "metadata": {
+              "created_at": "2025-12-20T17:23:13.093681+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T17:23:13.093684+00:00"
+            },
+            "updated_at": "2025-12-20T17:23:13.093869Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "df08ec14-8f6b-4752-a644-4b84e3ecfcbb",
+            "key": "test.setting.key_b0624590",
+            "metadata": {
+              "created_at": "2025-12-20T10:53:39.498630+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:53:39.498634+00:00"
+            },
+            "updated_at": "2025-12-20T10:53:39.498806Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "d8e55d40-1521-421d-bd01-3e43043e0893",
+            "key": "test.setting.key_f03d729e",
+            "metadata": {
+              "created_at": "2025-12-20T10:54:57.339512+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:54:57.339514+00:00"
+            },
+            "updated_at": "2025-12-20T10:54:57.339686Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "d5d0c6ff-bd47-425e-ac7b-9f36d28b10ac",
+            "key": "test.setting.key_b14cc5ed",
+            "metadata": {
+              "created_at": "2025-12-20T04:09:23.276562+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T04:09:23.276566+00:00"
+            },
+            "updated_at": "2025-12-20T04:09:23.276931Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          },
+          {
+            "description": "Test setting for integration tests",
+            "id": "d5334bd9-706e-4add-98df-6c273d273fda",
+            "key": "test.setting.key_41528650",
+            "metadata": {
+              "created_at": "2025-12-13T18:20:54.515792+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-13T18:20:54.515795+00:00"
+            },
+            "updated_at": "2025-12-13T18:20:54.515976Z",
+            "updated_by": null,
+            "value": "test_value_123"
+          }
+        ],
+        "meta": {
+          "limit": 20,
+          "page": 1,
+          "total": 115,
+          "total_pages": 6
+        }
+      },
+      "success": true
+    },
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.627630Z"
+}

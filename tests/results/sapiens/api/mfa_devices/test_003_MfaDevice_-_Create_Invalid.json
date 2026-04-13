@@ -1,0 +1,20 @@
+{
+  "test_name": "MfaDevice - Create Invalid",
+  "success": true,
+  "details": "Validation correctly rejected invalid data",
+  "duration_seconds": 0.00042225,
+  "input": {
+    "body": {
+      "device_type": "INVALID_TYPE",
+      "name": "",
+      "user_id": "not-uuid"
+    },
+    "endpoint": "/api/v1/mfa_devices",
+    "method": "POST"
+  },
+  "output": {
+    "body": "Failed to deserialize the JSON body into the target type: device_type: unknown variant `INVALID_TYPE`, expected one of `totp`, `sms`, `backup_codes` at line 1 column 29",
+    "status_code": 422
+  },
+  "timestamp": "2025-12-24T04:02:35.294846Z"
+}

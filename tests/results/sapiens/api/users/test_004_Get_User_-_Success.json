@@ -1,0 +1,12 @@
+{
+  "test_name": "Get User - Success",
+  "success": true,
+  "details": "Retrieved user 38af0bf6-6dc5-47df-b502-3775439711aa",
+  "duration_seconds": 0.007831542,
+  "input": null,
+  "output": {
+    "body": "{\"success\":true,\"data\":{\"id\":\"38af0bf6-6dc5-47df-b502-3775439711aa\",\"username\":\"getuser-f05f8d98\",\"email\":\"getuser-685db614@test.local\",\"password_hash\":\"$argon2id$v=19$m=19456,t=2,p=1$salt-e570ac6d$hash-6b87bd31xxxxxxxxxxxxxxxxxxxx\",\"status\":\"active\",\"email_verified\":false,\"failed_login_attempts\":0,\"locked_until\":null,\"last_login\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.751775+00:00\",\"updated_at\":\"2025-12-24T04:02:35.751775+00:00\"}}}",
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.759431Z"
+}

@@ -1,0 +1,15 @@
+{
+  "test_name": "UserPermission - List",
+  "success": true,
+  "details": "List retrieved successfully",
+  "duration_seconds": 0.011005792,
+  "input": {
+    "endpoint": "/api/v1/user_permissions",
+    "method": "GET"
+  },
+  "output": {
+    "body_preview": "{\"success\":true,\"data\":{\"data\":[{\"id\":\"ffe76344-9d98-45c0-a039-59dde8fbb5c3\",\"user_id\":\"7422b1c4-9fc6-4e1e-86a0-b8ac65f7205f\",\"permission_id\":\"81ad79a5-d9cb-4ac5-98be-b72cb0d3bc13\",\"granted_at\":\"2025-12-19T15:02:29.398194Z\",\"granted_by\":\"765939df-9969-49ab-ab40-ec4b8b5d0b88\",\"reason\":\"Temporary access granted for testing - reason-97218d27\",\"expires_at\":null,\"resource_id\":null,\"resource_type\":null,\"is_active\":true,\"revoked_at\":null,\"revoked_by\":null,\"revoked_reason\":null,\"metadata\":{\"created_at\":",
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.649830Z"
+}

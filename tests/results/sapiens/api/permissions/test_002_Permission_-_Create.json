@@ -1,0 +1,40 @@
+{
+  "test_name": "Permission - Create",
+  "success": true,
+  "details": "Entity created successfully",
+  "duration_seconds": 0.00718725,
+  "input": {
+    "body": {
+      "action": "read",
+      "description": "Permission to read perm-8309c805 resources",
+      "metadata": {
+        "created_at": "2025-12-24T04:02:35.456597+00:00",
+        "test": true,
+        "updated_at": "2025-12-24T04:02:35.456605+00:00"
+      },
+      "name": "read_perm-8309c805",
+      "resource": "perm-8309c805"
+    },
+    "endpoint": "/api/v1/permissions",
+    "method": "POST"
+  },
+  "output": {
+    "body": {
+      "data": {
+        "action": "read",
+        "description": "Permission to read perm-8309c805 resources",
+        "id": "6539ff3f-1f25-45e7-af3e-63285a3226c5",
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.456597+00:00",
+          "test": true,
+          "updated_at": "2025-12-24T04:02:35.456605+00:00"
+        },
+        "name": "read_perm-8309c805",
+        "resource": "perm-8309c805"
+      },
+      "success": true
+    },
+    "status_code": 201
+  },
+  "timestamp": "2025-12-24T04:02:35.463820Z"
+}

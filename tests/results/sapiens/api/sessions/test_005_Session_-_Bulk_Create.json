@@ -1,0 +1,131 @@
+{
+  "test_name": "Session - Bulk Create",
+  "success": true,
+  "details": "3 entities created in bulk",
+  "duration_seconds": 0.011169625,
+  "input": {
+    "body": [
+      {
+        "device_type": "desktop",
+        "expires_at": "2025-12-31T23:59:59Z",
+        "ip_address": "192.168.1.1",
+        "is_active": true,
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.597964+00:00",
+          "device_name": "Test MacBook",
+          "remember_me": false,
+          "test": true,
+          "updated_at": "2025-12-24T04:02:35.597967+00:00"
+        },
+        "token_hash": "00000000000000000000000000000000aab1fc4d9f3fe112c4817f8f4055fe3d",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+        "user_id": "2173a85b-236e-4878-b005-b1860046cb83"
+      },
+      {
+        "device_type": "desktop",
+        "expires_at": "2025-12-31T23:59:59Z",
+        "ip_address": "192.168.1.1",
+        "is_active": true,
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.597974+00:00",
+          "device_name": "Test MacBook",
+          "remember_me": false,
+          "test": true,
+          "updated_at": "2025-12-24T04:02:35.597975+00:00"
+        },
+        "token_hash": "000000000000000000000000000000003d842ce7e00ff00283d18510b2335a26",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+        "user_id": "60ec3fe5-fcf7-420d-b1b2-f635a66f668a"
+      },
+      {
+        "device_type": "desktop",
+        "expires_at": "2025-12-31T23:59:59Z",
+        "ip_address": "192.168.1.1",
+        "is_active": true,
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.597981+00:00",
+          "device_name": "Test MacBook",
+          "remember_me": false,
+          "test": true,
+          "updated_at": "2025-12-24T04:02:35.597982+00:00"
+        },
+        "token_hash": "00000000000000000000000000000000cf7fd7de5b766925ca3f90ca4b828317",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+        "user_id": "c7aa61ed-7859-4715-b14b-2fd072e3bf5b"
+      }
+    ],
+    "endpoint": "/api/v1/sessions/bulk",
+    "method": "POST"
+  },
+  "output": {
+    "body": {
+      "data": {
+        "errors": [],
+        "failed": 0,
+        "items": [
+          {
+            "device_type": "desktop",
+            "expires_at": "2025-12-31T23:59:59Z",
+            "id": "0f4c06a7-aad9-4956-bbb5-60ba4cf590e7",
+            "ip_address": "192.168.1.1",
+            "is_active": true,
+            "last_activity": null,
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.597964+00:00",
+              "device_name": "Test MacBook",
+              "remember_me": false,
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.597967+00:00"
+            },
+            "revoked_at": null,
+            "token_hash": "00000000000000000000000000000000aab1fc4d9f3fe112c4817f8f4055fe3d",
+            "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+            "user_id": "2173a85b-236e-4878-b005-b1860046cb83"
+          },
+          {
+            "device_type": "desktop",
+            "expires_at": "2025-12-31T23:59:59Z",
+            "id": "2d0b65ae-435d-4b61-a243-3e03f08d77c5",
+            "ip_address": "192.168.1.1",
+            "is_active": true,
+            "last_activity": null,
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.597974+00:00",
+              "device_name": "Test MacBook",
+              "remember_me": false,
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.597975+00:00"
+            },
+            "revoked_at": null,
+            "token_hash": "000000000000000000000000000000003d842ce7e00ff00283d18510b2335a26",
+            "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+            "user_id": "60ec3fe5-fcf7-420d-b1b2-f635a66f668a"
+          },
+          {
+            "device_type": "desktop",
+            "expires_at": "2025-12-31T23:59:59Z",
+            "id": "b12bc7ae-5418-4152-8563-2d67172c5f79",
+            "ip_address": "192.168.1.1",
+            "is_active": true,
+            "last_activity": null,
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.597981+00:00",
+              "device_name": "Test MacBook",
+              "remember_me": false,
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.597982+00:00"
+            },
+            "revoked_at": null,
+            "token_hash": "00000000000000000000000000000000cf7fd7de5b766925ca3f90ca4b828317",
+            "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+            "user_id": "c7aa61ed-7859-4715-b14b-2fd072e3bf5b"
+          }
+        ],
+        "total": 3
+      },
+      "success": true
+    },
+    "status_code": 201
+  },
+  "timestamp": "2025-12-24T04:02:35.609316Z"
+}

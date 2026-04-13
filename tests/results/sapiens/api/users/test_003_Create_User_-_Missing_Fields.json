@@ -1,0 +1,14 @@
+{
+  "test_name": "Create User - Missing Fields",
+  "success": true,
+  "details": "Correctly rejected request with missing fields",
+  "duration_seconds": 0.000263375,
+  "input": {
+    "username": "onlyusername"
+  },
+  "output": {
+    "body": "Failed to deserialize the JSON body into the target type: missing field `email` at line 1 column 27",
+    "status_code": 422
+  },
+  "timestamp": "2025-12-24T04:02:35.751599Z"
+}

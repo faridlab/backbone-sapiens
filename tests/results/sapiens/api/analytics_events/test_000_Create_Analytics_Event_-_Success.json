@@ -1,0 +1,32 @@
+{
+  "test_name": "Create Analytics Event - Success",
+  "success": true,
+  "details": "Analytics event created successfully",
+  "duration_seconds": 0.11132775,
+  "input": {
+    "event_type": "login",
+    "geographic_data": null,
+    "ip_address": null,
+    "metadata": {
+      "created_at": "2025-12-24T04:02:35.025307+00:00",
+      "source": "integration_test",
+      "updated_at": "2025-12-24T04:02:35.025307+00:00"
+    },
+    "processed": false,
+    "properties": {
+      "method": "oauth",
+      "page": "/login"
+    },
+    "resource_id": null,
+    "resource_type": null,
+    "session_id": "051a25ba-8b6c-4bec-9096-743feb1e82d1",
+    "timestamp": "2025-12-24T04:02:35.025307Z",
+    "user_agent": "Mozilla/5.0",
+    "user_id": null
+  },
+  "output": {
+    "body": "{\"success\":true,\"data\":{\"id\":\"bb8c5846-12e6-47a7-bbd9-7e737fc1417f\",\"event_type\":\"login\",\"user_id\":null,\"session_id\":\"051a25ba-8b6c-4bec-9096-743feb1e82d1\",\"resource_type\":null,\"resource_id\":null,\"properties\":{\"method\":\"oauth\",\"page\":\"/login\"},\"timestamp\":\"2025-12-24T04:02:35.025307Z\",\"ip_address\":null,\"user_agent\":\"Mozilla/5.0\",\"geographic_data\":null,\"processed\":false,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.025307+00:00\",\"source\":\"integration_test\",\"updated_at\":\"2025-12-24T04:02:35.025307+00:00\"}}}",
+    "status_code": 201
+  },
+  "timestamp": "2025-12-24T04:02:35.136632Z"
+}

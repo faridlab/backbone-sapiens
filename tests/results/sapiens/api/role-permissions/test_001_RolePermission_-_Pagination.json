@@ -1,0 +1,79 @@
+{
+  "test_name": "RolePermission - Pagination",
+  "success": true,
+  "details": "Pagination works correctly",
+  "duration_seconds": 0.00253975,
+  "input": {
+    "endpoint": "/api/v1/role_permissions?page=1&per_page=5",
+    "method": "GET",
+    "params": {
+      "page": 1,
+      "per_page": 5
+    }
+  },
+  "output": {
+    "body": {
+      "data": {
+        "data": [
+          {
+            "granted_at": "2025-12-12T15:03:51.771692Z",
+            "id": "e9b40b42-59ef-4a01-b817-52ae381554f5",
+            "metadata": {
+              "created_at": "2025-12-12T15:03:51.771693+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-12T15:03:51.771694+00:00"
+            },
+            "permission_id": "645ccf06-a7b2-424d-b6c8-361e4ab5b544",
+            "role_id": "294775cd-1a15-46dd-a643-c2be98381450"
+          },
+          {
+            "granted_at": "2025-12-12T15:03:51.768660Z",
+            "id": "9e480710-c34c-4752-b821-77453235ed1f",
+            "metadata": {
+              "created_at": "2025-12-12T15:03:51.768663+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-12T15:03:51.768664+00:00"
+            },
+            "permission_id": "cafda988-5156-4d65-b749-c61fa0a404ba",
+            "role_id": "742c4e2c-7034-4fbf-9940-c74a646d7ad0"
+          },
+          {
+            "granted_at": "2025-12-12T15:03:51.771677Z",
+            "id": "432e1e41-bc97-493b-b17f-ae7b66704486",
+            "metadata": {
+              "created_at": "2025-12-12T15:03:51.771679+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-12T15:03:51.771680+00:00"
+            },
+            "permission_id": "4b85c8d3-603a-42f7-80f3-c152e0f60fa6",
+            "role_id": "e67fc3af-9d85-4ec5-8bef-714eeecd591e"
+          },
+          {
+            "granted_at": "2025-12-12T15:03:51.771685Z",
+            "id": "21f207a2-c995-4c51-b8ea-b0c0e2f6f1de",
+            "metadata": {
+              "created_at": "2025-12-12T15:03:51.771687+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-12T15:03:51.771687+00:00"
+            },
+            "permission_id": "13c709f4-785e-4e7a-8aaf-f98c4b7bcf36",
+            "role_id": "49318e1b-2b35-4d10-95dd-cc7019f07de1"
+          }
+        ],
+        "meta": {
+          "limit": 20,
+          "page": 1,
+          "total": 4,
+          "total_pages": 1
+        }
+      },
+      "success": true
+    },
+    "status_code": 200
+  },
+  "timestamp": "2025-12-12T15:50:20.939129Z"
+}

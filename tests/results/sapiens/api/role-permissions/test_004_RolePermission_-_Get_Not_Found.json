@@ -1,0 +1,16 @@
+{
+  "test_name": "RolePermission - Get Not Found",
+  "success": true,
+  "details": "Correctly returned 404 for non-existent entity",
+  "duration_seconds": 0.000988625,
+  "input": {
+    "endpoint": "/api/v1/role_permissions/d531583c-84cd-4db9-a0ee-43b3a8aedd90",
+    "id": "d531583c-84cd-4db9-a0ee-43b3a8aedd90",
+    "method": "GET"
+  },
+  "output": {
+    "body": "{\"success\":false,\"error\":\"RolePermission with id 'd531583c-84cd-4db9-a0ee-43b3a8aedd90' not found\"}",
+    "status_code": 404
+  },
+  "timestamp": "2025-12-12T15:50:20.942169Z"
+}

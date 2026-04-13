@@ -1,0 +1,12 @@
+{
+  "test_name": "Create Role - Duplicate Name",
+  "success": true,
+  "details": "Correctly rejected duplicate role name",
+  "duration_seconds": 0.022858542,
+  "input": null,
+  "output": {
+    "body": "{\"success\":false,\"error\":\"Validation error: Role name already exists\"}",
+    "status_code": 409
+  },
+  "timestamp": "2025-12-24T04:02:35.565706Z"
+}

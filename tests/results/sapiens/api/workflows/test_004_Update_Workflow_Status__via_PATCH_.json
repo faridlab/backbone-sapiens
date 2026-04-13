@@ -1,0 +1,15 @@
+{
+  "test_name": "Update Workflow Status (via PATCH)",
+  "success": true,
+  "details": "Updated workflow status 24d2b516-2ae6-4e48-828b-12eb290e3277",
+  "duration_seconds": 0.002023916,
+  "input": {
+    "started_at": "2025-12-24T04:02:35.794464+00:00",
+    "status": "active"
+  },
+  "output": {
+    "body": "{\"success\":true,\"data\":{\"id\":\"24d2b516-2ae6-4e48-828b-12eb290e3277\",\"workflow_type\":\"sequential\",\"status\":\"active\",\"initiator_id\":\"76fccf40-8ece-4d5c-affe-19bd7102c0b0\",\"target_user_id\":null,\"title\":\"User Onboarding v2\",\"description\":\"Updated automated user onboarding workflow\",\"context\":{\"source\":\"registration\",\"steps\":[\"verify_email\",\"complete_profile\",\"welcome\"]},\"current_step\":1,\"total_steps\":3,\"progress_percentage\":33.3,\"started_at\":\"2025-12-24T04:02:35.794464Z\",\"completed_at\":null,\"failed_at\":null,\"expires_at\":null,\"retry_count\":0,\"max_retries\":3,\"error_message\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.789944+00:00\",\"updated_at\":\"2025-12-24T04:02:35.789944+00:00\"}}}",
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.796487Z"
+}

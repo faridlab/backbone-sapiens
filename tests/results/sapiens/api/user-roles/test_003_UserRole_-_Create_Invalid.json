@@ -1,0 +1,19 @@
+{
+  "test_name": "UserRole - Create Invalid",
+  "success": true,
+  "details": "Validation correctly rejected invalid data",
+  "duration_seconds": 0.000253792,
+  "input": {
+    "body": {
+      "role_id": "",
+      "user_id": "not-a-uuid"
+    },
+    "endpoint": "/api/v1/user_roles",
+    "method": "POST"
+  },
+  "output": {
+    "body": "Failed to deserialize the JSON body into the target type: role_id: UUID parsing failed: invalid length: expected length 32 for simple format, found 0 at line 1 column 13",
+    "status_code": 422
+  },
+  "timestamp": "2025-12-12T15:50:21.024162Z"
+}

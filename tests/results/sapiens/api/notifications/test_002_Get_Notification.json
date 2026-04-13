@@ -1,0 +1,12 @@
+{
+  "test_name": "Get Notification",
+  "success": true,
+  "details": "Retrieved notification 1b2928bc-2582-4f1a-a5ee-dd37b6507486",
+  "duration_seconds": 0.0036345,
+  "input": null,
+  "output": {
+    "body": "{\"success\":true,\"data\":{\"id\":\"1b2928bc-2582-4f1a-a5ee-dd37b6507486\",\"user_id\":\"9ca348bf-3ff6-4ee3-8773-78fe1530fa04\",\"notification_type\":\"welcome\",\"channel\":\"in_app\",\"title\":\"Welcome to Sapiens\",\"message\":\"Your account has been successfully created!\",\"data\":null,\"is_read\":false,\"read_at\":null,\"sent_at\":null,\"delivered_at\":null,\"expires_at\":null,\"priority\":\"high\",\"action_url\":null,\"action_text\":null,\"category\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.308330+00:00\",\"updated_at\":\"2025-12-24T04:02:35.308330+00:00\"}}}",
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.336455Z"
+}

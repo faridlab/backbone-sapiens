@@ -1,0 +1,16 @@
+{
+  "test_name": "UserPermission - Get Not Found",
+  "success": true,
+  "details": "Correctly returned 404 for non-existent entity",
+  "duration_seconds": 0.00117775,
+  "input": {
+    "endpoint": "/api/v1/user_permissions/ac2377ce-d764-4ad0-a631-63944e406d92",
+    "id": "ac2377ce-d764-4ad0-a631-63944e406d92",
+    "method": "GET"
+  },
+  "output": {
+    "body": "{\"success\":false,\"error\":\"UserPermission with id 'ac2377ce-d764-4ad0-a631-63944e406d92' not found\"}",
+    "status_code": 404
+  },
+  "timestamp": "2025-12-12T15:50:21.006150Z"
+}

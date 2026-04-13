@@ -1,0 +1,23 @@
+{
+  "test_name": "Create Workflow - Invalid Data",
+  "success": true,
+  "details": "Correctly rejected invalid workflow data",
+  "duration_seconds": 0.000278042,
+  "input": {
+    "current_step": -1,
+    "initiator_id": "invalid-uuid",
+    "max_retries": -1,
+    "metadata": {},
+    "progress_percentage": -10.0,
+    "retry_count": -1,
+    "status": "invalid_status",
+    "title": "",
+    "total_steps": 0,
+    "workflow_type": "invalid_type"
+  },
+  "output": {
+    "body": "Failed to deserialize the JSON body into the target type: initiator_id: UUID parsing failed: invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `i` at 1 at line 1 column 48",
+    "status_code": 422
+  },
+  "timestamp": "2025-12-24T04:02:35.799484Z"
+}

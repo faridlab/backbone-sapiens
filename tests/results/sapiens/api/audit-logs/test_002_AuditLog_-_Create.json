@@ -1,0 +1,65 @@
+{
+  "test_name": "AuditLog - Create",
+  "success": true,
+  "details": "Entity created successfully",
+  "duration_seconds": 0.015571708,
+  "input": {
+    "body": {
+      "action": "user.action-0caecae1",
+      "archived": false,
+      "details": {
+        "operation": "create",
+        "timestamp": "2024-01-01T00:00:00Z"
+      },
+      "ip_address": "192.168.1.100",
+      "metadata": {
+        "created_at": "2025-12-12T15:50:20.842236+00:00",
+        "request_id": "req-fee464ec",
+        "test": true,
+        "updated_at": "2025-12-12T15:50:20.842237+00:00"
+      },
+      "request_id": "req-f163366c",
+      "resource_id": "21433488-d7d7-4d0c-8ee2-799eac6d7c59",
+      "resource_type": "user",
+      "session_id": "a169e7f4-6f68-4b83-ae41-1601a7760df7",
+      "severity": "info",
+      "timestamp": "2025-12-12T15:50:20.842204+00:00",
+      "user_agent": "Mozilla/5.0 Test Agent",
+      "user_id": "ca7b6edf-94d2-46a3-9e36-12817199757a"
+    },
+    "endpoint": "/api/v1/audit_logs",
+    "method": "POST"
+  },
+  "output": {
+    "body": {
+      "data": {
+        "action": "user.action-0caecae1",
+        "archive_location": null,
+        "archived": false,
+        "archived_at": null,
+        "details": {
+          "operation": "create",
+          "timestamp": "2024-01-01T00:00:00Z"
+        },
+        "id": "0d0d0edf-3a4f-4365-8ef0-291e8c1bfa95",
+        "ip_address": "192.168.1.100",
+        "metadata": {
+          "created_at": "2025-12-12T15:50:20.842236+00:00",
+          "request_id": "req-fee464ec",
+          "test": true,
+          "updated_at": "2025-12-12T15:50:20.842237+00:00"
+        },
+        "resource_id": "21433488-d7d7-4d0c-8ee2-799eac6d7c59",
+        "resource_type": "user",
+        "session_id": "a169e7f4-6f68-4b83-ae41-1601a7760df7",
+        "severity": "info",
+        "timestamp": "2025-12-12T15:50:20.842204Z",
+        "user_agent": "Mozilla/5.0 Test Agent",
+        "user_id": "ca7b6edf-94d2-46a3-9e36-12817199757a"
+      },
+      "success": true
+    },
+    "status_code": 201
+  },
+  "timestamp": "2025-12-12T15:50:20.857809Z"
+}

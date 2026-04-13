@@ -1,0 +1,12 @@
+{
+  "test_name": "Delete Analytics Event",
+  "success": true,
+  "details": "Deleted analytics event bb8c5846-12e6-47a7-bbd9-7e737fc1417f",
+  "duration_seconds": 0.005833083,
+  "input": null,
+  "output": {
+    "body": "",
+    "status_code": 204
+  },
+  "timestamp": "2025-12-24T04:02:35.195098Z"
+}

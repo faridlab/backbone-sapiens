@@ -1,0 +1,60 @@
+{
+  "test_name": "MfaDevice - Create",
+  "success": true,
+  "details": "Entity created successfully",
+  "duration_seconds": 0.008545125,
+  "input": {
+    "body": {
+      "backup_codes": [
+        "123456",
+        "654321",
+        "111111",
+        "222222",
+        "333333"
+      ],
+      "device_name": "Authenticator App - dev-4e935030",
+      "device_type": "totp",
+      "is_active": true,
+      "metadata": {
+        "created_at": "2025-12-24T04:02:35.285829+00:00",
+        "source": "integration_test",
+        "test": true,
+        "updated_at": "2025-12-24T04:02:35.285834+00:00"
+      },
+      "secret": "JBSWY3DPEHPK3PXP",
+      "user_id": "0cc7bea9-ed27-4b26-b373-0270f3686911"
+    },
+    "endpoint": "/api/v1/mfa_devices",
+    "method": "POST"
+  },
+  "output": {
+    "body": {
+      "data": {
+        "backup_codes": [
+          "123456",
+          "654321",
+          "111111",
+          "222222",
+          "333333"
+        ],
+        "device_name": "Authenticator App - dev-4e935030",
+        "device_type": "totp",
+        "id": "667caaec-e4ef-4738-8668-abd0796c42d1",
+        "is_active": true,
+        "last_used": null,
+        "metadata": {
+          "created_at": "2025-12-24T04:02:35.285829+00:00",
+          "source": "integration_test",
+          "test": true,
+          "updated_at": "2025-12-24T04:02:35.285834+00:00"
+        },
+        "secret": "JBSWY3DPEHPK3PXP",
+        "user_id": "0cc7bea9-ed27-4b26-b373-0270f3686911",
+        "verified_at": null
+      },
+      "success": true
+    },
+    "status_code": 201
+  },
+  "timestamp": "2025-12-24T04:02:35.294399Z"
+}

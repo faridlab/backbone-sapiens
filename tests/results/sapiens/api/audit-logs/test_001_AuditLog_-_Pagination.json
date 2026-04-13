@@ -1,0 +1,131 @@
+{
+  "test_name": "AuditLog - Pagination",
+  "success": true,
+  "details": "Pagination works correctly",
+  "duration_seconds": 0.017333125,
+  "input": {
+    "endpoint": "/api/v1/audit_logs?page=1&per_page=5",
+    "method": "GET",
+    "params": {
+      "page": 1,
+      "per_page": 5
+    }
+  },
+  "output": {
+    "body": {
+      "data": {
+        "data": [
+          {
+            "action": "user.action-359711fe",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "e61b0e23-19ed-454d-88fc-2d111e93376e",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-12T15:03:51.675403+00:00",
+              "request_id": "req-b8b48dd7",
+              "test": true,
+              "updated_at": "2025-12-12T15:03:51.675406+00:00"
+            },
+            "resource_id": "4322d2ab-46a0-4361-844c-a0cfcc367178",
+            "resource_type": "user",
+            "session_id": "1aef015b-6f2d-4b20-94dc-bca387e8b27c",
+            "severity": "info",
+            "timestamp": "2025-12-12T15:03:51.675395Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "ddaa655e-02fb-4cd0-84b5-f5b614901631"
+          },
+          {
+            "action": "user.action-a9d1d877",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "d7e24078-fea9-42fa-8063-a620a4156e6e",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-12T15:03:51.675355+00:00",
+              "request_id": "req-76847659",
+              "test": true,
+              "updated_at": "2025-12-12T15:03:51.675358+00:00"
+            },
+            "resource_id": "e67993b9-4eaf-466f-add8-d87d39f40ce3",
+            "resource_type": "user",
+            "session_id": "69268618-fe44-4951-81f0-59b15df6ee3d",
+            "severity": "info",
+            "timestamp": "2025-12-12T15:03:51.675340Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "fcdfedb4-56d0-4433-b3cc-2007d1cce37a"
+          },
+          {
+            "action": "user.action-85bf76f6",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "72e58be2-4572-4bf8-8a1e-e215c4363db7",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-12T15:03:51.675452+00:00",
+              "request_id": "req-c79bba81",
+              "test": true,
+              "updated_at": "2025-12-12T15:03:51.675456+00:00"
+            },
+            "resource_id": "2629948b-10f1-4300-a5f1-7e961db82776",
+            "resource_type": "user",
+            "session_id": "077ddfd3-7d17-42a5-bfdc-8cbd02001eca",
+            "severity": "info",
+            "timestamp": "2025-12-12T15:03:51.675442Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "1e738a8a-4809-4a86-a9f1-20e58422a06a"
+          },
+          {
+            "action": "user.action-c1256a03",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "101df8c2-d9e2-4829-af32-c9dda2c8e331",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-12T15:03:51.657220+00:00",
+              "request_id": "req-bd979ec5",
+              "test": true,
+              "updated_at": "2025-12-12T15:03:51.657222+00:00"
+            },
+            "resource_id": "d90895e4-77b6-4e41-aa06-c1a6e3d86230",
+            "resource_type": "user",
+            "session_id": "aea40309-30aa-4ca6-91a8-20c4d1ad77ab",
+            "severity": "info",
+            "timestamp": "2025-12-12T15:03:51.657187Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "abe1b51c-e5b5-470c-94e9-20df219e34af"
+          }
+        ],
+        "meta": {
+          "limit": 20,
+          "page": 1,
+          "total": 4,
+          "total_pages": 1
+        }
+      },
+      "success": true
+    },
+    "status_code": 200
+  },
+  "timestamp": "2025-12-12T15:50:20.842124Z"
+}

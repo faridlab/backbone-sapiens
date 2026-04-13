@@ -1,0 +1,35 @@
+{
+  "test_name": "Create Workflow - Success",
+  "success": true,
+  "details": "Workflow created successfully",
+  "duration_seconds": 0.013279459,
+  "input": {
+    "context": {
+      "source": "registration",
+      "steps": [
+        "verify_email",
+        "complete_profile",
+        "welcome"
+      ]
+    },
+    "current_step": 0,
+    "description": "Automated user onboarding workflow",
+    "initiator_id": "76fccf40-8ece-4d5c-affe-19bd7102c0b0",
+    "max_retries": 3,
+    "metadata": {
+      "created_at": "2025-12-24T04:02:35.768069+00:00",
+      "updated_at": "2025-12-24T04:02:35.768069+00:00"
+    },
+    "progress_percentage": 0.0,
+    "retry_count": 0,
+    "status": "pending",
+    "title": "User Onboarding",
+    "total_steps": 3,
+    "workflow_type": "sequential"
+  },
+  "output": {
+    "body": "{\"success\":true,\"data\":{\"id\":\"24d2b516-2ae6-4e48-828b-12eb290e3277\",\"workflow_type\":\"sequential\",\"status\":\"pending\",\"initiator_id\":\"76fccf40-8ece-4d5c-affe-19bd7102c0b0\",\"target_user_id\":null,\"title\":\"User Onboarding\",\"description\":\"Automated user onboarding workflow\",\"context\":{\"source\":\"registration\",\"steps\":[\"verify_email\",\"complete_profile\",\"welcome\"]},\"current_step\":0,\"total_steps\":3,\"progress_percentage\":0.0,\"started_at\":null,\"completed_at\":null,\"failed_at\":null,\"expires_at\":null,\"retry_count\":0,\"max_retries\":3,\"error_message\":null,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.768069+00:00\",\"updated_at\":\"2025-12-24T04:02:35.768069+00:00\"}}}",
+    "status_code": 201
+  },
+  "timestamp": "2025-12-24T04:02:35.781347Z"
+}

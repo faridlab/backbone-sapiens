@@ -1,0 +1,440 @@
+{
+  "suite_name": "audit_log_api_test",
+  "start_time": "2025-12-12T15:50:20.772675Z",
+  "end_time": "2025-12-12T15:50:20.872469Z",
+  "results": [
+    {
+      "test_name": "AuditLog - List",
+      "success": true,
+      "details": "List retrieved successfully",
+      "duration_seconds": 0.051748375,
+      "input": {
+        "endpoint": "/api/v1/audit_logs",
+        "method": "GET"
+      },
+      "output": {
+        "body_preview": "{\"success\":true,\"data\":{\"data\":[{\"id\":\"e61b0e23-19ed-454d-88fc-2d111e93376e\",\"user_id\":\"ddaa655e-02fb-4cd0-84b5-f5b614901631\",\"action\":\"user.action-359711fe\",\"details\":{\"operation\":\"create\",\"timestamp\":\"2024-01-01T00:00:00Z\"},\"severity\":\"info\",\"ip_address\":\"192.168.1.100\",\"user_agent\":\"Mozilla/5.0 Test Agent\",\"session_id\":\"1aef015b-6f2d-4b20-94dc-bca387e8b27c\",\"resource_type\":\"user\",\"resource_id\":\"4322d2ab-46a0-4361-844c-a0cfcc367178\",\"timestamp\":\"2025-12-12T15:03:51.675395Z\",\"archived\":false,\"a",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-12T15:50:20.824534Z"
+    },
+    {
+      "test_name": "AuditLog - Pagination",
+      "success": true,
+      "details": "Pagination works correctly",
+      "duration_seconds": 0.017333125,
+      "input": {
+        "endpoint": "/api/v1/audit_logs?page=1&per_page=5",
+        "method": "GET",
+        "params": {
+          "page": 1,
+          "per_page": 5
+        }
+      },
+      "output": {
+        "body": {
+          "data": {
+            "data": [
+              {
+                "action": "user.action-359711fe",
+                "archive_location": null,
+                "archived": false,
+                "archived_at": null,
+                "details": {
+                  "operation": "create",
+                  "timestamp": "2024-01-01T00:00:00Z"
+                },
+                "id": "e61b0e23-19ed-454d-88fc-2d111e93376e",
+                "ip_address": "192.168.1.100",
+                "metadata": {
+                  "created_at": "2025-12-12T15:03:51.675403+00:00",
+                  "request_id": "req-b8b48dd7",
+                  "test": true,
+                  "updated_at": "2025-12-12T15:03:51.675406+00:00"
+                },
+                "resource_id": "4322d2ab-46a0-4361-844c-a0cfcc367178",
+                "resource_type": "user",
+                "session_id": "1aef015b-6f2d-4b20-94dc-bca387e8b27c",
+                "severity": "info",
+                "timestamp": "2025-12-12T15:03:51.675395Z",
+                "user_agent": "Mozilla/5.0 Test Agent",
+                "user_id": "ddaa655e-02fb-4cd0-84b5-f5b614901631"
+              },
+              {
+                "action": "user.action-a9d1d877",
+                "archive_location": null,
+                "archived": false,
+                "archived_at": null,
+                "details": {
+                  "operation": "create",
+                  "timestamp": "2024-01-01T00:00:00Z"
+                },
+                "id": "d7e24078-fea9-42fa-8063-a620a4156e6e",
+                "ip_address": "192.168.1.100",
+                "metadata": {
+                  "created_at": "2025-12-12T15:03:51.675355+00:00",
+                  "request_id": "req-76847659",
+                  "test": true,
+                  "updated_at": "2025-12-12T15:03:51.675358+00:00"
+                },
+                "resource_id": "e67993b9-4eaf-466f-add8-d87d39f40ce3",
+                "resource_type": "user",
+                "session_id": "69268618-fe44-4951-81f0-59b15df6ee3d",
+                "severity": "info",
+                "timestamp": "2025-12-12T15:03:51.675340Z",
+                "user_agent": "Mozilla/5.0 Test Agent",
+                "user_id": "fcdfedb4-56d0-4433-b3cc-2007d1cce37a"
+              },
+              {
+                "action": "user.action-85bf76f6",
+                "archive_location": null,
+                "archived": false,
+                "archived_at": null,
+                "details": {
+                  "operation": "create",
+                  "timestamp": "2024-01-01T00:00:00Z"
+                },
+                "id": "72e58be2-4572-4bf8-8a1e-e215c4363db7",
+                "ip_address": "192.168.1.100",
+                "metadata": {
+                  "created_at": "2025-12-12T15:03:51.675452+00:00",
+                  "request_id": "req-c79bba81",
+                  "test": true,
+                  "updated_at": "2025-12-12T15:03:51.675456+00:00"
+                },
+                "resource_id": "2629948b-10f1-4300-a5f1-7e961db82776",
+                "resource_type": "user",
+                "session_id": "077ddfd3-7d17-42a5-bfdc-8cbd02001eca",
+                "severity": "info",
+                "timestamp": "2025-12-12T15:03:51.675442Z",
+                "user_agent": "Mozilla/5.0 Test Agent",
+                "user_id": "1e738a8a-4809-4a86-a9f1-20e58422a06a"
+              },
+              {
+                "action": "user.action-c1256a03",
+                "archive_location": null,
+                "archived": false,
+                "archived_at": null,
+                "details": {
+                  "operation": "create",
+                  "timestamp": "2024-01-01T00:00:00Z"
+                },
+                "id": "101df8c2-d9e2-4829-af32-c9dda2c8e331",
+                "ip_address": "192.168.1.100",
+                "metadata": {
+                  "created_at": "2025-12-12T15:03:51.657220+00:00",
+                  "request_id": "req-bd979ec5",
+                  "test": true,
+                  "updated_at": "2025-12-12T15:03:51.657222+00:00"
+                },
+                "resource_id": "d90895e4-77b6-4e41-aa06-c1a6e3d86230",
+                "resource_type": "user",
+                "session_id": "aea40309-30aa-4ca6-91a8-20c4d1ad77ab",
+                "severity": "info",
+                "timestamp": "2025-12-12T15:03:51.657187Z",
+                "user_agent": "Mozilla/5.0 Test Agent",
+                "user_id": "abe1b51c-e5b5-470c-94e9-20df219e34af"
+              }
+            ],
+            "meta": {
+              "limit": 20,
+              "page": 1,
+              "total": 4,
+              "total_pages": 1
+            }
+          },
+          "success": true
+        },
+        "status_code": 200
+      },
+      "timestamp": "2025-12-12T15:50:20.842124Z"
+    },
+    {
+      "test_name": "AuditLog - Create",
+      "success": true,
+      "details": "Entity created successfully",
+      "duration_seconds": 0.015571708,
+      "input": {
+        "body": {
+          "action": "user.action-0caecae1",
+          "archived": false,
+          "details": {
+            "operation": "create",
+            "timestamp": "2024-01-01T00:00:00Z"
+          },
+          "ip_address": "192.168.1.100",
+          "metadata": {
+            "created_at": "2025-12-12T15:50:20.842236+00:00",
+            "request_id": "req-fee464ec",
+            "test": true,
+            "updated_at": "2025-12-12T15:50:20.842237+00:00"
+          },
+          "request_id": "req-f163366c",
+          "resource_id": "21433488-d7d7-4d0c-8ee2-799eac6d7c59",
+          "resource_type": "user",
+          "session_id": "a169e7f4-6f68-4b83-ae41-1601a7760df7",
+          "severity": "info",
+          "timestamp": "2025-12-12T15:50:20.842204+00:00",
+          "user_agent": "Mozilla/5.0 Test Agent",
+          "user_id": "ca7b6edf-94d2-46a3-9e36-12817199757a"
+        },
+        "endpoint": "/api/v1/audit_logs",
+        "method": "POST"
+      },
+      "output": {
+        "body": {
+          "data": {
+            "action": "user.action-0caecae1",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "0d0d0edf-3a4f-4365-8ef0-291e8c1bfa95",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-12T15:50:20.842236+00:00",
+              "request_id": "req-fee464ec",
+              "test": true,
+              "updated_at": "2025-12-12T15:50:20.842237+00:00"
+            },
+            "resource_id": "21433488-d7d7-4d0c-8ee2-799eac6d7c59",
+            "resource_type": "user",
+            "session_id": "a169e7f4-6f68-4b83-ae41-1601a7760df7",
+            "severity": "info",
+            "timestamp": "2025-12-12T15:50:20.842204Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "ca7b6edf-94d2-46a3-9e36-12817199757a"
+          },
+          "success": true
+        },
+        "status_code": 201
+      },
+      "timestamp": "2025-12-12T15:50:20.857809Z"
+    },
+    {
+      "test_name": "AuditLog - Create Invalid",
+      "success": true,
+      "details": "Validation correctly rejected invalid data",
+      "duration_seconds": 0.000407416,
+      "input": {
+        "body": {
+          "action": "",
+          "resource_type": "",
+          "result": "INVALID_RESULT",
+          "severity": "INVALID"
+        },
+        "endpoint": "/api/v1/audit_logs",
+        "method": "POST"
+      },
+      "output": {
+        "body": "Failed to deserialize the JSON body into the target type: severity: unknown variant `INVALID`, expected one of `info`, `warning`, `error`, `critical` at line 1 column 78",
+        "status_code": 422
+      },
+      "timestamp": "2025-12-12T15:50:20.858266Z"
+    },
+    {
+      "test_name": "AuditLog - Get Not Found",
+      "success": true,
+      "details": "Correctly returned 404 for non-existent entity",
+      "duration_seconds": 0.001962375,
+      "input": {
+        "endpoint": "/api/v1/audit_logs/1ca52515-5999-4778-8ad9-9cb190f59197",
+        "id": "1ca52515-5999-4778-8ad9-9cb190f59197",
+        "method": "GET"
+      },
+      "output": {
+        "body": "{\"success\":false,\"error\":\"AuditLog with id '1ca52515-5999-4778-8ad9-9cb190f59197' not found\"}",
+        "status_code": 404
+      },
+      "timestamp": "2025-12-12T15:50:20.860258Z"
+    },
+    {
+      "test_name": "AuditLog - Bulk Create",
+      "success": true,
+      "details": "3 entities created in bulk",
+      "duration_seconds": 0.011719458,
+      "input": {
+        "body": [
+          {
+            "action": "user.action-8d20a6af",
+            "archived": false,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-12T15:50:20.860326+00:00",
+              "request_id": "req-d68e322e",
+              "test": true,
+              "updated_at": "2025-12-12T15:50:20.860327+00:00"
+            },
+            "request_id": "req-97d87c27",
+            "resource_id": "6b63343b-a994-45f4-9241-e6a150675c95",
+            "resource_type": "user",
+            "session_id": "8a7530fa-c78e-4bbb-a6db-a1d95f0eac77",
+            "severity": "info",
+            "timestamp": "2025-12-12T15:50:20.860319+00:00",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "6503fedc-91b9-42ee-bd73-721d840b01fd"
+          },
+          {
+            "action": "user.action-1f9795d5",
+            "archived": false,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-12T15:50:20.860346+00:00",
+              "request_id": "req-62cbecd9",
+              "test": true,
+              "updated_at": "2025-12-12T15:50:20.860347+00:00"
+            },
+            "request_id": "req-1462bf4f",
+            "resource_id": "472ea359-7415-4cdf-82e0-8714b7fd9336",
+            "resource_type": "user",
+            "session_id": "24b6ecef-5a3e-4440-b4e1-8cee6f8209b1",
+            "severity": "info",
+            "timestamp": "2025-12-12T15:50:20.860343+00:00",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "ad6607c8-e9f8-421f-a8d2-2a902429068b"
+          },
+          {
+            "action": "user.action-11b6ae7a",
+            "archived": false,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-12T15:50:20.860365+00:00",
+              "request_id": "req-8afa663b",
+              "test": true,
+              "updated_at": "2025-12-12T15:50:20.860366+00:00"
+            },
+            "request_id": "req-0c5788e2",
+            "resource_id": "9ddddf53-8caa-414e-9785-3749195d92dd",
+            "resource_type": "user",
+            "session_id": "4efcaa09-0b82-4abc-aecc-33f09486c693",
+            "severity": "info",
+            "timestamp": "2025-12-12T15:50:20.860362+00:00",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "39534d0e-cb49-4480-9d9c-2099950a0958"
+          }
+        ],
+        "endpoint": "/api/v1/audit_logs/bulk",
+        "method": "POST"
+      },
+      "output": {
+        "body": {
+          "data": {
+            "errors": [],
+            "failed": 0,
+            "items": [
+              {
+                "action": "user.action-8d20a6af",
+                "archive_location": null,
+                "archived": false,
+                "archived_at": null,
+                "details": {
+                  "operation": "create",
+                  "timestamp": "2024-01-01T00:00:00Z"
+                },
+                "id": "b73dacb2-492e-4452-9c06-02ce0f02e8df",
+                "ip_address": "192.168.1.100",
+                "metadata": {
+                  "created_at": "2025-12-12T15:50:20.860326+00:00",
+                  "request_id": "req-d68e322e",
+                  "test": true,
+                  "updated_at": "2025-12-12T15:50:20.860327+00:00"
+                },
+                "resource_id": "6b63343b-a994-45f4-9241-e6a150675c95",
+                "resource_type": "user",
+                "session_id": "8a7530fa-c78e-4bbb-a6db-a1d95f0eac77",
+                "severity": "info",
+                "timestamp": "2025-12-12T15:50:20.860319Z",
+                "user_agent": "Mozilla/5.0 Test Agent",
+                "user_id": "6503fedc-91b9-42ee-bd73-721d840b01fd"
+              },
+              {
+                "action": "user.action-1f9795d5",
+                "archive_location": null,
+                "archived": false,
+                "archived_at": null,
+                "details": {
+                  "operation": "create",
+                  "timestamp": "2024-01-01T00:00:00Z"
+                },
+                "id": "35efce38-8807-468e-beaf-ed0a4ae90c2e",
+                "ip_address": "192.168.1.100",
+                "metadata": {
+                  "created_at": "2025-12-12T15:50:20.860346+00:00",
+                  "request_id": "req-62cbecd9",
+                  "test": true,
+                  "updated_at": "2025-12-12T15:50:20.860347+00:00"
+                },
+                "resource_id": "472ea359-7415-4cdf-82e0-8714b7fd9336",
+                "resource_type": "user",
+                "session_id": "24b6ecef-5a3e-4440-b4e1-8cee6f8209b1",
+                "severity": "info",
+                "timestamp": "2025-12-12T15:50:20.860343Z",
+                "user_agent": "Mozilla/5.0 Test Agent",
+                "user_id": "ad6607c8-e9f8-421f-a8d2-2a902429068b"
+              },
+              {
+                "action": "user.action-11b6ae7a",
+                "archive_location": null,
+                "archived": false,
+                "archived_at": null,
+                "details": {
+                  "operation": "create",
+                  "timestamp": "2024-01-01T00:00:00Z"
+                },
+                "id": "f1f86ef2-5e90-4dd0-a41d-fb9d36c7a120",
+                "ip_address": "192.168.1.100",
+                "metadata": {
+                  "created_at": "2025-12-12T15:50:20.860365+00:00",
+                  "request_id": "req-8afa663b",
+                  "test": true,
+                  "updated_at": "2025-12-12T15:50:20.860366+00:00"
+                },
+                "resource_id": "9ddddf53-8caa-414e-9785-3749195d92dd",
+                "resource_type": "user",
+                "session_id": "4efcaa09-0b82-4abc-aecc-33f09486c693",
+                "severity": "info",
+                "timestamp": "2025-12-12T15:50:20.860362Z",
+                "user_agent": "Mozilla/5.0 Test Agent",
+                "user_id": "39534d0e-cb49-4480-9d9c-2099950a0958"
+              }
+            ],
+            "total": 3
+          },
+          "success": true
+        },
+        "status_code": 201
+      },
+      "timestamp": "2025-12-12T15:50:20.872129Z"
+    },
+    {
+      "test_name": "AuditLog - Empty Trash",
+      "success": true,
+      "details": "Trash emptied",
+      "duration_seconds": 0.000290125,
+      "input": {
+        "endpoint": "/api/v1/audit_logs/empty",
+        "method": "DELETE"
+      },
+      "output": {
+        "body": "{\"success\":true,\"data\":{\"deleted_count\":0},\"message\":\"Successfully deleted 0 items from trash\"}",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-12T15:50:20.872454Z"
+    }
+  ]
+}

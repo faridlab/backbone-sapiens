@@ -1,0 +1,21 @@
+{
+  "test_name": "UserSettings - Create Invalid",
+  "success": true,
+  "details": "Validation correctly rejected invalid data",
+  "duration_seconds": 0.00076525,
+  "input": {
+    "body": {
+      "language": "invalid-lang-code-too-long",
+      "theme": "INVALID_THEME",
+      "timezone": "",
+      "user_id": "not-uuid"
+    },
+    "endpoint": "/api/v1/user_settings",
+    "method": "POST"
+  },
+  "output": {
+    "body": "Failed to deserialize the JSON body into the target type: theme: unknown variant `INVALID_THEME`, expected one of `light`, `dark`, `system` at line 1 column 64",
+    "status_code": 422
+  },
+  "timestamp": "2025-12-24T04:02:35.714042Z"
+}

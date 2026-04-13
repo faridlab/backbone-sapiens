@@ -1,0 +1,285 @@
+{
+  "test_name": "UserRole - Pagination",
+  "success": true,
+  "details": "Pagination works correctly",
+  "duration_seconds": 0.003239125,
+  "input": {
+    "endpoint": "/api/v1/user_roles?page=1&per_page=5",
+    "method": "GET",
+    "params": {
+      "page": 1,
+      "per_page": 5
+    }
+  },
+  "output": {
+    "body": {
+      "data": {
+        "data": [
+          {
+            "assigned_at": "2025-12-19T15:02:29.430007Z",
+            "assigned_by": "a989acd1-b6ef-4250-be8b-39908b3d08a7",
+            "id": "fe2b4ccc-dfd6-4152-a993-38b0bcedefb4",
+            "metadata": {
+              "created_at": "2025-12-19T15:02:29.430008+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-19T15:02:29.430009+00:00"
+            },
+            "role_id": "2f2ede82-052a-4593-bdc9-ea7258836ebe",
+            "user_id": "2cb51ba9-c3a0-4aae-a5ae-59e3afd36329"
+          },
+          {
+            "assigned_at": "2025-12-13T18:50:14.672554Z",
+            "assigned_by": "406ae09a-41fc-40f6-a3ad-b95f69839561",
+            "id": "f9432803-f857-4e32-ab4a-78e9d3b2b78e",
+            "metadata": {
+              "created_at": "2025-12-13T18:50:14.672556+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-13T18:50:14.672557+00:00"
+            },
+            "role_id": "21f838d6-ab18-435b-8de8-c528354b242c",
+            "user_id": "cf60bc20-1aae-46ae-a6b0-faaa8ad9ea83"
+          },
+          {
+            "assigned_at": "2025-12-20T10:30:13.479568Z",
+            "assigned_by": "0f31edc5-8c92-4c7d-a8bb-dc0135248b7d",
+            "id": "f2f57750-9d36-40ee-9ec2-69e879d8907c",
+            "metadata": {
+              "created_at": "2025-12-20T10:30:13.479571+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:30:13.479572+00:00"
+            },
+            "role_id": "3ab63407-d723-4c9b-a751-02107c987ac8",
+            "user_id": "68f6fdd3-66fa-4590-9987-a589975c4695"
+          },
+          {
+            "assigned_at": "2025-12-19T15:02:29.426281Z",
+            "assigned_by": "9e5182b9-4d8d-446d-8c37-4d10f4dc8f69",
+            "id": "eeb0275f-2774-4bac-8dc1-a165a28f7adc",
+            "metadata": {
+              "created_at": "2025-12-19T15:02:29.426284+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-19T15:02:29.426285+00:00"
+            },
+            "role_id": "1c961fbd-38c5-480e-93a8-7c3ff348eb9f",
+            "user_id": "6a6cd305-b0b0-4fa7-a472-7f4d7aacad3a"
+          },
+          {
+            "assigned_at": "2025-12-20T10:50:14.404534Z",
+            "assigned_by": "cdd7c7a9-289a-459f-86a2-0c5a123d2c3e",
+            "id": "eabc6fb8-934b-4eaa-bc08-60b4931c5d44",
+            "metadata": {
+              "created_at": "2025-12-20T10:50:14.404539+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:50:14.404540+00:00"
+            },
+            "role_id": "911ac5f7-2bf9-49ce-a0c0-82f75da489e9",
+            "user_id": "fc175b61-b66e-48ae-891b-88ed98d2cb96"
+          },
+          {
+            "assigned_at": "2025-12-20T03:55:12.857549Z",
+            "assigned_by": "7e20e48c-d848-46b5-8999-3acac9c06c16",
+            "id": "ea5957f7-a3bf-4452-a117-8e28854ccb84",
+            "metadata": {
+              "created_at": "2025-12-20T03:55:12.857555+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T03:55:12.857556+00:00"
+            },
+            "role_id": "e650a6bd-09e9-4651-9f2f-de45fcfd99b0",
+            "user_id": "f71f606a-89af-4fc0-9f96-486302afc6f3"
+          },
+          {
+            "assigned_at": "2025-12-08T12:45:12.522279Z",
+            "assigned_by": null,
+            "id": "dfc8a831-76d6-426a-b8b8-89861b3547af",
+            "metadata": {
+              "created_at": "2025-12-08T12:45:12.217718+00:00",
+              "updated_at": "2025-12-08T12:45:12.217718+00:00"
+            },
+            "role_id": "acb46f3e-ba2b-466c-92ec-930febd80f1a",
+            "user_id": "22b3e42a-757c-459e-a19d-bb037c76a4d2"
+          },
+          {
+            "assigned_at": "2025-12-08T12:45:12.513288Z",
+            "assigned_by": null,
+            "id": "df0878d7-be2d-4121-a0ef-0972763c37b9",
+            "metadata": {
+              "created_at": "2025-12-08T12:45:12.217718+00:00",
+              "updated_at": "2025-12-08T12:45:12.217718+00:00"
+            },
+            "role_id": "e460b646-d5eb-4f05-9a23-f72bdf8bc15b",
+            "user_id": "3b179020-9a49-4000-a2ec-4e14e7849621"
+          },
+          {
+            "assigned_at": "2025-12-19T15:19:07.008398Z",
+            "assigned_by": "fab7fbde-d0af-42f6-9ed5-a4bbf315f7fd",
+            "id": "daf14d90-4d66-44a5-8e43-22a81080bdac",
+            "metadata": {
+              "created_at": "2025-12-19T15:19:07.008399+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-19T15:19:07.008400+00:00"
+            },
+            "role_id": "d5d3f0de-dd2e-4ac5-824a-6f2a834444cf",
+            "user_id": "d5a00a93-f7fe-42a9-a3f1-c555f3d50edc"
+          },
+          {
+            "assigned_at": "2025-12-20T16:24:13.261175Z",
+            "assigned_by": "0cb79a6c-ac58-436b-91f4-22a05b35a0bc",
+            "id": "d800b952-6b83-41d9-ab60-daccda2b2936",
+            "metadata": {
+              "created_at": "2025-12-20T16:24:13.261177+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T16:24:13.261177+00:00"
+            },
+            "role_id": "4f53a82c-da22-459d-960b-1059e902bc6a",
+            "user_id": "088b534c-cc63-4e15-932a-0dd72fbaf700"
+          },
+          {
+            "assigned_at": "2025-12-20T10:22:46.147088Z",
+            "assigned_by": "c81f746e-9ca0-4386-99be-dc35b9853240",
+            "id": "d6a12d48-6072-49b3-a823-3e6320c4edd0",
+            "metadata": {
+              "created_at": "2025-12-20T10:22:46.147090+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:22:46.147091+00:00"
+            },
+            "role_id": "97eb3652-9ebe-402c-90b9-968dc664e2f6",
+            "user_id": "e36b82a2-f518-45c1-8a48-95c6f064527a"
+          },
+          {
+            "assigned_at": "2025-12-20T10:42:10.653243Z",
+            "assigned_by": "92ae10bb-d967-4832-a388-0ec874e5d789",
+            "id": "d3e85efe-5dfd-4b4e-a865-017ce5e23f95",
+            "metadata": {
+              "created_at": "2025-12-20T10:42:10.653244+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:42:10.653245+00:00"
+            },
+            "role_id": "402b99c8-c4fc-494c-b702-c17590850533",
+            "user_id": "1b440aaf-b30b-405c-ab27-061d05cf80dd"
+          },
+          {
+            "assigned_at": "2025-12-20T03:48:50.234747Z",
+            "assigned_by": "cd4bbdd3-048e-4081-aa5e-0efb737358c5",
+            "id": "cf9e85a5-1c8e-460b-abcd-a2a8d22ffba0",
+            "metadata": {
+              "created_at": "2025-12-20T03:48:50.234749+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T03:48:50.234750+00:00"
+            },
+            "role_id": "da2e8836-9ac8-4822-a6ee-bac45793e90c",
+            "user_id": "4e6f6008-b5d9-43b1-9e5d-136a8210e79c"
+          },
+          {
+            "assigned_at": "2025-12-20T03:32:37.941603Z",
+            "assigned_by": "023160dc-e120-439d-9d60-058955d945d1",
+            "id": "ca62d0f8-49ee-4029-9b43-e1f6422055d7",
+            "metadata": {
+              "created_at": "2025-12-20T03:32:37.941607+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T03:32:37.941608+00:00"
+            },
+            "role_id": "1688973e-5b78-435d-8336-4f5b3d21654f",
+            "user_id": "e9710038-ff21-45d2-b428-83ddbd138c4d"
+          },
+          {
+            "assigned_at": "2025-12-20T17:23:13.135026Z",
+            "assigned_by": "7fb1b4b7-627a-44fa-a1ed-fc0023692082",
+            "id": "c2e972ed-e3b6-46df-a0b2-8a20d96b6646",
+            "metadata": {
+              "created_at": "2025-12-20T17:23:13.135029+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T17:23:13.135030+00:00"
+            },
+            "role_id": "2c72e98c-e49c-4563-a452-c80dd5bab187",
+            "user_id": "d3bbf1ea-46e9-4eb8-be28-3f40b9861624"
+          },
+          {
+            "assigned_at": "2025-12-08T12:45:12.518645Z",
+            "assigned_by": null,
+            "id": "c29541f9-bdb1-493a-ad58-3b4ee556813f",
+            "metadata": {
+              "created_at": "2025-12-08T12:45:12.217718+00:00",
+              "updated_at": "2025-12-08T12:45:12.217718+00:00"
+            },
+            "role_id": "34e02c5e-d2a4-4d3f-ae42-e30623a82a29",
+            "user_id": "8fb01a3e-161b-4129-be32-49f0a921e652"
+          },
+          {
+            "assigned_at": "2025-12-20T10:53:39.533895Z",
+            "assigned_by": "f1c71d98-bd6f-467c-ad87-dc92189d3c4f",
+            "id": "c1d910ef-fc00-4900-90cb-8ad8e535f358",
+            "metadata": {
+              "created_at": "2025-12-20T10:53:39.533899+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T10:53:39.533901+00:00"
+            },
+            "role_id": "269f948a-16de-411e-a4ca-c3e632cc9a4c",
+            "user_id": "689ffc40-2562-4641-b394-a9234edcebb8"
+          },
+          {
+            "assigned_at": "2025-12-20T04:09:23.337899Z",
+            "assigned_by": "cb942d6a-5ac0-4af8-ad02-d429ff0a9bba",
+            "id": "c129d532-6d2e-4ef4-9e0e-8d44736c3bcb",
+            "metadata": {
+              "created_at": "2025-12-20T04:09:23.337903+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-20T04:09:23.337904+00:00"
+            },
+            "role_id": "cd21b9db-2f80-45e3-94d8-ad910c59a1d4",
+            "user_id": "e699d286-1c88-4d75-8661-db96c79b0b0b"
+          },
+          {
+            "assigned_at": "2025-12-19T15:02:29.429990Z",
+            "assigned_by": "81024d4b-74ab-4168-bd2e-ce73edacda96",
+            "id": "ba69309c-7aee-4259-b732-3f04b1dc5f21",
+            "metadata": {
+              "created_at": "2025-12-19T15:02:29.429992+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-19T15:02:29.429993+00:00"
+            },
+            "role_id": "f42fee76-7600-420f-9dc1-b8ff6a334d6d",
+            "user_id": "9288d457-7e69-4a84-9f5e-899d66415271"
+          },
+          {
+            "assigned_at": "2025-12-13T18:20:54.559388Z",
+            "assigned_by": "e8e29b73-9bbe-4587-aaaa-94c586a61392",
+            "id": "b85810b7-5db2-4fd9-8bd1-02468af02b75",
+            "metadata": {
+              "created_at": "2025-12-13T18:20:54.559390+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-13T18:20:54.559391+00:00"
+            },
+            "role_id": "62a37af0-7dd6-478c-9855-86eab6abae79",
+            "user_id": "f53359cc-809b-4800-beda-5f7aad7136aa"
+          }
+        ],
+        "meta": {
+          "limit": 20,
+          "page": 1,
+          "total": 97,
+          "total_pages": 5
+        }
+      },
+      "success": true
+    },
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.680906Z"
+}

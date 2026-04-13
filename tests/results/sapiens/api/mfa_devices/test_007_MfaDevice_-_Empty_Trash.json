@@ -1,0 +1,15 @@
+{
+  "test_name": "MfaDevice - Empty Trash",
+  "success": true,
+  "details": "Trash emptied",
+  "duration_seconds": 0.000521041,
+  "input": {
+    "endpoint": "/api/v1/mfa_devices/empty",
+    "method": "DELETE"
+  },
+  "output": {
+    "body": "{\"success\":true,\"data\":{\"deleted_count\":0},\"message\":\"Successfully deleted 0 items from trash\"}",
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.307897Z"
+}

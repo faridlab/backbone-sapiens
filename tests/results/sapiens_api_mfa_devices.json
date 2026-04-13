@@ -1,0 +1,839 @@
+{
+  "suite_name": "mfa_device_api_test",
+  "start_time": "2025-12-24T04:02:35.261495Z",
+  "end_time": "2025-12-24T04:02:35.307903Z",
+  "results": [
+    {
+      "test_name": "MfaDevice - List",
+      "success": true,
+      "details": "List retrieved successfully",
+      "duration_seconds": 0.016592459,
+      "input": {
+        "endpoint": "/api/v1/mfa_devices",
+        "method": "GET"
+      },
+      "output": {
+        "body_preview": "{\"success\":true,\"data\":{\"data\":[{\"id\":\"fe91e096-81f8-4b7a-aabc-4eca3d6fc3c0\",\"user_id\":\"e0bdf687-e3fb-48a4-8386-13e38b9171b3\",\"device_type\":\"totp\",\"device_name\":\"Authenticator App - dev-a181bbb8\",\"secret\":\"JBSWY3DPEHPK3PXP\",\"backup_codes\":[\"123456\",\"654321\",\"111111\",\"222222\",\"333333\"],\"is_active\":true,\"verified_at\":null,\"last_used\":null,\"metadata\":{\"created_at\":\"2025-12-13T18:20:54.400116+00:00\",\"source\":\"integration_test\",\"test\":true,\"updated_at\":\"2025-12-13T18:20:54.400120+00:00\"}},{\"id\":\"fe43",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.278096Z"
+    },
+    {
+      "test_name": "MfaDevice - Pagination",
+      "success": true,
+      "details": "Pagination works correctly",
+      "duration_seconds": 0.007130792,
+      "input": {
+        "endpoint": "/api/v1/mfa_devices?page=1&per_page=5",
+        "method": "GET",
+        "params": {
+          "page": 1,
+          "per_page": 5
+        }
+      },
+      "output": {
+        "body": {
+          "data": {
+            "data": [
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-a181bbb8",
+                "device_type": "totp",
+                "id": "fe91e096-81f8-4b7a-aabc-4eca3d6fc3c0",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-13T18:20:54.400116+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-13T18:20:54.400120+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "e0bdf687-e3fb-48a4-8386-13e38b9171b3",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-02b2c68e",
+                "device_type": "totp",
+                "id": "fe43e33a-24b2-4f11-a559-6ec7021cfdfa",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-20T03:55:12.670311+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:55:12.670314+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "ee8b8a02-5ed8-4828-8acb-225a0bfbfcd8",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-cdf9cf40",
+                "device_type": "totp",
+                "id": "f7b9c132-cfc2-412e-a38c-b2c70a75bde2",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-20T17:23:12.959009+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T17:23:12.959010+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "f9695fe0-1518-4122-9cff-22a9a325d250",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-2cd9da87",
+                "device_type": "totp",
+                "id": "f3a5b3da-2fd0-4b6f-82a2-7b254a3a20f8",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-20T03:32:37.704949+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:32:37.704950+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "b4f1253c-7ee5-4790-8133-1b84e09d44d4",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-3665c024",
+                "device_type": "totp",
+                "id": "efec6f38-802d-418d-b617-f03a2a74fab2",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-20T16:24:13.034542+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T16:24:13.034543+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "bca39fcb-855d-41ce-8f27-9ff818686760",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-67d53c0a",
+                "device_type": "totp",
+                "id": "ee35b6a3-67a0-4734-8e4e-510e5f55082e",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-13T18:20:54.417447+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-13T18:20:54.417449+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "9d563577-b6e9-46a3-90c2-595528bc5f3a",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-981ba70a",
+                "device_type": "totp",
+                "id": "edf5ca96-341b-4ce6-af20-4cc3b5ad9a9b",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-13T18:20:54.409518+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-13T18:20:54.409519+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "c990ae87-206d-49a8-9e3f-08ff15048097",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-010480bd",
+                "device_type": "totp",
+                "id": "ec936e2d-be81-4521-8c89-cf93de3c7cb3",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-20T10:42:10.496230+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T10:42:10.496233+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "150b1f59-9b44-40c5-b127-873bea7f7dfe",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-1a059920",
+                "device_type": "totp",
+                "id": "ec8b601e-3761-4c0c-b216-82a5d28dac8b",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-20T16:24:13.034526+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T16:24:13.034535+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "d443f31c-c5ba-4cdb-b565-9477550e2b56",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-8082cadc",
+                "device_type": "totp",
+                "id": "e59ea20c-b055-4314-8468-18875ea001d5",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-20T17:17:13.084383+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T17:17:13.084386+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "c0489c31-005b-4fb3-8a99-80622b305ea8",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-035ef110",
+                "device_type": "totp",
+                "id": "e4be7071-0941-4b8c-9723-982cd73249b5",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-20T03:32:37.704957+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:32:37.704958+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "3f8bb1f3-213e-4664-a3e1-7de75b8d6c8a",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-e728ea5a",
+                "device_type": "totp",
+                "id": "e3d33013-6135-421f-b20d-547bd1281f58",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-13T18:50:14.433897+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-13T18:50:14.433901+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "a39ce3a6-aa98-49c1-854a-b2a877beaa15",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-f6343d45",
+                "device_type": "totp",
+                "id": "df58ad30-3fbd-4bdd-8861-f398fefb771a",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-20T10:22:45.984541+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T10:22:45.984542+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "4fc5f078-361d-4fe7-ae0d-739e2e83ecb9",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-1ea18522",
+                "device_type": "totp",
+                "id": "de36c5f3-b114-435d-9f76-73399d5941a6",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-19T15:19:06.841993+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-19T15:19:06.841994+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "c05eb819-7081-4e63-ba29-d9f699961f16",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-c0bc5213",
+                "device_type": "totp",
+                "id": "dd865ab0-daef-4792-9a8d-77aa0fded299",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-20T03:32:37.712185+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:32:37.712188+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "29e78619-40ec-4d4e-9b8f-1c78b7d1b24b",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-d1306048",
+                "device_type": "totp",
+                "id": "dcfad1da-6aca-4fc7-b759-c53eb32ba74e",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-19T17:37:02.871882+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-19T17:37:02.871885+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "10281452-0a52-48e1-b705-74540796d0a4",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-1106d5a0",
+                "device_type": "totp",
+                "id": "db0f33fc-bbdb-4470-9f97-abbb0606f5ed",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-19T13:54:04.991546+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-19T13:54:04.991549+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "9b63e733-c57d-4e0f-ab34-2bd9053c278d",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-50c1e726",
+                "device_type": "totp",
+                "id": "dae31de0-7e5f-42c4-aa4a-5bbeb14cc287",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-20T04:09:23.104879+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T04:09:23.104882+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "1b226a55-4124-4ca9-9677-86a402be46c5",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-ba0e062a",
+                "device_type": "totp",
+                "id": "da6bbc86-35fb-41ce-8102-b712bf7cd404",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-20T17:23:12.958998+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T17:23:12.959002+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "3b0c197f-5105-4b1c-a52f-94de0639f103",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-0aeb6a7e",
+                "device_type": "totp",
+                "id": "d42fb06d-0cfe-4dd6-9a3a-41805977b9c8",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-20T10:22:45.984521+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-20T10:22:45.984524+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "82ff0de1-fa67-4ab3-b368-f87656bc496d",
+                "verified_at": null
+              }
+            ],
+            "meta": {
+              "limit": 20,
+              "page": 1,
+              "total": 115,
+              "total_pages": 6
+            }
+          },
+          "success": true
+        },
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.285761Z"
+    },
+    {
+      "test_name": "MfaDevice - Create",
+      "success": true,
+      "details": "Entity created successfully",
+      "duration_seconds": 0.008545125,
+      "input": {
+        "body": {
+          "backup_codes": [
+            "123456",
+            "654321",
+            "111111",
+            "222222",
+            "333333"
+          ],
+          "device_name": "Authenticator App - dev-4e935030",
+          "device_type": "totp",
+          "is_active": true,
+          "metadata": {
+            "created_at": "2025-12-24T04:02:35.285829+00:00",
+            "source": "integration_test",
+            "test": true,
+            "updated_at": "2025-12-24T04:02:35.285834+00:00"
+          },
+          "secret": "JBSWY3DPEHPK3PXP",
+          "user_id": "0cc7bea9-ed27-4b26-b373-0270f3686911"
+        },
+        "endpoint": "/api/v1/mfa_devices",
+        "method": "POST"
+      },
+      "output": {
+        "body": {
+          "data": {
+            "backup_codes": [
+              "123456",
+              "654321",
+              "111111",
+              "222222",
+              "333333"
+            ],
+            "device_name": "Authenticator App - dev-4e935030",
+            "device_type": "totp",
+            "id": "667caaec-e4ef-4738-8668-abd0796c42d1",
+            "is_active": true,
+            "last_used": null,
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.285829+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.285834+00:00"
+            },
+            "secret": "JBSWY3DPEHPK3PXP",
+            "user_id": "0cc7bea9-ed27-4b26-b373-0270f3686911",
+            "verified_at": null
+          },
+          "success": true
+        },
+        "status_code": 201
+      },
+      "timestamp": "2025-12-24T04:02:35.294399Z"
+    },
+    {
+      "test_name": "MfaDevice - Create Invalid",
+      "success": true,
+      "details": "Validation correctly rejected invalid data",
+      "duration_seconds": 0.00042225,
+      "input": {
+        "body": {
+          "device_type": "INVALID_TYPE",
+          "name": "",
+          "user_id": "not-uuid"
+        },
+        "endpoint": "/api/v1/mfa_devices",
+        "method": "POST"
+      },
+      "output": {
+        "body": "Failed to deserialize the JSON body into the target type: device_type: unknown variant `INVALID_TYPE`, expected one of `totp`, `sms`, `backup_codes` at line 1 column 29",
+        "status_code": 422
+      },
+      "timestamp": "2025-12-24T04:02:35.294846Z"
+    },
+    {
+      "test_name": "MfaDevice - Get Not Found",
+      "success": true,
+      "details": "Correctly returned 404 for non-existent entity",
+      "duration_seconds": 0.001243083,
+      "input": {
+        "endpoint": "/api/v1/mfa_devices/a0796ba0-036e-4f05-b624-a41d7e14f937",
+        "id": "a0796ba0-036e-4f05-b624-a41d7e14f937",
+        "method": "GET"
+      },
+      "output": {
+        "body": "{\"success\":false,\"error\":\"MFADevice with id 'a0796ba0-036e-4f05-b624-a41d7e14f937' not found\"}",
+        "status_code": 404
+      },
+      "timestamp": "2025-12-24T04:02:35.296115Z"
+    },
+    {
+      "test_name": "MfaDevice - Bulk Create",
+      "success": true,
+      "details": "3 entities created in bulk",
+      "duration_seconds": 0.007293208,
+      "input": {
+        "body": [
+          {
+            "backup_codes": [
+              "123456",
+              "654321",
+              "111111",
+              "222222",
+              "333333"
+            ],
+            "device_name": "Authenticator App - dev-b54e90e5",
+            "device_type": "totp",
+            "is_active": true,
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.296131+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.296136+00:00"
+            },
+            "secret": "JBSWY3DPEHPK3PXP",
+            "user_id": "b85f5b39-061c-4c49-a966-ab83d4f3cfe9"
+          },
+          {
+            "backup_codes": [
+              "123456",
+              "654321",
+              "111111",
+              "222222",
+              "333333"
+            ],
+            "device_name": "Authenticator App - dev-38d38991",
+            "device_type": "totp",
+            "is_active": true,
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.296144+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.296145+00:00"
+            },
+            "secret": "JBSWY3DPEHPK3PXP",
+            "user_id": "9ceed957-dc50-4785-a6e1-fc2e0fd82363"
+          },
+          {
+            "backup_codes": [
+              "123456",
+              "654321",
+              "111111",
+              "222222",
+              "333333"
+            ],
+            "device_name": "Authenticator App - dev-61299dd5",
+            "device_type": "totp",
+            "is_active": true,
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.296152+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.296153+00:00"
+            },
+            "secret": "JBSWY3DPEHPK3PXP",
+            "user_id": "4b3ff004-56e6-4413-bb42-e968ae02a56a"
+          }
+        ],
+        "endpoint": "/api/v1/mfa_devices/bulk",
+        "method": "POST"
+      },
+      "output": {
+        "body": {
+          "data": {
+            "errors": [],
+            "failed": 0,
+            "items": [
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-b54e90e5",
+                "device_type": "totp",
+                "id": "6943fe1f-d8da-4b2f-b664-bd1e5d457d79",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-24T04:02:35.296131+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-24T04:02:35.296136+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "b85f5b39-061c-4c49-a966-ab83d4f3cfe9",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-38d38991",
+                "device_type": "totp",
+                "id": "4555231d-a972-4f57-b194-04d3f1dabebd",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-24T04:02:35.296144+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-24T04:02:35.296145+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "9ceed957-dc50-4785-a6e1-fc2e0fd82363",
+                "verified_at": null
+              },
+              {
+                "backup_codes": [
+                  "123456",
+                  "654321",
+                  "111111",
+                  "222222",
+                  "333333"
+                ],
+                "device_name": "Authenticator App - dev-61299dd5",
+                "device_type": "totp",
+                "id": "670ce106-db49-42d5-b926-9ba847a8fe44",
+                "is_active": true,
+                "last_used": null,
+                "metadata": {
+                  "created_at": "2025-12-24T04:02:35.296152+00:00",
+                  "source": "integration_test",
+                  "test": true,
+                  "updated_at": "2025-12-24T04:02:35.296153+00:00"
+                },
+                "secret": "JBSWY3DPEHPK3PXP",
+                "user_id": "4b3ff004-56e6-4413-bb42-e968ae02a56a",
+                "verified_at": null
+              }
+            ],
+            "total": 3
+          },
+          "success": true
+        },
+        "status_code": 201
+      },
+      "timestamp": "2025-12-24T04:02:35.303522Z"
+    },
+    {
+      "test_name": "MfaDevice - Upsert",
+      "success": true,
+      "details": "Upsert completed",
+      "duration_seconds": 0.003757084,
+      "input": {
+        "body": {
+          "backup_codes": [
+            "123456",
+            "654321",
+            "111111",
+            "222222",
+            "333333"
+          ],
+          "device_name": "Authenticator App - dev-427b5e70",
+          "device_type": "totp",
+          "is_active": true,
+          "metadata": {
+            "created_at": "2025-12-24T04:02:35.303573+00:00",
+            "source": "integration_test",
+            "test": true,
+            "updated_at": "2025-12-24T04:02:35.303577+00:00"
+          },
+          "secret": "JBSWY3DPEHPK3PXP",
+          "user_id": "88b33274-7e2f-4a06-b604-bace201f5403"
+        },
+        "endpoint": "/api/v1/mfa_devices/upsert",
+        "method": "POST"
+      },
+      "output": {
+        "body": {
+          "data": {
+            "backup_codes": [
+              "123456",
+              "654321",
+              "111111",
+              "222222",
+              "333333"
+            ],
+            "device_name": "Authenticator App - dev-427b5e70",
+            "device_type": "totp",
+            "id": "64c9477e-c50b-4df8-a52d-d7a38f6f98d0",
+            "is_active": true,
+            "last_used": null,
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.303573+00:00",
+              "source": "integration_test",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.303577+00:00"
+            },
+            "secret": "JBSWY3DPEHPK3PXP",
+            "user_id": "88b33274-7e2f-4a06-b604-bace201f5403",
+            "verified_at": null
+          },
+          "success": true
+        },
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.307364Z"
+    },
+    {
+      "test_name": "MfaDevice - Empty Trash",
+      "success": true,
+      "details": "Trash emptied",
+      "duration_seconds": 0.000521041,
+      "input": {
+        "endpoint": "/api/v1/mfa_devices/empty",
+        "method": "DELETE"
+      },
+      "output": {
+        "body": "{\"success\":true,\"data\":{\"deleted_count\":0},\"message\":\"Successfully deleted 0 items from trash\"}",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.307897Z"
+    }
+  ]
+}

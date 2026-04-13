@@ -1,0 +1,15 @@
+{
+  "test_name": "UserPermission - Empty Trash",
+  "success": true,
+  "details": "Trash emptied",
+  "duration_seconds": 0.000266917,
+  "input": {
+    "endpoint": "/api/v1/user_permissions/empty",
+    "method": "DELETE"
+  },
+  "output": {
+    "body": "{\"success\":true,\"data\":{\"deleted_count\":0},\"message\":\"Successfully deleted 0 items from trash\"}",
+    "status_code": 200
+  },
+  "timestamp": "2025-12-12T15:50:21.014673Z"
+}

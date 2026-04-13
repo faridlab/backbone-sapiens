@@ -1,0 +1,17 @@
+{
+  "test_name": "Create Analytics Event - Invalid Data",
+  "success": true,
+  "details": "Correctly rejected invalid event data",
+  "duration_seconds": 0.000743625,
+  "input": {
+    "event_type": "invalid_event_type",
+    "metadata": {},
+    "processed": "not-a-boolean",
+    "timestamp": "not-a-valid-datetime"
+  },
+  "output": {
+    "body": "Failed to deserialize the JSON body into the target type: event_type: unknown variant `invalid_event_type`, expected one of `page_view`, `click`, `form_submit`, `login`, `logout`, `signup`, `purchase`, `search`, `download`, `api_call`, `error`, `custom` at line 1 column 34",
+    "status_code": 422
+  },
+  "timestamp": "2025-12-24T04:02:35.195844Z"
+}

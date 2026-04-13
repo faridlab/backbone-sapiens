@@ -1,0 +1,531 @@
+{
+  "test_name": "AuditLog - Pagination",
+  "success": true,
+  "details": "Pagination works correctly",
+  "duration_seconds": 0.012185166,
+  "input": {
+    "endpoint": "/api/v1/audit_logs?page=1&per_page=5",
+    "method": "GET",
+    "params": {
+      "page": 1,
+      "per_page": 5
+    }
+  },
+  "output": {
+    "body": {
+      "data": {
+        "data": [
+          {
+            "action": "user.action-87fb8f9b",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "fd181138-926c-469f-8a6e-bdd87ab228cd",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T03:38:58.579054+00:00",
+              "request_id": "req-b0914eb8",
+              "test": true,
+              "updated_at": "2025-12-20T03:38:58.579055+00:00"
+            },
+            "resource_id": "80fce150-d04c-4176-b7ec-cfb1b23e7549",
+            "resource_type": "user",
+            "session_id": "a95d4386-a017-4bfb-98bc-357b0ea99ef1",
+            "severity": "info",
+            "timestamp": "2025-12-20T03:38:58.579046Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "5ca3a39b-9fab-4847-a6c3-18b77ff1354b"
+          },
+          {
+            "action": "user.action-543e4e27",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "fce2f991-5adb-4377-bd2d-049a2b8cc933",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T03:55:12.644459+00:00",
+              "request_id": "req-0b517abb",
+              "test": true,
+              "updated_at": "2025-12-20T03:55:12.644460+00:00"
+            },
+            "resource_id": "efc09743-53e0-455c-892f-788749ec05a9",
+            "resource_type": "user",
+            "session_id": "69f1fe0b-1e0e-4517-89ee-c8e2034a378b",
+            "severity": "info",
+            "timestamp": "2025-12-20T03:55:12.644456Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "2f47a70a-5c8f-407d-8fcb-def3c4f879c8"
+          },
+          {
+            "action": "user.action-3aa913fc",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "fbcadc04-4c94-4e43-bf3b-ff3a14d9c932",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-19T15:02:29.228015+00:00",
+              "request_id": "req-de104250",
+              "test": true,
+              "updated_at": "2025-12-19T15:02:29.228016+00:00"
+            },
+            "resource_id": "9d1da950-0791-40ef-a1e6-38da8929896e",
+            "resource_type": "user",
+            "session_id": "57d630c0-982c-47a8-9a33-e62a6f340fff",
+            "severity": "info",
+            "timestamp": "2025-12-19T15:02:29.228012Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "52bcf13c-d03a-41bb-aca0-76317a4de3bc"
+          },
+          {
+            "action": "user.action-bb304791",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "f9acfdfb-0f64-4d7a-aee7-0b9710413a25",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-19T15:19:06.785122+00:00",
+              "request_id": "req-b4814fe4",
+              "test": true,
+              "updated_at": "2025-12-19T15:19:06.785124+00:00"
+            },
+            "resource_id": "bcc4a190-1a62-49b8-abb0-7d68219047ef",
+            "resource_type": "user",
+            "session_id": "618ce2c4-dd72-4b81-b9ce-ed00abc9878c",
+            "severity": "info",
+            "timestamp": "2025-12-19T15:19:06.785116Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "ab1afb9d-37c4-40d4-a9ab-ea6d058ee15b"
+          },
+          {
+            "action": "user.action-dcb77f67",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "f7da7716-57a8-494d-982e-33934e79eabe",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T10:42:10.469834+00:00",
+              "request_id": "req-191aa9a8",
+              "test": true,
+              "updated_at": "2025-12-20T10:42:10.469835+00:00"
+            },
+            "resource_id": "eefa382d-4e7d-4f67-8b0b-e1b6c12d81cb",
+            "resource_type": "user",
+            "session_id": "db6cc275-ad64-4635-9856-5cf600d1d626",
+            "severity": "info",
+            "timestamp": "2025-12-20T10:42:10.469825Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "4ea964fa-3fba-4fc3-945b-59a68dcbed33"
+          },
+          {
+            "action": "user.action-a13ebd56",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "f50d77c1-567b-4f79-b9e0-a9ea6af38077",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T10:53:39.375898+00:00",
+              "request_id": "req-788add28",
+              "test": true,
+              "updated_at": "2025-12-20T10:53:39.375899+00:00"
+            },
+            "resource_id": "606583d0-9645-4f6e-84f7-e700505449cb",
+            "resource_type": "user",
+            "session_id": "9d2c97f7-113b-4ca6-97f1-176ed6ffc4a3",
+            "severity": "info",
+            "timestamp": "2025-12-20T10:53:39.375896Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "0e754d2d-03c2-40f4-b7de-ae2c93935b49"
+          },
+          {
+            "action": "user.action-8ad42e10",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "f0857474-f941-4d54-b3e1-f4843454c269",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T10:54:57.168174+00:00",
+              "request_id": "req-fe69f4cd",
+              "test": true,
+              "updated_at": "2025-12-20T10:54:57.168175+00:00"
+            },
+            "resource_id": "d0a469f8-0720-468e-9ba9-ce7b8498186e",
+            "resource_type": "user",
+            "session_id": "c3d89a5a-dc0e-4b2b-9577-592ef490bbfb",
+            "severity": "info",
+            "timestamp": "2025-12-20T10:54:57.168172Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "f97506cb-9f59-4c08-86db-818d11432bee"
+          },
+          {
+            "action": "user.action-d3e46bdc",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "f067d4f7-7ace-4254-92ef-f755eb2d5964",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T10:42:10.469869+00:00",
+              "request_id": "req-36c0a764",
+              "test": true,
+              "updated_at": "2025-12-20T10:42:10.469870+00:00"
+            },
+            "resource_id": "bdee9942-86a6-4374-ae2e-a19930c1ac6d",
+            "resource_type": "user",
+            "session_id": "5a7d924a-fcdd-4e30-a6e2-6dfbaf7eedf2",
+            "severity": "info",
+            "timestamp": "2025-12-20T10:42:10.469867Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "0c129aeb-58e3-4832-ba52-5c66cedea770"
+          },
+          {
+            "action": "user.action-ba63d952",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "ed038127-51d9-4772-ba97-6c8134a813b7",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-13T18:50:14.410416+00:00",
+              "request_id": "req-50995ff0",
+              "test": true,
+              "updated_at": "2025-12-13T18:50:14.410417+00:00"
+            },
+            "resource_id": "14873c09-44e8-4a95-8868-9216e6c6f7d3",
+            "resource_type": "user",
+            "session_id": "5a0e5da8-3cda-48c1-8459-bf29ef01114e",
+            "severity": "info",
+            "timestamp": "2025-12-13T18:50:14.410413Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "2ef19b56-5b73-4dc7-a794-0a48540e281e"
+          },
+          {
+            "action": "user.action-3ff33e47",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "ec7cbda3-6022-4f58-92a3-9a38b2a72f63",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-19T13:54:04.941974+00:00",
+              "request_id": "req-566c34ae",
+              "test": true,
+              "updated_at": "2025-12-19T13:54:04.941975+00:00"
+            },
+            "resource_id": "e95a4515-e4c4-4dff-9e99-52156f85ab27",
+            "resource_type": "user",
+            "session_id": "3b0f2f52-5c9b-4bcd-95ab-319e25c7c226",
+            "severity": "info",
+            "timestamp": "2025-12-19T13:54:04.941967Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "76a2c396-aba2-4b13-a7c8-c55796a68606"
+          },
+          {
+            "action": "user.action-75cd9048",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "eb7e9a48-94fc-4602-b791-70b3d4014614",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T03:32:37.668558+00:00",
+              "request_id": "req-541be32c",
+              "test": true,
+              "updated_at": "2025-12-20T03:32:37.668559+00:00"
+            },
+            "resource_id": "7865452e-788f-4fbe-868e-944f38f85139",
+            "resource_type": "user",
+            "session_id": "6d8cc664-a9b7-4661-9ed2-0daa5229799d",
+            "severity": "info",
+            "timestamp": "2025-12-20T03:32:37.668556Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "26431570-89e8-4af4-8b6e-5d095088beb9"
+          },
+          {
+            "action": "user.action-22d423af",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "e5f012ef-8106-4a0e-80d1-9b1129f8f649",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T10:30:13.291039+00:00",
+              "request_id": "req-fa400b50",
+              "test": true,
+              "updated_at": "2025-12-20T10:30:13.291040+00:00"
+            },
+            "resource_id": "c48501ae-18ff-4042-b125-57f5e76a879c",
+            "resource_type": "user",
+            "session_id": "52b0411c-86ba-4644-8d79-dce57bed03ff",
+            "severity": "info",
+            "timestamp": "2025-12-20T10:30:13.291037Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "e7f269d1-0611-47f8-84f1-5e0537b5a3ef"
+          },
+          {
+            "action": "user.action-f80d85df",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "e5a7ae21-2329-4315-8900-40fbb6c977e6",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T10:24:44.787614+00:00",
+              "request_id": "req-8deeca01",
+              "test": true,
+              "updated_at": "2025-12-20T10:24:44.787615+00:00"
+            },
+            "resource_id": "400d9f72-d41e-4952-8445-7c86ea09d59d",
+            "resource_type": "user",
+            "session_id": "30370e9e-808b-4535-97f7-55927b248434",
+            "severity": "info",
+            "timestamp": "2025-12-20T10:24:44.787612Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "c1e5f321-61e5-4936-87b0-cf25184e5864"
+          },
+          {
+            "action": "user.action-709f19c5",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "e1a68c70-3d22-4afd-a45d-5b06716a91e9",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T16:24:13.003842+00:00",
+              "request_id": "req-2b36ce10",
+              "test": true,
+              "updated_at": "2025-12-20T16:24:13.003843+00:00"
+            },
+            "resource_id": "2f8bc026-0f4a-456f-b85f-8e32c156ae1a",
+            "resource_type": "user",
+            "session_id": "69f145df-e732-457a-9ee9-0034d0f87a9f",
+            "severity": "info",
+            "timestamp": "2025-12-20T16:24:13.003840Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "3cd5e9dd-8364-4dc3-a86b-2a0d76246c6c"
+          },
+          {
+            "action": "user.action-af12ebb1",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "e11d5930-a118-4560-89b2-4e08febd817f",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T04:09:23.080847+00:00",
+              "request_id": "req-3c1118bd",
+              "test": true,
+              "updated_at": "2025-12-20T04:09:23.080848+00:00"
+            },
+            "resource_id": "dd299b7d-f4f5-4f20-8b9d-a85967eca298",
+            "resource_type": "user",
+            "session_id": "d0a055b4-8f4b-44e1-ae8d-7b260c6e6e85",
+            "severity": "info",
+            "timestamp": "2025-12-20T04:09:23.080845Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "84b43dde-b32b-4cdb-9490-4d0555341158"
+          },
+          {
+            "action": "user.action-efa9152f",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "de6d012a-fd60-4c8e-8409-e66bc09af041",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T17:17:13.062047+00:00",
+              "request_id": "req-5c0ae788",
+              "test": true,
+              "updated_at": "2025-12-20T17:17:13.062048+00:00"
+            },
+            "resource_id": "8d0d6113-3009-4a3c-a43c-3917b76e4cb5",
+            "resource_type": "user",
+            "session_id": "27e1d249-b898-4e5c-b94b-3faf27252d99",
+            "severity": "info",
+            "timestamp": "2025-12-20T17:17:13.062045Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "c0d5f772-064b-4f77-8b5d-31732bd586bc"
+          },
+          {
+            "action": "user.action-23bb893f",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "dafc689c-afcf-45cb-9fdd-b5f31653967c",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T17:23:12.926631+00:00",
+              "request_id": "req-d133bc98",
+              "test": true,
+              "updated_at": "2025-12-20T17:23:12.926632+00:00"
+            },
+            "resource_id": "4e326d24-7c8f-4cc9-874a-6baa1ab5c70a",
+            "resource_type": "user",
+            "session_id": "34fd7ac1-e5fa-4049-ba2d-dc4e9c3db655",
+            "severity": "info",
+            "timestamp": "2025-12-20T17:23:12.926628Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "821f12c0-5fd7-4ff1-950c-369716498ec1"
+          },
+          {
+            "action": "user.action-76832a72",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "d9040cea-ecb1-4ccb-9eac-f106c888b9f4",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-13T18:20:54.350458+00:00",
+              "request_id": "req-a00ed819",
+              "test": true,
+              "updated_at": "2025-12-13T18:20:54.350459+00:00"
+            },
+            "resource_id": "5d651c73-2dfd-49ef-b068-80d5796a54d1",
+            "resource_type": "user",
+            "session_id": "8cbf2833-d011-4d75-a676-b57ca721a339",
+            "severity": "info",
+            "timestamp": "2025-12-13T18:20:54.350432Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "f64b7ac9-e9d2-40e3-aab6-6055b5eeedbf"
+          },
+          {
+            "action": "user.action-6887b232",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "d52d93be-68f7-4f1a-807b-80f6abecd735",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T10:53:39.375916+00:00",
+              "request_id": "req-cbdfa4d2",
+              "test": true,
+              "updated_at": "2025-12-20T10:53:39.375917+00:00"
+            },
+            "resource_id": "101ce3b2-54cb-4304-b2f8-496d80f572c5",
+            "resource_type": "user",
+            "session_id": "b6bfd49f-5c11-4746-9109-3b53acbae003",
+            "severity": "info",
+            "timestamp": "2025-12-20T10:53:39.375914Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "4b52b43e-1833-43e8-8522-3857c14a6d0e"
+          },
+          {
+            "action": "user.action-5092cbba",
+            "archive_location": null,
+            "archived": false,
+            "archived_at": null,
+            "details": {
+              "operation": "create",
+              "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "id": "d3ac155d-91f9-4a7a-8b4c-e10ebc5e0c78",
+            "ip_address": "192.168.1.100",
+            "metadata": {
+              "created_at": "2025-12-20T10:47:02.234950+00:00",
+              "request_id": "req-2d90c280",
+              "test": true,
+              "updated_at": "2025-12-20T10:47:02.234951+00:00"
+            },
+            "resource_id": "c9b973cd-211c-44a4-8d52-c573c5c0e6a5",
+            "resource_type": "user",
+            "session_id": "40840296-3ac6-431d-9538-5921945e39c1",
+            "severity": "info",
+            "timestamp": "2025-12-20T10:47:02.234948Z",
+            "user_agent": "Mozilla/5.0 Test Agent",
+            "user_id": "c2ddfd3f-39d4-4117-b666-caf81f687c18"
+          }
+        ],
+        "meta": {
+          "limit": 20,
+          "page": 1,
+          "total": 92,
+          "total_pages": 5
+        }
+      },
+      "success": true
+    },
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.241209Z"
+}

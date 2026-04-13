@@ -1,0 +1,16 @@
+{
+  "test_name": "Permission - Get Not Found",
+  "success": true,
+  "details": "Correctly returned 404 for non-existent entity",
+  "duration_seconds": 0.001471208,
+  "input": {
+    "endpoint": "/api/v1/permissions/eab572eb-5a37-4d8e-ae27-244aab9f5fd3",
+    "id": "eab572eb-5a37-4d8e-ae27-244aab9f5fd3",
+    "method": "GET"
+  },
+  "output": {
+    "body": "{\"success\":false,\"error\":\"Permission with id 'eab572eb-5a37-4d8e-ae27-244aab9f5fd3' not found\"}",
+    "status_code": 404
+  },
+  "timestamp": "2025-12-24T04:02:35.466165Z"
+}

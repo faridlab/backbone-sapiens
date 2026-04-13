@@ -1,0 +1,21 @@
+{
+  "test_name": "Create Notification - Invalid Data",
+  "success": true,
+  "details": "Correctly rejected invalid notification data",
+  "duration_seconds": 0.000407833,
+  "input": {
+    "channel": "invalid_channel",
+    "is_read": false,
+    "message": "",
+    "metadata": {},
+    "notification_type": "invalid_type",
+    "priority": "invalid_priority",
+    "title": "",
+    "user_id": "invalid-uuid"
+  },
+  "output": {
+    "body": "Failed to deserialize the JSON body into the target type: channel: unknown variant `invalid_channel`, expected one of `email`, `sms`, `push`, `in_app`, `webhook` at line 1 column 28",
+    "status_code": 422
+  },
+  "timestamp": "2025-12-24T04:02:35.361028Z"
+}

@@ -1,0 +1,16 @@
+{
+  "test_name": "UserSettings - Get Not Found",
+  "success": true,
+  "details": "Correctly returned 404 for non-existent entity",
+  "duration_seconds": 0.001991792,
+  "input": {
+    "endpoint": "/api/v1/user_settings/81929084-fa0e-4cac-80ea-5955b13ff025",
+    "id": "81929084-fa0e-4cac-80ea-5955b13ff025",
+    "method": "GET"
+  },
+  "output": {
+    "body": "{\"success\":false,\"error\":\"UserSettings with id '81929084-fa0e-4cac-80ea-5955b13ff025' not found\"}",
+    "status_code": 404
+  },
+  "timestamp": "2025-12-12T15:50:21.042563Z"
+}

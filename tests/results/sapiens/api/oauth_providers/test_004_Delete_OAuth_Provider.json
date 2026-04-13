@@ -1,0 +1,12 @@
+{
+  "test_name": "Delete OAuth Provider",
+  "success": true,
+  "details": "Deleted OAuth provider 81683e24-4004-4e7c-bb8f-0e1819480c9f",
+  "duration_seconds": 0.002364292,
+  "input": null,
+  "output": {
+    "body": "",
+    "status_code": 204
+  },
+  "timestamp": "2025-12-24T04:02:35.391277Z"
+}

@@ -1,0 +1,508 @@
+{
+  "suite_name": "permission_api_test",
+  "start_time": "2025-12-24T04:02:35.417532Z",
+  "end_time": "2025-12-24T04:02:35.482299Z",
+  "results": [
+    {
+      "test_name": "Permission - List",
+      "success": true,
+      "details": "List retrieved successfully",
+      "duration_seconds": 0.026766416,
+      "input": {
+        "endpoint": "/api/v1/permissions",
+        "method": "GET"
+      },
+      "output": {
+        "body_preview": "{\"success\":true,\"data\":{\"data\":[{\"id\":\"ffb4ff9b-d524-445b-b563-7a279a5c77bc\",\"name\":\"read_perm-00b2029d\",\"description\":\"Permission to read perm-00b2029d resources\",\"resource\":\"perm-00b2029d\",\"action\":\"read\",\"metadata\":{\"created_at\":\"2025-12-20T03:55:12.734309+00:00\",\"test\":true,\"updated_at\":\"2025-12-20T03:55:12.734311+00:00\"}},{\"id\":\"ffaed2c4-6b4a-4e82-8853-d69f4424683a\",\"name\":\"read_perm-5580fd25\",\"description\":\"Permission to read perm-5580fd25 resources\",\"resource\":\"perm-5580fd25\",\"action\":\"re",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.444313Z"
+    },
+    {
+      "test_name": "Permission - Pagination",
+      "success": true,
+      "details": "Pagination works correctly",
+      "duration_seconds": 0.011612,
+      "input": {
+        "endpoint": "/api/v1/permissions?page=1&per_page=5",
+        "method": "GET",
+        "params": {
+          "page": 1,
+          "per_page": 5
+        }
+      },
+      "output": {
+        "body": {
+          "data": {
+            "data": [
+              {
+                "action": "read",
+                "description": "Permission to read perm-00b2029d resources",
+                "id": "ffb4ff9b-d524-445b-b563-7a279a5c77bc",
+                "metadata": {
+                  "created_at": "2025-12-20T03:55:12.734309+00:00",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:55:12.734311+00:00"
+                },
+                "name": "read_perm-00b2029d",
+                "resource": "perm-00b2029d"
+              },
+              {
+                "action": "read",
+                "description": "Permission to read perm-5580fd25 resources",
+                "id": "ffaed2c4-6b4a-4e82-8853-d69f4424683a",
+                "metadata": {
+                  "created_at": "2025-12-19T15:02:29.236825+00:00",
+                  "test": true,
+                  "updated_at": "2025-12-19T15:02:29.236829+00:00"
+                },
+                "name": "read_perm-5580fd25",
+                "resource": "perm-5580fd25"
+              },
+              {
+                "action": "create",
+                "description": "Create new user profiles",
+                "id": "fd839533-118f-4f04-97ad-ec01376bebec",
+                "metadata": {
+                  "created_at": "2025-12-08T12:45:11.911417+00:00",
+                  "updated_at": "2025-12-08T12:45:11.911417+00:00"
+                },
+                "name": "create:profiles",
+                "resource": "profiles"
+              },
+              {
+                "action": "read",
+                "description": "Permission to read perm-233a0727 resources",
+                "id": "fc6f207b-4444-465e-99bd-9a365ffbcce0",
+                "metadata": {
+                  "created_at": "2025-12-20T10:53:39.438315+00:00",
+                  "test": true,
+                  "updated_at": "2025-12-20T10:53:39.438316+00:00"
+                },
+                "name": "read_perm-233a0727",
+                "resource": "perm-233a0727"
+              },
+              {
+                "action": "admin",
+                "description": "Full administrative control over roles",
+                "id": "fc0a57f2-abd8-403c-bb33-a01dc64da73e",
+                "metadata": {
+                  "created_at": "2025-12-08T12:45:11.911417+00:00",
+                  "updated_at": "2025-12-08T12:45:11.911417+00:00"
+                },
+                "name": "admin:roles",
+                "resource": "roles"
+              },
+              {
+                "action": "read",
+                "description": "Permission to read perm-561e455b resources",
+                "id": "fb7f536d-93db-4f86-8806-e4486df2c063",
+                "metadata": {
+                  "created_at": "2025-12-20T10:50:14.314425+00:00",
+                  "test": true,
+                  "updated_at": "2025-12-20T10:50:14.314426+00:00"
+                },
+                "name": "read_perm-561e455b",
+                "resource": "perm-561e455b"
+              },
+              {
+                "action": "read",
+                "description": "Permission to read perm-0e33b6a8 resources",
+                "id": "fad69ad5-1db0-4d13-aec2-fb8bdbb01ec3",
+                "metadata": {
+                  "created_at": "2025-12-20T17:17:13.179729+00:00",
+                  "test": true,
+                  "updated_at": "2025-12-20T17:17:13.179730+00:00"
+                },
+                "name": "read_perm-0e33b6a8",
+                "resource": "perm-0e33b6a8"
+              },
+              {
+                "action": "read",
+                "description": "Permission to read perm-b0d30339 resources",
+                "id": "f9df20e7-a412-4702-ba3d-6b136cb311e8",
+                "metadata": {
+                  "created_at": "2025-12-20T03:32:37.802175+00:00",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:32:37.802177+00:00"
+                },
+                "name": "read_perm-b0d30339",
+                "resource": "perm-b0d30339"
+              },
+              {
+                "action": "read",
+                "description": "Permission to read perm-4785b4d4 resources",
+                "id": "f9352dab-0914-4b76-ac40-d736870b09b6",
+                "metadata": {
+                  "created_at": "2025-12-20T03:48:50.125330+00:00",
+                  "test": true,
+                  "updated_at": "2025-12-20T03:48:50.125333+00:00"
+                },
+                "name": "read_perm-4785b4d4",
+                "resource": "perm-4785b4d4"
+              },
+              {
+                "action": "read",
+                "description": "View user role assignments",
+                "id": "f91b3e35-0d0a-465f-8bb1-d15f4bf1beaa",
+                "metadata": {
+                  "created_at": "2025-12-08T12:45:11.911417+00:00",
+                  "updated_at": "2025-12-08T12:45:11.911417+00:00"
+                },
+                "name": "read:user_roles",
+                "resource": "user_roles"
+              },
+              {
+                "action": "update_own",
+                "description": "Update own MFA devices",
+                "id": "f885157f-ac51-45b8-af6c-5cd27b48477e",
+                "metadata": {
+                  "created_at": "2025-12-08T12:45:11.911417+00:00",
+                  "updated_at": "2025-12-08T12:45:11.911417+00:00"
+                },
+                "name": "update_own:mfa_devices",
+                "resource": "mfa_devices"
+              },
+              {
+                "action": "update",
+                "description": "Update existing MFA devices",
+                "id": "f8432fa6-560c-4c5a-a6ed-ee9fdba4e226",
+                "metadata": {
+                  "created_at": "2025-12-08T12:45:11.911417+00:00",
+                  "updated_at": "2025-12-08T12:45:11.911417+00:00"
+                },
+                "name": "update:mfa_devices",
+                "resource": "mfa_devices"
+              },
+              {
+                "action": "read",
+                "description": "Permission to read perm-3f6d2952 resources",
+                "id": "f6f0598a-48f7-4d28-99bf-2fcf87cd37d7",
+                "metadata": {
+                  "created_at": "2025-12-20T10:22:45.918103+00:00",
+                  "test": true,
+                  "updated_at": "2025-12-20T10:22:45.918104+00:00"
+                },
+                "name": "read_perm-3f6d2952",
+                "resource": "perm-3f6d2952"
+              },
+              {
+                "action": "delete_own",
+                "description": "Delete own user settings",
+                "id": "f6abf795-0a74-4635-aaaf-854afc2c8a45",
+                "metadata": {
+                  "created_at": "2025-12-08T12:45:11.911417+00:00",
+                  "updated_at": "2025-12-08T12:45:11.911417+00:00"
+                },
+                "name": "delete_own:user_settings",
+                "resource": "user_settings"
+              },
+              {
+                "action": "bulk_create",
+                "description": "Bulk create user permission assignments",
+                "id": "f363dc42-11c6-4d4c-8624-a1b7d4366245",
+                "metadata": {
+                  "created_at": "2025-12-08T12:45:11.911417+00:00",
+                  "updated_at": "2025-12-08T12:45:11.911417+00:00"
+                },
+                "name": "bulk_create:user_permissions",
+                "resource": "user_permissions"
+              },
+              {
+                "action": "read",
+                "description": "Permission to read perm-185f1f9a resources",
+                "id": "f2d82a35-d159-48f1-89dc-f8e307a62d8e",
+                "metadata": {
+                  "created_at": "2025-12-19T15:02:29.227629+00:00",
+                  "test": true,
+                  "updated_at": "2025-12-19T15:02:29.227633+00:00"
+                },
+                "name": "read_perm-185f1f9a",
+                "resource": "perm-185f1f9a"
+              },
+              {
+                "action": "update",
+                "description": "Update existing user profiles",
+                "id": "f2ba4797-8a5e-47f3-acea-3601c9076335",
+                "metadata": {
+                  "created_at": "2025-12-08T12:45:11.911417+00:00",
+                  "updated_at": "2025-12-08T12:45:11.911417+00:00"
+                },
+                "name": "update:profiles",
+                "resource": "profiles"
+              },
+              {
+                "action": "import",
+                "description": "Import permissions",
+                "id": "f20d524d-321e-4492-b560-c449421bdbb2",
+                "metadata": {
+                  "created_at": "2025-12-08T12:45:11.911417+00:00",
+                  "updated_at": "2025-12-08T12:45:11.911417+00:00"
+                },
+                "name": "import:permissions",
+                "resource": "permissions"
+              },
+              {
+                "action": "bulk_delete",
+                "description": "Bulk delete permissions",
+                "id": "f0b85aa7-36ef-4a7b-b487-86e689ba918c",
+                "metadata": {
+                  "created_at": "2025-12-08T12:45:11.911417+00:00",
+                  "updated_at": "2025-12-08T12:45:11.911417+00:00"
+                },
+                "name": "bulk_delete:permissions",
+                "resource": "permissions"
+              },
+              {
+                "action": "read",
+                "description": "Permission to read perm-cb86430f resources",
+                "id": "f09d4afd-156f-47ad-b05c-c3caa4d42857",
+                "metadata": {
+                  "created_at": "2025-12-19T15:02:29.312532+00:00",
+                  "test": true,
+                  "updated_at": "2025-12-19T15:02:29.312533+00:00"
+                },
+                "name": "read_perm-cb86430f",
+                "resource": "perm-cb86430f"
+              }
+            ],
+            "meta": {
+              "limit": 20,
+              "page": 1,
+              "total": 288,
+              "total_pages": 15
+            }
+          },
+          "success": true
+        },
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.456520Z"
+    },
+    {
+      "test_name": "Permission - Create",
+      "success": true,
+      "details": "Entity created successfully",
+      "duration_seconds": 0.00718725,
+      "input": {
+        "body": {
+          "action": "read",
+          "description": "Permission to read perm-8309c805 resources",
+          "metadata": {
+            "created_at": "2025-12-24T04:02:35.456597+00:00",
+            "test": true,
+            "updated_at": "2025-12-24T04:02:35.456605+00:00"
+          },
+          "name": "read_perm-8309c805",
+          "resource": "perm-8309c805"
+        },
+        "endpoint": "/api/v1/permissions",
+        "method": "POST"
+      },
+      "output": {
+        "body": {
+          "data": {
+            "action": "read",
+            "description": "Permission to read perm-8309c805 resources",
+            "id": "6539ff3f-1f25-45e7-af3e-63285a3226c5",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.456597+00:00",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.456605+00:00"
+            },
+            "name": "read_perm-8309c805",
+            "resource": "perm-8309c805"
+          },
+          "success": true
+        },
+        "status_code": 201
+      },
+      "timestamp": "2025-12-24T04:02:35.463820Z"
+    },
+    {
+      "test_name": "Permission - Create Invalid",
+      "success": true,
+      "details": "Validation correctly rejected invalid data",
+      "duration_seconds": 0.000841625,
+      "input": {
+        "body": {
+          "action": "INVALID_ACTION",
+          "name": ""
+        },
+        "endpoint": "/api/v1/permissions",
+        "method": "POST"
+      },
+      "output": {
+        "body": "Failed to deserialize the JSON body into the target type: missing field `resource` at line 1 column 37",
+        "status_code": 422
+      },
+      "timestamp": "2025-12-24T04:02:35.464682Z"
+    },
+    {
+      "test_name": "Permission - Get Not Found",
+      "success": true,
+      "details": "Correctly returned 404 for non-existent entity",
+      "duration_seconds": 0.001471208,
+      "input": {
+        "endpoint": "/api/v1/permissions/eab572eb-5a37-4d8e-ae27-244aab9f5fd3",
+        "id": "eab572eb-5a37-4d8e-ae27-244aab9f5fd3",
+        "method": "GET"
+      },
+      "output": {
+        "body": "{\"success\":false,\"error\":\"Permission with id 'eab572eb-5a37-4d8e-ae27-244aab9f5fd3' not found\"}",
+        "status_code": 404
+      },
+      "timestamp": "2025-12-24T04:02:35.466165Z"
+    },
+    {
+      "test_name": "Permission - Bulk Create",
+      "success": true,
+      "details": "3 entities created in bulk",
+      "duration_seconds": 0.012301042,
+      "input": {
+        "body": [
+          {
+            "action": "read",
+            "description": "Permission to read perm-fdde0509 resources",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.466180+00:00",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.466185+00:00"
+            },
+            "name": "read_perm-fdde0509",
+            "resource": "perm-fdde0509"
+          },
+          {
+            "action": "read",
+            "description": "Permission to read perm-39d9f415 resources",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.466190+00:00",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.466191+00:00"
+            },
+            "name": "read_perm-39d9f415",
+            "resource": "perm-39d9f415"
+          },
+          {
+            "action": "read",
+            "description": "Permission to read perm-61a0b150 resources",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.466200+00:00",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.466201+00:00"
+            },
+            "name": "read_perm-61a0b150",
+            "resource": "perm-61a0b150"
+          }
+        ],
+        "endpoint": "/api/v1/permissions/bulk",
+        "method": "POST"
+      },
+      "output": {
+        "body": {
+          "data": {
+            "errors": [],
+            "failed": 0,
+            "items": [
+              {
+                "action": "read",
+                "description": "Permission to read perm-fdde0509 resources",
+                "id": "6a7892f0-3ff0-481c-a783-8ed444fe45db",
+                "metadata": {
+                  "created_at": "2025-12-24T04:02:35.466180+00:00",
+                  "test": true,
+                  "updated_at": "2025-12-24T04:02:35.466185+00:00"
+                },
+                "name": "read_perm-fdde0509",
+                "resource": "perm-fdde0509"
+              },
+              {
+                "action": "read",
+                "description": "Permission to read perm-39d9f415 resources",
+                "id": "319cf53f-9626-4d30-b258-023c8e614eff",
+                "metadata": {
+                  "created_at": "2025-12-24T04:02:35.466190+00:00",
+                  "test": true,
+                  "updated_at": "2025-12-24T04:02:35.466191+00:00"
+                },
+                "name": "read_perm-39d9f415",
+                "resource": "perm-39d9f415"
+              },
+              {
+                "action": "read",
+                "description": "Permission to read perm-61a0b150 resources",
+                "id": "7ebe08aa-6855-41d8-9783-f9703f5da816",
+                "metadata": {
+                  "created_at": "2025-12-24T04:02:35.466200+00:00",
+                  "test": true,
+                  "updated_at": "2025-12-24T04:02:35.466201+00:00"
+                },
+                "name": "read_perm-61a0b150",
+                "resource": "perm-61a0b150"
+              }
+            ],
+            "total": 3
+          },
+          "success": true
+        },
+        "status_code": 201
+      },
+      "timestamp": "2025-12-24T04:02:35.478605Z"
+    },
+    {
+      "test_name": "Permission - Upsert",
+      "success": true,
+      "details": "Upsert completed",
+      "duration_seconds": 0.003004375,
+      "input": {
+        "body": {
+          "action": "read",
+          "description": "Permission to read perm-bb7ab9ba resources",
+          "metadata": {
+            "created_at": "2025-12-24T04:02:35.478651+00:00",
+            "test": true,
+            "updated_at": "2025-12-24T04:02:35.478659+00:00"
+          },
+          "name": "read_perm-bb7ab9ba",
+          "resource": "perm-bb7ab9ba"
+        },
+        "endpoint": "/api/v1/permissions/upsert",
+        "method": "POST"
+      },
+      "output": {
+        "body": {
+          "data": {
+            "action": "read",
+            "description": "Permission to read perm-bb7ab9ba resources",
+            "id": "259f34b0-d159-4438-b0ee-6537f2b60f9c",
+            "metadata": {
+              "created_at": "2025-12-24T04:02:35.478651+00:00",
+              "test": true,
+              "updated_at": "2025-12-24T04:02:35.478659+00:00"
+            },
+            "name": "read_perm-bb7ab9ba",
+            "resource": "perm-bb7ab9ba"
+          },
+          "success": true
+        },
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.481690Z"
+    },
+    {
+      "test_name": "Permission - Empty Trash",
+      "success": true,
+      "details": "Trash emptied",
+      "duration_seconds": 0.000577209,
+      "input": {
+        "endpoint": "/api/v1/permissions/empty",
+        "method": "DELETE"
+      },
+      "output": {
+        "body": "{\"success\":true,\"data\":{\"deleted_count\":0},\"message\":\"Successfully deleted 0 items from trash\"}",
+        "status_code": 200
+      },
+      "timestamp": "2025-12-24T04:02:35.482288Z"
+    }
+  ]
+}

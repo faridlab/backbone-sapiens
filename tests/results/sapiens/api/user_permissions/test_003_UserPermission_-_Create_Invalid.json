@@ -1,0 +1,20 @@
+{
+  "test_name": "UserPermission - Create Invalid",
+  "success": true,
+  "details": "Validation correctly rejected invalid data",
+  "duration_seconds": 0.000275166,
+  "input": {
+    "body": {
+      "permission_id": "",
+      "reason": "short",
+      "user_id": "invalid"
+    },
+    "endpoint": "/api/v1/user_permissions",
+    "method": "POST"
+  },
+  "output": {
+    "body": "Failed to deserialize the JSON body into the target type: permission_id: UUID parsing failed: invalid length: expected length 32 for simple format, found 0 at line 1 column 19",
+    "status_code": 422
+  },
+  "timestamp": "2025-12-24T04:02:35.660167Z"
+}

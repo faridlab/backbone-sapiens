@@ -1,0 +1,16 @@
+{
+  "test_name": "SystemSettings - Get Not Found",
+  "success": true,
+  "details": "Correctly returned 404 for non-existent entity",
+  "duration_seconds": 0.000972375,
+  "input": {
+    "endpoint": "/api/v1/system_settings/d46c1bdb-90f8-4000-bdc2-a948d70d083f",
+    "id": "d46c1bdb-90f8-4000-bdc2-a948d70d083f",
+    "method": "GET"
+  },
+  "output": {
+    "body": "{\"success\":false,\"error\":\"SystemSettings with id 'd46c1bdb-90f8-4000-bdc2-a948d70d083f' not found\"}",
+    "status_code": 404
+  },
+  "timestamp": "2025-12-24T04:02:35.631354Z"
+}

@@ -1,0 +1,16 @@
+{
+  "test_name": "AuditLog - Get Not Found",
+  "success": true,
+  "details": "Correctly returned 404 for non-existent entity",
+  "duration_seconds": 0.001962375,
+  "input": {
+    "endpoint": "/api/v1/audit_logs/1ca52515-5999-4778-8ad9-9cb190f59197",
+    "id": "1ca52515-5999-4778-8ad9-9cb190f59197",
+    "method": "GET"
+  },
+  "output": {
+    "body": "{\"success\":false,\"error\":\"AuditLog with id '1ca52515-5999-4778-8ad9-9cb190f59197' not found\"}",
+    "status_code": 404
+  },
+  "timestamp": "2025-12-12T15:50:20.860258Z"
+}

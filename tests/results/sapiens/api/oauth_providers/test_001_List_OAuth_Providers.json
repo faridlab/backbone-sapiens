@@ -1,0 +1,12 @@
+{
+  "test_name": "List OAuth Providers",
+  "success": true,
+  "details": "OAuth providers listed successfully",
+  "duration_seconds": 0.00516525,
+  "input": null,
+  "output": {
+    "body": "{\"success\":true,\"data\":{\"data\":[{\"id\":\"81683e24-4004-4e7c-bb8f-0e1819480c9f\",\"provider_name\":\"google\",\"display_name\":\"Google Login\",\"client_id\":\"google_client_123\",\"client_secret\":\"google_secret_456\",\"redirect_uri\":\"https://example.com/oauth/callback\",\"scopes\":[\"openid\",\"email\",\"profile\"],\"authorization_url\":\"https://accounts.google.com/o/oauth2/v2/auth\",\"token_url\":\"https://oauth2.googleapis.com/token\",\"user_info_url\":\"https://www.googleapis.com/oauth2/v2/userinfo\",\"is_active\":true,\"metadata\":{\"created_at\":\"2025-12-24T04:02:35.361345+00:00\",\"source\":\"integration_test\",\"updated_at\":\"2025-12-24T04:02:35.361345+00:00\"}},{\"id\":\"5f5ddc70-4807-4155-9b5a-10c06a94badc\",\"provider_name\":\"google\",\"display_name\":\"Google Login Duplicate\",\"client_id\":\"duplicate_client_123\",\"client_secret\":\"duplicate_secret_456\",\"redirect_uri\":\"https://example.com/oauth/callback\",\"scopes\":[\"openid\",\"email\",\"profile\"],\"authorization_url\":\"https://example.com/oauth/authorize\",\"token_url\":\"https://example.com/oauth/token\",\"user_info_url\":\"https://example.com/oauth/userinfo\",\"is_active\":true,\"metadata\":{\"created_at\":\"2025-12-20T10:30:13.359433+00:00\",\"source\":\"integration_test\",\"updated_at\":\"2025-12-20T10:30:13.359433+00:00\"}},{\"id\":\"4ddf1374-d91f-4c07-be15-025341b766a4\",\"provider_name\":\"google\",\"display_name\":\"Google Login Duplicate\",\"client_id\":\"duplicate_client_123\",\"client_secret\":\"duplicate_secret_456\",\"redirect_uri\":\"https://example.com/oauth/callback\",\"scopes\":[\"openid\",\"email\",\"profile\"],\"authorization_url\":\"https://example.com/oauth/authorize\",\"token_url\":\"https://example.com/oauth/token\",\"user_info_url\":\"https://example.com/oauth/userinfo\",\"is_active\":true,\"metadata\":{\"created_at\":\"2025-12-20T10:42:10.539632+00:00\",\"source\":\"integration_test\",\"updated_at\":\"2025-12-20T10:42:10.539632+00:00\"}}],\"meta\":{\"total\":3,\"page\":1,\"limit\":20,\"total_pages\":1}}}",
+    "status_code": 200
+  },
+  "timestamp": "2025-12-24T04:02:35.382935Z"
+}
