@@ -1,0 +1,457 @@
+server:
+  host: 0.0.0.0
+  port: 3000
+  grpc_port: 50051
+database:
+  url: postgresql://root:password@localhost:5432/sapiens
+  max_connections: 20
+  min_connections: 5
+  connect_timeout: 30
+  idle_timeout: 600
+module:
+  name: sapiens
+  enabled: true
+features:
+  soft_delete: true
+  state_machines: true
+  workflows: true
+entities:
+  analytics_event:
+    collection: analytics_events
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  analytics_metric:
+    collection: analytics_metrics
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  analytics_report:
+    collection: analytics_reports
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  anonymization_record:
+    collection: anonymization_records
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  audit_log:
+    collection: audit_logs
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  backup_code:
+    collection: backup_codes
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  bulk_operation:
+    collection: bulk_operations
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  bulk_operation_result:
+    collection: bulk_operation_results
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  data_export:
+    collection: data_exports
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  device_trust:
+    collection: device_trusts
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  direct_permission_grant:
+    collection: direct_permission_grants
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  effective_permission_cache:
+    collection: effective_permission_cache
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  email_verification_token:
+    collection: email_verification_tokens
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  impersonation_session:
+    collection: impersonation_sessions
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  ldap_directory:
+    collection: ldap_directories
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  mfa_backup_code:
+    collection: mfa_backup_codes
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  mfa_device:
+    collection: mfa_devices
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  mfa_session:
+    collection: mfa_sessions
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  notification:
+    collection: notifications
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  notification_template:
+    collection: notification_templates
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  notification_log:
+    collection: notification_logs
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  notification_preference:
+    collection: notification_preferences
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  o_auth_provider:
+    collection: oauth_providers
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  user_o_auth_link:
+    collection: user_oauth_links
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  organization_permission:
+    collection: organization_permissions
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  organization_role:
+    collection: organization_roles
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  organization_user:
+    collection: organization_users
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  password_creation_context:
+    collection: password_creation_contexts
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  password_expiration_settings:
+    collection: password_expiration_settings
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  password_history:
+    collection: password_history
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  password_history_settings:
+    collection: password_history_settings
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  password_policy:
+    collection: password_policies
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  password_requirements:
+    collection: password_requirements
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  password_reset:
+    collection: password_resets
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  password_reset_security:
+    collection: password_reset_security
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  password_reset_token:
+    collection: password_reset_tokens
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  password_reset_verification_details:
+    collection: password_reset_verification_details
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  permission:
+    collection: permissions
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  permission_conflict:
+    collection: permission_conflicts
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  resource_permission:
+    collection: resource_permissions
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  role:
+    collection: roles
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  role_assignment:
+    collection: role_assignments
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  role_permission:
+    collection: role_permissions
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  saml_provider:
+    collection: saml_providers
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  security_event:
+    collection: security_events
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  session:
+    collection: sessions
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  session_limit:
+    collection: session_limits
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  system_settings:
+    collection: system_settings
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  temporary_permission:
+    collection: temporary_permissions
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  user:
+    collection: users
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  profile:
+    collection: profiles
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  user_permission:
+    collection: user_permissions
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  user_role:
+    collection: user_roles
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  user_saml_link:
+    collection: user_saml_links
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  user_settings:
+    collection: user_settings
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  workflow:
+    collection: workflows
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  workflow_step:
+    collection: workflow_steps
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  workflow_definition:
+    collection: workflow_definitions
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  workflow_action:
+    collection: workflow_actions
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  workflow_execution:
+    collection: workflow_executions
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+  workflow_action_execution:
+    collection: workflow_action_executions
+    enabled: true
+    cache_ttl: 300
+    pagination:
+      default_limit: 20
+      max_limit: 100
+logging:
+  level: info
+  format: json
+  file: logs/sapiens.log
+tracing:
+  enabled: true
+  exporter: otlp
+  endpoint: http://localhost:4317
+metrics:
+  enabled: true
+  endpoint: /metrics
+  port: 9090
