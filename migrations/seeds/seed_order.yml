@@ -1,0 +1,70 @@
+# Seed Execution Order Configuration
+# Seeds are executed in the order defined in this file.
+# This ensures foreign key dependencies are satisfied.
+
+# Format: seed_name_seed (without .sql extension)
+#
+# Note: You can manually edit this file to customize the order.
+# Seeds not listed here will be executed after in alphabetical order.
+
+- analytics_event_seed
+- analytics_report_seed
+- anonymization_record_seed
+- audit_log_seed
+- backup_code_seed
+- bulk_operation_seed
+- bulk_operation_result_seed
+- data_export_seed
+- device_trust_seed
+- direct_permission_grant_seed
+- effective_permission_cache_seed
+- email_verification_token_seed
+- impersonation_session_seed
+- ldap_directory_seed
+- mfa_backup_code_seed
+- mfa_device_seed
+- mfa_session_seed
+- notification_seed
+- notification_template_seed
+- notification_log_seed
+- notification_preference_seed
+- o_auth_provider_seed
+- user_o_auth_link_seed
+- password_creation_context_seed
+- password_expiration_settings_seed
+- password_history_seed
+- password_history_settings_seed
+- password_requirements_seed
+- password_reset_seed
+- password_reset_security_seed
+- password_reset_token_seed
+- password_reset_verification_details_seed
+- permission_seed
+- permission_conflict_seed
+- resource_permission_seed
+- role_seed
+- role_assignment_seed
+- role_permission_seed
+- saml_provider_seed
+- security_event_seed
+- session_seed
+- session_limit_seed
+- system_settings_seed
+- temporary_permission_seed
+- user_seed
+- profile_seed
+- user_permission_seed
+- user_role_seed
+- user_saml_link_seed
+- user_settings_seed
+- workflow_seed
+- workflow_step_seed
+- workflow_definition_seed
+- workflow_action_seed
+- workflow_execution_seed
+- workflow_action_execution_seed
+- analytics_metric_seed
+- organization_permission_seed
+- organization_role_seed
+- organization_user_seed
+- password_policy_seed
