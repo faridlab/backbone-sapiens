@@ -1,0 +1,57 @@
+//! Permissions seeder
+//!
+//! Seeds initial permission data into the database.
+
+use anyhow::Result;
+use async_trait::async_trait;
+use sqlx::PgPool;
+
+use super::Seeder;
+
+/// Seeder for permissions
+pub struct SeedPermissionsSeeder;
+
+impl SeedPermissionsSeeder {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Default for SeedPermissionsSeeder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+#[async_trait]
+impl Seeder for SeedPermissionsSeeder {
+    fn name(&self) -> &'static str {
+        "SeedPermissionsSeeder"
+    }
+
+    fn order(&self) -> i32 {
+        1
+    }
+
+    async fn should_run(&self, pool: &PgPool) -> Result<bool> {
+        // Check if permissions table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM permissions")
+            .fetch_one(pool)
+            .await?;
+        Ok(count.0 == 0)
+    }
+
+    async fn run(&self, pool: &PgPool) -> Result<()> {
+        // Run the SQL seed file
+        let sql = include_str!("../../migrations/seeds/002_seed_permissions.sql");
+        sqlx::raw_sql(sql).execute(pool).await?;
+        Ok(())
+    }
+
+    async fn rollback(&self, pool: &PgPool) -> Result<()> {
+        sqlx::query("DELETE FROM permissions")
+            .execute(pool)
+            .await?;
+        Ok(())
+    }
+}
