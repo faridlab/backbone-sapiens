@@ -1,0 +1,262 @@
+# Impersonation Request Workflow
+# Admin impersonation session with approval and monitoring
+# Source: libs/modules/sapiens/docs/spec-sapiens.md UC-011
+
+name: ImpersonationRequest
+description: |
+  Admin impersonation session request workflow:
+  - Validate request (admin cannot impersonate self)
+  - Check concurrent session limits
+  - Create impersonation session
+  - Monitor for expiration
+  - Log all actions during session
+
+version: 1
+
+trigger:
+  event: ImpersonationRequestedEvent
+  extract:
+    admin_id: "event.admin_id"
+    target_user_id: "event.target_user_id"
+    reason: "event.reason"
+    max_duration_minutes: "event.max_duration_minutes"
+
+config:
+  timeout: "{{ max_duration_minutes }}m"
+  persistence: true
+
+context:
+  admin_id: null
+  target_user_id: null
+  reason: null
+  max_duration_minutes: null
+  session_id: null
+  actions_performed: 0
+
+steps:
+  # =========================================================================
+  # Step 1: Validate impersonation request
+  # =========================================================================
+  - name: validate_request
+    type: action
+    action: validate_impersonation
+    params:
+      admin_id: "{{ context.admin_id }}"
+      target_user_id: "{{ context.target_user_id }}"
+      reason: "{{ context.reason }}"
+      max_duration_minutes: "{{ context.max_duration_minutes }}"
+
+    on_success:
+      set:
+        can_impersonate: "{{ result.can_proceed }}"
+        validation_error: "{{ result.error }}"
+      next: check_validation
+
+    on_failure:
+      next: request_failed
+
+  - name: check_validation
+    type: condition
+    conditions:
+      - if: "can_impersonate == true"
+        next: check_concurrent_limit
+      - else:
+        next: log_validation_error
+
+  - name: log_validation_error
+    type: action
+    action: audit_log
+    params:
+      action: impersonation_denied
+      user_id: "{{ context.admin_id }}"
+      severity: warning
+      details:
+        target_user_id: "{{ context.target_user_id }}"
+        reason: "{{ validation_error }}"
+    on_success:
+      next: request_failed
+
+  # =========================================================================
+  # Step 2: Check concurrent session limits
+  # =========================================================================
+  - name: check_concurrent_limit
+    type: action
+    action: count_active_sessions
+    params:
+      admin_id: "{{ context.admin_id }}"
+
+    on_success:
+      set:
+        active_count: "{{ result.count }}"
+      next: verify_limit
+
+  - name: verify_limit
+    type: condition
+    conditions:
+      - if: "active_count < 3"
+        next: create_session
+      - else:
+        next: log_limit_exceeded
+
+  - name: log_limit_exceeded
+    type: action
+    action: audit_log
+    params:
+      action: impersonation_denied
+      user_id: "{{ context.admin_id }}"
+      severity: warning
+      details:
+        reason: "Maximum concurrent impersonation sessions exceeded"
+        current_count: "{{ active_count }}"
+    on_success:
+      next: request_failed
+
+  # =========================================================================
+  # Step 3: Create impersonation session
+  # =========================================================================
+  - name: create_session
+    type: action
+    action: create
+    entity: ImpersonationSession
+    params:
+      admin_id: "{{ context.admin_id }}"
+      target_user_id: "{{ context.target_user_id }}"
+      session_id: "{{ new_uuid() }}"
+      started_at: "{{ now() }}"
+      max_duration_minutes: "{{ context.max_duration_minutes }}"
+      reason: "{{ context.reason }}"
+      actions_performed: 0
+
+    on_success:
+      set:
+        session_id: "{{ result.id }}"
+      next: notify_target_user
+
+    on_failure:
+      next: request_failed
+
+  # =========================================================================
+  # Step 4: Notify target user (GDPR compliance)
+  # =========================================================================
+  - name: notify_target_user
+    type: action
+    action: send_email
+    params:
+      template: account_impersonated
+      to: "{{ get_user_email(target_user_id) }}"
+      data:
+        admin_name: "{{ get_user_name(admin_id) }}"
+        session_id: "{{ session_id }}"
+        reason: "{{ reason }}"
+
+    on_success:
+      next: log_session_start
+    on_failure:
+      next: log_session_start  # Continue even if notification fails
+
+  # =========================================================================
+  # Step 5: Log session start
+  # =========================================================================
+  - name: log_session_start
+    type: action
+    action: audit_log
+    params:
+      action: impersonation_started
+      user_id: "{{ context.admin_id }}"
+      target_user_id: "{{ context.target_user_id }}"
+      severity: info
+      details:
+        session_id: "{{ session_id }}"
+        max_duration_minutes: "{{ context.max_duration_minutes }}"
+        reason: "{{ context.reason }}"
+
+    on_success:
+      next: monitor_session
+
+  # =========================================================================
+  # Step 6: Monitor session until expiration/termination
+  # =========================================================================
+  - name: monitor_session
+    type: wait
+    wait_for:
+      event: ImpersonationEndedEvent
+      condition: "event.session_id == context.session_id"
+      timeout: "{{ max_duration_minutes }}m"
+
+    on_event:
+      next: log_session_end
+
+    on_timeout:
+      next: expire_session
+
+  # =========================================================================
+  # Step 7: Session ended normally
+  # =========================================================================
+  - name: log_session_end
+    type: action
+    action: audit_log
+    params:
+      action: impersonation_ended
+      user_id: "{{ context.admin_id }}"
+      target_user_id: "{{ context.target_user_id }}"
+      severity: info
+      details:
+        session_id: "{{ context.session_id }}"
+        duration_minutes: "{{ calculate_duration(session_id) }}"
+        actions_performed: "{{ actions_performed }}"
+
+    on_success:
+      next: complete
+
+  # =========================================================================
+  # Step 8: Session expired
+  # =========================================================================
+  - name: expire_session
+    type: transition
+    entity: ImpersonationSession
+    id: "{{ session_id }}"
+    transition: auto_expire
+
+    on_success:
+      next: log_expiration
+
+  - name: log_expiration
+    type: action
+    action: audit_log
+    params:
+      action: impersonation_expired
+      user_id: "{{ context.admin_id }}"
+      target_user_id: "{{ context.target_user_id }}"
+      severity: warning
+      details:
+        session_id: "{{ context.session_id }}"
+        reason: "Session duration exceeded"
+
+    on_success:
+      next: notify_expiry
+
+  - name: notify_expiry
+    type: action
+    action: notify
+    params:
+      channel: in_app
+      template: impersonation_expired
+      to: "{{ context.admin_id }}"
+      data:
+        session_id: "{{ context.session_id }}"
+        target_user_id: "{{ context.target_user_id }}"
+
+    on_success:
+      next: complete
+
+  # =========================================================================
+  # Terminal states
+  # =========================================================================
+  - name: complete
+    type: terminal
+    status: completed
+
+  - name: request_failed
+    type: terminal
+    status: failed
+    reason: "Impersonation request validation failed"

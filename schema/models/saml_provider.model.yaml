@@ -1,0 +1,99 @@
+# SAMLProvider Entity - SAML 2.0 enterprise SSO provider configuration
+# Source: libs/modules/sapiens/docs/spec-sapiens.md Section 3.2
+
+models:
+  - name: SAMLProvider
+    collection: saml_providers
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      name:
+        type: string
+        attributes: ["@unique", "@required", "@max(100)"]
+        description: "Provider name"
+
+      display_name:
+        type: string
+        attributes: ["@required", "@max(200)"]
+        description: "Display name for UI"
+
+      entity_id:
+        type: string
+        attributes: ["@unique", "@required", "@max(500)", "@exclude_from_foreign_key_check"]
+        description: "SAML Entity ID"
+
+      sso_url:
+        type: string
+        attributes: ["@required", "@max(500)"]
+        description: "IdP SSO URL"
+
+      slo_url:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "IdP SLO URL"
+
+      certificate:
+        type: string
+        attributes: ["@required"]
+        description: "IdP X.509 certificate"
+
+      acs_url:
+        type: string
+        attributes: ["@required", "@max(500)"]
+        description: "Assertion Consumer Service URL"
+
+      sls_url:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Single Logout Service URL"
+
+      name_id_format:
+        type: string
+        attributes: ["@default(urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified)", "@max(500)"]
+        description: "NameID format"
+
+      attribute_mapping:
+        type: json
+        attributes: ["@required", "@default({})"]
+        description: "Map SAML attrs to user attrs"
+
+      is_active:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Provider enabled"
+
+      status:
+        type: SAMLProviderStatus
+        attributes: ["@default(draft)"]
+        description: "Provider status"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    indexes:
+      - type: index
+        fields: [name]
+      - type: index
+        fields: [is_active]
+      - type: unique
+        fields: [entity_id]
+      - type: index
+        fields: [status]
+
+enums:
+  - name: SAMLProviderStatus
+    variants:
+      - name: draft
+        default: true
+        description: "Provider configuration in progress"
+      - name: active
+        description: "Provider is active and usable"
+      - name: inactive
+        description: "Provider is deactivated"

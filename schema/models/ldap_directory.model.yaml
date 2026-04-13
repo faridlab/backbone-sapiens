@@ -1,0 +1,124 @@
+# LDAPDirectory Entity - LDAP/Active Directory directory configuration
+# Source: libs/modules/sapiens/docs/spec-sapiens.md Section 3.2
+
+models:
+  - name: LDAPDirectory
+    collection: ldap_directories
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      name:
+        type: string
+        attributes: ["@unique", "@required", "@max(100)"]
+        description: "Directory name"
+
+      display_name:
+        type: string
+        attributes: ["@required", "@max(200)"]
+        description: "Display name"
+
+      host:
+        type: string
+        attributes: ["@required", "@max(255)"]
+        description: "LDAP server host"
+
+      port:
+        type: integer
+        attributes: ["@required", "@default(389)", "@min(1)", "@max(65535)"]
+        description: "LDAP port (389 or 636)"
+
+      use_ssl:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Use LDAPS"
+
+      use_tls:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "StartTLS"
+
+      bind_dn:
+        type: string
+        attributes: ["@required", "@max(500)"]
+        description: "Bind DN for authentication"
+
+      bind_password:
+        type: string
+        attributes: ["@required", "@max(255)", "@sensitive"]
+        description: "Bind password (encrypted)"
+
+      search_base:
+        type: string
+        attributes: ["@required", "@max(500)"]
+        description: "Base DN for searches"
+
+      search_filter:
+        type: string
+        attributes: ["@default((uid={username})), @max(500)"]
+        description: "User search filter"
+
+      attribute_mapping:
+        type: json
+        attributes: ["@required", "@default({})"]
+        description: "LDAP to user attr mapping"
+
+      sync_enabled:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Auto-sync users"
+
+      sync_interval_minutes:
+        type: integer?
+        attributes: ["@min(1)"]
+        description: "Sync interval in minutes"
+
+      last_sync_at:
+        type: datetime?
+        description: "Last successful sync"
+
+      last_sync_result:
+        type: json?
+        description: "Last sync result details"
+
+      is_active:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Directory enabled"
+
+      status:
+        type: LDAPDirectoryStatus
+        attributes: ["@default(draft)"]
+        description: "Directory status"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    indexes:
+      - type: index
+        fields: [name]
+      - type: index
+        fields: [is_active]
+      - type: index
+        fields: [sync_enabled, last_sync_at]
+      - type: index
+        fields: [status]
+
+enums:
+  - name: LDAPDirectoryStatus
+    variants:
+      - name: draft
+        default: true
+        description: "Directory configuration in progress"
+      - name: active
+        description: "Directory is active and usable"
+      - name: inactive
+        description: "Directory is deactivated"
+      - name: error
+        description: "Directory has errors"

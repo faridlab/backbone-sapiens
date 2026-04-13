@@ -1,0 +1,293 @@
+# User Anonymization Request Workflow
+# GDPR right to erasure / right to be forgotten
+# Source: libs/modules/sapiens/docs/spec-sapiens.md UC-015
+
+name: UserAnonymizationRequest
+description: |
+  GDPR user anonymization workflow:
+  - Admin-only authorization
+  - Cannot anonymize self
+  - Requires detailed reason
+  - Full/Partial/Pseudonymization methods
+  - Audit trail required
+  - Data retention schedule
+
+version: 1
+
+trigger:
+  event: AnonymizationRequestedEvent
+  extract:
+    user_id: "event.user_id"
+    method: "event.method"
+    requested_by: "event.requested_by"
+    reason: "event.reason"
+    retention_days: "event.retention_days"
+
+config:
+  timeout: 24h
+  persistence: true
+
+context:
+  user_id: null
+  method: full
+  requested_by: null
+  reason: null
+  retention_days: null
+  anonymization_id: null
+  original_email: null
+  original_username: null
+
+steps:
+  # =========================================================================
+  # Step 1: Fetch user details before anonymization
+  # =========================================================================
+  - name: fetch_user_details
+    type: action
+    action: fetch
+    entity: User
+    id: "{{ context.user_id }}"
+
+    on_success:
+      set:
+        original_email: "{{ result.email }}"
+        original_username: "{{ result.username }}"
+        user_exists: "{{ result != null }}"
+      next: validate_request
+
+    on_failure:
+      next: log_user_not_found
+
+  - name: log_user_not_found
+    type: action
+    action: audit_log
+    params:
+      action: anonymization_failed
+      user_id: "{{ context.requested_by }}"
+      severity: warning
+      details:
+        target_user_id: "{{ context.user_id }}"
+        reason: "User not found"
+
+    on_success:
+      next: workflow_failed
+
+  # =========================================================================
+  # Step 2: Validate authorization and constraints
+  # =========================================================================
+  - name: validate_request
+    type: action
+    action: validate_anonymization
+    params:
+      requester_id: "{{ context.requested_by }}"
+      target_user_id: "{{ context.user_id }}"
+      is_admin: "{{ has_role(requested_by, 'admin') }}"
+      reason: "{{ context.reason }}"
+
+    on_success:
+      set:
+        can_proceed: "{{ result.authorized }}"
+        validation_error: "{{ result.error }}"
+      next: check_validation
+
+    on_failure:
+      next: log_validation_error
+
+  - name: check_validation
+    type: condition
+    conditions:
+      - if: "can_proceed == true"
+        next: create_record
+      - else:
+        next: log_validation_error
+
+  - name: log_validation_error
+    type: action
+    action: audit_log
+    params:
+      action: anonymization_denied
+      user_id: "{{ context.requested_by }}"
+      severity: warning
+      details:
+        target_user_id: "{{ context.user_id }}"
+        reason: "{{ validation_error }}"
+
+    on_success:
+      next: workflow_failed
+
+  # =========================================================================
+  # Step 3: Create anonymization record (audit trail)
+  # =========================================================================
+  - name: create_record
+    type: action
+    action: create
+    entity: AnonymizationRecord
+    params:
+      id: "{{ new_uuid() }}"
+      user_id: "{{ context.user_id }}"
+      original_email: "{{ context.original_email }}"
+      original_username: "{{ context.original_username }}"
+      anonymized_by: "{{ context.requested_by }}"
+      anonymized_at: "{{ now() }}"
+      reason: "{{ context.reason }}"
+      method: "{{ context.method }}"
+      retention_period_days: "{{ context.retention_days }}"
+
+    on_success:
+      set:
+        anonymization_id: "{{ result.id }}"
+      next: update_status_processing
+
+    on_failure:
+      next: log_record_error
+
+  - name: log_record_error
+    type: action
+    action: audit_log
+    params:
+      action: anonymization_failed
+      user_id: "{{ context.requested_by }}"
+      severity: error
+      details:
+        error: "Failed to create anonymization record"
+
+    on_success:
+      next: workflow_failed
+
+  # =========================================================================
+  # Step 4: Update status to processing
+  # =========================================================================
+  - name: update_status_processing
+    type: transition
+    entity: AnonymizationRecord
+    id: "{{ anonymization_id }}"
+    transition: start_processing
+
+    on_success:
+      next: anonymize_user_data
+
+  # =========================================================================
+  # Step 5: Anonymize user data based on method
+  # =========================================================================
+  - name: anonymize_user_data
+    type: action
+    action: anonymize_user
+    params:
+      user_id: "{{ context.user_id }}"
+      method: "{{ context.method }}"
+      anonymization_id: "{{ anonymization_id }}"
+
+    on_success:
+      set:
+        records_affected: "{{ result.count }}"
+      next: update_status_completed
+
+    on_failure:
+      next: log_anonymization_error
+
+  - name: log_anonymization_error
+    type: action
+    action: audit_log
+    params:
+      action: anonymization_failed
+      user_id: "{{ context.requested_by }}"
+      severity: error
+      details:
+        anonymization_id: "{{ anonymization_id }}"
+        error: "{{ error }}"
+
+    on_success:
+      next: mark_failed
+
+  # =========================================================================
+  # Step 6: Update status to completed
+  # =========================================================================
+  - name: update_status_completed
+    type: transition
+    entity: AnonymizationRecord
+    id: "{{ anonymization_id }}"
+    transition: complete
+
+    params:
+      records_affected: "{{ context.records_affected }}"
+
+    on_success:
+      next: invalidate_sessions
+
+  # =========================================================================
+  # Step 7: Invalidate all user sessions
+  # =========================================================================
+  - name: invalidate_sessions
+    type: action
+    action: revoke_all_sessions
+    params:
+      user_id: "{{ context.user_id }}"
+      reason: "User anonymized per GDPR request"
+
+    on_success:
+      next: log_completion
+
+  # =========================================================================
+  # Step 8: Log completion
+  # =========================================================================
+  - name: log_completion
+    type: action
+    action: audit_log
+    params:
+      action: user_anonymized
+      user_id: "{{ context.requested_by }}"
+      severity: critical
+      details:
+        anonymization_id: "{{ anonymization_id }}"
+        target_user_id: "{{ context.user_id }}"
+        method: "{{ context.method }}"
+        original_email: "{{ context.original_email }}"
+        records_affected: "{{ context.records_affected }}"
+        reason: "{{ context.reason }}"
+
+    on_success:
+      next: notify_complete
+
+  # =========================================================================
+  # Step 9: Mark record failed
+  # =========================================================================
+  - name: mark_failed
+    type: transition
+    entity: AnonymizationRecord
+    id: "{{ anonymization_id }}"
+    transition: fail
+
+    on_success:
+      next: workflow_failed
+
+  # =========================================================================
+  # Step 10: Notify completion (to admin requester)
+  # =========================================================================
+  - name: notify_complete
+    type: action
+    action: send_email
+    params:
+      template: anonymization_completed
+      to: "{{ get_user_email(requested_by) }}"
+      data:
+        user_id: "{{ context.user_id }}"
+        method: "{{ context.method }}"
+        records_affected: "{{ context.records_affected }}"
+        retention_days: "{{ context.retention_days }}"
+
+    on_success:
+      next: complete
+
+    on_failure:
+      next: complete  # Continue even if email fails
+
+  # =========================================================================
+  # Terminal states
+  # =========================================================================
+  - name: complete
+    type: terminal
+    status: completed
+
+  - name: workflow_failed
+    type: terminal
+    status: failed
+    reason: "User anonymization request processing failed"

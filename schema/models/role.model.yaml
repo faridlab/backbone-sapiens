@@ -1,0 +1,49 @@
+# Role Entity - Named collection of permissions for RBAC
+# Source: libs/modules/sapiens/docs/domain.md Section 3.2
+
+models:
+  - name: Role
+    collection: roles
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+
+      name:
+        type: string
+        attributes: ["@unique", "@required", "@max(50)", "@uppercase"]
+        description: "Unique role name, uppercase convention (e.g., ADMIN, EDITOR)"
+
+      description:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Optional description of the role"
+
+      is_default:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Auto-assigned to new users, only one can be true"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      permissions:
+        type: Permission[]
+        attributes: ["@many_to_many", "@join_table(role_permissions)"]
+
+      users:
+        type: User[]
+        attributes: ["@many_to_many", "@join_table(user_roles)"]
+
+    indexes:
+      - type: index
+        fields: [name]
+      - type: index
+        fields: [is_default]
+      - type: unique
+        fields: [name, "(metadata->>'deleted_at')"]

@@ -1,0 +1,157 @@
+# BackupCode Workflow - One-time backup codes for MFA account recovery
+# Source: IMPLEMENTATION_ROADMAP.md Phase 2.1 Multi-Factor Authentication
+
+name: BackupCode
+model: backup_code.model.yaml
+
+# =============================================================================
+# PRIORITY 1: Validation Rules
+# =============================================================================
+rules:
+  unique_active_codes:
+    when: [create]
+    condition: "count(BackupCode, user_id == $this.user_id && batch_id == $this.batch_id && is_used == false && (metadata.deleted_at == null)) == 0"
+    message: "Backup codes already exist for this batch"
+    code: BACKUP_CODES_EXIST
+
+  valid_code_index:
+    when: [create]
+    condition: "code_index >= 1 && code_index <= 10"
+    message: "Code index must be between 1 and 10"
+    code: INVALID_CODE_INDEX
+
+  sufficient_batch_size:
+    when: [create]
+    condition: "count(BackupCode, batch_id == $this.batch_id && (metadata.deleted_at == null)) >= 8"
+    message: "Backup code batch must contain at least 8 codes"
+    code: INSUFFICIENT_BATCH_SIZE
+
+  valid_expiry:
+    when: [create]
+    condition: "expires_at > now() && expires_at <= now().days(90)"
+    message: "Backup code expiry must be between now and 90 days"
+    code: INVALID_EXPIRY
+
+  unique_code_hash:
+    when: [create]
+    condition: "count(BackupCode, code_hash == $this.code_hash && (metadata.deleted_at == null)) == 0"
+    message: "Backup code hash already exists"
+    code: DUPLICATE_CODE_HASH
+
+# =============================================================================
+# PRIORITY 2: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: read
+      - action: list
+      - action: create
+      - action: regenerate
+    deny:
+      - action: verify
+        if: "$this.user_id != $actor.id"
+      - action: delete
+        if: "$this.user_id != $actor.id"
+
+  user:
+    allow:
+      - action: read
+        if: "$this.user_id == $actor.id"
+      - action: create
+        if: "$this.user_id == $actor.id"
+      - action: verify
+        if: "$this.user_id == $actor.id"
+    deny:
+      - action: list
+      - action: regenerate
+      - action: delete
+        if: "$this.user_id != $actor.id"
+
+  system:
+    allow:
+      - action: verify
+      - action: regenerate
+      - action: cleanup_expired
+
+# =============================================================================
+# PRIORITY 3: Triggers (Side Effects)
+# =============================================================================
+triggers:
+  after_create_batch:
+    actions:
+      - "log(backup_codes.generated, { user_id: user_id, batch_id: batch_id, code_count: count(BackupCode, batch_id == batch_id) })"
+      - "send_email(backup_codes_generated, user.email)"
+      - "emit: BackupCodesGeneratedEvent(user_id: user_id, batch_id: batch_id, code_count: count(BackupCode, batch_id == batch_id) })"
+
+  after_verify:
+    actions:
+      - "set: is_used = true"
+      - "set: used_at = now()"
+      - "set: used_ip_address = $context.ip_address"
+      - "set: used_user_agent = $context.user_agent"
+      - "increment: usage_count in User where id == user_id"
+      - "update: last_mfa_used = now() in User where id == user_id"
+      - "log(backup_code.used, { user_id: user_id, batch_id: batch_id, code_index: code_index, ip_address: $context.ip_address })"
+      - "emit: BackupCodeUsedEvent(code_id: id, user_id: user_id, batch_id: batch_id, code_index: code_index, used_at: now() })"
+      - "regenerate_if_needed(batch_id)"
+
+  after_regenerate:
+    actions:
+      - "log(backup_codes.regenerated, { user_id: user_id, old_batch_id: $context.old_batch_id, new_batch_id: batch_id })"
+      - "invalidate_old_codes($context.old_batch_id)"
+      - "emit: BackupCodesRegeneratedEvent(user_id: user_id, old_batch_id: $context.old_batch_id, new_batch_id: batch_id })"
+
+  before_delete:
+    actions:
+      - "log(backup_codes.deleting, { user_id: user_id, batch_id: batch_id })"
+
+  after_delete_batch:
+    actions:
+      - "log(backup_codes.deleted, { user_id: user_id, batch_id: batch_id, code_count: count(BackupCode, batch_id == batch_id) })"
+      - "emit: BackupCodesDeletedEvent(user_id: user_id, batch_id: batch_id })"
+
+# =============================================================================
+# PRIORITY 4: Scheduled Jobs and Background Tasks
+# =============================================================================
+jobs:
+  cleanup_expired_codes:
+    schedule: "0 2 * * *"  # Daily at 2 AM
+    actions:
+      - "find_and_archive_expired_codes()"
+      - "log(backup_codes.cleanup_expired, { deleted_count: $deleted_count })"
+
+  regenerate_if_low:
+    when: "usage_count <= 2"
+    actions:
+      - "check_user_mfa_requirement(user_id)"
+      - "regenerate_backup_codes_if_required(user_id, batch_id)"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  # Check if code is expired
+  is_expired: "expires_at < now()"
+
+  # Check if code is used
+  is_used: "is_used == true"
+
+  # Check if code is active (not used and not expired)
+  is_active: "is_used == false && expires_at > now()"
+
+  # Code age in days
+  age_days: "(now() - created_at).total_days"
+
+  # Time until expiry in hours
+  time_until_expiry_hours: "expires_at > now() ? (expires_at - now()).total_hours : 0"
+
+  # Batch completion percentage
+  batch_completion_percentage: "total_count > 0 ? (used_count as f64 / total_count as f64) * 100.0 : 0"
+
+  # Number of remaining codes
+  remaining_codes: "total_count - used_count"

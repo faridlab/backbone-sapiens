@@ -1,0 +1,90 @@
+# Permission Entity - Granular action definition for fine-grained access control
+# Source: libs/modules/sapiens/docs/domain.md Section 3.3
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+# STANDARD ACTION NAMING CONVENTION
+# ═══════════════════════════════════════════════════════════════════════════════
+# Action names are free-form strings. Data integrity maintained via seed data.
+# Follow these conventions when creating new permissions:
+#
+# Format: {action}:{resource}
+# Example: read:users, export:reports, approve:orders
+#
+# ┌─────────────────┬────────────────────────────────────────────────────────────┐
+# │ Category        │ Actions                                                    │
+# ├─────────────────┼────────────────────────────────────────────────────────────┤
+# │ CRUD            │ read, write, create, update, delete                        │
+# │ Admin           │ admin (full control)                                       │
+# │ Bulk Operations │ bulk_create, bulk_update, bulk_delete                      │
+# │ Data Transfer   │ export, import                                             │
+# │ Assignment      │ assign, revoke                                             │
+# │ Workflow        │ submit, approve, reject, publish, unpublish                │
+# │ Security        │ impersonate, reset_password, unlock, verify                │
+# │ Sensitive Data  │ read_sensitive, read_audit                                 │
+# │ Lifecycle       │ archive, restore, purge                                    │
+# │ Ownership       │ read_own, update_own, delete_own                           │
+# └─────────────────┴────────────────────────────────────────────────────────────┘
+#
+# Hierarchy (checked in order, first match wins):
+#   1. admin:*         → Superuser
+#   2. admin:{module}  → Module admin (e.g., admin:sapiens)
+#   3. admin:{resource}→ Resource admin (e.g., admin:users)
+#   4. write:{resource}→ Implies create + update
+#   5. {action}:{resource} → Exact match
+# ═══════════════════════════════════════════════════════════════════════════════
+
+models:
+  - name: Permission
+    collection: permissions
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+
+      name:
+        type: string
+        attributes: ["@unique", "@required", "@max(100)", "@pattern(^[a-z_]+:[a-z_*]+$)"]
+        description: "Format: action:resource (e.g., read:users, admin:*, export:reports)"
+
+      description:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Human-readable description"
+
+      resource:
+        type: string
+        attributes: ["@required", "@max(250)", "@pattern(^[a-z_*]+$)"]
+        description: "Resource name (e.g., users, roles, * for wildcard)"
+
+      action:
+        type: string
+        attributes: ["@required", "@max(250)", "@pattern(^[a-z_]+$)"]
+        description: "Action verb (e.g., read, write, export, approve). See conventions above."
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      roles:
+        type: Role[]
+        attributes: ["@many_to_many", "@join_table(role_permissions)"]
+
+      user_permissions:
+        type: UserPermission[]
+        attributes: ["@one_to_many"]
+
+    indexes:
+      - type: index
+        fields: [name]
+      - type: index
+        fields: [resource]
+      - type: index
+        fields: [action]
+      - type: unique
+        fields: [name, "(metadata->>'deleted_at')"]
+      - type: unique
+        fields: [resource, action, "(metadata->>'deleted_at')"]

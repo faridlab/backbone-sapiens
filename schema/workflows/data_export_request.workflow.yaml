@@ -1,0 +1,283 @@
+# Data Export Request Workflow
+# GDPR data export request processing
+# Source: libs/modules/sapiens/docs/spec-sapiens.md UC-012
+
+name: DataExportRequest
+description: |
+  GDPR data export request workflow:
+  - Validate export request (users own data, admin with justification)
+  - Collect user data from all entities
+  - Generate export file (JSON, CSV, PDF, XML)
+  - Secure storage with expiration
+  - Notify user with download link
+
+version: 1
+
+trigger:
+  event: DataExportRequestedEvent
+  extract:
+    user_id: "event.user_id"
+    requested_by: "event.requested_by"
+    format: "event.format"
+    includes: "event.includes"
+
+config:
+  timeout: 72h
+  persistence: true
+
+context:
+  user_id: null
+  requested_by: null
+  format: json
+  includes: null
+  export_id: null
+  file_url: null
+
+steps:
+  # =========================================================================
+  # Step 1: Fetch export request details
+  # =========================================================================
+  - name: fetch_request
+    type: action
+    action: fetch
+    entity: DataExport
+    filter:
+      user_id: "{{ context.user_id }}"
+      status: pending
+    order: created_at DESC
+    limit: 1
+
+    on_success:
+      set:
+        export_id: "{{ result[0].id }}"
+        requested_by: "{{ result[0].requested_by }}"
+        format: "{{ result[0].format }}"
+        includes: "{{ result[0].includes }}"
+        justification: "{{ result[0].justification }}"
+      next: validate_request
+
+    on_failure:
+      next: workflow_failed
+
+  # =========================================================================
+  # Step 2: Validate authorization
+  # =========================================================================
+  - name: validate_request
+    type: action
+    action: validate_export_request
+    params:
+      requester_id: "{{ context.requested_by }}"
+      user_id: "{{ context.user_id }}"
+      justification: "{{ context.justification }}"
+      is_admin: "{{ has_role(requested_by, 'admin') }}"
+
+    on_success:
+      set:
+        is_authorized: "{{ result.authorized }}"
+      next: check_authorization
+
+    on_failure:
+      next: log_unauthorized
+
+  - name: check_authorization
+    type: condition
+    conditions:
+      - if: "is_authorized == true"
+        next: update_status_processing
+      - else:
+        next: log_unauthorized
+
+  - name: log_unauthorized
+    type: action
+    action: audit_log
+    params:
+      action: data_export_denied
+      user_id: "{{ context.requested_by }}"
+      severity: warning
+      details:
+        target_user_id: "{{ context.user_id }}"
+        reason: "Unauthorized export request"
+
+    on_success:
+      next: mark_failed
+
+  # =========================================================================
+  # Step 3: Update status to processing
+  # =========================================================================
+  - name: update_status_processing
+    type: transition
+    entity: DataExport
+    id: "{{ export_id }}"
+    transition: start_processing
+
+    on_success:
+      next: collect_user_data
+
+  # =========================================================================
+  # Step 4: Collect user data from all entities
+  # =========================================================================
+  - name: collect_user_data
+    type: action
+    action: collect_user_data
+    params:
+      user_id: "{{ context.user_id }}"
+      includes: "{{ context.includes }}"
+
+    on_success:
+      set:
+        user_data: "{{ result.data }}"
+        record_count: "{{ result.count }}"
+      next: generate_export
+
+    on_failure:
+      next: log_collection_error
+
+  - name: log_collection_error
+    type: action
+    action: audit_log
+    params:
+      action: data_export_failed
+      user_id: "{{ context.user_id }}"
+      severity: error
+      details:
+        export_id: "{{ export_id }}"
+        error: "{{ error }}"
+
+    on_success:
+      next: mark_failed
+
+  # =========================================================================
+  # Step 5: Generate export file
+  # =========================================================================
+  - name: generate_export
+    type: action
+    action: generate_data_export
+    params:
+      export_id: "{{ export_id }}"
+      user_id: "{{ context.user_id }}"
+      data: "{{ user_data }}"
+      format: "{{ context.format }}"
+
+    on_success:
+      set:
+        file_url: "{{ result.file_url }}"
+        file_size_bytes: "{{ result.size }}"
+      next: calculate_expiry
+
+    on_failure:
+      next: log_generation_error
+
+  - name: log_generation_error
+    type: action
+    action: audit_log
+    params:
+      action: data_export_failed
+      user_id: "{{ context.user_id }}"
+      severity: error
+      details:
+        export_id: "{{ export_id }}"
+        error: "{{ error }}"
+
+    on_success:
+      next: mark_failed
+
+  # =========================================================================
+  # Step 6: Calculate expiry (7 days GDPR compliance)
+  # =========================================================================
+  - name: calculate_expiry
+    type: action
+    action: calculate
+    params:
+      expression: "now() + INTERVAL '7 days'"
+
+    on_success:
+      set:
+        expires_at: "{{ result }}"
+      next: update_completed
+
+  # =========================================================================
+  # Step 7: Mark export as completed
+  # =========================================================================
+  - name: update_completed
+    type: transition
+    entity: DataExport
+    id: "{{ export_id }}"
+    transition: complete
+
+    params:
+      file_url: "{{ context.file_url }}"
+      file_size_bytes: "{{ context.file_size_bytes }}"
+      expires_at: "{{ context.expires_at }}"
+      completed_at: "{{ now() }}"
+
+    on_success:
+      next: log_completion
+
+  # =========================================================================
+  # Step 8: Log completion
+  # =========================================================================
+  - name: log_completion
+    type: action
+    action: audit_log
+    params:
+      action: data_export_completed
+      user_id: "{{ context.user_id }}"
+      severity: info
+      details:
+        export_id: "{{ export_id }}"
+        format: "{{ context.format }}"
+        record_count: "{{ context.record_count }}"
+        file_size_bytes: "{{ context.file_size_bytes }}"
+        expires_at: "{{ context.expires_at }}"
+
+    on_success:
+      next: send_notification
+
+  # =========================================================================
+  # Step 9: Send notification with download link
+  # =========================================================================
+  - name: send_notification
+    type: action
+    action: send_email
+    params:
+      template: data_export_ready
+      to: "{{ get_user_email(user_id) }}"
+      data:
+        download_url: "{{ context.file_url }}"
+        expires_at: "{{ context.expires_at }}"
+        format: "{{ context.format }}"
+        file_size: "{{ format_file_size(file_size_bytes) }}"
+
+    on_success:
+      next: complete
+
+    on_failure:
+      next: complete  # Complete even if email fails (link available in UI)
+
+  # =========================================================================
+  # Step 10: Mark failed
+  # =========================================================================
+  - name: mark_failed
+    type: transition
+    entity: DataExport
+    id: "{{ export_id }}"
+    transition: fail
+
+    params:
+      error_message: "{{ context.error }}"
+      completed_at: "{{ now() }}"
+
+    on_success:
+      next: workflow_failed
+
+  # =========================================================================
+  # Terminal states
+  # =========================================================================
+  - name: complete
+    type: terminal
+    status: completed
+
+  - name: workflow_failed
+    type: terminal
+    status: failed
+    reason: "Data export request processing failed"

@@ -1,0 +1,79 @@
+# PermissionConflict Entity - Represents detected permission/role conflicts
+# Source: libs/modules/sapiens/docs/spec-sapiens.md
+
+models:
+  - name: PermissionConflict
+    collection: permission_conflicts
+    soft_delete: true
+    description: "Represents detected permission/role conflicts"
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      conflict_type:
+        type: string
+        attributes: ["@required", "@max(100)"]
+        description: "Type of conflict"
+
+      severity:
+        type: ConflictSeverity
+        attributes: ["@default(medium)"]
+        description: "Conflict severity level"
+
+      description:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Conflict description"
+
+      conflicting_entity_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "ID of the conflicting entity"
+
+      resolution_status:
+        type: ConflictResolutionStatus
+        attributes: ["@default(pending)"]
+        description: "Resolution status"
+
+      resolved_at:
+        type: datetime?
+        description: "When conflict was resolved"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    indexes:
+      - type: index
+        fields: [conflict_type]
+      - type: index
+        fields: [severity, resolution_status]
+
+enums:
+  - name: ConflictSeverity
+    variants:
+      - name: low
+        description: "Low severity conflict"
+      - name: medium
+        default: true
+        description: "Medium severity conflict"
+      - name: high
+        description: "High severity conflict"
+      - name: critical
+        description: "Critical conflict"
+
+  - name: ConflictResolutionStatus
+    variants:
+      - name: pending
+        default: true
+        description: "Resolution pending"
+      - name: resolved
+        description: "Conflict resolved"
+      - name: escalated
+        description: "Conflict escalated"
+      - name: ignored
+        description: "Conflict ignored"

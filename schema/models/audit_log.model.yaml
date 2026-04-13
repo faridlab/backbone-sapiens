@@ -1,0 +1,119 @@
+# AuditLog Entity - Immutable record of all user events for compliance and security
+# Source: libs/modules/sapiens/docs/domain.md Section 3.8
+# Important: Append-only, no updates or deletes allowed
+
+models:
+  - name: AuditLog
+    collection: audit_logs
+    soft_delete: false
+    config:
+      generators:
+        disabled: [bulk-operations, cqrs, projection]
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+
+      user_id:
+        type: uuid?
+        attributes: ["@foreign_key(User.id)"]
+        description: "User who performed action, null for system events"
+
+      action:
+        type: string
+        attributes: ["@required", "@min(1)", "@max(100)"]
+        description: "Event type (e.g., login_success, user_created)"
+
+      details:
+        type: json?
+        description: "Event-specific JSON payload"
+
+      severity:
+        type: AuditLogSeverity
+        attributes: ["@default(info)"]
+        description: "Event severity level"
+
+      ip_address:
+        type: ip?
+        description: "Client IP (IPv4 or IPv6)"
+
+      user_agent:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Browser/client info"
+
+      session_id:
+        type: uuid?
+        attributes: ["@foreign_key(Session.id)"]
+        description: "Associated session if applicable"
+
+      resource_type:
+        type: string?
+        attributes: ["@max(50)"]
+        description: "Type of resource affected"
+
+      resource_id:
+        type: string?
+        attributes: ["@max(100)", "@exclude_from_foreign_key_check"]
+        description: "ID of affected resource"
+
+      timestamp:
+        type: datetime
+        attributes: ["@default(now)"]
+        description: "When the event occurred"
+
+      archived:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Archive status for log management"
+
+      archived_at: datetime?
+
+      archive_location:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "S3 path for archived logs"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User?
+        attributes: ["@one", "@foreign_key(user_id)"]
+
+      session:
+        type: Session?
+        attributes: ["@one", "@foreign_key(session_id)"]
+
+    indexes:
+      - type: index
+        fields: [user_id, timestamp]
+      - type: index
+        fields: [action, timestamp]
+      - type: index
+        fields: [timestamp]
+      - type: index
+        fields: [severity, timestamp]
+      - type: index
+        fields: [archived, timestamp]
+      - type: index
+        fields: [session_id]
+      - type: index
+        fields: [resource_type, resource_id]
+
+enums:
+  - name: AuditLogSeverity
+    variants:
+      - name: info
+        default: true
+        description: "Normal operations"
+      - name: warning
+        description: "Potential issues"
+      - name: error
+        description: "Operation failures"
+      - name: critical
+        description: "Security-critical events"

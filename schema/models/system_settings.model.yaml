@@ -1,0 +1,41 @@
+# SystemSettings Entity - Global system configuration (feature flags, audit settings)
+# Source: libs/modules/sapiens/docs/domain.md Section 3.12
+
+models:
+  - name: SystemSettings
+    collection: system_settings
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+
+      key:
+        type: string
+        attributes: ["@unique", "@required", "@min(1)", "@max(100)"]
+        description: "Setting key (e.g., 'audit_logging_enabled')"
+
+      value:
+        type: json
+        attributes: ["@required"]
+        description: "Setting value (bool, string, number, object)"
+
+      description:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Human-readable description"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      updater:
+        type: User?
+        attributes: ["@one", "@foreign_key(updated_by)"]
+
+    indexes:
+      - type: index
+        fields: [key]

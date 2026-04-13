@@ -1,0 +1,21 @@
+# RequestSource Enum - Source of authentication/authorization requests
+# Source: libs/modules/sapiens/docs/spec-sapiens.md
+
+enums:
+  - name: RequestSource
+    variants:
+      - name: web
+        default: true
+        description: "Web browser request"
+      - name: mobile
+        description: "Mobile application request"
+      - name: api
+        description: "API request"
+      - name: admin
+        description: "Admin panel request"
+      - name: cli
+        description: "Command-line interface request"
+      - name: webhook
+        description: "Webhook callback request"
+      - name: service
+        description: "Service-to-service request"

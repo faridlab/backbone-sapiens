@@ -1,0 +1,92 @@
+# NotificationPreference Entity - Per-user notification preferences
+# Source: libs/modules/sapiens/docs/spec-sapiens.md Section 3.2
+
+models:
+  - name: NotificationPreference
+    collection: notification_preferences
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      user_id:
+        type: uuid
+        attributes: ["@unique", "@required", "@foreign_key(User.id)"]
+        description: "Preferences owner"
+
+      notification_type:
+        type: string
+        attributes: ["@required", "@max(100)"]
+        description: "Notification type/category"
+
+      channel_enabled:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Channel enabled flag"
+
+      channels:
+        type: json
+        attributes: ["@required", "@default({})"]
+        description: "Map of channel->enabled (email, sms, push, in_app)"
+
+      quiet_hours_start:
+        type: string?
+        attributes: ["@max(5)"]
+        description: "Quiet hours start (HH:MM)"
+
+      quiet_hours_end:
+        type: string?
+        attributes: ["@max(5)"]
+        description: "Quiet hours end (HH:MM)"
+
+      quiet_timezone:
+        type: string
+        attributes: ["@default(UTC)", "@max(50)"]
+        description: "Timezone for quiet hours"
+
+      digest_enabled:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Batch into digest"
+
+      digest_frequency:
+        type: DigestFrequency
+        attributes: ["@default(immediate)"]
+        description: "Digest frequency"
+
+      enabled:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Preference enabled"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [user_id]
+      - type: unique
+        fields: [user_id, notification_type]
+
+enums:
+  - name: DigestFrequency
+    variants:
+      - name: immediate
+        default: true
+        description: "Send immediately (no digest)"
+      - name: hourly
+        description: "Batch hourly"
+      - name: daily
+        description: "Batch daily"
+      - name: weekly
+        description: "Batch weekly"

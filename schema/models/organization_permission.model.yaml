@@ -1,0 +1,96 @@
+# OrganizationPermission Entity - Organization-level permission grants
+# Source: libs/modules/sapiens/docs/spec-sapiens.md
+
+models:
+  - name: OrganizationPermission
+    collection: organization_permissions
+    soft_delete: true
+    description: "Organization-level permission grants"
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      organization_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(corpus.Organization.id)"]
+        description: "Organization ID"
+
+      permission_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Permission.id)"]
+        description: "Granted permission"
+
+      permission_name:
+        type: string?
+        attributes: ["@max(100)"]
+        description: "Permission name/identifier"
+
+      resource_id:
+        type: uuid?
+        attributes: ["@exclude_from_foreign_key_check"]
+        description: "Resource ID this permission applies to"
+
+      resource_type:
+        type: string?
+        attributes: ["@max(100)"]
+        description: "Resource type this permission applies to"
+
+      role_id:
+        type: uuid?
+        attributes: ["@foreign_key(Role.id)"]
+        description: "Role ID"
+
+      granted_by:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "Who granted this permission"
+
+      granted_at:
+        type: datetime
+        attributes: ["@required", "@default(now)"]
+        description: "Grant timestamp"
+
+      expires_at:
+        type: datetime?
+        description: "Optional expiration"
+
+      reason:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Justification for grant"
+
+      is_active:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Whether permission is active"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      permission:
+        type: Permission
+        attributes: ["@one", "@foreign_key(permission_id)"]
+
+      role:
+        type: Role?
+        attributes: ["@one", "@foreign_key(role_id)"]
+
+      granter:
+        type: User
+        attributes: ["@one", "@foreign_key(granted_by)"]
+
+    indexes:
+      - type: index
+        fields: [organization_id]
+      - type: index
+        fields: [permission_id]
+      - type: index
+        fields: [role_id]
+      - type: index
+        fields: [expires_at]

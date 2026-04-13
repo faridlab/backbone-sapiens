@@ -1,0 +1,58 @@
+# SessionLimit Entity - Per-user concurrent session limits
+# Source: libs/modules/sapiens/docs/spec-sapiens.md Section 3.2
+
+models:
+  - name: SessionLimit
+    collection: session_limits
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      user_id:
+        type: uuid
+        attributes: ["@unique", "@required", "@foreign_key(User.id)"]
+        description: "User this limit applies to"
+
+      max_sessions:
+        type: integer
+        attributes: ["@required", "@default(5)", "@min(1)", "@max(100)"]
+        description: "Maximum concurrent sessions allowed"
+
+      max_sessions_per_device:
+        type: integer?
+        attributes: ["@min(1)", "@max(50)"]
+        description: "Optional per-device session limit"
+
+      enforce_limit:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Whether to enforce the limit"
+
+      current_session_count:
+        type: integer
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Computed: current active session count"
+
+      last_session_revoke_at:
+        type: datetime?
+        description: "Last time a session was auto-revoked"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [user_id]
+      - type: index
+        fields: [enforce_limit]

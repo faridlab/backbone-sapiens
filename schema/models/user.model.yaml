@@ -1,0 +1,179 @@
+# User Entity - Core aggregate root for user identity and profile
+# Source: libs/modules/sapiens/docs/domain.md Section 3.1
+
+models:
+  - name: User
+    collection: users
+    soft_delete: true
+
+    fields:
+      # Identity
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+
+      # Authentication credentials
+      username:
+        type: string
+        attributes: ["@unique", "@required", "@min(3)", "@max(50)", "@alpha_dash"]
+        description: "Unique username, alphanumeric + underscore/hyphen"
+
+      email:
+        type: email
+        attributes: ["@unique", "@required", "@lowercase"]
+        description: "Unique email, normalized to lowercase"
+
+      password_hash:
+        type: string
+        attributes: ["@required", "@min(60)", "@sensitive", "@hashed"]
+        description: "Argon2id hash, never exposed in API"
+
+      # Account status
+      status:
+        type: UserStatus
+        attributes: ["@default(active)"]
+
+      email_verified:
+        type: bool
+        attributes: ["@default(false)"]
+
+      # Security tracking
+      failed_login_attempts:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+
+      locked_until:
+        type: datetime?
+        description: "Account unlock time after lockout"
+
+      last_login: datetime?
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      roles:
+        type: Role[]
+        attributes: ["@many_to_many", "@join_table(user_roles)", "@on_delete(cascade)"]
+
+      permissions:
+        type: UserPermission[]
+        attributes: ["@one_to_many", "@on_delete(cascade)", "@on_update(cascade)"]
+
+      user_settings:
+        type: UserSettings?
+        attributes: ["@one", "@on_delete(cascade)"]
+
+      sessions:
+        type: Session[]
+        attributes: ["@one_to_many", "@on_delete(cascade)"]
+
+      mfa_devices:
+        type: MFADevice[]
+        attributes: ["@one_to_many", "@on_delete(cascade)"]
+
+      mfa_sessions:
+        type: MFASession[]
+        attributes: ["@one_to_many", "@on_delete(cascade)"]
+
+      mfa_backup_codes:
+        type: MFABackupCode[]
+        attributes: ["@one_to_many", "@on_delete(cascade)"]
+
+      audit_logs:
+        type: AuditLog[]
+        attributes: ["@one_to_many", "@on_delete(set_null)"]
+
+      password_resets:
+        type: PasswordResetToken[]
+        attributes: ["@one_to_many", "@on_delete(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [email]
+      - type: index
+        fields: [username]
+      - type: index
+        fields: [status]
+      - type: index
+        fields: [status, "(metadata->>'created_at')"]
+      - type: index
+        fields: [email_verified]
+      - type: unique
+        fields: [email, "(metadata->>'deleted_at')"]
+      - type: unique
+        fields: [username, "(metadata->>'deleted_at')"]
+
+  - name: Profile
+    collection: profiles
+    soft_delete: true
+
+    fields:
+      user_id:
+        type: uuid
+        attributes: ["@id", "@foreign_key(User.id)"]
+        description: "Primary key, references User"
+
+      first_name:
+        type: string
+        attributes: ["@required", "@max(100)"]
+
+      middle_name:
+        type: string?
+        attributes: ["@max(100)"]
+
+      last_name:
+        type: string?
+        attributes: ["@max(100)"]
+
+      dob: date?
+
+      pob: string?
+
+      gender: Gender?
+
+      phone_number:
+        type: phone?
+        description: "E.164 format"
+
+      profile_picture_url:
+        type: url?
+        attributes: ["@max(500)"]
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [user_id]
+
+enums:
+  - name: UserStatus
+    variants:
+      - name: active
+        description: "Active user account"
+      - name: inactive
+        description: "Deactivated by user or admin"
+      - name: suspended
+        description: "Temporarily banned"
+      - name: pending_verification
+        description: "Awaiting email verification"
+        default: true
+
+  - name: Gender
+    variants:
+      - name: male
+        default: true
+        description: "Male gender"
+      - name: female
+        description: "Female gender"
+

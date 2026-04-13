@@ -1,0 +1,119 @@
+# Sapiens User Management System - Module Index Schema
+# Version: 2.0
+# All entities based on domain.md specification
+
+module: sapiens
+version: 2
+
+# Shared types available to all models in this module
+shared_types:
+  # Common audit fields for all entities
+  AuditFields:
+    created_at:
+      type: datetime
+      attributes: ["@default(now)"]
+    updated_at:
+      type: datetime
+      attributes: ["@updated_at"]
+    deleted_at: datetime?
+
+  # Password hash parameters for Argon2id
+  PasswordHashParams:
+    memory_cost:
+      type: int
+      attributes: ["@default(19456)"]
+    time_cost:
+      type: int
+      attributes: ["@default(2)"]
+    parallelism:
+      type: int
+      attributes: ["@default(1)"]
+    output_length:
+      type: int
+      attributes: ["@default(32)"]
+
+  Timestamps:
+    created_at:
+      type: datetime
+      attributes: ["@default(now)"]
+    updated_at:
+      type: datetime
+      attributes: ["@updated_at"]
+    deleted_at: datetime?
+
+  Actors:
+    created_by:
+      type: uuid?
+      attributes: ["@foreign_key(User.id)"]
+    updated_by:
+      type: uuid?
+      attributes: ["@foreign_key(User.id)"]
+    deleted_by:
+      type: uuid?
+      attributes: ["@foreign_key(User.id)"]
+
+  # This composes Timestamps + Actors into Metadata
+  Metadata: [Timestamps, Actors]
+
+# Module-level configuration
+config:
+  database: postgresql
+  soft_delete: true
+  audit: true
+  default_timestamps: true
+  generators:
+    disabled:
+      - graphql
+      - grpc
+      - proto
+      - openapi
+
+# Import all model files
+imports:
+  # Core entities
+  - user.model.yaml
+  - role.model.yaml
+  - permission.model.yaml
+  - user_permission.model.yaml
+  - user_role.model.yaml
+  - role_permission.model.yaml
+  - user_settings.model.yaml
+  - profile.model.yaml
+
+  # Security & Authentication
+  - audit_log.model.yaml
+  - session.model.yaml
+  - session_limit.model.yaml
+  - password_reset_token.model.yaml
+  - mfa_device.model.yaml
+  - system_settings.model.yaml
+
+  # Enhanced Security (v2.0)
+  - temporary_permission.model.yaml
+  - resource_permission.model.yaml
+  - security_event.model.yaml
+  - impersonation_session.model.yaml
+
+  # GDPR & Compliance (v2.0)
+  - data_export.model.yaml
+  - anonymization_record.model.yaml
+
+  # Communication
+  - backup_code.model.yaml
+  - bulk_operation.model.yaml
+  - device_trust.model.yaml
+  - notification.model.yaml
+  - notification_preference.model.yaml
+
+  # Analytics & Monitoring
+  - analytics.model.yaml
+  - email_verification.model.yaml
+  - oauth_provider.model.yaml
+
+  # Workflows & Automation
+  - workflow.model.yaml
+
+  # Enterprise Integration (v2.0)
+  - saml_provider.model.yaml
+  - user_saml_link.model.yaml
+  - ldap_directory.model.yaml

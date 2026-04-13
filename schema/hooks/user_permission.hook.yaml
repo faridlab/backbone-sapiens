@@ -1,0 +1,131 @@
+# UserPermission Workflow - Direct permission grants (Hybrid RBAC)
+# Source: libs/modules/sapiens/docs/domain.md Section 3.4
+
+name: UserPermission
+model: user_permission.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - Grant Lifecycle
+# =============================================================================
+states:
+  field: is_active
+
+  values:
+    active:
+      initial: true
+      on_enter:
+        - "log(user_permission.granted, { user_id: user_id, permission_id: permission_id, granted_by: granted_by, expires_at: expires_at })"
+
+    revoked:
+      final: true
+      on_enter:
+        - "set: revoked_at = now()"
+        - "log(user_permission.revoked, { user_id: user_id, permission_id: permission_id, revoked_by: revoked_by, reason: revoked_reason })"
+
+  transitions:
+    revoke:
+      from: active
+      to: revoked
+      roles: [admin, super_admin]
+      condition: "revoked_reason != null && revoked_reason.length >= 10"
+      message: "Revocation reason is required (min 10 characters)"
+
+    expire:
+      from: active
+      to: revoked
+      roles: [system]
+      condition: "expires_at != null && expires_at <= now()"
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  reason_required:
+    when: [create]
+    condition: "reason != null && reason.length >= 10"
+    message: "Reason is required for direct permission grants (min 10 characters)"
+    code: REASON_REQUIRED
+
+  expires_in_future:
+    when: [create, update]
+    condition: "expires_at == null || expires_at > now()"
+    message: "Expiry date must be in the future"
+    code: INVALID_EXPIRY
+
+  no_self_grant:
+    when: [create]
+    condition: "user_id != granted_by"
+    message: "Cannot grant permissions to yourself"
+    code: SELF_GRANT_PROHIBITED
+
+  no_duplicate_grant:
+    when: [create]
+    condition: "count(UserPermission, user_id == $this.user_id && permission_id == $this.permission_id && is_active == true) == 0"
+    message: "User already has this permission granted directly"
+    code: DUPLICATE_GRANT
+
+  resource_scope_consistency:
+    when: [create]
+    condition: "(resource_id == null && resource_type == null) || (resource_id != null && resource_type != null)"
+    message: "Resource ID and type must both be provided or both be null"
+    code: INCOMPLETE_RESOURCE_SCOPE
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: create
+      - action: read
+      - action: list
+      - action: revoke
+    deny:
+      - action: update
+      - action: delete
+
+  user:
+    allow:
+      - action: read
+        if: "user_id == $actor.id"
+      - action: list
+        if: "user_id == $actor.id"
+    deny:
+      - action: create
+      - action: update
+      - action: delete
+      - action: revoke
+
+  guest:
+    deny:
+      - all
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "notify([user], You have been granted permission: #{permission.name})"
+      - "emit: UserPermissionGrantedEvent(user_id: user_id, permission_id: permission_id, granted_by: granted_by, expires_at: expires_at, resource_id: resource_id, resource_type: resource_type)"
+
+  after_update_is_active:
+    actions:
+      - "emit: UserPermissionRevokedEvent(user_id: user_id, permission_id: permission_id, revoked_by: revoked_by, reason: revoked_reason)"
+    if: "is_active == false"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  is_expired: "expires_at != null && expires_at <= now()"
+  is_valid: "is_active == true && (expires_at == null || expires_at > now())"
+  time_until_expiry: "expires_at != null ? expires_at - now() : null"
+  age: "now() - granted_at"
+  is_temporary: "expires_at != null"
+  display_label: "permission.name + (is_temporary ? ' (expires ' + expires_at.format('YYYY-MM-DD') + ')' : ' (permanent)')"
+  scope_description: "resource_type != null ? resource_type + ':' + resource_id : 'global'"

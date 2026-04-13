@@ -1,0 +1,107 @@
+# ResourcePermission Entity - Resource-level permission grants
+# Source: libs/modules/sapiens/docs/spec-sapiens.md Section 3.2
+
+models:
+  - name: ResourcePermission
+    collection: resource_permissions
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      permission_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Permission.id)"]
+        description: "Granted permission"
+
+      resource_type:
+        type: string
+        attributes: ["@required", "@max(100)"]
+        description: "Type of resource (e.g., 'document', 'project')"
+
+      resource_id:
+        type: string
+        attributes: ["@required", "@max(100)", "@exclude_from_foreign_key_check"]
+        description: "ID of the resource instance"
+
+      granted_to_user_id:
+        type: uuid?
+        attributes: ["@foreign_key(User.id)"]
+        description: "Granted to specific user"
+
+      granted_to_role_id:
+        type: uuid?
+        attributes: ["@foreign_key(Role.id)"]
+        description: "Granted to role members"
+
+      granted_by:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "Who granted this permission"
+
+      granted_at:
+        type: datetime
+        attributes: ["@required", "@default(now)"]
+        description: "Grant timestamp"
+
+      expires_at:
+        type: datetime?
+        description: "Optional expiration"
+
+      reason:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Justification for grant"
+
+      status:
+        type: ResourcePermissionStatus
+        attributes: ["@default(active)"]
+        description: "Permission grant status"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      permission:
+        type: Permission
+        attributes: ["@one", "@foreign_key(permission_id)"]
+
+      granted_user:
+        type: User?
+        attributes: ["@one", "@foreign_key(granted_to_user_id)"]
+
+      granted_role:
+        type: Role?
+        attributes: ["@one", "@foreign_key(granted_to_role_id)"]
+
+      granter:
+        type: User
+        attributes: ["@one", "@foreign_key(granted_by)"]
+
+    indexes:
+      - type: index
+        fields: [resource_type, resource_id]
+      - type: index
+        fields: [granted_to_user_id]
+      - type: index
+        fields: [granted_to_role_id]
+      - type: index
+        fields: [expires_at]
+      - type: index
+        fields: [status]
+
+enums:
+  - name: ResourcePermissionStatus
+    variants:
+      - name: active
+        default: true
+        description: "Permission is active"
+      - name: expired
+        description: "Permission has expired"
+      - name: revoked
+        description: "Permission was revoked"

@@ -1,0 +1,230 @@
+# Notification Workflow - Multi-channel notification system
+# Source: IMPLEMENTATION_ROADMAP.md Phase 6.1 Notification System
+
+name: Notification
+model: notification.model.yaml
+
+# =============================================================================
+# PRIORITY 1: Validation Rules
+# =============================================================================
+rules:
+  valid_notification_type:
+    when: [create, update]
+    condition: "type in ['info', 'success', 'warning', 'error', 'alert', 'reminder', 'invitation', 'system']"
+    message: "Invalid notification type"
+    code: INVALID_NOTIFICATION_TYPE
+
+  valid_channel:
+    when: [create, update]
+    condition: "channel in ['in_app', 'email', 'sms', 'push', 'webhook']"
+    message: "Invalid notification channel"
+    code: INVALID_CHANNEL
+
+  valid_priority:
+    when: [create, update]
+    condition: "priority in ['low', 'normal', 'high', 'urgent']"
+    message: "Invalid priority level"
+    code: INVALID_PRIORITY
+
+  reasonable_expiry:
+    when: [create, update]
+    condition: "expires_at == null || expires_at > created_at"
+    message: "Expiry date must be after creation date"
+    code: INVALID_EXPIRY
+
+  valid_recipient_for_channel:
+    when: [create, update]
+    condition: "validate_recipient_for_channel(recipient, channel)"
+    message: "Invalid recipient format for selected channel"
+    code: INVALID_RECIPIENT
+
+  template_has_required_placeholders:
+    when: [create, update]
+    entity: NotificationTemplate
+    condition: "validate_template_placeholders(content, required_placeholders)"
+    message: "Template missing required placeholders"
+    code: MISSING_PLACEHOLDERS
+
+# =============================================================================
+# PRIORITY 2: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: read
+      - action: list
+      - action: create
+      - action: update
+      - action: mark_read
+      - action: mark_sent
+      - action: delete
+    deny:
+      - action: delete
+        if: "$this.recipient_type == 'super_admin' && $actor.role != 'super_admin'"
+
+  user:
+    allow:
+      - action: read
+        if: "$this.recipient_type == 'user' && $this.recipient_id == $actor.id"
+      - action: list
+        if: "$this.recipient_type == 'user' && $this.recipient_id == $actor.id"
+      - action: mark_read
+        if: "$this.recipient_type == 'user' && $this.recipient_id == $actor.id"
+    deny:
+      - action: create
+      - action: update
+      - action: delete
+      - action: mark_sent
+
+  system:
+    allow:
+      - action: create
+      - action: update
+      - action: send
+      - action: process_queue
+      - action: cleanup_expired
+
+# =============================================================================
+# PRIORITY 3: Triggers (Side Effects)
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "set_default_priority_based_on_type()"
+      - "queue_for_delivery()"
+      - "log(notification.created, { notification_id: id, type: type, channel: channel, recipient: recipient })"
+      - "emit: NotificationCreatedEvent(id: id, type: type, channel: channel, recipient_type: recipient_type })"
+
+  after_send:
+    actions:
+      - "set: sent_at = now()"
+      - "set: status = 'sent'"
+      - "update_delivery_status($context.delivery_result)"
+      - "log(notification.sent, { notification_id: id, channel: channel, sent_at: sent_at, delivery_status: $context.delivery_status })"
+      - "emit: NotificationSentEvent(id: id, sent_at: now(), delivery_status: $context.delivery_status })"
+
+  after_read:
+    actions:
+      - "set: read_at = now()"
+      - "update_read_status()"
+      - "log(notification.read, { notification_id: id, read_at: read_at })"
+      - "emit: NotificationReadEvent(id: id, read_at: now() })"
+
+  after_fail:
+    actions:
+      - "set: failed_at = now()"
+      - "set: status = 'failed'"
+      - "store_failure_details($context.error_details)"
+      - "schedule_retry_if_applicable()"
+      - "log(notification.failed, { notification_id: id, error_message: $context.error_message, failed_at: failed_at })"
+      - "emit: NotificationFailedEvent(id: id, error_message: $context.error_message, failed_at: now() })"
+
+  before_delete:
+    actions:
+      - "log(notification.deleting, { notification_id: id, type: type })"
+
+  after_delete:
+    actions:
+      - "log(notification.deleted, { notification_id: id, type: type })"
+      - "emit: NotificationDeletedEvent(id: id })"
+
+  after_template_create:
+    entity: NotificationTemplate
+    actions:
+      - "validate_template_syntax(content)"
+      - "extract_placeholders(content)"
+      - "log(notification_template.created, { template_id: id, name: name, type: type })"
+
+# =============================================================================
+# PRIORITY 4: Scheduled Jobs and Background Tasks
+# =============================================================================
+jobs:
+  process_notification_queue:
+    schedule: "* * * * *"  # Every minute
+    actions:
+      - "get_pending_notifications()"
+      - "process_notifications_by_channel(pending)"
+      - "update_queue_status()"
+
+  retry_failed_notifications:
+    schedule: "*/5 * * * *"  # Every 5 minutes
+    actions:
+      - "get_failed_notifications_for_retry()"
+      - "retry_failed_notifications(notifications)"
+      - "log(notification.retry_completed, { retried_count: $retried_count })"
+
+  cleanup_expired_notifications:
+    schedule: "0 1 * * *"  # Daily at 1 AM
+    actions:
+      - "find_expired_notifications()"
+      - "archive_or_delete_expired(expired)"
+      - "log(notification.cleanup_expired, { cleaned_count: $cleaned_count })"
+
+  cleanup_read_notifications:
+    schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
+    actions:
+      - "find_notifications_read_before(30.days)"
+    actions:
+      - "archive_old_read_notifications(old_read)"
+      - "log(notification.cleanup_read, { archived_count: $archived_count })"
+
+  aggregate_notifications:
+    schedule: "0 */6 * * *"  # Every 6 hours
+    actions:
+      - "find_batchable_notifications()"
+      - "create_digest_notifications(batchable)"
+      - "mark_notifications_as_batched(batchable)"
+      - "log(notification.aggregation_completed, { batched_count: $batched_count })"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  # Check if notification is expired
+  is_expired: "expires_at != null && expires_at < now()"
+
+  # Check if notification is read
+  is_read: "read_at != null"
+
+  # Check if notification is sent
+  is_sent: "sent_at != null"
+
+  # Check if notification is failed
+  is_failed: "failed_at != null || status == 'failed'"
+
+  # Notification age in minutes
+  age_minutes: "(now() - created_at).total_minutes"
+
+  # Time until expiry in minutes
+  time_until_expiry_minutes: "expires_at != null && expires_at > now() ? (expires_at - now()).total_minutes : null"
+
+  # Delivery status
+  delivery_status: "is_sent ? 'delivered' : (is_failed ? 'failed' : (is_expired ? 'expired' : 'pending'))"
+
+  # Is high priority
+  is_high_priority: "priority in ['high', 'urgent']"
+
+  # Is actionable (requires user response)
+  is_actionable: "action_url != null || metadata['action_required'] == true"
+
+  # Notification category
+  category: "type in ['alert', 'error'] ? 'critical' : (type in ['success', 'info'] ? 'informational' : 'transactional')"
+
+  # Time since read in minutes
+  time_since_read_minutes: "read_at != null ? (now() - read_at).total_minutes : null"
+
+  # Response time in minutes (from sent to read)
+  response_time_minutes: "sent_at != null && read_at != null ? (read_at - sent_at).total_minutes : null"
+
+  # Is recent (created in last hour)
+  is_recent: "age_minutes <= 60"
+
+  # Requires immediate attention
+  requires_attention: "is_high_priority == true && is_read == false && !is_expired"
+
+  # Notification visibility status
+  visibility_status: "is_read ? 'read' : (is_expired ? 'expired' : 'unread')"

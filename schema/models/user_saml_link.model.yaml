@@ -1,0 +1,95 @@
+# UserSAMLLink Entity - Link between user and SAML provider accounts
+# Source: libs/modules/sapiens/docs/spec-sapiens.md Section 3.2
+
+models:
+  - name: UserSAMLLink
+    collection: user_saml_links
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "References User.id"
+
+      provider_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(SAMLProvider.id)"]
+        description: "References SAMLProvider.id"
+
+      name_id:
+        type: string
+        attributes: ["@required", "@max(255)", "@exclude_from_foreign_key_check"]
+        description: "SAML NameID"
+
+      session_index:
+        type: string?
+        attributes: ["@max(255)"]
+        description: "Current SAML session"
+
+      first_login_at:
+        type: datetime
+        attributes: ["@required", "@default(now)"]
+        description: "First login via SAML"
+
+      last_login_at:
+        type: datetime
+        attributes: ["@required", "@default(now)"]
+        description: "Last login via SAML"
+
+      attributes:
+        type: json
+        attributes: ["@required", "@default({})"]
+        description: "SAML attributes from IdP"
+
+      is_primary:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Primary auth method"
+
+      status:
+        type: UserSAMLLinkStatus
+        attributes: ["@default(active)"]
+        description: "Link status"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+      provider:
+        type: SAMLProvider
+        attributes: ["@one", "@foreign_key(provider_id)"]
+
+    indexes:
+      - type: index
+        fields: [user_id]
+      - type: index
+        fields: [provider_id]
+      - type: unique
+        fields: [provider_id, name_id]
+      - type: index
+        fields: [user_id, is_primary]
+      - type: index
+        fields: [status]
+
+enums:
+  - name: UserSAMLLinkStatus
+    variants:
+      - name: active
+        default: true
+        description: "Link is active and can be used for authentication"
+      - name: inactive
+        description: "Link is inactive"
+      - name: revoked
+        description: "Link has been revoked"

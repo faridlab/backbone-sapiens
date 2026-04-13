@@ -1,0 +1,282 @@
+models:
+  - name: MFABackupCode
+    collection: mfa_backup_codes
+    soft_delete: true
+    description: "MFA backup codes for account recovery and emergency access"
+
+    fields:
+      # Identity
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+
+      # Relations
+      user_id:
+        type: uuid
+        attributes: ["@foreign_key(User.id)", "@required"]
+        description: "User who owns these backup codes"
+
+      device_id:
+        type: uuid?
+        attributes: ["@foreign_key(MFADevice.id)"]
+        description: "MFA device these codes are associated with"
+
+      # Code identification
+      batch_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Batch identifier for this set of backup codes"
+
+      # Code details
+      code:
+        type: string
+        attributes: ["@required", "@max(10)", "@sensitive"]
+        description: "Encrypted backup code"
+
+      code_hash:
+        type: string
+        attributes: ["@required", "@max(64)"]
+        description: "Hashed backup code for verification"
+
+      code_index:
+        type: int
+        attributes: ["@required", "@min(1)", "@max(10)"]
+        description: "Index number of this code in the batch (1-10)"
+
+      # Generation details
+      generated_at:
+        type: datetime
+        attributes: ["@default(now())"]
+        description: "When backup codes were generated"
+
+      generated_by:
+        type: uuid?
+        attributes: ["@foreign_key(User.id)"]
+        description: "Admin who generated these codes (if applicable)"
+
+      generation_method:
+        type: GenerationMethod
+        attributes: ["@default(user_initiated)"]
+        description: "How these backup codes were generated"
+
+      generation_ip:
+        type: string
+        attributes: ["@required", "@max(45)"]
+        description: "IP address used during generation"
+
+      algorithm_version:
+        type: string
+        attributes: ["@default(v1.0)", "@max(20)"]
+        description: "Backup code generation algorithm version"
+
+      # Usage tracking
+      used_at:
+        type: datetime?
+        description: "When this backup code was used"
+
+      used_ip:
+        type: string?
+        attributes: ["@max(45)"]
+        description: "IP address used when this code was redeemed"
+
+      used_user_agent:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "User agent when code was used"
+
+      session_id:
+        type: uuid?
+        attributes: ["@exclude_from_foreign_key_check"]
+        description: "Session where code was used"
+
+      verification_attempt:
+        type: int?
+        description: "Verification attempt number when code was used"
+
+      time_since_generation:
+        type: int?
+        description: "Minutes between generation and usage"
+
+      usage_risk_score:
+        type: int?
+        attributes: ["@min(0)", "@max(100)"]
+        description: "Risk score of the usage attempt"
+
+      is_consumed:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether this backup code has been used"
+
+      consumption_attempts:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of times this code was attempted for use"
+
+      successful_verification:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether code usage resulted in successful verification"
+
+      # Security and compliance
+      is_revoked:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether this backup code has been revoked"
+
+      revoked_at:
+        type: datetime?
+        description: "When this backup code was revoked"
+
+      revoked_by:
+        type: uuid?
+        attributes: ["@foreign_key(User.id)"]
+        description: "Admin who revoked this code"
+
+      revocation_reason:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Reason for revocation"
+
+      compromised:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether this code may have been compromised"
+
+      compromised_detected_at:
+        type: datetime?
+        description: "When compromise was detected"
+
+      compromise_detection_method:
+        type: CompromiseDetectionMethod?
+        description: "How compromise was detected"
+
+      # Expiration and lifecycle
+      expires_at:
+        type: datetime
+        attributes: ["@required"]
+        description: "When this backup code expires"
+
+      created_with_expiry:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Whether code was created with an expiration date"
+
+      grace_period_hours:
+        type: int
+        attributes: ["@default(0)", "@min(0)", "@max(168)"]
+        description: "Grace period in hours after expiration before deletion"
+
+      auto_renew_enabled:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether to automatically generate new codes before expiration"
+
+      renewal_reminder_sent:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether expiration reminder has been sent"
+
+      last_access_before_expiry:
+        type: datetime?
+        description: "Last time this code was accessed before expiry"
+
+      # Notifications
+      creation_notification_sent:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether creation notification was sent to user"
+
+      expiry_warning_sent:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether expiry warning notification was sent"
+
+      usage_notification_sent:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether usage notification was sent to user"
+
+      security_alert_sent:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether security alert was sent due to unusual usage"
+
+      last_notification_at:
+        type: datetime?
+        description: "Last time any notification was sent"
+
+      # Compliance
+      gdpr_compliant:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Whether code handling is GDPR compliant"
+
+      audit_log_required:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Whether audit logging is required for this code"
+
+      data_retention_days:
+        type: int
+        attributes: ["@default(365)", "@min(30)", "@max(1825)"]
+        description: "Days to retain data after code expiration"
+
+      # Metadata
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+      device:
+        type: MFADevice?
+        attributes: ["@one", "@foreign_key(device_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [user_id, batch_id]
+      - type: index
+        fields: [user_id, is_consumed]
+      - type: index
+        fields: [device_id]
+      - type: index
+        fields: [used_at]
+      - type: index
+        fields: [is_revoked]
+      - type: index
+        fields: [expires_at]
+      - type: index
+        fields: [generated_at]
+
+enums:
+  - name: GenerationMethod
+    variants:
+      - name: user_initiated
+        default: true
+        description: "User initiated backup code generation"
+      - name: admin_enforced
+        description: "Admin enforced backup code generation"
+      - name: automatic
+        description: "Automatic backup code generation"
+      - name: device_enrollment
+        description: "Backup codes generated during device enrollment"
+      - name: emergency
+        description: "Emergency backup code generation"
+
+  - name: CompromiseDetectionMethod
+    variants:
+      - name: failed_attempts
+        default: true
+        description: "Multiple failed verification attempts"
+      - name: unusual_usage
+        description: "Unusual usage patterns detected"
+      - name: admin_report
+        description: "Reported by administrator"
+      - name: automatic_scan
+        description: "Detected by automatic security scan"
+      - name: user_report
+        description: "Reported by user"

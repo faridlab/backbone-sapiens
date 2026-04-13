@@ -1,0 +1,392 @@
+# Analytics Entity - System usage analytics and reporting
+# Source: IMPLEMENTATION_ROADMAP.md Phase 5.3 Analytics & Reporting
+# Hooks: pre_record, post_record, pre_aggregate, post_aggregate, pre_report_generate
+
+models:
+  - name: AnalyticsEvent
+    collection: analytics_events
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Analytics event ID"
+
+      event_type:
+        type: AnalyticsEventType
+        attributes: ["@required"]
+        description: "Type of analytics event"
+
+      user_id:
+        type: uuid?
+        attributes: ["@foreign_key(User.id)"]
+        description: "User who triggered event"
+
+      session_id:
+        type: uuid?
+        attributes: ["@foreign_key(Session.id)"]
+        description: "Session ID if applicable"
+
+      resource_type:
+        type: string?
+        attributes: ["@max(50)"]
+        description: "Type of resource affected"
+
+      resource_id:
+        type: string?
+        attributes: ["@max(100)", "@exclude_from_foreign_key_check"]
+        description: "ID of affected resource"
+
+      properties:
+        type: json?
+        description: "Event properties and metadata"
+
+      timestamp:
+        type: datetime
+        attributes: ["@default(now)"]
+        description: "When event occurred"
+
+      ip_address:
+        type: ip?
+        description: "Client IP address"
+
+      user_agent:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Client user agent"
+
+      geographic_data:
+        type: json?
+        description: "Geographic location data"
+
+      processed:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether event has been processed for aggregation"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User?
+        attributes: ["@one", "@foreign_key(user_id)"]
+
+      session:
+        type: Session?
+        attributes: ["@one", "@foreign_key(session_id)"]
+
+    indexes:
+      - type: index
+        fields: [event_type, timestamp]
+      - type: index
+        fields: [user_id, timestamp]
+      - type: index
+        fields: [session_id, timestamp]
+      - type: index
+        fields: [resource_type, resource_id, timestamp]
+      - type: index
+        fields: [processed, timestamp]
+      - type: index
+        fields: [timestamp]
+
+  - name: AnalyticsMetric
+    collection: analytics_metrics
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Metric ID"
+
+      metric_name:
+        type: string
+        attributes: ["@required", "@max(100)"]
+        description: "Metric name"
+
+      metric_type:
+        type: AnalyticsMetricType
+        attributes: ["@required"]
+        description: "Metric type"
+
+      value:
+        type: float
+        attributes: ["@required"]
+        description: "Metric value"
+
+      unit:
+        type: string?
+        attributes: ["@max(50)"]
+        description: "Metric unit (count, percentage, ms, etc.)"
+
+      dimensions:
+        type: json?
+        description: "Metric dimensions for filtering"
+
+      period_start:
+        type: datetime
+        attributes: ["@required"]
+        description: "Period start time"
+
+      period_end:
+        type: datetime
+        attributes: ["@required"]
+        description: "Period end time"
+
+      aggregation_level:
+        type: AggregationLevel
+        attributes: ["@required"]
+        description: "Aggregation level"
+
+      organization_id:
+        type: uuid?
+        attributes: ["@exclude_from_foreign_key_check"]
+        # Organization moved to corpus module - cross-module reference handled at application layer
+        description: "Organization if org-specific metric (references corpus.Organization)"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    # Organization relation removed - Organization entity moved to corpus module
+
+    indexes:
+      - type: index
+        fields: [metric_name, period_start, period_end]
+      - type: index
+        fields: [metric_type, period_start]
+      - type: index
+        fields: [aggregation_level, period_start]
+      - type: index
+        fields: [organization_id, period_start]
+      - type: unique
+        fields: [metric_name, dimensions, period_start, period_end, aggregation_level]
+
+  - name: AnalyticsReport
+    collection: analytics_reports
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Report ID"
+
+      report_name:
+        type: string
+        attributes: ["@required", "@max(100)"]
+        description: "Report name"
+
+      report_type:
+        type: AnalyticsReportType
+        attributes: ["@required"]
+        description: "Report type"
+
+      description:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Report description"
+
+      parameters:
+        type: json?
+        description: "Report parameters and filters"
+
+      format:
+        type: ReportFormat
+        attributes: ["@required"]
+        description: "Output format"
+
+      generated_by:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "User who generated report"
+
+      generated_at:
+        type: datetime?
+        description: "When report was generated"
+
+      expires_at:
+        type: datetime?
+        description: "When report expires and is deleted"
+
+      file_path:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Path to generated report file"
+
+      file_size:
+        type: int?
+        attributes: ["@non_negative"]
+        description: "Generated file size in bytes"
+
+      status:
+        type: ReportStatus
+        attributes: ["@default(pending)"]
+        description: "Report generation status"
+
+      download_count:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of times downloaded"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      generator:
+        type: User
+        attributes: ["@one", "@foreign_key(generated_by)"]
+
+    indexes:
+      - type: index
+        fields: [report_type, generated_at]
+      - type: index
+        fields: [generated_by, generated_at]
+      - type: index
+        fields: [status, generated_at]
+      - type: index
+        fields: [expires_at]
+      - type: index
+        fields: [download_count]
+
+enums:
+  - name: AnalyticsEventType
+    variants:
+      - name: user_login
+        default: true
+        description: "User login event"
+      - name: user_logout
+        description: "User logout event"
+      - name: user_registration
+        description: "User registration event"
+      - name: password_change
+        description: "Password change event"
+      - name: mfa_setup
+        description: "MFA setup event"
+      - name: mfa_verification
+        description: "MFA verification event"
+      - name: role_assignment
+        description: "Role assignment event"
+      - name: permission_grant
+        description: "Permission grant event"
+      - name: api_access
+        description: "API access event"
+      - name: page_view
+        description: "Page view event"
+      - name: feature_usage
+        description: "Feature usage event"
+      - name: security_event
+        description: "Security-related event"
+      - name: system_event
+        description: "System event"
+
+  - name: AnalyticsMetricType
+    variants:
+      - name: counter
+        default: true
+        description: "Counter metric"
+      - name: gauge
+        description: "Gauge metric"
+      - name: histogram
+        description: "Histogram metric"
+      - name: timer
+        description: "Timer metric"
+
+  - name: AggregationLevel
+    variants:
+      - name: minute
+        description: "Minute-level aggregation"
+      - name: hour
+        default: true
+        description: "Hour-level aggregation"
+      - name: day
+        description: "Day-level aggregation"
+      - name: week
+        description: "Week-level aggregation"
+      - name: month
+        description: "Month-level aggregation"
+      - name: quarter
+        description: "Quarter-level aggregation"
+      - name: year
+        description: "Year-level aggregation"
+
+  - name: AnalyticsReportType
+    variants:
+      - name: user_activity
+        default: true
+        description: "User activity report"
+      - name: login_trends
+        description: "Login trends report"
+      - name: feature_usage
+        description: "Feature usage report"
+      - name: security_events
+        description: "Security events report"
+      - name: performance_metrics
+        description: "Performance metrics report"
+      - name: compliance_audit
+        description: "Compliance audit report"
+      - name: custom
+        description: "Custom report"
+
+  - name: ReportFormat
+    variants:
+      - name: json
+        default: true
+        description: "JSON format"
+      - name: csv
+        description: "CSV format"
+      - name: pdf
+        description: "PDF format"
+      - name: excel
+        description: "Excel format"
+
+  - name: ReportStatus
+    variants:
+      - name: pending
+        default: true
+        description: "Pending generation"
+      - name: generating
+        description: "Currently generating"
+      - name: completed
+        description: "Successfully generated"
+      - name: failed
+        description: "Generation failed"
+      - name: expired
+        description: "Report expired"
+
+hooks:
+  # Analytics Workflow Hooks
+  - event: pre_analytics_event_record
+    trigger: before_recording_analytics_event
+    description: "Validate analytics event, check privacy settings"
+    service: AnalyticsEventValidationService
+
+  - event: post_analytics_event_record
+    trigger: after_recording_analytics_event
+    description: "Complete event recording, trigger real-time processing"
+    service: AnalyticsEventRecordingService
+
+  - event: pre_analytics_aggregate
+    trigger: before_aggregating_analytics
+    description: "Validate aggregation parameters, prepare resources"
+    service: AnalyticsAggregationValidationService
+
+  - event: post_analytics_aggregate
+    trigger: after_aggregating_analytics
+    description: "Complete aggregation, update metrics"
+    service: AnalyticsAggregationService
+
+  - event: pre_analytics_report_generate
+    trigger: before_generating_analytics_report
+    description: "Validate report generation request, check permissions"
+    service: AnalyticsReportValidationService
+
+  - event: post_analytics_report_generate
+    trigger: after_generating_analytics_report
+    description: "Complete report generation, handle file storage"
+    service: AnalyticsReportGenerationService

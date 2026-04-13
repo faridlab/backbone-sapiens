@@ -1,0 +1,226 @@
+# LDAPDirectory Workflow - LDAP/AD directory configuration
+# Source: libs/modules/sapiens/docs/spec-sapiens.md Section 6.3
+
+name: LDAPDirectory
+model: ldap_directory.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - Directory Lifecycle
+# =============================================================================
+states:
+  field: status
+
+  values:
+    draft:
+      initial: true
+      on_enter:
+        - "log(ldap_directory.draft, { directory_name: name })"
+
+    active:
+      on_enter:
+        - "log(ldap_directory.activated, { directory_name: name, host: host })"
+        - "emit: LDAPDirectoryActivatedEvent(directory_id: id, directory_name: name)"
+
+    inactive:
+      final: true
+      on_enter:
+        - "log(ldap_directory.deactivated, { directory_name: name })"
+
+    error:
+      on_enter:
+        - "log(ldap_directory.error, { directory_name: name, last_error: last_error })"
+
+  transitions:
+    activate:
+      from: [draft, inactive, error]
+      to: active
+      roles: [admin]
+      condition: "connection_test_successful()"
+
+    deactivate:
+      from: [active, error]
+      to: inactive
+      roles: [admin]
+
+    report_error:
+      from: [draft, active]
+      to: error
+      roles: [system]
+      condition: "last_error != null"
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  name_required:
+    when: [create, update]
+    condition: "name != null && name.length >= 3"
+    message: "Directory name (min 3 characters) is required"
+    code: NAME_REQUIRED
+
+  host_required:
+    when: [create, update]
+    condition: "host != null && is_valid_host_or_ip(host)"
+    message: "Valid LDAP host or IP is required"
+    code: HOST_REQUIRED
+
+  port_valid:
+    when: [create, update]
+    condition: "port > 0 && port <= 65535"
+    message: "Port must be between 1 and 65535"
+    code: INVALID_PORT
+
+  base_dn_required:
+    when: [create, update]
+    condition: "base_dn != null && is_valid_dn(base_dn)"
+    message: "Valid base DN is required"
+    code: BASE_DN_REQUIRED
+
+  bind_dn_valid:
+    when: [create, update]
+    condition: "bind_dn == null || is_valid_dn(bind_dn)"
+    message: "Invalid bind DN format"
+    code: INVALID_BIND_DN
+
+  user_search_filter_valid:
+    when: [create, update]
+    condition: "user_search_filter == null || is_valid_ldap_filter(user_search_filter)"
+    message: "Invalid LDAP search filter syntax"
+    code: INVALID_FILTER
+
+  use_tls_or_ssl:
+    when: [create]
+    condition: "use_ssl || use_tls || use_starttls"
+    message: "At least one encryption method (SSL, TLS, or StartTLS) must be enabled"
+    code: ENCRYPTION_REQUIRED
+
+  sync_interval_positive:
+    when: [create, update]
+    condition: "sync_interval_minutes > 0"
+    message: "Sync interval must be positive"
+    code: INVALID_SYNC_INTERVAL
+
+  max_sync_interval:
+    when: [create, update]
+    condition: "sync_interval_minutes <= 1440"
+    message: "Sync interval cannot exceed 1440 minutes (24 hours)"
+    code: SYNC_INTERVAL_TOO_LONG
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: create
+      - action: read
+      - action: list
+      - action: update
+      - action: activate
+      - action: deactivate
+      - action: test_connection
+      - action: sync
+      - action: delete
+
+  user:
+    deny:
+      - all
+
+  guest:
+    deny:
+      - all
+
+  system:
+    allow:
+      - action: read
+      - action: sync
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(ldap_directory.created, { directory_name: name, host: host, port: port })"
+      - "emit: LDAPDirectoryCreatedEvent(directory_id: id, directory_name: name, host: host})"
+      - "trigger: test_connection"
+
+  after_update:
+    actions:
+      - "log(ldap_directory.updated, { id: id, updated_fields: $changed_fields })"
+      - "invalidate_ldap_cache(id)"
+
+  after_activate:
+    actions:
+      - "log(ldap_directory.activated, { directory_name: name })"
+      - "emit: LDAPDirectoryActivatedEvent(directory_id: id, directory_name: name)"
+      - "trigger: test_connection"
+      - "trigger: sync_users"
+
+  after_deactivate:
+    actions:
+      - "log(ldap_directory.deactivated, { directory_name: name })"
+      - "invalidate_ldap_cache(id)"
+
+  after_sync:
+    actions:
+      - "log(ldap_directory.synced, { directory_name: name, users_synced: metadata.users_synced, users_failed: metadata.users_failed })"
+      - "emit: LDAPDirectorySyncedEvent(directory_id: id, users_synced: metadata.users_synced, users_failed: metadata.users_failed)"
+
+  scheduled_sync:
+    schedule: "every {sync_interval_minutes}.minutes"
+    actions:
+      - "trigger: sync_users"
+    description: "Sync users from LDAP directory"
+
+  scheduled_connection_check:
+    schedule: "every 5.minutes"
+    actions:
+      - "trigger: check_directory_connections"
+    description: "Verify LDAP directory connectivity"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  is_active: "status == 'active'"
+
+  connection_url: "(use_ssl || use_tls) ? 'ldaps://' : 'ldap://' + host + ':' + port"
+
+  is_encrypted: "use_ssl || use_tls || use_starttls"
+
+  encryption_type: "use_ssl ? 'SSL' : use_tls ? 'TLS' : use_starttls ? 'StartTLS' : 'None'"
+
+  last_sync_age_minutes: "last_sync_at != null ? (now() - last_sync_at).minutes : null"
+
+  needs_sync: "last_sync_at == null || (last_sync_at != null && (now() - last_sync_at).minutes >= sync_interval_minutes)"
+
+  sync_overdue: "last_sync_at != null && (now() - last_sync_at).minutes > sync_interval_minutes * 2"
+
+  last_sync_status: "metadata.users_failed.as_i64() > 0 ? 'partial_failure' : metadata.users_synced.as_i64() > 0 ? 'success' : 'no_users'"
+
+  total_users_synced: "metadata.users_synced.as_i64()"
+
+  total_users_failed: "metadata.users_failed.as_i64()"
+
+  sync_success_rate: "(metadata.users_synced.as_i64() + metadata.users_failed.as_i64()) > 0 ? (metadata.users_synced.as_i64() * 100.0) / (metadata.users_synced.as_i64() + metadata.users_failed.as_i64()) : 100.0"
+
+  # Connection health
+  is_healthy: "status == 'active' && (last_connection_test == null || last_connection_test.success == true)"
+
+  last_connection_test_age_minutes: "last_connection_test?.tested_at != null ? (now() - last_connection_test.tested_at).minutes : null"
+
+  # Display values
+  display_name: "display_name != null ? display_name : name"
+
+  domain_name: "base_dn != null ? extract_domain_from_dn(base_dn) : null"
+
+  # User count estimates
+  estimated_user_count: "metadata.user_count_estimate.as_i64()"
+
+  # Check if directory can be used for authentication
+  can_authenticate: "status == 'active' && is_healthy && bind_dn != null && bind_password != null"

@@ -1,0 +1,548 @@
+# Sapiens User Management System - Workflow Index Schema
+# Version: 2.0
+# All workflows based on domain.md specification
+
+module: sapiens
+version: 2
+
+# Import all hook files
+imports:
+  # Core entities
+  - user.hook.yaml
+  - profile.hook.yaml
+  - role.hook.yaml
+  - permission.hook.yaml
+  - user_permission.hook.yaml
+  - session.hook.yaml
+  - audit_log.hook.yaml
+  - mfa_device.hook.yaml
+  - password_reset_token.hook.yaml
+  - backup_code.hook.yaml
+  - bulk_operation.hook.yaml
+  - device_trust.hook.yaml
+  - notification.hook.yaml
+  - organization.hook.yaml
+  - analytics.hook.yaml
+  - email_verification.hook.yaml
+  - oauth_provider.hook.yaml
+  - user_oauth_link.hook.yaml
+  - workflow.hook.yaml
+
+  # v2.0 Enhanced Security entities
+  - session_limit.hook.yaml
+  - temporary_permission.hook.yaml
+  - impersonation_session.hook.yaml
+  - resource_permission.hook.yaml
+  - security_event.hook.yaml
+
+  # v2.0 GDPR & Compliance entities
+  - data_export.hook.yaml
+  - anonymization_record.hook.yaml
+
+  # v2.0 Notification entities
+  - notification_preference.hook.yaml
+
+  # v2.0 Enterprise SSO entities
+  - saml_provider.hook.yaml
+  - user_saml_link.hook.yaml
+
+  # v2.0 LDAP integration
+  - ldap_directory.hook.yaml
+
+# =============================================================================
+# Module-level workflow configuration
+# =============================================================================
+config:
+  # Default role for new users
+  default_user_role: USER
+
+  # Authentication settings
+  auth:
+    session_ttl: 24.hours          # Session expiry (24 hours)
+    password_reset_ttl: 1.hour     # Password reset token expiry
+    max_login_attempts: 5          # Account lockout settings
+    lockout_duration: 15.minutes
+    mfa_required_for_admin: true   # MFA settings
+    totp_window: 1                 # Allow 1 time step tolerance
+
+  # Audit settings
+  audit:
+    retention_days: 365            # Retention period (1 year)
+    archive_after_days: 90         # Archive after 90 days
+    critical_events:
+      - login_failed
+      - permission_denied
+      - unauthorized_access
+      - password_changed
+      - mfa_disabled
+      - user_suspended
+      - role_assigned
+      - permission_granted
+
+  # Notification channels
+  notifications:
+    email_enabled: true
+    sms_enabled: false
+    push_enabled: false
+    templates:
+      welcome: "Welcome to Sapiens! Your account is ready."
+      verification: "Please verify your email address."
+      password_reset: "Password reset requested. Link expires in 1 hour."
+      password_changed: "Your password has been changed."
+      account_suspended: "Your account has been suspended."
+      email_changed: "Your email address has been updated."
+      mfa_device_activated: "MFA device has been activated."
+      mfa_device_disabled: "MFA device has been disabled."
+
+# =============================================================================
+# Shared domain events
+# =============================================================================
+events:
+  # User events
+  UserCreatedEvent:
+    fields:
+      user_id: uuid
+      email: string
+      username: string
+      first_name: string?  # Optional, for Profile creation
+
+  UserUpdatedEvent:
+    fields:
+      user_id: uuid
+      updated_fields: string[]
+
+  UserDeletedEvent:
+    fields:
+      user_id: uuid
+      reason: string?
+
+  UserStatusChangedEvent:
+    fields:
+      user_id: uuid
+      old_status: string
+      new_status: string
+
+  UserEmailChangedEvent:
+    fields:
+      user_id: uuid
+      old_email: string
+      new_email: string
+
+  UserPasswordChangedEvent:
+    fields:
+      user_id: uuid
+      reason: string?
+
+  UserLoggedInEvent:
+    fields:
+      user_id: uuid
+      session_id: uuid
+      ip_address: string?
+
+  LoginFailedEvent:
+    fields:
+      email_or_username: string
+      reason: string
+      ip_address: string?
+
+  # Profile events
+  ProfileCreatedEvent:
+    fields:
+      user_id: uuid
+
+  ProfileUpdatedEvent:
+    fields:
+      user_id: uuid
+      updated_fields: string[]
+
+  ProfileDeletedEvent:
+    fields:
+      user_id: uuid
+
+  # Role events
+  RoleCreatedEvent:
+    fields:
+      role_id: uuid
+      name: string
+
+  RoleUpdatedEvent:
+    fields:
+      role_id: uuid
+      name: string
+      updated_fields: string[]
+
+  RoleDeletedEvent:
+    fields:
+      role_id: uuid
+      name: string
+
+  RoleAssignedEvent:
+    fields:
+      user_id: uuid
+      role_id: uuid
+      assigned_by: uuid?
+
+  RoleRevokedEvent:
+    fields:
+      user_id: uuid
+      role_id: uuid
+      revoked_by: uuid?
+
+  # Permission events
+  PermissionCreatedEvent:
+    fields:
+      permission_id: uuid
+      name: string
+      resource: string?
+      action: string
+
+  PermissionDeletedEvent:
+    fields:
+      permission_id: uuid
+      name: string
+
+  UserPermissionGrantedEvent:
+    fields:
+      user_id: uuid
+      permission_id: uuid
+      granted_by: uuid
+      expires_at: datetime?
+      resource_id: string?
+      resource_type: string?
+
+  UserPermissionRevokedEvent:
+    fields:
+      user_id: uuid
+      permission_id: uuid
+      revoked_by: uuid?
+      reason: string?
+
+  # Session events
+  SessionCreatedEvent:
+    fields:
+      session_id: uuid
+      user_id: uuid
+
+  SessionRevokedEvent:
+    fields:
+      session_id: uuid
+      user_id: uuid
+
+  # MFA events
+  MFADeviceEnrolledEvent:
+    fields:
+      user_id: uuid
+      device_type: string
+      device_name: string
+
+  MFADeviceStatusChangedEvent:
+    fields:
+      user_id: uuid
+      device_id: uuid
+      is_active: bool
+
+  MFAVerificationEvent:
+    fields:
+      user_id: uuid
+      device_id: uuid
+      success: bool
+
+  # Password reset events
+  PasswordResetRequestedEvent:
+    fields:
+      user_id: uuid
+      ip_address: string?
+
+  PasswordResetCompletedEvent:
+    fields:
+      user_id: uuid
+
+  # v2.0 Session Limit events
+  SessionLimitEnforcedEvent:
+    fields:
+      user_id: uuid
+      max_sessions: int32
+
+  SessionLimitUpdatedEvent:
+    fields:
+      user_id: uuid
+      old_max: int32
+      new_max: int32
+
+  # v2.0 Temporary Permission events
+  TemporaryPermissionGrantedEvent:
+    fields:
+      user_id: uuid
+      permission_id: uuid
+      expires_at: datetime
+      granted_by: uuid
+
+  TemporaryPermissionActivatedEvent:
+    fields:
+      user_id: uuid
+      permission_id: uuid
+      expires_at: datetime
+
+  TemporaryPermissionExpiredEvent:
+    fields:
+      user_id: uuid
+      permission_id: uuid
+
+  TemporaryPermissionRevokedEvent:
+    fields:
+      user_id: uuid
+      permission_id: uuid
+      revoked_by: uuid
+
+  # v2.0 Impersonation Session events
+  ImpersonationStartedEvent:
+    fields:
+      admin_id: uuid
+      target_user_id: uuid
+      session_id: uuid
+      reason: string
+      max_duration_minutes: int32
+
+  ImpersonationEndedEvent:
+    fields:
+      admin_id: uuid
+      target_user_id: uuid
+      session_id: uuid
+      duration_minutes: int32
+
+  ImpersonationExpiredEvent:
+    fields:
+      admin_id: uuid
+      target_user_id: uuid
+      session_id: uuid
+
+  ImpersonationTerminatedEvent:
+    fields:
+      admin_id: uuid
+      target_user_id: uuid
+      terminated_by: uuid
+      reason: string?
+
+  # v2.0 Data Export events
+  DataExportRequestedEvent:
+    fields:
+      user_id: uuid
+      requested_by: uuid
+      format: string
+      includes: string?
+
+  DataExportCompletedEvent:
+    fields:
+      user_id: uuid
+      export_id: uuid
+      file_url: string
+      expires_at: datetime
+
+  DataExportFailedEvent:
+    fields:
+      user_id: uuid
+      export_id: uuid
+      error: string
+
+  # v2.0 Resource Permission events
+  ResourcePermissionGrantedEvent:
+    fields:
+      permission_id: uuid
+      resource_type: string
+      resource_id: string
+      granted_to_user_id: uuid?
+      granted_to_role_id: uuid?
+      granted_by: uuid
+      expires_at: datetime?
+
+  ResourcePermissionExpiredEvent:
+    fields:
+      permission_id: uuid
+      resource_type: string
+      resource_id: string
+      granted_to: string
+
+  ResourcePermissionRevokedEvent:
+    fields:
+      permission_id: uuid
+      resource_type: string
+      resource_id: string
+      granted_to: string
+      revoked_by: uuid
+
+  # v2.0 Security Event events
+  SecurityEventCreatedEvent:
+    fields:
+      event_id: uuid
+      event_type: string
+      severity: string
+      user_id: uuid?
+      ip_address: string?
+
+  SecurityEventResolvedEvent:
+    fields:
+      event_id: uuid
+      resolved_by: uuid
+      resolution_notes: string
+
+  # v2.0 Anonymization events
+  AnonymizationRequestedEvent:
+    fields:
+      user_id: uuid
+      method: string
+      requested_by: uuid
+      retention_days: int32?
+
+  AnonymizationCompletedEvent:
+    fields:
+      user_id: uuid
+      method: string
+      anonymized_by: uuid
+
+  AnonymizationFailedEvent:
+    fields:
+      user_id: uuid
+      error: string
+
+  # v2.0 SAML events
+  SAMLProviderCreatedEvent:
+    fields:
+      provider_id: uuid
+      provider_name: string
+      entity_id: string
+
+  SAMLProviderActivatedEvent:
+    fields:
+      provider_id: uuid
+      provider_name: string
+
+  SAMLLinkCreatedEvent:
+    fields:
+      user_id: uuid
+      provider_id: uuid
+      saml_user_id: string
+
+  SAMLLinkDeactivatedEvent:
+    fields:
+      user_id: uuid
+      provider_id: uuid
+
+  # v2.0 LDAP events
+  LDAPDirectoryCreatedEvent:
+    fields:
+      directory_id: uuid
+      directory_name: string
+      host: string
+
+  LDAPDirectoryActivatedEvent:
+    fields:
+      directory_id: uuid
+      directory_name: string
+
+  LDAPDirectorySyncedEvent:
+    fields:
+      directory_id: uuid
+      users_synced: int32
+      users_failed: int32
+
+# =============================================================================
+# Scheduled jobs
+# =============================================================================
+scheduled_jobs:
+  # Core jobs
+  expire_sessions:
+    schedule: "every 1.hour"
+    handler: Session.expire_sessions_batch
+
+  expire_permission_grants:
+    schedule: "every 5.minutes"
+    handler: UserPermission.expire_grants_batch
+
+  archive_audit_logs:
+    schedule: "every 1.day at 02:00"
+    handler: AuditLog.archive_old_logs
+
+  cleanup_reset_tokens:
+    schedule: "every 1.hour"
+    handler: PasswordResetToken.cleanup_expired_tokens
+
+  cleanup_inactive_sessions:
+    schedule: "every 6.hours"
+    handler: Session.cleanup_inactive_sessions
+
+  # v2.0 Session Limit jobs
+  cleanup_stale_sessions:
+    schedule: "every 6.hours"
+    handler: SessionLimit.cleanup_stale_sessions
+
+  # v2.0 Temporary Permission jobs
+  expire_temporary_permissions:
+    schedule: "every 5.minutes"
+    handler: TemporaryPermission.expire_batch
+
+  notify_expiring_permissions:
+    schedule: "every 1.hour"
+    handler: TemporaryPermission.notify_expiring_soon
+
+  # v2.0 Impersonation Session jobs
+  expire_impersonation_sessions:
+    schedule: "every 1.minute"
+    handler: ImpersonationSession.expire_batch
+
+  notify_expiring_impersonation:
+    schedule: "every 5.minutes"
+    handler: ImpersonationSession.notify_expiring_soon
+
+  # v2.0 Data Export jobs
+  delete_expired_exports:
+    schedule: "every 1.day at 03:00"
+    handler: DataExport.delete_expired_batch
+
+  delete_old_failed_exports:
+    schedule: "every 1.day at 03:30"
+    handler: DataExport.delete_old_failed_batch
+
+  # v2.0 Resource Permission jobs
+  expire_resource_permissions:
+    schedule: "every 5.minutes"
+    handler: ResourcePermission.expire_batch
+
+  notify_expiring_resource_permissions:
+    schedule: "every 1.hour"
+    handler: ResourcePermission.notify_expiring_soon
+
+  # v2.0 Security Event jobs
+  archive_resolved_events:
+    schedule: "every 1.day at 01:00"
+    handler: SecurityEvent.archive_resolved_batch
+
+  delete_old_events:
+    schedule: "every 1.day at 01:30"
+    handler: SecurityEvent.delete_old_batch
+
+  detect_attack_patterns:
+    schedule: "every 5.minutes"
+    handler: SecurityEvent.detect_attack_patterns
+
+  # v2.0 Anonymization jobs
+  delete_expired_anonymized_records:
+    schedule: "every 1.day at 02:00"
+    handler: AnonymizationRecord.delete_expired_batch
+
+  # v2.0 SAML jobs
+  refresh_provider_metadata:
+    schedule: "every 1.day at 04:00"
+    handler: SAMLProvider.refresh_metadata_batch
+
+  check_expiring_certificates:
+    schedule: "every 1.day at 03:00"
+    handler: SAMLProvider.check_certificate_expiry
+
+  # v2.0 LDAP jobs
+  sync_ldap_users:
+    schedule: "every 30.minutes"
+    handler: LDAPDirectory.sync_users_batch
+
+  check_directory_connections:
+    schedule: "every 5.minutes"
+    handler: LDAPDirectory.check_connections

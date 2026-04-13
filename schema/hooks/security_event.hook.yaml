@@ -1,0 +1,158 @@
+# SecurityEvent Workflow - Security monitoring and alerting
+# Source: libs/modules/sapiens/docs/spec-sapiens.md UC-014
+
+name: SecurityEvent
+model: security_event.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - Security Event Lifecycle
+# =============================================================================
+states:
+  field: resolved
+
+  values:
+    "false":
+      initial: true
+      on_enter:
+        - "log(security.event_created, { event_type: event_type, severity: severity, user_id: user_id })"
+        - "emit: SecurityEventCreatedEvent(event_id: id, event_type: event_type, severity: severity, user_id: user_id)"
+
+    "true":
+      final: true
+      on_enter:
+        - "set: resolved_at = now()"
+        - "log(security.event_resolved, { event_id: id, resolved_by: resolved_by })"
+        - "emit: SecurityEventResolvedEvent(event_id: id, resolved_by: resolved_by, resolution_note: resolution_note)"
+
+  transitions:
+    resolve:
+      from: "false"
+      to: "true"
+      roles: [admin, security_analyst]
+      condition: "resolution_note != null && resolution_note.length >= 10"
+      message: "Resolution notes (min 10 characters) are required"
+
+    auto_resolve:
+      from: "false"
+      to: "true"
+      roles: [system]
+      condition: "is_low_risk_false_positive()"
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  event_type_required:
+    when: [create]
+    condition: "event_type != null"
+    message: "Event type is required"
+    code: EVENT_TYPE_REQUIRED
+
+  severity_required:
+    when: [create]
+    condition: "severity in ['low', 'medium', 'high', 'critical']"
+    message: "Valid severity required: low, medium, high, critical"
+    code: INVALID_SEVERITY
+
+  resolution_notes_for_resolve:
+    when: [update]
+    condition: "resolved == false || resolution_note != null"
+    message: "Resolution notes are required when marking event as resolved"
+    code: RESOLUTION_NOTES_REQUIRED
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: create
+      - action: read
+      - action: list
+      - action: update
+      - action: resolve
+
+  security_analyst:
+    allow:
+      - action: create
+      - action: read
+      - action: list
+      - action: update
+      - action: resolve
+    deny:
+      - action: delete
+
+  user:
+    allow:
+      - action: read
+        if: "user_id == $actor.id"
+      - action: list
+        if: "user_id == $actor.id"
+    deny:
+      - action: create
+      - action: update
+      - action: resolve
+      - action: delete
+
+  guest:
+    deny:
+      - all
+
+  system:
+    allow:
+      - action: create
+      - action: read
+      - action: update
+      - action: resolve
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(security.event_created, { event_type: event_type, severity: severity, user_id: user_id, source_ip: source_ip })"
+      - "emit: SecurityEventCreatedEvent(event_id: id, event_type: event_type, severity: severity, user_id: user_id, ip_address: source_ip)"
+
+  after_resolve:
+    actions:
+      - "log(security.event_resolved, { event_id: id, resolved_by: resolved_by, resolution_note: resolution_note })"
+      - "emit: SecurityEventResolvedEvent(event_id: id, resolved_by: resolved_by, resolution_note: resolution_note)"
+
+  scheduled_stale_cleanup:
+    schedule: "every 1.day at 01:00"
+    actions:
+      - "trigger: archive_resolved_events"
+      - "trigger: delete_old_events"
+
+  scheduled_attack_detection:
+    schedule: "every 5.minutes"
+    actions:
+      - "trigger: detect_attack_patterns"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  is_high_priority: "severity in ['high', 'critical']"
+
+  requires_immediate_attention: "severity == 'critical'"
+
+  is_stale: "resolved == true && resolved_at != null && (now() - resolved_at).days > 90"
+
+  age_days: "(now() - created_at).days"
+
+  resolution_duration: "resolved_at != null ? (resolved_at - created_at) : null"
+
+  should_notify: "is_high_priority"
+
+  risk_score: |
+    severity == 'critical' ? 95 :
+    severity == 'high' ? 75 :
+    severity == 'medium' ? 50 : 20
+
+  needs_attention: "resolved == false && (severity == 'critical' || (severity == 'high' && age_days >= 1))"

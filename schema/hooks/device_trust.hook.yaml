@@ -1,0 +1,200 @@
+# DeviceTrust Workflow - Trusted device management for enhanced security
+# Source: IMPLEMENTATION_ROADMAP.md Phase 2.2 Advanced Session Management
+
+name: DeviceTrust
+model: device_trust.model.yaml
+
+# =============================================================================
+# PRIORITY 1: Validation Rules
+# =============================================================================
+rules:
+  unique_device_per_user:
+    when: [create, update]
+    condition: "count(DeviceTrust, user_id == $this.user_id && device_fingerprint == $this.device_fingerprint && id != $this.id && (metadata.deleted_at == null)) == 0"
+    message: "Device already registered for this user"
+    code: DUPLICATE_DEVICE
+
+  unique_device_name_per_user:
+    when: [create, update]
+    condition: "count(DeviceTrust, user_id == $this.user_id && device_name == $this.device_name && id != $this.id && (metadata.deleted_at == null)) == 0"
+    message: "Device name already exists for this user"
+    code: DUPLICATE_DEVICE_NAME
+
+  valid_risk_score:
+    when: [create, update]
+    condition: "risk_score >= 0.0 && risk_score <= 1.0"
+    message: "Risk score must be between 0.0 and 1.0"
+    code: INVALID_RISK_SCORE
+
+  valid_trust_level:
+    when: [create, update]
+    condition: "trust_level in ['temporary', 'standard', 'trusted', 'permanent']"
+    message: "Invalid trust level"
+    code: INVALID_TRUST_LEVEL
+
+  valid_device_type:
+    when: [create, update]
+    condition: "device_type in ['desktop', 'laptop', 'mobile', 'tablet', 'browser', 'application']"
+    message: "Invalid device type"
+    code: INVALID_DEVICE_TYPE
+
+  reasonable_expiry:
+    when: [create, update]
+    condition: "expires_at == null || expires_at > created_at"
+    message: "Expiry date must be after creation date"
+    code: INVALID_EXPIRY
+
+# =============================================================================
+# PRIORITY 2: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: read
+      - action: list
+    deny:
+      - action: create
+      - action: update
+      - action: delete
+        if: "$this.user_id != $actor.id"
+
+  user:
+    allow:
+      - action: read
+        if: "$this.user_id == $actor.id"
+      - action: list
+        if: "$this.user_id == $actor.id"
+      - action: create
+        if: "$this.user_id == $actor.id"
+      - action: update
+        if: "$this.user_id == $actor.id"
+      - action: delete
+        if: "$this.user_id == $actor.id"
+    deny:
+      - action: read
+      - action: list
+      - action: create
+      - action: update
+      - action: delete
+        if: "$this.user_id != $actor.id"
+
+  system:
+    allow:
+      - action: verify
+      - action: update_risk_score
+      - action: cleanup_expired
+      - action: revoke_suspicious
+
+# =============================================================================
+# PRIORITY 3: Triggers (Side Effects)
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "set_auto_expiry_based_on_trust_level()"
+      - "log(device_trust.created, { user_id: user_id, device_fingerprint: device_fingerprint, device_name: device_name, trust_level: trust_level })"
+      - "emit: DeviceTrustedEvent(user_id: user_id, device_fingerprint: device_fingerprint, trust_level: trust_level })"
+
+  after_verify:
+    actions:
+      - "update_last_used_at()"
+      - "increment_usage_count()"
+      - "update_ip_address($context.ip_address)"
+      - "update_location($context.location)"
+      - "log(device_trust.verified, { user_id: user_id, device_fingerprint: device_fingerprint, ip_address: $context.ip_address })"
+      - "emit: DeviceVerifiedEvent(user_id: user_id, device_fingerprint: device_fingerprint, verified_at: now() })"
+
+  after_risk_score_update:
+    actions:
+      - "if risk_score > 0.8: require_mfa_for_device()"
+      - "if risk_score > 0.9: revoke_device_trust()"
+      - "log(device_trust.risk_updated, { user_id: user_id, device_fingerprint: device_fingerprint, new_risk_score: risk_score })"
+
+  after_trust_level_change:
+    actions:
+      - "update_expiry_based_on_new_trust_level()"
+      - "log(device_trust.level_changed, { user_id: user_id, device_fingerprint: device_fingerprint, new_level: trust_level })"
+      - "emit: DeviceTrustLevelChangedEvent(user_id: user_id, device_fingerprint: device_fingerprint, new_level: trust_level })"
+
+  before_delete:
+    actions:
+      - "log(device_trust.revoking, { user_id: user_id, device_fingerprint: device_fingerprint })"
+
+  after_delete:
+    actions:
+      - "invalidate_sessions_for_device(device_fingerprint)"
+      - "log(device_trust.revoked, { user_id: user_id, device_fingerprint: device_fingerprint })"
+      - "emit: DeviceTrustRevokedEvent(user_id: user_id, device_fingerprint: device_fingerprint, revoked_at: now() })"
+
+# =============================================================================
+# PRIORITY 4: Scheduled Jobs and Background Tasks
+# =============================================================================
+jobs:
+  cleanup_expired_devices:
+    schedule: "0 1 * * *"  # Daily at 1 AM
+    actions:
+      - "find_and_revoke_expired_devices()"
+      - "log(device_trust.cleanup_expired, { revoked_count: $revoked_count })"
+
+  update_risk_scores:
+    schedule: "0 */2 * * *"  # Every 2 hours
+    actions:
+      - "analyze_device_risk_factors()"
+      - "update_suspicious_device_risk_scores()"
+      - "log(device_trust.risk_scores_updated, { updated_count: $updated_count })"
+
+  cleanup_unused_devices:
+    schedule: "0 3 * * 0"  # Weekly on Sunday at 3 AM
+    actions:
+      - "find_devices_not_used_for(90.days)"
+      - "send_warning_emails_for_unused_devices()"
+      - "revoke_long_unused_devices(365.days)"
+      - "log(device_trust.cleanup_unused, { revoked_count: $revoked_count })"
+
+  refresh_device_locations:
+    schedule: "0 4 * * *"  # Daily at 4 AM
+    actions:
+      - "update_device_locations_based_on_recent_activity()"
+      - "detect_suspicious_location_changes()"
+      - "log(device_trust.locations_refreshed, { updated_count: $updated_count, suspicious_count: $suspicious_count })"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  # Check if device is expired
+  is_expired: "expires_at != null && expires_at < now()"
+
+  # Check if device is currently trusted
+  is_active: "is_trusted == true && !is_expired"
+
+  # Device age in days
+  age_days: "(now() - metadata.created_at).total_days"
+
+  # Days since last use
+  days_since_last_use: "last_used_at != null ? (now() - last_used_at).total_days : null"
+
+  # Time until expiry in hours
+  time_until_expiry_hours: "expires_at != null && expires_at > now() ? (expires_at - now()).total_hours : null"
+
+  # Is high-risk device
+  is_high_risk: "risk_score > 0.7"
+
+  # Requires MFA
+  requires_mfa_verification: "requires_mfa == true || is_high_risk == true"
+
+  # Trust status
+  trust_status: "is_trusted && !is_expired ? 'active' : (is_expired ? 'expired' : 'revoked')"
+
+  # Usage frequency (times per day)
+  usage_frequency_per_day: "usage_count > 0 && age_days > 0 ? usage_count as f64 / age_days as f64 : 0"
+
+  # Is recently used (last 7 days)
+  is_recently_used: "last_used_at != null && (now() - last_used_at).total_days <= 7"
+
+  # Risk level category
+  risk_category: "risk_score >= 0.8 ? 'high' : (risk_score >= 0.5 ? 'medium' : 'low')"

@@ -1,0 +1,105 @@
+# Permission Workflow - Granular permission management
+# Source: libs/modules/sapiens/docs/domain.md Section 3.3
+
+name: Permission
+model: permission.model.yaml
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  name_format:
+    when: [create, update]
+    condition: "name matches '^[a-z_]+:[a-z_]+$'"
+    message: "Permission name must be in format 'action:resource' (e.g., read:users, write:posts)"
+    code: INVALID_PERMISSION_FORMAT
+
+  unique_name:
+    when: [create, update]
+    # Note: deleted_at is now in metadata.deleted_at
+    condition: "count(Permission, name == $this.name && id != $this.id && metadata.deleted_at == null) == 0"
+    message: "Permission already exists"
+    code: PERMISSION_EXISTS
+
+  resource_matches_name:
+    when: [create, update]
+    condition: "resource == null || name.endsWith(':' + resource)"
+    message: "Resource must match the resource part of permission name"
+    code: RESOURCE_MISMATCH
+
+  no_roles_on_delete:
+    when: [delete]
+    condition: "count(RolePermission, permission_id == $this.id) == 0"
+    message: "Cannot delete permission that is assigned to roles"
+    code: PERMISSION_HAS_ROLES
+
+  no_users_on_delete:
+    when: [delete]
+    condition: "count(UserPermission, permission_id == $this.id && is_active == true) == 0"
+    message: "Cannot delete permission that is directly assigned to users"
+    code: PERMISSION_HAS_USER_GRANTS
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: read
+      - action: list
+    deny:
+      - action: create
+      - action: update
+      - action: delete
+
+  user:
+    allow:
+      - action: read
+        only: [id, name, description, resource, action]
+      - action: list
+    deny:
+      - action: create
+      - action: update
+      - action: delete
+
+  guest:
+    deny:
+      - all
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  before_create:
+    actions:
+      - "set: resource = name.split(':')[1]"
+      - "set: action = name.split(':')[0]"
+    if: "resource == null"
+
+  after_create:
+    actions:
+      - "log(permission.created, { permission_id: id, name: name })"
+      - "emit: PermissionCreatedEvent(permission_id: id, name: name, resource: resource, action: action)"
+
+  after_update:
+    actions:
+      - "log(permission.updated, { permission_id: id, name: name })"
+
+  after_delete:
+    actions:
+      - "log(permission.deleted, { permission_id: id, name: name })"
+      - "emit: PermissionDeletedEvent(permission_id: id, name: name)"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  role_count: "count(RolePermission, permission_id == id)"
+  direct_user_count: "count(UserPermission, permission_id == id && is_active == true)"
+  total_assignments: "role_count + direct_user_count"
+  display_label: "name + ' (' + role_count.toString() + ' roles)'"
+  is_widely_used: "total_assignments > 10"

@@ -1,0 +1,293 @@
+# BulkOperation Entity - Background job tracking for bulk user operations
+# Source: IMPLEMENTATION_ROADMAP.md Phase 3.2 Bulk Operations & Search
+# Hooks: pre_create, post_create, pre_start, post_start, pre_complete, post_complete
+
+models:
+  - name: BulkOperation
+    collection: bulk_operations
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Bulk operation job ID"
+
+      operation_type:
+        type: BulkOperationType
+        attributes: ["@required"]
+        description: "Type of bulk operation"
+
+      status:
+        type: BulkOperationStatus
+        attributes: ["@default(pending)"]
+        description: "Operation status"
+
+      created_by:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "User who initiated operation"
+
+      total_records:
+        type: int
+        attributes: ["@required", "@positive"]
+        description: "Total number of records to process"
+
+      processed_records:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of records processed"
+
+      successful_records:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of successfully processed records"
+
+      failed_records:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of failed records"
+
+      skipped_records:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of skipped records"
+
+      input_file_path:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Path to input file (CSV/Excel)"
+
+      output_file_path:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Path to output/results file"
+
+      error_file_path:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Path to error details file"
+
+      parameters:
+        type: json?
+        description: "Operation parameters and configuration"
+
+      progress_percentage:
+        type: float
+        attributes: ["@default(0.0)", "@min(0.0)", "@max(100.0)"]
+        description: "Operation progress percentage"
+
+      started_at:
+        type: datetime?
+        description: "When operation started"
+
+      completed_at:
+        type: datetime?
+        description: "When operation completed"
+
+      estimated_completion:
+        type: datetime?
+        description: "Estimated completion time"
+
+      error_message:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Error message if operation failed"
+
+      retry_count:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of retry attempts"
+
+      max_retries:
+        type: int
+        attributes: ["@default(3)", "@positive"]
+        description: "Maximum retry attempts"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      creator:
+        type: User
+        attributes: ["@one", "@foreign_key(created_by)"]
+
+      bulk_operation_results:
+        type: BulkOperationResult[]
+        attributes: ["@one_to_many", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [operation_type, status]
+      - type: index
+        fields: [created_by]
+      - type: index
+        fields: [status]
+      - type: index
+        fields: [created_at]
+      - type: index
+        fields: [started_at]
+      - type: index
+        fields: [completed_at]
+
+  - name: BulkOperationResult
+    collection: bulk_operation_results
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Result record ID"
+
+      bulk_operation_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(BulkOperation.id)"]
+        description: "Parent bulk operation"
+
+      row_number:
+        type: int
+        attributes: ["@required", "@positive"]
+        description: "Row number in input file"
+
+      record_type:
+        type: string
+        attributes: ["@required", "@max(50)"]
+        description: "Type of record (user, role, permission, etc.)"
+
+      status:
+        type: BulkOperationResultStatus
+        attributes: ["@required"]
+        description: "Processing status for this record"
+
+      input_data:
+        type: json?
+        description: "Original input data"
+
+      output_data:
+        type: json?
+        description: "Processing output data"
+
+      error_message:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Error message if processing failed"
+
+      warning_message:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Warning message for successful processing"
+
+      processed_at:
+        type: datetime?
+        description: "When this record was processed"
+
+      processing_duration_ms:
+        type: int?
+        attributes: ["@non_negative"]
+        description: "Processing duration in milliseconds"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      bulk_operation:
+        type: BulkOperation
+        attributes: ["@one", "@foreign_key(bulk_operation_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [bulk_operation_id, status]
+      - type: index
+        fields: [bulk_operation_id, record_type]
+      - type: index
+        fields: [processed_at]
+      - type: index
+        fields: [status]
+
+enums:
+  - name: BulkOperationType
+    variants:
+      - name: user_import
+        default: true
+        description: "Import users from file"
+      - name: user_export
+        description: "Export users to file"
+      - name: role_assignment
+        description: "Bulk role assignment"
+      - name: permission_grant
+        description: "Bulk permission grants"
+      - name: user_update
+        description: "Bulk user profile updates"
+      - name: user_suspension
+        description: "Bulk user suspension"
+      - name: user_deletion
+        description: "Bulk user deletion"
+
+  - name: BulkOperationStatus
+    variants:
+      - name: pending
+        default: true
+        description: "Waiting to start"
+      - name: running
+        description: "Currently processing"
+      - name: completed
+        description: "Successfully completed"
+      - name: failed
+        description: "Failed with errors"
+      - name: cancelled
+        description: "Cancelled by user"
+      - name: paused
+        description: "Temporarily paused"
+
+  - name: BulkOperationResultStatus
+    variants:
+      - name: pending
+        default: true
+        description: "Waiting to be processed"
+      - name: processing
+        description: "Currently being processed"
+      - name: success
+        description: "Successfully processed"
+      - name: failed
+        description: "Processing failed"
+      - name: skipped
+        description: "Record skipped"
+      - name: warning
+        description: "Processed with warnings"
+
+hooks:
+  # Bulk Operation Workflow Hooks
+  - event: pre_bulk_operation_create
+    trigger: before_creating_bulk_operation
+    description: "Validate bulk operation request, check permissions"
+    service: BulkOperationValidationService
+
+  - event: post_bulk_operation_create
+    trigger: after_creating_bulk_operation
+    description: "Initialize bulk operation, queue for processing"
+    service: BulkOperationInitializationService
+
+  - event: pre_bulk_operation_start
+    trigger: before_starting_bulk_operation
+    description: "Validate operation start, prepare resources"
+    service: BulkOperationStartValidationService
+
+  - event: post_bulk_operation_start
+    trigger: after_starting_bulk_operation
+    description: "Begin operation processing, update status"
+    service: BulkOperationProcessingService
+
+  - event: pre_bulk_operation_complete
+    trigger: before_completing_bulk_operation
+    description: "Validate operation completion, generate reports"
+    service: BulkOperationCompletionValidationService
+
+  - event: post_bulk_operation_complete
+    trigger: after_completing_bulk_operation
+    description: "Finalize operation, notify users, cleanup"
+    service: BulkOperationFinalizationService

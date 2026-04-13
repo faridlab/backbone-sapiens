@@ -1,0 +1,138 @@
+# DeviceTrust Entity - Trusted device management for enhanced security
+# Source: IMPLEMENTATION_ROADMAP.md Phase 2.2 Advanced Session Management
+# Hooks: pre_trust, post_trust, pre_untrust, post_untrust, pre_verify
+
+models:
+  - name: DeviceTrust
+    collection: device_trusts
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Device trust record ID"
+
+      user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "User who owns this device"
+
+      device_fingerprint:
+        type: string
+        attributes: ["@required", "@unique", "@length(128)"]
+        description: "Unique device fingerprint hash"
+
+      device_name:
+        type: string
+        attributes: ["@required", "@max(100)"]
+        description: "User-friendly device name"
+
+      device_type:
+        type: DeviceTrustType
+        attributes: ["@required"]
+        description: "Type of trusted device"
+
+      trust_level:
+        type: TrustLevel
+        attributes: ["@required", "@default(standard)"]
+        description: "Trust level for this device"
+
+      is_trusted:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Device trusted status"
+
+      trusted_at:
+        type: datetime
+        attributes: ["@default(now)"]
+        description: "When device was marked as trusted"
+
+      expires_at:
+        type: datetime?
+        description: "Trust expiry time (null = permanent)"
+
+      last_used_at:
+        type: datetime
+        attributes: ["@required", "@default(now)"]
+        description: "Last time device was used"
+
+      usage_count:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of times device has been used"
+
+      ip_address:
+        type: ip?
+        description: "Last known IP address"
+
+      location:
+        type: json?
+        description: "Geographic location data (city, country, coordinates)"
+
+      risk_score:
+        type: float
+        attributes: ["@default(0.0)", "@min(0.0)", "@max(1.0)"]
+        description: "Device risk score (0.0 = safe, 1.0 = high risk)"
+
+      requires_mfa:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Device requires MFA verification"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [user_id, is_trusted]
+      - type: index
+        fields: [device_fingerprint]
+      - type: index
+        fields: [user_id, trust_level]
+      - type: index
+        fields: [expires_at]
+      - type: index
+        fields: [last_used_at]
+      - type: index
+        fields: [risk_score]
+      - type: unique
+        fields: [device_fingerprint, "(metadata->>'deleted_at')"]
+      - type: unique
+        fields: [user_id, device_name, "(metadata->>'deleted_at')"]
+
+enums:
+  - name: DeviceTrustType
+    variants:
+      - name: desktop
+        default: true
+        description: "Desktop computer"
+      - name: laptop
+        description: "Laptop computer"
+      - name: mobile
+        description: "Mobile phone"
+      - name: tablet
+        description: "Tablet device"
+      - name: browser
+        description: "Web browser"
+      - name: application
+        description: "Desktop application"
+
+  - name: TrustLevel
+    variants:
+      - name: temporary
+        description: "Temporary trust (24 hours)"
+      - name: standard
+        default: true
+        description: "Standard trust (30 days)"
+      - name: trusted
+        description: "High trust (90 days)"
+      - name: permanent
+        description: "Permanent trust"

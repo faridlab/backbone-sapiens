@@ -1,0 +1,130 @@
+# OAuth Provider Workflow - Social login provider management and user linking
+# Source: IMPLEMENTATION_ROADMAP.md Phase 4.1 OAuth Integration
+
+name: OAuthProvider
+model: OAuthProvider
+
+# =============================================================================
+# PRIORITY 1: State Machine - OAuth Provider Configuration
+# =============================================================================
+states:
+  field: is_active
+
+  values:
+    active:
+      initial: true
+      on_enter:
+        - "log(oauth_provider.activated, { provider_name: provider_name })"
+
+    inactive:
+      on_enter:
+        - "log(oauth_provider.deactivated, { provider_name: provider_name })"
+
+    maintenance:
+      final: true
+      on_enter:
+        - "log(oauth_provider.maintenance, { provider_name: provider_name })"
+
+  transitions:
+    activate:
+      from: [inactive, maintenance]
+      to: active
+      roles: [admin]
+
+    deactivate:
+      from: [active, maintenance]
+      to: inactive
+      roles: [admin]
+
+    maintenance:
+      from: [active, inactive]
+      to: maintenance
+      roles: [admin]
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  unique_provider:
+    when: [create, update]
+    condition: "count(OAuthProvider, provider_name == $this.provider_name && (metadata.deleted_at == null)) == 0"
+    message: "OAuth provider already exists"
+    code: PROVIDER_ALREADY_EXISTS
+
+  valid_configuration:
+    when: [create, update]
+    condition: "client_id != null && client_secret != null && redirect_uri != null && authorization_url != null && token_url != null && user_info_url != null"
+    message: "Incomplete OAuth provider configuration"
+    code: INCOMPLETE_CONFIGURATION
+
+  valid_redirect_uri:
+    when: [create, update]
+    condition: "redirect_uri starts_with 'https://' || redirect_uri starts_with 'http://localhost'"
+    message: "Invalid redirect URI - must use HTTPS or localhost"
+    code: INVALID_REDIRECT_URI
+
+  scopes_not_empty:
+    when: [create, update]
+    condition: "scopes != null && scopes.length > 0"
+    message: "OAuth scopes cannot be empty"
+    code: EMPTY_SCOPES
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: read
+      - action: create
+      - action: update
+      - action: delete
+      - action: list
+    deny:
+      - action: change_configuration
+        if: "$this.is_active == true"
+
+# =============================================================================
+# PRIORITY 4: Triggers (Side Effects)
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(oauth_provider.created, { provider_name: provider_name, created_by: created_by })"
+      - "emit: OAuthProviderCreatedEvent(provider_id: id, provider_name: provider_name })"
+
+  after_update_is_active:
+    actions:
+      - "log(oauth_provider.status_changed, { provider_name: provider_name, old_status: $old.is_active, new_status: is_active })"
+      - "emit: OAuthProviderStatusChangedEvent(provider_id: id, provider_name: provider_name, old_status: $old.is_active, new_status: is_active })"
+
+  before_delete:
+    actions:
+      - "validate_no_active_links()"
+      - "log(oauth_provider.deleting, { provider_name: provider_name })"
+
+  after_delete:
+    actions:
+      - "delete_all_user_links() if $context.force_delete == true"
+      - "log(oauth_provider.deleted, { provider_name: provider_name })"
+      - "emit: OAuthProviderDeletedEvent(provider_id: id, provider_name: provider_name })"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  # Count of linked users
+  linked_users_count: "user_oauth_links.count(is_active == true)"
+
+  # Check if provider has any active users
+  has_active_users: "user_oauth_links.any(is_active == true)"
+
+  # Provider configuration completeness score
+  configuration_score: "calculate_configuration_score()"
+
+  # Provider display status
+  display_status: "is_active ? 'Active' : (maintenance ? 'Under Maintenance' : 'Inactive')"

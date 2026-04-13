@@ -1,0 +1,189 @@
+# SAMLProvider Workflow - Enterprise SSO SAML 2.0 configuration
+# Source: libs/modules/sapiens/docs/spec-sapiens.md Section 6.2
+
+name: SAMLProvider
+model: saml_provider.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - Provider Lifecycle
+# =============================================================================
+states:
+  field: status
+
+  values:
+    draft:
+      initial: true
+      on_enter:
+        - "log(saml_provider.draft, { provider_name: name })"
+
+    active:
+      on_enter:
+        - "log(saml_provider.activated, { provider_name: name, entity_id: entity_id })"
+        - "emit: SAMLProviderActivatedEvent(provider_id: id, provider_name: name)"
+
+    inactive:
+      final: true
+      on_enter:
+        - "log(saml_provider.deactivated, { provider_name: name })"
+
+  transitions:
+    activate:
+      from: [draft, inactive]
+      to: active
+      roles: [admin]
+      condition: "metadata_valid() && certificate_valid()"
+
+    deactivate:
+      from: active
+      to: inactive
+      roles: [admin]
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  name_required:
+    when: [create, update]
+    condition: "name != null && name.length >= 3"
+    message: "Provider name (min 3 characters) is required"
+    code: NAME_REQUIRED
+
+  entity_id_required:
+    when: [create, update]
+    condition: "entity_id != null && entity_id.length > 0"
+    message: "Entity ID is required"
+    code: ENTITY_ID_REQUIRED
+
+  sso_url_required:
+    when: [create, update]
+    condition: "sso_url != null && is_valid_url(sso_url)"
+    message: "Valid SSO URL is required"
+    code: SSO_URL_REQUIRED
+
+  slo_url_valid:
+    when: [create, update]
+    condition: "slo_url == null || is_valid_url(slo_url)"
+    message: "SLO URL must be valid if provided"
+    code: SLO_URL_INVALID
+
+  certificate_required_for_active:
+    when: [create, update]
+    condition: "status != 'active' || (certificate != null && certificate.length > 0)"
+    message: "X.509 certificate is required for active providers"
+    code: CERTIFICATE_REQUIRED
+
+  certificate_valid_format:
+    when: [create, update]
+    condition: "certificate == null || is_valid_x509_certificate(certificate)"
+    message: "Invalid X.509 certificate format"
+    code: CERTIFICATE_INVALID
+
+  metadata_url_valid:
+    when: [create, update]
+    condition: "metadata_url == null || is_valid_url(metadata_url)"
+    message: "Metadata URL must be valid if provided"
+    code: METADATA_URL_INVALID
+
+  name_id_format_valid:
+    when: [create, update]
+    condition: "name_id_format == null || name_id_format in ['urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified', 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress', 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent', 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient']"
+    message: "Invalid NameID format"
+    code: NAME_ID_FORMAT_INVALID
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: create
+      - action: read
+      - action: list
+      - action: update
+      - action: activate
+      - action: deactivate
+      - action: delete
+
+  user:
+    deny:
+      - all
+
+  guest:
+    deny:
+      - all
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(saml_provider.created, { provider_name: name, entity_id: entity_id })"
+      - "emit: SAMLProviderCreatedEvent(provider_id: id, provider_name: name, entity_id: entity_id)"
+
+  after_update:
+    actions:
+      - "log(saml_provider.updated, { id: id, updated_fields: $changed_fields })"
+      - "invalidate_saml_cache(id)"
+
+  after_activate:
+    actions:
+      - "log(saml_provider.activated, { provider_name: name })"
+      - "emit: SAMLProviderActivatedEvent(provider_id: id, provider_name: name)"
+      - "test_saml_connection(id)"
+
+  after_deactivate:
+    actions:
+      - "log(saml_provider.deactivated, { provider_name: name })"
+      - "invalidate_saml_cache(id)"
+      - "revoke_all_saml_sessions(id)"
+
+  scheduled_metadata_refresh:
+    schedule: "every 1.day at 04:00"
+    actions:
+      - "trigger: refresh_provider_metadata"
+    description: "Refresh SAML metadata from providers"
+
+  scheduled_certificate_check:
+    schedule: "every 1.day at 03:00"
+    actions:
+      - "trigger: check_expiring_certificates"
+    description: "Check for certificates expiring within 30 days"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  is_active: "status == 'active'"
+
+  has_metadata_url: "metadata_url.length > 0"
+
+  has_slo: "slo_url.length > 0"
+
+  wants_encrypted_assertions: "encrypt_assertions == true"
+
+  certificate_expires_at: "parse_certificate_expiry(certificate)"
+
+  certificate_expires_soon: "certificate_expires_at != null && (certificate_expires_at - now()).days <= 30"
+
+  is_certificate_expired: "certificate_expires_at != null && certificate_expires_at <= now()"
+
+  days_until_certificate_expiry: "certificate_expires_at != null ? (certificate_expires_at - now()).days.max(0) : null"
+
+  # Authentication settings summary
+  authn_context_classes_count: "authn_context_classes != null ? authn_context_classes.size : 0"
+
+  # Check if provider is properly configured
+  is_configured: "entity_id.length > 0 && sso_url.length > 0 && certificate.length > 0"
+
+  # Get display name
+  display_name: "display_name.length > 0 ? display_name : name"
+
+  # Metadata status
+  metadata_freshness: "metadata_last_refreshed != null ? (now() - metadata_last_refreshed).days : null"
+
+  needs_metadata_refresh: "metadata_url.length > 0 && (metadata_last_refreshed == null || (now() - metadata_last_refreshed).hours >= 24)"

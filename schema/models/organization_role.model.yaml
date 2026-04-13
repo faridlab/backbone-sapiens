@@ -1,0 +1,51 @@
+# OrganizationRole Entity - Organization-specific role definitions
+# Source: libs/modules/sapiens/docs/spec-sapiens.md
+
+models:
+  - name: OrganizationRole
+    collection: organization_roles
+    soft_delete: true
+    description: "Organization-specific role definitions"
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      organization_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(corpus.Organization.id)"]
+        description: "Organization ID"
+
+      name:
+        type: string
+        attributes: ["@required", "@max(100)"]
+        description: "Role name"
+
+      description:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Role description"
+
+      permissions:
+        type: json?
+        description: "Role permissions"
+
+      is_active:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Whether role is active"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    indexes:
+      - type: index
+        fields: [organization_id]
+      - type: index
+        fields: [organization_id, name]
+      - type: index
+        fields: [is_active]

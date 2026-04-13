@@ -1,0 +1,723 @@
+# Workflow Entity - Business workflow orchestration and state management
+# Source: IMPLEMENTATION_ROADMAP.md - All business workflows across all phases
+# Hooks: pre_start, post_start, pre_step_execute, post_step_execute, pre_complete, post_complete
+
+models:
+  - name: Workflow
+    collection: workflows
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Workflow instance ID"
+
+      workflow_type:
+        type: WorkflowType
+        attributes: ["@required"]
+        description: "Type of workflow"
+
+      status:
+        type: WorkflowStatus
+        attributes: ["@default(pending)"]
+        description: "Current workflow status"
+
+      initiator_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(sapiens.User.id)"]
+        description: "User who initiated workflow"
+
+      target_user_id:
+        type: uuid?
+        attributes: ["@foreign_key(sapiens.User.id)"]
+        description: "User this workflow targets (if different from initiator)"
+
+      title:
+        type: string
+        attributes: ["@required", "@max(255)"]
+        description: "Workflow title"
+
+      description:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Workflow description"
+
+      context:
+        type: json?
+        description: "Workflow context and parameters"
+
+      current_step:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Current step number"
+
+      total_steps:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Total number of steps"
+
+      progress_percentage:
+        type: float
+        attributes: ["@default(0.0)", "@min(0.0)", "@max(100.0)"]
+        description: "Workflow progress percentage"
+
+      started_at:
+        type: datetime?
+        description: "When workflow started"
+
+      completed_at:
+        type: datetime?
+        description: "When workflow completed"
+
+      failed_at:
+        type: datetime?
+        description: "When workflow failed"
+
+      expires_at:
+        type: datetime?
+        attributes: ["@future"]
+        description: "Workflow expiry time"
+
+      retry_count:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of retry attempts"
+
+      max_retries:
+        type: int
+        attributes: ["@default(3)", "@non_negative"]
+        description: "Maximum retry attempts"
+
+      error_message:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Error message if workflow failed"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      initiator:
+        type: User
+        attributes: ["@one", "@foreign_key(initiator_id)"]
+
+      target_user:
+        type: User?
+        attributes: ["@one", "@foreign_key(target_user_id)"]
+
+      workflow_steps:
+        type: WorkflowStep[]
+        attributes: ["@one_to_many", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [workflow_type, status]
+      - type: index
+        fields: [initiator_id]
+      - type: index
+        fields: [target_user_id]
+      - type: index
+        fields: [status, created_at]
+      - type: index
+        fields: [started_at]
+      - type: index
+        fields: [expires_at]
+
+  - name: WorkflowStep
+    collection: workflow_steps
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Workflow step ID"
+
+      workflow_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Workflow.id)"]
+        description: "Parent workflow"
+
+      step_number:
+        type: int
+        attributes: ["@required", "@positive"]
+        description: "Step number in sequence"
+
+      step_type:
+        type: WorkflowStepType
+        attributes: ["@required"]
+        description: "Type of workflow step"
+
+      step_name:
+        type: string
+        attributes: ["@required", "@max(100)"]
+        description: "Step name"
+
+      description:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Step description"
+
+      status:
+        type: WorkflowStepStatus
+        attributes: ["@default(pending)"]
+        description: "Step status"
+
+      parameters:
+        type: json?
+        description: "Step-specific parameters"
+
+      result:
+        type: json?
+        description: "Step execution result"
+
+      started_at:
+        type: datetime?
+        description: "When step started"
+
+      completed_at:
+        type: datetime?
+        description: "When step completed"
+
+      failed_at:
+        type: datetime?
+        description: "When step failed"
+
+      duration_ms:
+        type: int?
+        attributes: ["@non_negative"]
+        description: "Step execution duration in milliseconds"
+
+      error_message:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Error message if step failed"
+
+      retry_count:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of step retry attempts"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      workflow:
+        type: Workflow
+        attributes: ["@one", "@foreign_key(workflow_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [workflow_id, step_number]
+      - type: index
+        fields: [workflow_id, status]
+      - type: index
+        fields: [step_type, status]
+      - type: index
+        fields: [started_at]
+      - type: index
+        fields: [completed_at]
+
+  - name: WorkflowDefinition
+    collection: workflow_definitions
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Workflow definition ID"
+
+      name:
+        type: string
+        attributes: ["@required", "@max(255)", "@unique"]
+        description: "Workflow definition name"
+
+      workflow_type:
+        type: WorkflowType
+        attributes: ["@required"]
+        description: "Type of workflow"
+
+      description:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Workflow description"
+
+      trigger_type:
+        type: TriggerType
+        attributes: ["@required"]
+        description: "How workflow is triggered"
+
+      trigger_config:
+        type: json?
+        description: "Trigger configuration (cron schedule, events, etc.)"
+
+      is_active:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Whether workflow definition is active"
+
+      timeout_minutes:
+        type: int?
+        attributes: ["@positive"]
+        description: "Default timeout in minutes"
+
+      max_retries:
+        type: int
+        attributes: ["@default(3)", "@non_negative"]
+        description: "Maximum retry attempts"
+
+      created_by:
+        type: uuid
+        attributes: ["@required", "@foreign_key(sapiens.User.id)"]
+        description: "User who created workflow definition"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      created_by_user:
+        type: User
+        attributes: ["@one", "@foreign_key(created_by)"]
+
+      workflow_actions:
+        type: WorkflowAction[]
+        attributes: ["@one_to_many", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [workflow_type]
+      - type: index
+        fields: [trigger_type]
+      - type: index
+        fields: [is_active]
+      - type: unique
+        fields: [name, "(metadata->>'deleted_at')"]
+
+  - name: WorkflowAction
+    collection: workflow_actions
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Workflow action ID"
+
+      workflow_definition_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(WorkflowDefinition.id)"]
+        description: "Parent workflow definition"
+
+      action_type:
+        type: ActionType
+        attributes: ["@required"]
+        description: "Type of action"
+
+      action_name:
+        type: string
+        attributes: ["@required", "@max(100)"]
+        description: "Action name"
+
+      description:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Action description"
+
+      step_order:
+        type: int
+        attributes: ["@required", "@non_negative"]
+        description: "Action order in workflow"
+
+      parameters:
+        type: json?
+        description: "Action parameters configuration"
+
+      conditions:
+        type: json?
+        description: "Conditions for action execution"
+
+      is_required:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Whether action is required"
+
+      timeout_minutes:
+        type: int?
+        attributes: ["@positive"]
+        description: "Action-specific timeout"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      workflow_definition:
+        type: WorkflowDefinition
+        attributes: ["@one", "@foreign_key(workflow_definition_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [workflow_definition_id, step_order]
+      - type: index
+        fields: [action_type]
+      - type: index
+        fields: [is_required]
+
+  - name: WorkflowExecution
+    collection: workflow_executions
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Workflow execution ID"
+
+      workflow_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Workflow.id)"]
+        description: "Parent workflow instance"
+
+      workflow_definition_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(WorkflowDefinition.id)"]
+        description: "Workflow definition used"
+
+      status:
+        type: WorkflowExecutionStatus
+        attributes: ["@default(pending)"]
+        description: "Execution status"
+
+      current_action:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Current action number"
+
+      total_actions:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Total number of actions"
+
+      progress_percentage:
+        type: float
+        attributes: ["@default(0.0)", "@min(0.0)", "@max(100.0)"]
+        description: "Execution progress percentage"
+
+      timeout_minutes:
+        type: int?
+        attributes: ["@positive"]
+        description: "Execution timeout in minutes"
+
+      started_at:
+        type: datetime?
+        description: "When execution started"
+
+      completed_at:
+        type: datetime?
+        description: "When execution completed"
+
+      failed_at:
+        type: datetime?
+        description: "When execution failed"
+
+      cancelled_at:
+        type: datetime?
+        description: "When execution was cancelled"
+
+      error_message:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Error message if execution failed"
+
+      execution_context:
+        type: json?
+        description: "Execution context data"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      workflow:
+        type: Workflow
+        attributes: ["@one", "@foreign_key(workflow_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+      workflow_definition:
+        type: WorkflowDefinition
+        attributes: ["@one", "@foreign_key(workflow_definition_id)"]
+
+      action_executions:
+        type: WorkflowActionExecution[]
+        attributes: ["@one_to_many", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [workflow_id]
+      - type: index
+        fields: [workflow_definition_id]
+      - type: index
+        fields: [status]
+      - type: index
+        fields: [started_at]
+      - type: index
+        fields: [completed_at]
+
+  - name: WorkflowActionExecution
+    collection: workflow_action_executions
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Action execution ID"
+
+      workflow_execution_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(WorkflowExecution.id)"]
+        description: "Parent workflow execution"
+
+      workflow_action_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(WorkflowAction.id)"]
+        description: "Action definition"
+
+      action_order:
+        type: int
+        attributes: ["@required", "@non_negative"]
+        description: "Action order in execution"
+
+      status:
+        type: WorkflowActionExecutionStatus
+        attributes: ["@default(pending)"]
+        description: "Action execution status"
+
+      input_data:
+        type: json?
+        description: "Input data for action"
+
+      output_data:
+        type: json?
+        description: "Output data from action"
+
+      started_at:
+        type: datetime?
+        description: "When action execution started"
+
+      completed_at:
+        type: datetime?
+        description: "When action execution completed"
+
+      failed_at:
+        type: datetime?
+        description: "When action execution failed"
+
+      duration_ms:
+        type: int?
+        attributes: ["@non_negative"]
+        description: "Action execution duration in milliseconds"
+
+      error_message:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Error message if action failed"
+
+      retry_count:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of retry attempts"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      workflow_execution:
+        type: WorkflowExecution
+        attributes: ["@one", "@foreign_key(workflow_execution_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+      workflow_action:
+        type: WorkflowAction
+        attributes: ["@one", "@foreign_key(workflow_action_id)"]
+
+    indexes:
+      - type: index
+        fields: [workflow_execution_id, action_order]
+      - type: index
+        fields: [workflow_action_id]
+      - type: index
+        fields: [status]
+      - type: index
+        fields: [started_at]
+      - type: index
+        fields: [completed_at]
+
+enums:
+  - name: WorkflowType
+    variants:
+      - name: user_registration
+        default: true
+        description: "User registration workflow"
+      - name: email_verification
+        description: "Email verification workflow"
+      - name: password_reset
+        description: "Password reset workflow"
+      - name: account_suspension
+        description: "Account suspension workflow"
+      - name: role_assignment
+        description: "Role assignment workflow"
+      - name: permission_grant
+        description: "Permission grant workflow"
+      - name: mfa_setup
+        description: "MFA setup workflow"
+      - name: email_change
+        description: "Email change workflow"
+      - name: account_recovery
+        description: "Account recovery workflow"
+      - name: bulk_user_import
+        description: "Bulk user import workflow"
+      - name: oauth_linking
+        description: "OAuth account linking workflow"
+      - name: device_trust
+        description: "Device trust workflow"
+      - name: security_review
+        description: "Security review workflow"
+      - name: compliance_audit
+        description: "Compliance audit workflow"
+
+  - name: WorkflowStatus
+    variants:
+      - name: pending
+        default: true
+        description: "Waiting to start"
+      - name: running
+        description: "Currently executing"
+      - name: paused
+        description: "Temporarily paused"
+      - name: completed
+        description: "Successfully completed"
+      - name: failed
+        description: "Failed with errors"
+      - name: cancelled
+        description: "Cancelled by user"
+      - name: expired
+        description: "Expired without completion"
+
+  - name: WorkflowStepType
+    variants:
+      - name: validation
+        default: true
+        description: "Data validation step"
+      - name: database_operation
+        description: "Database operation step"
+      - name: external_service
+        description: "External service call step"
+      - name: notification
+        description: "Send notification step"
+      - name: approval
+        description: "Manual approval step"
+      - name: email_send
+        description: "Send email step"
+      - name: security_check
+        description: "Security validation step"
+      - name: audit_log
+        description: "Create audit log step"
+      - name: user_interaction
+        description: "User interaction required step"
+      - name: background_job
+        description: "Background job execution step"
+
+  - name: WorkflowStepStatus
+    variants:
+      - name: pending
+        default: true
+        description: "Waiting to execute"
+      - name: running
+        description: "Currently executing"
+      - name: completed
+        description: "Successfully completed"
+      - name: failed
+        description: "Failed with errors"
+      - name: skipped
+        description: "Skipped (conditional)"
+      - name: cancelled
+        description: "Cancelled"
+
+  - name: TriggerType
+    variants:
+      - name: manual
+        default: true
+        description: "Manually triggered by user"
+      - name: scheduled
+        description: "Triggered by schedule (cron)"
+      - name: event_based
+        description: "Triggered by system events"
+      - name: webhook
+        description: "Triggered by webhook call"
+      - name: api_call
+        description: "Triggered by API call"
+
+  - name: ActionType
+    variants:
+      - name: send_email
+        default: true
+        description: "Send email notification"
+      - name: create_task
+        description: "Create a task"
+      - name: update_record
+        description: "Update database record"
+      - name: call_api
+        description: "Call external API"
+      - name: approve
+        description: "Manual approval step"
+      - name: reject
+        description: "Manual rejection step"
+      - name: notify_user
+        description: "Send user notification"
+      - name: schedule_job
+        description: "Schedule background job"
+
+  - name: WorkflowExecutionStatus
+    variants:
+      - name: pending
+        default: true
+        description: "Waiting to start"
+      - name: running
+        description: "Currently executing"
+      - name: paused
+        description: "Temporarily paused"
+      - name: completed
+        description: "Successfully completed"
+      - name: failed
+        description: "Failed with errors"
+      - name: cancelled
+        description: "Cancelled by user"
+      - name: timeout
+        description: "Execution timed out"
+
+  - name: WorkflowActionExecutionStatus
+    variants:
+      - name: pending
+        default: true
+        description: "Waiting to execute"
+      - name: processing
+        description: "Currently being processed"
+      - name: success
+        description: "Successfully processed"
+      - name: failed
+        description: "Processing failed"
+      - name: skipped
+        description: "Record skipped"
+      - name: warning
+        description: "Completed with warnings"

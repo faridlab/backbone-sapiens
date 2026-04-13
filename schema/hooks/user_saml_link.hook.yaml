@@ -1,0 +1,176 @@
+# UserSAMLLink Workflow - User SAML account linking
+# Source: libs/modules/sapiens/docs/spec-sapiens.md Section 6.2
+
+name: UserSAMLLink
+model: user_saml_link.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - Link Lifecycle
+# =============================================================================
+states:
+  field: status
+
+  values:
+    active:
+      initial: true
+      on_enter:
+        - "log(saml_link.created, { user_id: user_id, provider_id: provider_id, saml_user_id: saml_user_id })"
+        - "emit: SAMLLinkCreatedEvent(user_id: user_id, provider_id: provider_id, saml_user_id: saml_user_id)"
+
+    inactive:
+      final: true
+      on_enter:
+        - "log(saml_link.deactivated, { user_id: user_id, provider_id: provider_id })"
+        - "emit: SAMLLinkDeactivatedEvent(user_id: user_id, provider_id: provider_id)"
+
+  transitions:
+    deactivate:
+      from: active
+      to: inactive
+      roles: [admin, owner]
+      condition: "$actor.id == user_id || $actor.has_role('admin')"
+
+    reactivate:
+      from: inactive
+      to: active
+      roles: [admin]
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  unique_user_provider:
+    when: [create]
+    condition: "count(UserSAMLLink, user_id == $this.user_id && provider_id == $this.provider_id && status == 'active') == 0"
+    message: "User already has an active SAML link for this provider"
+    code: DUPLICATE_LINK
+
+  unique_saml_user:
+    when: [create]
+    condition: "count(UserSAMLLink, provider_id == $this.provider_id && saml_user_id == $this.saml_user_id && status == 'active') == 0"
+    message: "SAML user ID is already linked to another account"
+    code: SAML_USER_ALREADY_LINKED
+
+  saml_user_id_required:
+    when: [create]
+    condition: "saml_user_id != null && saml_user_id.length > 0"
+    message: "SAML user ID is required"
+    code: SAML_USER_ID_REQUIRED
+
+  provider_required:
+    when: [create]
+    condition: "provider_id != null"
+    message: "Provider ID is required"
+    code: PROVIDER_REQUIRED
+
+  provider_must_be_active:
+    when: [create]
+    condition: "SAMLProvider.find(provider_id).status == 'active'"
+    message: "Cannot link to inactive SAML provider"
+    code: PROVIDER_INACTIVE
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: create
+      - action: read
+      - action: list
+      - action: update
+      - action: deactivate
+      - action: delete
+
+  user:
+    allow:
+      - action: read
+        if: "user_id == $actor.id"
+      - action: create
+        if: "user_id == $actor.id"
+      - action: deactivate
+        if: "user_id == $actor.id"
+    deny:
+      - action: list
+        if: "user_id != $actor.id"
+      - action: update
+      - action: delete
+
+  guest:
+    deny:
+      - all
+
+  system:
+    allow:
+      - action: create
+      - action: read
+      - action: update
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(saml_link.created, { user_id: user_id, provider_id: provider_id, saml_user_id: saml_user_id, saml_email: saml_email })"
+      - "emit: SAMLLinkCreatedEvent(user_id: user_id, provider_id: provider_id, saml_user_id: saml_user_id)"
+      - "invalidate_user_auth_cache(user_id)"
+
+  after_update:
+    actions:
+      - "log(saml_link.updated, { id: id, updated_fields: $changed_fields })"
+      - "invalidate_user_auth_cache(user_id)"
+
+  after_deactivate:
+    actions:
+      - "log(saml_link.deactivated, { user_id: user_id, provider_id: provider_id })"
+      - "emit: SAMLLinkDeactivatedEvent(user_id: user_id, provider_id: provider_id)"
+      - "invalidate_user_auth_cache(user_id)"
+      - "notify(user_id, saml_link_deactivated, { provider_name: SAMLProvider.find(provider_id).name })"
+    if: "user_id != $actor.id"
+
+  scheduled_sync:
+    schedule: "every 1.day at 05:00"
+    actions:
+      - "trigger: sync_saml_user_attributes"
+    description: "Sync user attributes from SAML provider"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  is_active: "status == 'active'"
+
+  provider_name: "SAMLProvider.find(provider_id).name"
+
+  provider_entity_id: "SAMLProvider.find(provider_id).entity_id"
+
+  linked_date: "metadata.created_at"
+
+  link_age_days: "(now() - metadata.created_at).days"
+
+  last_used_days_ago: "last_used_at != null ? (now() - last_used_at).days : null"
+
+  is_recently_used: "last_used_at != null && (now() - last_used_at).days < 30"
+
+  has_email: "saml_email != null && saml_email.length > 0"
+
+  has_attributes: "saml_attributes != null && saml_attributes.size > 0"
+
+  # User info from SAML
+  display_name: "saml_attributes?.name ?? saml_email ?? saml_user_id"
+
+  # Check if user can login via SAML
+  can_login_via_saml: "status == 'active' && SAMLProvider.find(provider_id).status == 'active'"
+
+  # Sync status
+  needs_sync: "last_synced_at == null || (now() - last_synced_at).hours >= 24"
+
+  sync_age_hours: "last_synced_at != null ? (now() - last_synced_at).hours : null"
+
+  # Check if this is the primary auth method
+  is_primary_auth: "user.default_auth_method == 'saml' && user.default_saml_provider_id == provider_id"

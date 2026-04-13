@@ -1,0 +1,104 @@
+# UserPermission Entity - Direct permission grants to users (Hybrid RBAC)
+# Source: libs/modules/sapiens/docs/domain.md Section 3.4
+# Purpose: Exception-based, temporary, or resource-scoped permission grants
+
+models:
+  - name: UserPermission
+    collection: user_permissions
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+
+      user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "User receiving the permission"
+
+      permission_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Permission.id)"]
+        description: "Permission being granted"
+
+      granted_at:
+        type: datetime
+        attributes: ["@default(now)"]
+
+      granted_by:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "Admin who granted the permission"
+
+      reason:
+        type: string
+        attributes: ["@required", "@min(10)", "@max(500)"]
+        description: "Mandatory explanation for audit trail"
+
+      expires_at:
+        type: datetime?
+        attributes: ["@future"]
+        description: "For temporary access, must be in future"
+
+      resource_id:
+        type: string?
+        attributes: ["@max(100)", "@exclude_from_foreign_key_check"]
+        description: "Scope to specific resource instance"
+
+      resource_type:
+        type: string?
+        attributes: ["@max(50)"]
+        description: "Type of resource (e.g., project, document)"
+
+      is_active:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Revocation flag"
+
+      revoked_at: datetime?
+
+      revoked_by:
+        type: uuid?
+        attributes: ["@foreign_key(User.id)"]
+
+      revoked_reason:
+        type: string?
+        attributes: ["@max(500)"]
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)"]
+
+      permission:
+        type: Permission
+        attributes: ["@one", "@foreign_key(permission_id)"]
+
+      granter:
+        type: User
+        attributes: ["@one", "@foreign_key(granted_by)"]
+
+      revoker:
+        type: User?
+        attributes: ["@one", "@foreign_key(revoked_by)"]
+
+    indexes:
+      - type: index
+        fields: [user_id, permission_id]
+      - type: index
+        fields: [user_id, is_active]
+      - type: index
+        fields: [expires_at]
+      - type: index
+        fields: [granted_at]
+      - type: index
+        fields: [resource_id, resource_type]
+      - type: unique
+        fields: [user_id, permission_id]
+        where: "is_active = TRUE"

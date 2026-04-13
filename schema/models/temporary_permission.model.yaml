@@ -1,0 +1,101 @@
+# TemporaryPermission Entity - Time-bound permission grants
+# Source: libs/modules/sapiens/docs/spec-sapiens.md Section 3.2
+
+models:
+  - name: TemporaryPermission
+    collection: temporary_permissions
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "User receiving the permission"
+
+      permission_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Permission.id)"]
+        description: "Granted permission"
+
+      granted_by:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "Admin who granted this permission"
+
+      granted_at:
+        type: datetime
+        attributes: ["@required", "@default(now)"]
+        description: "Grant timestamp"
+
+      expires_at:
+        type: datetime
+        attributes: ["@required"]
+        description: "When this permission expires"
+
+      revoked_at:
+        type: datetime?
+        description: "If revoked early"
+
+      revoked_by:
+        type: uuid?
+        attributes: ["@foreign_key(User.id)"]
+        description: "Who revoked this permission"
+
+      reason:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Justification for the grant"
+
+      notified_before_expiry:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "24h notice sent"
+
+      status:
+        type: TemporaryPermissionStatus
+        attributes: ["@default(pending)"]
+        description: "Permission status"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)"]
+
+      permission:
+        type: Permission
+        attributes: ["@one", "@foreign_key(permission_id)"]
+
+      granter:
+        type: User
+        attributes: ["@one", "@foreign_key(granted_by)"]
+
+    indexes:
+      - type: index
+        fields: [user_id, expires_at]
+      - type: index
+        fields: [expires_at]
+      - type: index
+        fields: [revoked_at]
+
+enums:
+  - name: TemporaryPermissionStatus
+    variants:
+      - name: pending
+        default: true
+        description: "Permission requested but not yet active"
+      - name: active
+        description: "Permission is active"
+      - name: expired
+        description: "Permission has expired"
+      - name: revoked
+        description: "Permission was revoked early"

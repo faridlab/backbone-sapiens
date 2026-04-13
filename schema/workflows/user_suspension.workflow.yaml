@@ -1,0 +1,238 @@
+# User Suspension Flow
+# Multi-step business process for suspending user accounts
+# Source: BRD - Admin User Management
+
+name: UserSuspension
+description: |
+  User account suspension process including:
+  - Session termination
+  - Access revocation
+  - Notification to user
+  - Optional appeal window
+  - Audit logging
+
+version: 1
+
+trigger:
+  event: UserSuspensionRequestedEvent
+  extract:
+    user_id: "event.user_id"
+    suspended_by: "event.suspended_by"
+    reason: "event.reason"
+    duration: "event.duration"
+    allow_appeal: "event.allow_appeal"
+
+config:
+  timeout: 90d
+  persistence: true
+
+context:
+  user: null
+
+steps:
+  - name: get_user
+    type: action
+    action: query
+    entity: User
+    params:
+      id: "{{ context.user_id }}"
+    on_success:
+      set:
+        user: "{{ result }}"
+      next: validate_not_admin
+
+  - name: validate_not_admin
+    type: condition
+    conditions:
+      - if: "!context.user.roles.includes('ADMIN')"
+        next: terminate_sessions
+      - else: true
+        next: error_cannot_suspend_admin
+
+  - name: terminate_sessions
+    type: action
+    action: revoke_all_sessions
+    params:
+      user_id: "{{ context.user_id }}"
+      reason: account_suspended
+    on_success:
+      next: suspend_user
+
+  - name: suspend_user
+    type: transition
+    entity: User
+    id: "{{ context.user_id }}"
+    transition: suspend
+    on_success:
+      next: record_suspension
+
+  - name: record_suspension
+    type: action
+    action: create
+    entity: AuditLog
+    params:
+      user_id: "{{ context.user_id }}"
+      action: user_suspended
+      severity: warning
+      details:
+        suspended_by: "{{ context.suspended_by }}"
+        reason: "{{ context.reason }}"
+        duration: "{{ context.duration }}"
+        allow_appeal: "{{ context.allow_appeal }}"
+    on_success:
+      next: send_suspension_email
+
+  - name: send_suspension_email
+    type: action
+    action: send_email
+    params:
+      template: account_suspended
+      to: "{{ context.user.email }}"
+      subject: "Your account has been suspended"
+      data:
+        username: "{{ context.user.username }}"
+        reason: "{{ context.reason }}"
+        duration: "{{ context.duration || 'indefinite' }}"
+        appeal_available: "{{ context.allow_appeal }}"
+        appeal_url: "{{ config.appeal_url }}"
+    on_success:
+      next: check_duration
+    on_failure:
+      next: check_duration  # Continue even if email fails
+
+  - name: check_duration
+    type: condition
+    conditions:
+      - if: "context.duration != null"
+        next: schedule_unsuspension
+      - else: true
+        next: wait_for_manual_action
+
+  # Temporary suspension path
+  - name: schedule_unsuspension
+    type: wait
+    wait_for:
+      timeout: "{{ context.duration }}"
+    on_timeout:
+      next: auto_unsuspend
+
+  - name: auto_unsuspend
+    type: transition
+    entity: User
+    id: "{{ context.user_id }}"
+    transition: unsuspend
+    on_success:
+      next: send_unsuspension_email
+
+  # Permanent/manual suspension path
+  - name: wait_for_manual_action
+    type: wait
+    wait_for:
+      event: UserUnsuspendedEvent
+      condition: "event.user_id == context.user_id"
+      timeout: 90d
+    on_event:
+      next: handle_unsuspension
+    on_timeout:
+      next: archive_suspension
+
+  - name: handle_unsuspension
+    type: condition
+    conditions:
+      - if: "event.type == 'UserAppealApprovedEvent'"
+        next: process_appeal
+      - else: true
+        next: manual_unsuspend
+
+  - name: process_appeal
+    type: action
+    action: audit_log
+    params:
+      action: suspension_appeal_approved
+      user_id: "{{ context.user_id }}"
+      severity: info
+      details:
+        approved_by: "{{ event.approved_by }}"
+    on_success:
+      next: manual_unsuspend
+
+  - name: manual_unsuspend
+    type: transition
+    entity: User
+    id: "{{ context.user_id }}"
+    transition: unsuspend
+    on_success:
+      next: send_unsuspension_email
+
+  - name: send_unsuspension_email
+    type: action
+    action: send_email
+    params:
+      template: account_unsuspended
+      to: "{{ context.user.email }}"
+      subject: "Your account has been reactivated"
+      data:
+        username: "{{ context.user.username }}"
+    on_success:
+      next: log_unsuspension
+    on_failure:
+      next: log_unsuspension  # Continue even if email fails
+
+  - name: log_unsuspension
+    type: action
+    action: audit_log
+    params:
+      action: user_unsuspended
+      user_id: "{{ context.user_id }}"
+      severity: info
+    on_success:
+      next: complete
+
+  - name: complete
+    type: terminal
+    status: completed
+
+  # Error paths
+  - name: error_cannot_suspend_admin
+    type: action
+    action: audit_log
+    params:
+      action: suspension_rejected
+      user_id: "{{ context.user_id }}"
+      severity: error
+      details:
+        reason: cannot_suspend_admin
+        attempted_by: "{{ context.suspended_by }}"
+    on_success:
+      next: error_end
+
+  - name: error_end
+    type: terminal
+    status: failed
+    reason: "Cannot suspend admin users"
+
+  - name: archive_suspension
+    type: action
+    action: audit_log
+    params:
+      action: suspension_archived
+      user_id: "{{ context.user_id }}"
+      severity: info
+      details:
+        reason: flow_timeout
+        still_suspended: true
+    on_success:
+      next: archived_end
+
+  - name: archived_end
+    type: terminal
+    status: archived
+    reason: "Suspension flow archived after 90 days"
+
+compensation:
+  - name: unsuspend_user
+    condition: "steps.suspend_user.completed == true"
+    action: transition
+    entity: User
+    id: "{{ context.user_id }}"
+    transition: unsuspend

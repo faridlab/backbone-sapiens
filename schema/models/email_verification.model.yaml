@@ -1,0 +1,121 @@
+# EmailVerificationToken Entity - Email verification tokens for account creation and changes
+# Source: IMPLEMENTATION_ROADMAP.md Phase 1.1 Core Authentication Workflows
+
+models:
+  - name: EmailVerificationToken
+    collection: email_verification_tokens
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Token ID"
+
+      user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "User requiring verification"
+
+      token:
+        type: string
+        attributes: ["@unique", "@required", "@length(64)", "@sensitive"]
+        description: "Secure verification token"
+
+      email:
+        type: email
+        attributes: ["@required", "@lowercase"]
+        description: "Email address being verified"
+
+      token_type:
+        type: EmailVerificationType
+        attributes: ["@required"]
+        description: "Type of verification"
+
+      old_email:
+        type: email?
+        attributes: ["@lowercase"]
+        description: "Previous email for change verification"
+
+      expires_at:
+        type: datetime
+        attributes: ["@required", "@future"]
+        description: "Token expiry time (24 hours)"
+
+      verified_at:
+        type: datetime?
+        description: "When token was verified"
+
+      attempts:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Verification attempts"
+
+      max_attempts:
+        type: int
+        attributes: ["@default(5)", "@positive"]
+        description: "Maximum verification attempts"
+
+      status:
+        type: EmailVerificationTokenStatus
+        attributes: ["@required", "@default(pending)"]
+        description: "Current verification status"
+
+      ip_address:
+        type: ip?
+        description: "IP address that requested verification"
+
+      user_agent:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Browser/client info"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [token]
+      - type: index
+        fields: [user_id, token_type]
+      - type: index
+        fields: [email, token_type]
+      - type: index
+        fields: [expires_at]
+      - type: index
+        fields: [verified_at]
+      - type: unique
+        fields: [user_id, token_type]
+        where: "verified_at IS NULL"
+
+enums:
+  - name: EmailVerificationType
+    variants:
+      - name: account_creation
+        default: true
+        description: "New account email verification"
+      - name: email_change
+        description: "Email address change verification"
+      - name: password_reset
+        description: "Password reset verification"
+      - name: account_reactivation
+        description: "Account reactivation verification"
+
+  - name: EmailVerificationTokenStatus
+    variants:
+      - name: pending
+        default: true
+        description: "Token is pending verification"
+      - name: verified
+        description: "Token has been verified"
+      - name: expired
+        description: "Token has expired"
+      - name: revoked
+        description: "Token has been revoked"

@@ -1,0 +1,126 @@
+# AuditLog Workflow - Immutable audit trail
+# Source: libs/modules/sapiens/docs/domain.md Section 3.8
+# IMPORTANT: AuditLog is append-only, no updates or deletes allowed
+
+name: AuditLog
+model: audit_log.model.yaml
+
+# =============================================================================
+# Note: AuditLog has NO state machine - it's immutable
+# =============================================================================
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  action_required:
+    when: [create]
+    condition: "action != null && action.length >= 1"
+    message: "Audit log action is required"
+    code: ACTION_REQUIRED
+
+  no_updates:
+    when: [update]
+    condition: "false"  # Always fails - no updates allowed
+    message: "Audit logs are immutable and cannot be updated"
+    code: AUDIT_LOG_IMMUTABLE
+
+  no_deletes:
+    when: [delete]
+    condition: "false"  # Always fails - no deletes allowed
+    message: "Audit logs are immutable and cannot be deleted"
+    code: AUDIT_LOG_IMMUTABLE
+
+  timestamp_not_future:
+    when: [create]
+    condition: "timestamp <= now()"
+    message: "Audit log timestamp cannot be in the future"
+    code: INVALID_TIMESTAMP
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - action: create      # For manual log entries
+      - action: read
+      - action: list
+    deny:
+      - action: update      # Even super_admin cannot update
+      - action: delete      # Even super_admin cannot delete
+
+  admin:
+    allow:
+      - action: read
+      - action: list
+    deny:
+      - action: create      # Admins cannot forge logs
+      - action: update
+      - action: delete
+
+  compliance_officer:
+    allow:
+      - action: read
+      - action: list
+      - action: export      # Custom action for compliance reporting
+    deny:
+      - action: create
+      - action: update
+      - action: delete
+
+  user:
+    allow:
+      - action: read
+        if: "user_id == $actor.id"
+      - action: list
+        if: "user_id == $actor.id"
+    deny:
+      - action: create
+      - action: update
+      - action: delete
+
+  guest:
+    deny:
+      - all
+
+  system:
+    allow:
+      - action: create
+      - action: read
+      - action: list
+      - action: archive     # System can archive old logs
+    deny:
+      - action: update
+      - action: delete
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "notify([security_team], Critical audit event: #{action})"
+      - "trigger: check_suspicious_activity"
+    if: "severity == 'critical' || action in ['login_failed', 'permission_denied', 'unauthorized_access']"
+
+  scheduled_archive:
+    schedule: "every 1.day at 02:00"
+    actions:
+      - "trigger: archive_old_logs(days: 90)"
+
+  scheduled_retention:
+    schedule: "every 1.week at 03:00"
+    actions:
+      - "trigger: cleanup_archived_logs(days: 365)"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  age: "now() - timestamp"
+  is_archive_candidate: "age > 90.days && archived == false"
+  is_retention_expired: "age > 365.days"
+  display_label: "format!('[{}] {} at {}', severity.uppercase(), action, timestamp.format('%Y-%m-%d %H:%M:%S'))"
+  actor_display: "user_id != null ? user.username : 'SYSTEM'"
+  event_summary: "actor_display + ' performed ' + action + (resource_type != null ? ' on ' + resource_type + ':' + resource_id : '')"

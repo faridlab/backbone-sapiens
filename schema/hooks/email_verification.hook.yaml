@@ -1,0 +1,201 @@
+# EmailVerification Workflow - Email verification token management
+# Source: IMPLEMENTATION_ROADMAP.md Phase 1.1 Core Authentication Workflows
+
+name: EmailVerificationToken
+model: EmailVerificationToken
+
+# =============================================================================
+# PRIORITY 1: State Machine - Email Verification Token Lifecycle
+# =============================================================================
+states:
+  field: status
+
+  values:
+    pending:
+      initial: true
+      on_enter:
+        - "send_email(verification, email)"
+        - "log(email_verification.created, { token_id: id, user_id: user_id, email: email, type: token_type })"
+
+    verified:
+      final: true
+      on_enter:
+        - "set: verified_at = now()"
+        - "update_user(email_verified: true) if token_type == 'account_creation'"
+        - "log(email_verification.verified, { token_id: id, user_id: user_id, verified_by: $context.verified_by })"
+        - "emit: EmailVerifiedEvent(token_id: id, user_id: user_id, email: email)"
+
+    expired:
+      final: true
+      on_enter:
+        - "set: archived = true"
+        - "set: archived_at = now()"
+        - "log(email_verification.expired, { token_id: id, user_id: user_id, email: email })"
+
+    revoked:
+      final: true
+      on_enter:
+        - "set: archived = true"
+        - "set: archived_at = now()"
+        - "log(email_verification.revoked, { token_id: id, user_id: user_id, reason: $context.reason })"
+
+  transitions:
+    verify:
+      from: pending
+      to: verified
+      condition: "$context.verification_code_valid && expires_at > now()"
+      message: "Invalid or expired verification code"
+      on_failure:
+        - "set: attempts = attempts + 1"
+        - "revoke_if: attempts >= max_attempts"
+        - "log(email_verification.failed_verification, { token_id: id, attempt: attempts, ip: $context.ip_address })"
+
+    expire:
+      from: [pending, verified]
+      to: expired
+      condition: "expires_at < now() && archived_at == null"
+
+    revoke:
+      from: [pending, verified]
+      to: revoked
+      roles: [admin, system]
+      condition: "$context.reason != null"
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  unique_pending_token:
+    when: [create]
+    condition: "count(EmailVerification, user_id == $this.user_id && token_type == $this.token_type && verified_at == null && (metadata.deleted_at == null || archived_at == null)) == 0"
+    message: "User already has a pending verification token of this type"
+    code: PENDING_TOKEN_EXISTS
+
+  valid_email:
+    when: [create]
+    condition: "email != null && email matches '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'"
+    message: "Invalid email format"
+    code: INVALID_EMAIL
+
+  valid_expiry:
+    when: [create]
+    condition: "expires_at > now()"
+    message: "Expiry time must be in the future"
+    code: INVALID_EXPIRY
+
+  token_format:
+    when: [create]
+    condition: "token != null && token.length >= 32"
+    message: "Invalid token format"
+    code: INVALID_TOKEN
+
+  token_type_valid:
+    when: [create]
+    condition: "token_type in ['account_creation', 'email_change', 'password_reset', 'account_reactivation']"
+    message: "Invalid verification token type"
+    code: INVALID_TOKEN_TYPE
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: read
+      - action: list
+      - action: revoke
+    deny:
+      - action: create
+      - action: verify
+      - action: update
+        if: "$this.user_id != $actor.id"
+
+  system:
+    allow:
+      - action: create
+      - action: verify
+      - action: update
+    deny:
+      - action: delete
+      - action: revoke
+
+  user:
+    allow:
+      - action: read
+        if: "$this.user_id == $actor.id"
+      - action: verify
+        if: "$this.user_id == $actor.id"
+    deny:
+      - action: create
+      - action: update
+      - action: delete
+      - action: list
+      - action: revoke
+
+# =============================================================================
+# PRIORITY 4: Triggers (Side Effects)
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "send_email(verification, email)"
+      - "schedule_job(cleanup_expired_tokens, run_at: expires_at + 1.hour)"
+      - "log(email_verification.created, { token_id: id, user_id: user_id, email: email, type: token_type })"
+      - "emit: EmailVerificationCreatedEvent(token_id: id, user_id: user_id, email: email, type: token_type, expires_at: expires_at })"
+
+  after_verify:
+    actions:
+      - "set: verified_at = now()"
+      - "update_user(email_verified: true) if token_type == 'account_creation'"
+      - "send_email(email_confirmed, email) if token_type == 'account_creation'"
+      - "handle_email_change_workflow() if token_type == 'email_change'"
+      - "handle_password_reset_workflow() if token_type == 'password_reset'"
+      - "handle_account_reactivation_workflow() if token_type == 'account_reactivation'"
+      - "delete_expired_tokens(user_id, token_type)"
+      - "log(email_verification.verified, { token_id: id, user_id: user_id, verified_by: $context.verified_by, ip_address: $context.ip_address })"
+      - "emit: EmailVerifiedEvent(token_id: id, user_id: user_id, email: email, type: token_type, verified_at: now() })"
+
+  after_failed_verification:
+    actions:
+      - "set: attempts = attempts + 1"
+      - "increment: failed_attempts on User where id == user_id"
+      - "lock_user_if_max_attempts() if attempts >= max_attempts"
+      - "revoke_if: attempts >= max_attempts"
+      - "log(email_verification.failed_verification, { token_id: id, user_id: user_id, attempt: attempts, ip_address: $context.ip_address, reason: $context.failure_reason })"
+      - "emit: EmailVerificationFailedEvent(token_id: id, user_id: user_id, attempts: attempts, ip_address: $context.ip_address, reason: $context.failure_reason })"
+    if: "attempts < max_attempts"
+
+  after_expire:
+    actions:
+      - "set: archived = true"
+      - "set: archived_at = now()"
+      - "log(email_verification.expired, { token_id: id, user_id: user_id, email: email })"
+      - "send_email(verification_expired, email)"
+      - "emit: EmailVerificationExpiredEvent(token_id: id, user_id: user_id, email: email })"
+
+  before_delete:
+    actions:
+      - "log(email_verification.deleting, { token_id: id, user_id: user_id })"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  # Check if token is expired
+  is_expired: "expires_at < now() && verified_at == null"
+
+  # Check if token is verified
+  is_verified: "verified_at != null"
+
+  # Check if token is active (pending and not expired)
+  is_active: "verified_at == null && expires_at > now()"
+
+  # Token age in hours
+  age_hours: "(now() - created_at).total_hours"
+
+  # Check if user has exceeded max attempts
+  max_attempts_reached: "attempts >= max_attempts"

@@ -1,0 +1,293 @@
+models:
+  - name: MFADevice
+    collection: mfa_devices
+    soft_delete: true
+    description: "Multi-factor authentication device management for enterprise security"
+
+    fields:
+      # Identity
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+
+      # Relations
+      user_id:
+        type: uuid
+        attributes: ["@foreign_key(User.id)", "@required"]
+        description: "User who owns this MFA device"
+
+      # Device Information
+      device_type:
+        type: MFADeviceType
+        attributes: ["@required"]
+        description: "Type of MFA device"
+
+      device_name:
+        type: string?
+        attributes: ["@max(100)"]
+        description: "User-friendly name for the device"
+
+      # Device Details (as individual fields for PostgreSQL)
+      phone_number:
+        type: string?
+        attributes: ["@max(20)"]
+        description: "Phone number for SMS MFA"
+
+      email_address:
+        type: string?
+        attributes: ["@max(255)"]
+        description: "Email address for email-based MFA"
+
+      totp_secret:
+        type: string?
+        attributes: ["@max(64)", "@sensitive"]
+        description: "TOTP secret key (encrypted)"
+
+      secret:
+        type: string?
+        attributes: ["@max(255)", "@sensitive"]
+        description: "Generic secret for MFA device (encrypted)"
+
+      hardware_key_id:
+        type: string?
+        attributes: ["@max(100)", "@exclude_from_foreign_key_check"]
+        description: "Hardware key identifier"
+
+      push_token:
+        type: string?
+        attributes: ["@max(500)", "@sensitive"]
+        description: "Push notification token for mobile devices"
+
+      device_fingerprint:
+        type: string?
+        attributes: ["@max(255)"]
+        description: "Device fingerprint for biometric verification"
+
+      manufacturer:
+        type: string?
+        attributes: ["@max(100)"]
+        description: "Device manufacturer"
+
+      model:
+        type: string?
+        attributes: ["@max(100)"]
+        description: "Device model"
+
+      operating_system:
+        type: string?
+        attributes: ["@max(50)"]
+        description: "Device operating system"
+
+      app_version:
+        type: string?
+        attributes: ["@max(20)"]
+        description: "MFA app version"
+
+      # Configuration
+      is_primary:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether this is the primary MFA device"
+
+      is_backup:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether this is a backup MFA device"
+
+      requires_verification:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Whether device requires additional verification"
+
+      auto_approval_enabled:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Auto-approve trusted devices"
+
+      trusted_duration_hours:
+        type: int
+        attributes: ["@default(24)", "@min(1)", "@max(168)"]
+        description: "Hours to trust this device after verification"
+
+      # Enrollment tracking
+      enrolled_at:
+        type: datetime
+        attributes: ["@default(now())"]
+        description: "When device was enrolled"
+
+      enrolled_by:
+        type: uuid?
+        attributes: ["@foreign_key(User.id)"]
+        description: "Admin who enrolled this device (if applicable)"
+
+      enrollment_method:
+        type: EnrollmentMethod
+        attributes: ["@default(self_service)"]
+        description: "How the device was enrolled"
+
+      enrollment_ip:
+        type: string
+        attributes: ["@required", "@max(45)"]
+        description: "IP address used during enrollment"
+
+      enrollment_user_agent:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "User agent during enrollment"
+
+      verification_attempts:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of verification attempts made"
+
+      backup_codes_generated:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether backup codes were generated for this device"
+
+      # Usage tracking
+      verified_at:
+        type: datetime?
+        description: "When device was first verified"
+
+      last_used:
+        type: datetime?
+        description: "Last time this device was used for MFA"
+
+      last_used_at:
+        type: datetime?
+        description: "Last time this device was used for MFA (alias)"
+
+      usage_count:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Total number of times this device was used"
+
+      successful_verifications:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of successful verifications"
+
+      failed_verifications:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of failed verification attempts"
+
+      # Security
+      is_locked:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether device is temporarily locked"
+
+      locked_at:
+        type: datetime?
+        description: "When device was locked"
+
+      locked_until:
+        type: datetime?
+        description: "When device lock expires"
+
+      lock_reason:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Reason for device lock"
+
+      risk_score:
+        type: int
+        attributes: ["@default(0)", "@min(0)", "@max(100)"]
+        description: "Device risk score based on usage patterns"
+
+      # Status
+      is_active:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether this device is active (for state machine compatibility)"
+
+      status:
+        type: MFADeviceStatus
+        attributes: ["@default(active)"]
+        description: "Current status of the MFA device"
+
+      backup_codes_data:
+        type: json?
+        description: "Backup codes for this device (JSON array)"
+
+      # Metadata
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+      mfa_sessions:
+        type: MFASession[]
+        attributes: ["@one_to_many", "@on_delete(cascade)", "@on_update(cascade)"]
+
+      backup_codes:
+        type: MFABackupCode[]
+        attributes: ["@one_to_many", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [user_id, status]
+      - type: index
+        fields: [device_type]
+      - type: index
+        fields: [is_primary, status]
+      - type: index
+        fields: [enrolled_at]
+      - type: index
+        fields: [last_used_at]
+      - type: index
+        fields: [is_locked, status]
+      - type: index
+        fields: [risk_score]
+
+enums:
+  - name: MFADeviceType
+    variants:
+      - name: totp
+        default: true
+        description: "Time-based One-Time Password"
+      - name: sms
+        description: "SMS-based verification"
+      - name: email
+        description: "Email-based verification"
+      - name: hardware_key
+        description: "Hardware security key"
+      - name: biometric
+        description: "Biometric verification"
+      - name: push_notification
+        description: "Push notification verification"
+
+  - name: EnrollmentMethod
+    variants:
+      - name: self_service
+        default: true
+        description: "User enrolled device themselves"
+      - name: admin_enforced
+        description: "Admin enrolled device for user"
+      - name: automatic
+        description: "Device automatically enrolled"
+      - name: emergency
+        description: "Emergency device enrollment"
+
+  - name: MFADeviceStatus
+    variants:
+      - name: active
+        default: true
+        description: "Device is active and can be used"
+      - name: inactive
+        description: "Device is inactive"
+      - name: suspended
+        description: "Device is temporarily suspended"
+      - name: compromised
+        description: "Device may be compromised"
+      - name: expired
+        description: "Device has expired"
+      - name: revoked
+        description: "Device has been revoked"

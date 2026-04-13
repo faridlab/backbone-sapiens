@@ -1,0 +1,48 @@
+# RolePermission Entity - Many-to-many junction between Roles and Permissions
+# Source: libs/modules/sapiens/docs/domain.md Section 3.6
+
+models:
+  - name: RolePermission
+    collection: role_permissions
+    soft_delete: true
+    config:
+      generators:
+        disabled: [cqrs, projection, bulk-operations]
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+
+      role_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Role.id)"]
+
+      permission_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Permission.id)"]
+
+      granted_at:
+        type: datetime
+        attributes: ["@default(now)"]
+        description: "When the permission was granted to the role"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      role:
+        type: Role
+        attributes: ["@one", "@foreign_key(role_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+      permission:
+        type: Permission
+        attributes: ["@one", "@foreign_key(permission_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: unique
+        fields: [role_id, permission_id]
+      - type: index
+        fields: [permission_id]

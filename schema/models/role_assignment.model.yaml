@@ -1,0 +1,193 @@
+# RoleAssignment Entity - Role assignments with hierarchy support and conflict detection
+# Source: libs/modules/sapiens/docs/spec-sapiens.md
+
+models:
+  - name: RoleAssignment
+    collection: role_assignments
+    soft_delete: true
+    description: "Role assignments with hierarchy support and conflict detection"
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "User assigned to this role"
+
+      role_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Role.id)"]
+        description: "Role being assigned"
+
+      assigned_by:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "Admin who made this assignment"
+
+      assigned_at:
+        type: datetime
+        attributes: ["@required", "@default(now)"]
+        description: "When role was assigned"
+
+      expires_at:
+        type: datetime?
+        description: "When role assignment expires (null = permanent)"
+
+      reason:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Reason for role assignment"
+
+      priority:
+        type: int
+        attributes: ["@default(50)", "@min(1)", "@max(100)"]
+        description: "Assignment priority for conflict resolution"
+
+      scope:
+        type: json?
+        description: "Resource scoping for this role assignment"
+
+      conditions:
+        type: json?
+        description: "Conditions for role validity"
+
+      parent_assignment_id:
+        type: uuid?
+        attributes: ["@foreign_key(RoleAssignment.id)"]
+        description: "Parent assignment in hierarchy"
+
+      inheritance_level:
+        type: int
+        attributes: ["@default(0)"]
+        description: "Level in assignment hierarchy (0 = direct)"
+
+      inherited_from:
+        type: uuid?
+        attributes: ["@foreign_key(RoleAssignment.id)"]
+        description: "Assignment this was inherited from"
+
+      conflicts_with:
+        type: uuid[]?
+        description: "Other assignments this conflicts with"
+
+      conflict_resolution:
+        type: ConflictResolutionType
+        attributes: ["@default(priority)"]
+        description: "How conflicts with other assignments are resolved"
+
+      has_conflicts:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether this assignment has detected conflicts"
+
+      conflict_types:
+        type: string[]?
+        description: "Types of conflicts detected"
+
+      detected_conflicts:
+        type: json?
+        description: "Detailed conflict information"
+
+      last_used_at:
+        type: datetime?
+        description: "Last time this role was used for authorization"
+
+      usage_count:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of times this role was referenced"
+
+      modification_history:
+        type: json?
+        description: "Complete modification history"
+
+      status:
+        type: RoleAssignmentStatus
+        attributes: ["@default(active)"]
+        description: "Current status of the role assignment"
+
+      warning_sent:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether expiration warning has been sent"
+
+      auto_renew:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether to automatically renew this assignment"
+
+      renewal_period_days:
+        type: int
+        attributes: ["@default(30)", "@min(1)", "@max(365)"]
+        description: "Days to renew for if auto_renew is enabled"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)"]
+
+      role:
+        type: Role
+        attributes: ["@one", "@foreign_key(role_id)"]
+
+      assigner:
+        type: User
+        attributes: ["@one", "@foreign_key(assigned_by)"]
+
+      parent_assignment:
+        type: RoleAssignment?
+        attributes: ["@one", "@foreign_key(parent_assignment_id)"]
+
+      inherited_from_assignment:
+        type: RoleAssignment?
+        attributes: ["@one", "@foreign_key(inherited_from)"]
+
+    indexes:
+      - type: index
+        fields: [user_id, status]
+      - type: index
+        fields: [role_id]
+      - type: index
+        fields: [assigned_by]
+      - type: index
+        fields: [status, expires_at]
+      - type: index
+        fields: [parent_assignment_id]
+      - type: index
+        fields: [has_conflicts, status]
+
+enums:
+  - name: ConflictResolutionType
+    variants:
+      - name: priority
+        default: true
+        description: "Resolve by priority"
+      - name: latest
+        description: "Latest assignment wins"
+      - name: manual
+        description: "Manual resolution required"
+      - name: escalation
+        description: "Escalate to admin"
+
+  - name: RoleAssignmentStatus
+    variants:
+      - name: active
+        default: true
+        description: "Assignment is active"
+      - name: inactive
+        description: "Assignment is inactive"
+      - name: expired
+        description: "Assignment has expired"
+      - name: suspended
+        description: "Assignment is suspended"
+      - name: pending_approval
+        description: "Assignment is pending approval"

@@ -1,0 +1,209 @@
+# OAuthProvider Entity - Social login provider configurations and user linkings
+# Source: IMPLEMENTATION_ROADMAP.md Phase 4.1 OAuth Integration
+# Hooks: pre_login, post_link, pre_unlink, post_login
+
+models:
+  - name: OAuthProvider
+    collection: oauth_providers
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "OAuth provider configuration ID"
+
+      provider_name:
+        type: OAuthProviderType
+        attributes: ["@required", "@unique"]
+        description: "OAuth provider (google, github, microsoft)"
+
+      display_name:
+        type: string
+        attributes: ["@required", "@max(100)"]
+        description: "Human-readable provider name"
+
+      client_id:
+        type: string
+        attributes: ["@required", "@sensitive", "@exclude_from_foreign_key_check"]
+        description: "OAuth client ID from provider"
+
+      client_secret:
+        type: string
+        attributes: ["@required", "@sensitive", "@encrypted"]
+        description: "OAuth client secret from provider"
+
+      redirect_uri:
+        type: url
+        attributes: ["@required"]
+        description: "OAuth callback URL"
+
+      scopes:
+        type: string[]
+        attributes: ["@required"]
+        description: "Requested OAuth scopes (email, profile, etc.)"
+
+      authorization_url:
+        type: url
+        attributes: ["@required"]
+        description: "Provider authorization endpoint"
+
+      token_url:
+        type: url
+        attributes: ["@required"]
+        description: "Provider token exchange endpoint"
+
+      user_info_url:
+        type: url
+        attributes: ["@required"]
+        description: "Provider user info endpoint"
+
+      is_active:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Provider enabled/disabled"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user_oauth_links:
+        type: UserOAuthLink[]
+        attributes: ["@one_to_many", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [provider_name]
+      - type: index
+        fields: [is_active]
+      - type: unique
+        fields: [provider_name, "(metadata->>'deleted_at')"]
+
+  - name: UserOAuthLink
+    collection: user_oauth_links
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "OAuth link ID"
+
+      user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "Linked user"
+
+      oauth_provider_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(OAuthProvider.id)"]
+        description: "OAuth provider configuration"
+
+      provider_user_id:
+        type: string
+        attributes: ["@required", "@max(255)", "@exclude_from_foreign_key_check"]
+        description: "User ID from OAuth provider"
+
+      provider_email:
+        type: email
+        attributes: ["@required", "@lowercase"]
+        description: "Email from OAuth provider"
+
+      provider_username:
+        type: string?
+        attributes: ["@max(255)"]
+        description: "Username from OAuth provider"
+
+      is_active:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Whether the OAuth link is active"
+
+      access_token:
+        type: string?
+        attributes: ["@sensitive", "@encrypted"]
+        description: "OAuth access token (if refreshable)"
+
+      refresh_token:
+        type: string?
+        attributes: ["@sensitive", "@encrypted"]
+        description: "OAuth refresh token"
+
+      token_expires_at:
+        type: datetime?
+        description: "When OAuth token expires"
+
+      is_primary:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Primary OAuth account for user"
+
+      link_status:
+        type: UserOAuthLinkStatus
+        attributes: ["@required", "@default(pending_verification)"]
+        description: "Current status of OAuth link"
+
+      last_synced:
+        type: datetime?
+        description: "Last profile sync timestamp"
+
+      sync_enabled:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Auto-sync profile changes"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+      oauth_provider:
+        type: OAuthProvider
+        attributes: ["@one", "@foreign_key(oauth_provider_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [user_id, oauth_provider_id]
+      - type: index
+        fields: [provider_user_id, oauth_provider_id]
+      - type: index
+        fields: [provider_email, oauth_provider_id]
+      - type: index
+        fields: [is_primary]
+      - type: unique
+        fields: [provider_user_id, oauth_provider_id, "(metadata->>'deleted_at')"]
+
+enums:
+  - name: OAuthProviderType
+    variants:
+      - name: google
+        default: true
+        description: "Google OAuth 2.0"
+      - name: github
+        description: "GitHub OAuth"
+      - name: microsoft
+        description: "Microsoft Azure AD"
+      - name: facebook
+        description: "Facebook OAuth"
+      - name: apple
+        description: "Apple Sign In"
+
+  - name: UserOAuthLinkStatus
+    variants:
+      - name: pending_verification
+        default: true
+        description: "OAuth link pending email verification"
+      - name: active
+        description: "OAuth link is active and verified"
+      - name: expired
+        description: "OAuth link has expired"
+      - name: revoked
+        description: "OAuth link has been revoked by user"
+

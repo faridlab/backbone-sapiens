@@ -1,0 +1,108 @@
+# Session Entity - Active user session with JWT token management
+# Source: libs/modules/sapiens/docs/domain.md Section 3.9
+
+models:
+  - name: Session
+    collection: sessions
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Session ID, also JWT jti claim"
+
+      user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "User who owns this session"
+
+      token_hash:
+        type: string
+        attributes: ["@unique", "@required", "@length(64)"]
+        description: "SHA-256 hash of JWT for revocation"
+
+      expires_at:
+        type: datetime
+        attributes: ["@required", "@future"]
+        description: "JWT expiry time (24h default)"
+
+      extended_at:
+        type: datetime?
+        description: "When session was last extended"
+
+      remember_me:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether user chose 'remember me' for extended session"
+
+      last_activity:
+        type: datetime?
+        description: "Last API call timestamp"
+
+      ip_address:
+        type: ip?
+        description: "Client IP at session creation"
+
+      user_agent:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Browser/client info"
+
+      device_type:
+        type: DeviceType
+        attributes: ["@default(unknown)"]
+        description: "Device category"
+
+      device_fingerprint:
+        type: string?
+        attributes: ["@max(255)"]
+        description: "Device fingerprint for trust verification"
+
+      is_active:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Revocation flag"
+
+      revoked_at:
+        type: datetime?
+        description: "When session was revoked"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+      audit_logs:
+        type: AuditLog[]
+        attributes: ["@one_to_many"]
+
+    indexes:
+      - type: index
+        fields: [token_hash]
+      - type: index
+        fields: [user_id, is_active]
+      - type: index
+        fields: [user_id, created_at]
+      - type: index
+        fields: [expires_at]
+
+enums:
+  - name: DeviceType
+    variants:
+      - name: web
+        description: "Web browser"
+      - name: mobile
+        description: "Mobile app"
+      - name: tablet
+        description: "Tablet device"
+      - name: desktop
+        description: "Desktop application"
+      - name: unknown
+        default: true
+        description: "Unknown device type"

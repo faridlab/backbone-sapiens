@@ -1,0 +1,59 @@
+# UserRole Entity - Many-to-many junction between Users and Roles
+# Source: libs/modules/sapiens/docs/domain.md Section 3.5
+
+models:
+  - name: UserRole
+    collection: user_roles
+    soft_delete: true
+    config:
+      generators:
+        disabled: [cqrs, projection, bulk-operations]
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+
+      user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+
+      role_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Role.id)"]
+
+      assigned_at:
+        type: datetime
+        attributes: ["@default(now)"]
+        description: "When the role was assigned"
+
+      assigned_by:
+        type: uuid?
+        attributes: ["@foreign_key(User.id)"]
+        description: "Admin who assigned the role, null for system"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+      role:
+        type: Role
+        attributes: ["@one", "@foreign_key(role_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+      assigner:
+        type: User?
+        attributes: ["@one", "@foreign_key(assigned_by)"]
+
+    indexes:
+      - type: unique
+        fields: [user_id, role_id]
+      - type: index
+        fields: [role_id]
+      - type: index
+        fields: [assigned_at]

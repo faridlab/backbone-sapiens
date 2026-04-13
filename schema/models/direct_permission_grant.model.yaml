@@ -1,0 +1,130 @@
+# DirectPermissionGrant Entity - Direct permission grants to users with time limits and conditions
+# Source: libs/modules/sapiens/docs/spec-sapiens.md
+
+models:
+  - name: DirectPermissionGrant
+    collection: direct_permission_grants
+    soft_delete: true
+    description: "Direct permission grants to users with time limits and conditions"
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "User receiving the direct permission grant"
+
+      permission_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Permission.id)"]
+        description: "Permission being granted"
+
+      granted_by:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "Admin who granted this permission"
+
+      granted_at:
+        type: datetime
+        attributes: ["@required", "@default(now)"]
+        description: "When permission was granted"
+
+      expires_at:
+        type: datetime?
+        description: "When permission expires (null = permanent)"
+
+      reason:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Reason for granting this permission"
+
+      scope:
+        type: json?
+        description: "Resource scoping for the permission"
+
+      conditions:
+        type: json?
+        description: "Conditions for permission validity"
+
+      last_used_at:
+        type: datetime?
+        description: "Last time this permission was used"
+
+      usage_count:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of times this permission was used"
+
+      access_log:
+        type: json?
+        description: "Detailed access log for compliance"
+
+      status:
+        type: DirectPermissionGrantStatus
+        attributes: ["@default(active)"]
+        description: "Current status of the permission grant"
+
+      revoked_at:
+        type: datetime?
+        description: "When permission was revoked"
+
+      revoked_by:
+        type: uuid?
+        attributes: ["@foreign_key(User.id)"]
+        description: "Admin who revoked this permission"
+
+      revocation_reason:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Reason for revocation"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+      permission:
+        type: Permission
+        attributes: ["@one", "@foreign_key(permission_id)"]
+
+      granter:
+        type: User
+        attributes: ["@one", "@foreign_key(granted_by)"]
+
+      revoker:
+        type: User?
+        attributes: ["@one", "@foreign_key(revoked_by)"]
+
+    indexes:
+      - type: index
+        fields: [user_id, status]
+      - type: index
+        fields: [permission_id]
+      - type: index
+        fields: [granted_by]
+      - type: index
+        fields: [status, expires_at]
+      - type: index
+        fields: [created_at]
+
+enums:
+  - name: DirectPermissionGrantStatus
+    variants:
+      - name: active
+        default: true
+        description: "Permission is active"
+      - name: expired
+        description: "Permission has expired"
+      - name: revoked
+        description: "Permission was revoked"
+      - name: suspended
+        description: "Permission is suspended"

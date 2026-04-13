@@ -1,0 +1,151 @@
+# MFADevice Workflow - Multi-factor authentication device management
+# Source: libs/modules/sapiens/docs/domain.md Section 3.11
+
+name: MFADevice
+model: mfa_device.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - Device Lifecycle
+# =============================================================================
+states:
+  field: is_active
+  # Note: This is a composite state based on is_active and verified_at
+
+  values:
+    pending:
+      initial: true
+      on_enter:
+        - "log(mfa.device_enrolled, { user_id: user_id, device_type: device_type })"
+
+    active:
+      on_enter:
+        - "set: verified_at = now()"
+        - "send_email(mfa_device_activated, user.email)"
+        - "log(mfa.device_activated, { user_id: user_id, device_type: device_type })"
+
+    disabled:
+      final: true
+      on_enter:
+        - "send_email(mfa_device_disabled, user.email)"
+        - "log(mfa.device_disabled, { user_id: user_id, device_type: device_type })"
+
+  transitions:
+    verify:
+      from: pending
+      to: active
+      roles: [owner, system]
+      condition: "$context.otp_valid == true"
+      message: "Valid OTP required to verify device"
+
+    disable:
+      from: active
+      to: disabled
+      roles: [owner, admin]
+
+    cancel:
+      from: pending
+      to: disabled
+      roles: [owner, admin]
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  device_name_required:
+    when: [create]
+    condition: "device_name != null && device_name.length >= 1"
+    message: "Device name is required"
+    code: DEVICE_NAME_REQUIRED
+
+  unique_device_name:
+    when: [create, update]
+    condition: "count(MFADevice, user_id == $this.user_id && device_name == $this.device_name && id != $this.id) == 0"
+    message: "Device name already exists for this user"
+    code: DUPLICATE_DEVICE_NAME
+
+  single_active_totp:
+    when: [create]
+    condition: "device_type != 'totp' || count(MFADevice, user_id == $this.user_id && device_type == 'totp' && is_active == true) == 0"
+    message: "Only one active TOTP device allowed per user"
+    code: MULTIPLE_TOTP_DEVICES
+
+  max_devices:
+    when: [create]
+    condition: "count(MFADevice, user_id == $this.user_id && is_active == true) < 10"
+    message: "Maximum 10 MFA devices allowed per user"
+    code: MAX_DEVICES_EXCEEDED
+
+  secret_required:
+    when: [create]
+    condition: "secret != null && secret.length >= 16"
+    message: "Device secret is required"
+    code: SECRET_REQUIRED
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: read
+      - action: list
+      - action: disable     # Admin can disable any device for security
+    deny:
+      - action: create      # Admins cannot create devices for other users
+      - action: update
+      - action: delete
+
+  user:
+    allow:
+      - action: create
+        if: "user_id == $actor.id"
+      - action: read
+        if: "user_id == $actor.id"
+      - action: list
+        if: "user_id == $actor.id"
+      - action: update
+        if: "user_id == $actor.id"
+        only: [device_name]   # Can only rename
+      - action: disable
+        if: "user_id == $actor.id"
+    deny:
+      - action: delete      # Devices should be disabled, not deleted
+
+  guest:
+    deny:
+      - all
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "trigger: update_user_mfa_status"
+      - "emit: MFADeviceEnrolledEvent(user_id: user_id, device_type: device_type, device_name: device_name)"
+
+  after_update_is_active:
+    actions:
+      - "trigger: update_user_mfa_status"
+      - "emit: MFADeviceStatusChangedEvent(user_id: user_id, device_id: id, is_active: is_active)"
+
+  after_update_last_used:
+    actions:
+      - "log(mfa.verification_success, { user_id: user_id, device_id: id })"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  is_verified: "verified_at != null"
+  is_usable: "is_active == true && is_verified == true"
+  days_since_last_use: "last_used != null ? (now() - last_used).days : null"
+  is_stale: "last_used != null && days_since_last_use > 90"
+  # Note: created_at is now in metadata.created_at
+  age: "now() - metadata.created_at"
+  display_label: "device_name + ' (' + device_type + ')'"
+  status_display: "is_active == false ? 'Disabled' : (is_verified == false ? 'Pending Verification' : (is_stale ? 'Inactive (not used recently)' : 'Active'))"

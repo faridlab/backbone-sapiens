@@ -1,0 +1,134 @@
+# SessionLimit Workflow - Concurrent session management per user
+# Source: libs/modules/sapiens/docs/spec-sapiens.md UC-009
+
+name: SessionLimit
+model: session_limit.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - Session Limit Lifecycle
+# =============================================================================
+states:
+  field: enforce_limit
+
+  values:
+    enforced:
+      initial: true
+      final: true
+      on_enter:
+        - "log(session_limit.enforced, { user_id: user_id, max_sessions: max_sessions })"
+
+    unenforced:
+      final: true
+      on_enter:
+        - "log(session_limit.unenforced, { user_id: user_id })"
+
+  transitions:
+    enable:
+      from: unenforced
+      to: enforced
+      roles: [admin]
+
+    disable:
+      from: enforced
+      to: unenforced
+      roles: [admin]
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  max_sessions_positive:
+    when: [create, update]
+    condition: "max_sessions > 0"
+    message: "Maximum sessions must be at least 1"
+    code: INVALID_MAX_SESSIONS
+
+  max_sessions_reasonable:
+    when: [create, update]
+    condition: "max_sessions <= 100"
+    message: "Maximum sessions cannot exceed 100"
+    code: MAX_SESSIONS_EXCEEDED
+
+  per_device_within_limit:
+    when: [create, update]
+    condition: "max_sessions_per_device == null || max_sessions_per_device <= max_sessions"
+    message: "Per-device limit cannot exceed total session limit"
+    code: INVALID_PER_DEVICE_LIMIT
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: read
+      - action: list
+      - action: update
+      - action: delete
+
+  user:
+    allow:
+      - action: read
+        if: "user_id == $actor.id"
+        only: [max_sessions, enforce_limit]
+    deny:
+      - action: create
+      - action: update
+        if: "user_id == $actor.id"
+      - action: delete
+
+  guest:
+    deny:
+      - all
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(session_limit.created, { user_id: user_id, max_sessions: max_sessions, enforce_limit: enforce_limit })"
+
+  after_update_max_sessions:
+    actions:
+      - "log(session_limit.updated, { user_id: user_id, old_max: $old.max_sessions, new_max: max_sessions })"
+      - "trigger: revoke_excess_sessions"
+    if: "max_sessions < $old.max_sessions"
+
+  after_update_enforce_limit:
+    actions:
+      - "log(session_limit.enforcement_changed, { user_id: user_id, enforce_limit: enforce_limit })"
+      - "trigger: revoke_excess_sessions"
+    if: "enforce_limit == true && $old.enforce_limit == false"
+
+  after_delete:
+    actions:
+      - "log(session_limit.deleted, { user_id: user_id })"
+
+  scheduled_session_cleanup:
+    schedule: "every 6.hours"
+    actions:
+      - "trigger: cleanup_stale_sessions"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  effective_limit: "max_sessions_per_device ?? max_sessions"
+
+  current_count: "current_session_count"
+
+  can_create_session: "enforce_limit == false || current_session_count < max_sessions"
+
+  excess_sessions: "enforce_limit == true ? (current_session_count - max_sessions).max(0) : 0"
+
+  utilization_percent: "max_sessions > 0 ? (current_session_count * 100 / max_sessions).min(100) : 0"
+
+  is_near_limit: "current_session_count >= (max_sessions * 0.8)"
+
+  # Time since last session revocation
+  time_since_revoke: "last_session_revoke_at != null ? now() - last_session_revoke_at : null"

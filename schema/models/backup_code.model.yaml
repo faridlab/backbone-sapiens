@@ -1,0 +1,82 @@
+# BackupCode Entity - One-time backup codes for MFA account recovery
+# Source: IMPLEMENTATION_ROADMAP.md Phase 2.1 Multi-Factor Authentication
+# Hooks: pre_generate, post_generate, pre_verify, post_verify, pre_regenerate
+
+models:
+  - name: BackupCode
+    collection: backup_codes
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Backup code ID"
+
+      user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "User who owns backup codes"
+
+      batch_id:
+        type: string
+        attributes: ["@required", "@length(32)", "@exclude_from_foreign_key_check"]
+        description: "Batch identifier for code generation"
+
+      code_hash:
+        type: string
+        attributes: ["@required", "@length(64)", "@sensitive"]
+        description: "SHA-256 hash of backup code"
+
+      code_index:
+        type: int
+        attributes: ["@required", "@min(1)", "@max(10)"]
+        description: "Code index in batch (1-10)"
+
+      is_used:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether code has been used"
+
+      used_at:
+        type: datetime?
+        description: "When code was used"
+
+      used_ip:
+        type: ip?
+        description: "IP address used when code was verified"
+
+      used_user_agent:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "User agent used when code was verified"
+
+      expires_at:
+        type: datetime
+        attributes: ["@required", "@future"]
+        description: "Backup code expiry time"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [user_id, batch_id]
+      - type: index
+        fields: [user_id, is_used]
+      - type: index
+        fields: [expires_at]
+      - type: index
+        fields: [used_at]
+      - type: unique
+        fields: [user_id, batch_id, code_index]
+      - type: unique
+        fields: [code_hash, "(metadata->>'deleted_at')"]
+

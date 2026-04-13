@@ -1,0 +1,360 @@
+# Notification Entity - User notifications and communication management
+# Source: IMPLEMENTATION_ROADMAP.md Phase 5.2 Notifications & Communications
+# Hooks: pre_send, post_send, pre_mark_read, post_mark_read, pre_batch_send
+
+models:
+  - name: Notification
+    collection: notifications
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Notification ID"
+
+      user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "Recipient user"
+
+      notification_type:
+        type: NotificationType
+        attributes: ["@required"]
+        description: "Notification type"
+
+      channel:
+        type: NotificationChannel
+        attributes: ["@required"]
+        description: "Delivery channel"
+
+      title:
+        type: string
+        attributes: ["@required", "@max(255)"]
+        description: "Notification title"
+
+      message:
+        type: string
+        attributes: ["@required", "@max(2000)"]
+        description: "Notification message content"
+
+      data:
+        type: json?
+        description: "Additional notification data"
+
+      is_read:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether notification has been read"
+
+      read_at:
+        type: datetime?
+        description: "When notification was read"
+
+      sent_at:
+        type: datetime?
+        description: "When notification was sent"
+
+      delivered_at:
+        type: datetime?
+        description: "When notification was delivered"
+
+      expires_at:
+        type: datetime?
+        description: "When notification expires"
+
+      priority:
+        type: NotificationPriority
+        attributes: ["@default(normal)"]
+        description: "Notification priority"
+
+      action_url:
+        type: url?
+        attributes: ["@max(500)"]
+        description: "Action URL for notification"
+
+      action_text:
+        type: string?
+        attributes: ["@max(100)"]
+        description: "Action button text"
+
+      category:
+        type: string?
+        attributes: ["@max(50)"]
+        description: "Notification category (security, system, etc.)"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [user_id, is_read]
+      - type: index
+        fields: [user_id, created_at]
+      - type: index
+        fields: [notification_type, created_at]
+      - type: index
+        fields: [channel, created_at]
+      - type: index
+        fields: [priority, created_at]
+      - type: index
+        fields: [expires_at]
+      - type: index
+        fields: [read_at]
+
+  - name: NotificationTemplate
+    collection: notification_templates
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Template ID"
+
+      name:
+        type: string
+        attributes: ["@required", "@max(100)", "@unique"]
+        description: "Template name"
+
+      notification_type:
+        type: NotificationType
+        attributes: ["@required"]
+        description: "Notification type"
+
+      channel:
+        type: NotificationChannel
+        attributes: ["@required"]
+        description: "Delivery channel"
+
+      subject_template:
+        type: string?
+        attributes: ["@max(255)"]
+        description: "Email subject template"
+
+      message_template:
+        type: string
+        attributes: ["@required"]
+        description: "Message content template with placeholders"
+
+      variables:
+        type: json?
+        description: "Template variable definitions"
+
+      is_active:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Template active status"
+
+      language:
+        type: string
+        attributes: ["@default(en)", "@max(10)"]
+        description: "Template language code"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      notification_logs:
+        type: NotificationLog[]
+        attributes: ["@one_to_many", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [notification_type, channel]
+      - type: index
+        fields: [is_active]
+      - type: index
+        fields: [language]
+      - type: unique
+        fields: [name, "(metadata->>'deleted_at')"]
+
+  - name: NotificationLog
+    collection: notification_logs
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Log entry ID"
+
+      notification_id:
+        type: uuid?
+        attributes: ["@foreign_key(Notification.id)"]
+        description: "Related notification"
+
+      template_id:
+        type: uuid?
+        attributes: ["@foreign_key(NotificationTemplate.id)"]
+        description: "Used template"
+
+      recipient_type:
+        type: string
+        attributes: ["@required", "@max(50)"]
+        description: "Recipient type (user, role, organization)"
+
+      recipient_id:
+        type: uuid?
+        attributes: ["@foreign_key(User.id)"]
+        description: "Recipient user ID"
+
+      channel:
+        type: NotificationChannel
+        attributes: ["@required"]
+        description: "Delivery channel"
+
+      status:
+        type: NotificationLogStatus
+        attributes: ["@required"]
+        description: "Delivery status"
+
+      sent_at:
+        type: datetime?
+        description: "When notification was sent"
+
+      delivered_at:
+        type: datetime?
+        description: "When notification was delivered"
+
+      failed_at:
+        type: datetime?
+        description: "When delivery failed"
+
+      error_message:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Error message if delivery failed"
+
+      external_id:
+        type: string?
+        attributes: ["@max(255)", "@exclude_from_foreign_key_check"]
+        description: "External system ID (email provider, SMS service)"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      notification:
+        type: Notification?
+        attributes: ["@one", "@foreign_key(notification_id)"]
+
+      template:
+        type: NotificationTemplate?
+        attributes: ["@one", "@foreign_key(template_id)"]
+
+      recipient:
+        type: User?
+        attributes: ["@one", "@foreign_key(recipient_id)"]
+
+    indexes:
+      - type: index
+        fields: [status, created_at]
+      - type: index
+        fields: [channel, created_at]
+      - type: index
+        fields: [recipient_id, created_at]
+      - type: index
+        fields: [external_id]
+
+enums:
+  - name: NotificationType
+    variants:
+      - name: welcome
+        default: true
+        description: "Welcome message"
+      - name: email_verification
+        description: "Email verification"
+      - name: password_reset
+        description: "Password reset"
+      - name: security_alert
+        description: "Security alert"
+      - name: account_suspended
+        description: "Account suspended"
+      - name: role_assigned
+        description: "Role assigned"
+      - name: permission_granted
+        description: "Permission granted"
+      - name: mfa_enabled
+        description: "MFA enabled"
+      - name: login_alert
+        description: "Login notification"
+      - name: system_maintenance
+        description: "System maintenance"
+      - name: general
+        description: "General notification"
+
+  - name: NotificationChannel
+    variants:
+      - name: in_app
+        default: true
+        description: "In-app notification"
+      - name: email
+        description: "Email notification"
+      - name: sms
+        description: "SMS notification"
+      - name: push
+        description: "Push notification"
+
+  - name: NotificationPriority
+    variants:
+      - name: low
+        description: "Low priority"
+      - name: normal
+        default: true
+        description: "Normal priority"
+      - name: high
+        description: "High priority"
+      - name: urgent
+        description: "Urgent priority"
+
+  - name: NotificationLogStatus
+    variants:
+      - name: pending
+        default: true
+        description: "Waiting to be sent"
+      - name: sent
+        description: "Successfully sent"
+      - name: delivered
+        description: "Successfully delivered"
+      - name: failed
+        description: "Delivery failed"
+      - name: bounced
+        description: "Message bounced"
+
+hooks:
+  # Notification Workflow Hooks
+  - event: pre_notification_send
+    trigger: before_sending_notification
+    description: "Validate notification, check preferences, rate limiting"
+    service: NotificationValidationService
+
+  - event: post_notification_send
+    trigger: after_sending_notification
+    description: "Complete notification send, update delivery status"
+    service: NotificationDeliveryService
+
+  - event: pre_notification_mark_read
+    trigger: before_marking_notification_read
+    description: "Validate read operation, check permissions"
+    service: NotificationReadValidationService
+
+  - event: post_notification_mark_read
+    trigger: after_marking_notification_read
+    description: "Complete read operation, update analytics"
+    service: NotificationReadService
+
+  - event: pre_batch_notification_send
+    trigger: before_sending_bulk_notifications
+    description: "Validate bulk send, check resource limits"
+    service: BulkNotificationValidationService

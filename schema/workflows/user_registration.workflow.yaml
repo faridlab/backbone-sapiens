@@ -1,0 +1,238 @@
+# User Registration Flow
+# Multi-step business process for complete user registration
+# Source: BRD FR-001 (User Registration)
+
+name: UserRegistration
+description: |
+  Complete user registration process including:
+  - Account creation
+  - Email verification
+  - Default role assignment
+  - Welcome notification
+  - Audit logging
+
+version: 1
+
+trigger:
+  event: UserCreatedEvent
+  extract:
+    user_id: "event.user_id"
+    email: "event.email"
+    username: "event.username"
+    first_name: "event.first_name"  # Optional, for Profile creation
+
+config:
+  timeout: 72h
+  persistence: true
+
+context:
+  verification_token: null
+  verification_url: null
+
+steps:
+  - name: generate_verification_token
+    type: action
+    action: generate_token
+    params:
+      type: email_verification
+      user_id: "{{ context.user_id }}"
+      expires_in: 24h
+    on_success:
+      set:
+        verification_token: "{{ result.token }}"
+        verification_url: "{{ result.url }}"
+      next: send_verification_email
+
+  - name: send_verification_email
+    type: action
+    action: send_email
+    params:
+      template: email_verification
+      to: "{{ context.email }}"
+      subject: "Verify your email address"
+      data:
+        username: "{{ context.username }}"
+        verification_url: "{{ context.verification_url }}"
+    on_success:
+      next: assign_default_role
+    on_failure:
+      next: assign_default_role  # Don't block registration if email fails
+
+  - name: assign_default_role
+    type: action
+    action: assign_role
+    params:
+      user_id: "{{ context.user_id }}"
+      role: default
+      assigned_by: system
+    on_success:
+      next: create_user_settings
+    on_failure:
+      retry: 3
+      backoff: exponential
+      on_exhausted:
+        next: registration_failed
+
+  - name: create_user_settings
+    type: action
+    action: create
+    entity: UserSettings
+    params:
+      user_id: "{{ context.user_id }}"
+      theme: system
+      language: en
+      timezone: UTC
+      notifications_enabled: true
+      email_notifications: true
+    on_success:
+      next: create_profile
+
+  # Create Profile entity (User/Profile split)
+  - name: create_profile
+    type: action
+    action: create
+    entity: Profile
+    params:
+      user_id: "{{ context.user_id }}"
+      first_name: "{{ context.first_name ?? '' }}"
+    on_success:
+      next: wait_for_verification
+
+  - name: wait_for_verification
+    type: wait
+    wait_for:
+      event: UserEmailVerifiedEvent
+      condition: "event.user_id == context.user_id"
+      timeout: 24h
+    on_event:
+      next: activate_user
+    on_timeout:
+      next: send_reminder
+
+  - name: activate_user
+    type: transition
+    entity: User
+    id: "{{ context.user_id }}"
+    transition: verify
+    condition: "user.status == 'pending'"
+    on_success:
+      next: send_welcome_email
+
+  - name: send_welcome_email
+    type: action
+    action: send_email
+    params:
+      template: welcome
+      to: "{{ context.email }}"
+      subject: "Welcome to Sapiens!"
+      data:
+        username: "{{ context.username }}"
+    on_success:
+      next: log_registration_complete
+    on_failure:
+      next: log_registration_complete  # Continue even if welcome email fails
+
+  - name: log_registration_complete
+    type: action
+    action: audit_log
+    params:
+      action: user_registration_completed
+      user_id: "{{ context.user_id }}"
+      severity: info
+      details:
+        email_verified: true
+    on_success:
+      next: complete
+
+  - name: complete
+    type: terminal
+    status: completed
+
+  # Timeout branch - send reminder
+  - name: send_reminder
+    type: action
+    action: send_email
+    params:
+      template: verification_reminder
+      to: "{{ context.email }}"
+      subject: "Reminder: Verify your email"
+      data:
+        username: "{{ context.username }}"
+        verification_url: "{{ context.verification_url }}"
+    on_success:
+      next: wait_for_verification_retry
+
+  - name: wait_for_verification_retry
+    type: wait
+    wait_for:
+      event: UserEmailVerifiedEvent
+      condition: "event.user_id == context.user_id"
+      timeout: 48h
+    on_event:
+      next: after_reminder_activation
+    on_timeout:
+      next: expire_registration
+
+  - name: after_reminder_activation
+    type: transition
+    entity: User
+    id: "{{ context.user_id }}"
+    transition: verify
+    on_success:
+      next: send_welcome_email
+
+  # Expiration branch
+  - name: expire_registration
+    type: action
+    action: audit_log
+    params:
+      action: user_registration_expired
+      user_id: "{{ context.user_id }}"
+      severity: warning
+      details:
+        reason: email_not_verified
+        after_hours: 72
+    on_success:
+      next: mark_inactive
+
+  - name: mark_inactive
+    type: transition
+    entity: User
+    id: "{{ context.user_id }}"
+    transition: deactivate
+    condition: "user.email_verified == false"
+    on_success:
+      next: expired
+
+  - name: expired
+    type: terminal
+    status: expired
+    reason: "Email not verified within 72 hours"
+
+  - name: registration_failed
+    type: terminal
+    status: failed
+    reason: "Role assignment failed after retries"
+    compensate: true
+
+compensation:
+  - name: revoke_default_role
+    condition: "steps.assign_default_role.completed == true"
+    action: revoke_role
+    params:
+      user_id: "{{ context.user_id }}"
+      role: default
+
+  - name: delete_user_settings
+    condition: "steps.create_user_settings.completed == true"
+    action: delete
+    entity: UserSettings
+    params:
+      user_id: "{{ context.user_id }}"
+
+  - name: delete_profile
+    condition: "steps.create_profile.completed == true"
+    action: delete
+    entity: Profile
+    params:
+      user_id: "{{ context.user_id }}"

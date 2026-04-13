@@ -1,0 +1,118 @@
+# DataExport Entity - GDPR user data export requests
+# Source: libs/modules/sapiens/docs/spec-sapiens.md Section 3.2
+
+models:
+  - name: DataExport
+    collection: data_exports
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "Subject user"
+
+      requested_by:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "Who requested the export"
+
+      requested_at:
+        type: datetime
+        attributes: ["@required", "@default(now)"]
+        description: "Request timestamp"
+
+      status:
+        type: DataExportStatus
+        attributes: ["@default(pending)"]
+        description: "Export status"
+
+      file_path:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Generated file path"
+
+      file_url:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Download URL"
+
+      expires_at:
+        type: datetime
+        attributes: ["@required"]
+        description: "File deletion time (7 days)"
+
+      completed_at:
+        type: datetime?
+        description: "Completion timestamp"
+
+      record_count:
+        type: integer?
+        attributes: ["@non_negative"]
+        description: "Number of records exported"
+
+      format:
+        type: DataExportFormat
+        attributes: ["@default(json)"]
+        description: "Export format"
+
+      justification:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Required for admin requests"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)"]
+
+      requester:
+        type: User
+        attributes: ["@one", "@foreign_key(requested_by)"]
+
+    indexes:
+      - type: index
+        fields: [user_id, requested_at]
+      - type: index
+        fields: [requested_by, requested_at]
+      - type: index
+        fields: [status]
+      - type: index
+        fields: [expires_at]
+
+enums:
+  - name: DataExportStatus
+    variants:
+      - name: pending
+        default: true
+        description: "Export queued"
+      - name: processing
+        description: "Generating export"
+      - name: completed
+        description: "Export ready for download"
+      - name: failed
+        description: "Export failed"
+      - name: expired
+        description: "Download link expired"
+
+  - name: DataExportFormat
+    variants:
+      - name: json
+        default: true
+        description: "JSON format"
+      - name: csv
+        description: "CSV format"
+      - name: pdf
+        description: "PDF format"
+      - name: xml
+        description: "XML format"

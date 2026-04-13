@@ -1,0 +1,236 @@
+# Analytics Workflow - System analytics and reporting
+# Source: IMPLEMENTATION_ROADMAP.md Phase 7.1 Analytics & Reporting
+
+name: AnalyticsEvent
+model: AnalyticsEvent
+
+# =============================================================================
+# PRIORITY 1: Validation Rules
+# =============================================================================
+rules:
+  valid_event_type:
+    when: [create]
+    condition: "event_type in ['user_login', 'user_logout', 'user_registration', 'password_change', 'mfa_enabled', 'mfa_disabled', 'role_assigned', 'permission_granted', 'organization_created', 'api_access', 'security_event', 'system_event']"
+    message: "Invalid event type"
+    code: INVALID_EVENT_TYPE
+
+  valid_event_category:
+    when: [create]
+    condition: "event_category in ['authentication', 'authorization', 'user_management', 'security', 'system', 'business', 'performance']"
+    message: "Invalid event category"
+    code: INVALID_EVENT_CATEGORY
+
+  valid_metric_type:
+    when: [create]
+    entity: AnalyticsMetric
+    condition: "metric_type in ['counter', 'gauge', 'histogram', 'timer']"
+    message: "Invalid metric type"
+    code: INVALID_METRIC_TYPE
+
+  valid_aggregation_type:
+    when: [create]
+    entity: AnalyticsMetric
+    condition: "aggregation_type in ['sum', 'average', 'min', 'max', 'count', 'rate']"
+    message: "Invalid aggregation type"
+    code: INVALID_AGGREGATION_TYPE
+
+  valid_date_range:
+    when: [create]
+    entity: AnalyticsReport
+    condition: "end_date >= start_date && (end_date - start_date).total_days <= 365"
+    message: "Invalid date range"
+    code: INVALID_DATE_RANGE
+
+# =============================================================================
+# PRIORITY 2: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: read
+      - action: list
+      - action: create_events
+      - action: create_metrics
+      - action: generate_reports
+    deny:
+      - action: delete
+      - action: purge_data
+
+  analyst:
+    allow:
+      - action: read
+      - action: list
+      - action: create_events
+      - action: generate_reports
+      - action: export_data
+    deny:
+      - action: delete
+      - action: purge_data
+      - action: manage_metrics
+
+  manager:
+    allow:
+      - action: read
+      - action: list
+      - action: generate_reports
+      - action: export_data
+        if: "$this.organization_id == $actor.organization_id"
+    deny:
+      - action: create_events
+      - action: delete
+      - action: purge_data
+
+  system:
+    allow:
+      - action: create_events
+      - action: update_metrics
+      - action: aggregate_data
+      - action: cleanup_old_data
+      - action: process_events
+
+# =============================================================================
+# PRIORITY 3: Triggers (Side Effects)
+# =============================================================================
+triggers:
+  after_event_create:
+    entity: AnalyticsEvent
+    actions:
+      - "increment_event_counters(event_type, event_category)"
+      - "update_real_time_metrics(event_type, event_data)"
+      - "trigger_alerts_if_needed(event_type, event_data)"
+      - "log(analytics.event_created, { event_id: id, event_type: event_type, user_id: user_id })"
+      - "emit: AnalyticsEventCreatedEvent(id: id, event_type: event_type, event_category: event_category })"
+
+  after_metric_update:
+    entity: AnalyticsMetric
+    actions:
+      - "calculate_aggregations(metric_name, time_window)"
+      - "update_dashboard_data(metric_name, new_value)"
+      - "check_thresholds(metric_name, new_value)"
+      - "log(analytics.metric_updated, { metric_id: id, metric_name: metric_name, new_value: value })"
+      - "emit: AnalyticsMetricUpdatedEvent(id: id, metric_name: metric_name, value: value })"
+
+  after_report_generate:
+    entity: AnalyticsReport
+    actions:
+      - "compile_report_data(start_date, end_date, filters)"
+      - "calculate_report_statistics()"
+      - "generate_report_charts()"
+      - "notify_subscribers(report_url)"
+      - "log(analytics.report_generated, { report_id: id, report_type: report_type, start_date: start_date, end_date: end_date })"
+      - "emit: AnalyticsReportGeneratedEvent(id: id, report_type: report_type, generated_at: now() })"
+
+  after_user_activity:
+    actions:
+      - "track_user_session_activity(user_id, activity_type)"
+      - "update_user_engagement_metrics(user_id)"
+      - "record_page_view_if_applicable(activity_data)"
+
+  after_security_event:
+    actions:
+      - "increment_security_counters(severity)"
+      - "trigger_security_alerts(event_type, event_data)"
+      - "update_risk_assessment(event_data)"
+
+# =============================================================================
+# PRIORITY 4: Scheduled Jobs and Background Tasks
+# =============================================================================
+jobs:
+  aggregate_hourly_metrics:
+    schedule: "0 * * * *"  # Every hour
+    actions:
+      - "aggregate_events_for_last_hour()"
+      - "calculate_hourly_metrics()"
+      - "update_real_time_dashboards()"
+      - "log(analytics.hourly_aggregation_completed, { metrics_updated: $metrics_count })"
+
+  aggregate_daily_metrics:
+    schedule: "0 1 * * *"  # Daily at 1 AM
+    actions:
+      - "aggregate_events_for_last_day()"
+      - "calculate_daily_metrics()"
+      - "generate_daily_reports()"
+      - "log(analytics.daily_aggregation_completed, { reports_generated: $reports_count })"
+
+  cleanup_old_events:
+    schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
+    actions:
+      - "find_events_older_than(90.days)"
+      - "archive_old_events(old_events)"
+      - "log(analytics.events_cleanup, { archived_count: $archived_count })"
+
+  generate_weekly_reports:
+    schedule: "0 3 * * 1"  # Weekly on Monday at 3 AM
+    actions:
+      - "generate_scheduled_weekly_reports()"
+      - "send_reports_to_subscribers()"
+      - "log(analytics.weekly_reports_completed, { reports_sent: $reports_sent_count })"
+
+  update_user_engagement:
+    schedule: "0 */6 * * *"  # Every 6 hours
+    actions:
+      - "calculate_user_engagement_scores()"
+      - "update_user_activity_segments()"
+      - "identify_churn_risk_users()"
+      - "log(analytics.engagement_updated, { users_updated: $users_updated_count })"
+
+  monitor_system_performance:
+    schedule: "*/5 * * * *"  # Every 5 minutes
+    actions:
+      - "collect_system_metrics()"
+      - "check_performance_thresholds()"
+      - "trigger_performance_alerts()"
+      - "update_system_health_dashboard()"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  # Event age in minutes
+  event_age_minutes: "(now() - created_at).total_minutes"
+
+  # Metric value change rate
+  metric_change_rate: "calculate_metric_value_change_rate(previous_value, current_value, time_period)"
+
+  # Event trend (increasing/decreasing/stable)
+  event_trend: "calculate_event_trend(event_type, time_window)"
+
+  # User engagement score (0-100)
+  user_engagement_score: "calculate_user_engagement_score(user_id, activity_period)"
+
+  # System health score (0-100)
+  system_health_score: "calculate_system_health_score()"
+
+  # Report completion percentage
+  report_completion_percentage: "report_status == 'completed' ? 100 : (report_status == 'processing' ? progress_percentage : 0)"
+
+  # Active users in time period
+  active_users_count: "count_distinct(user_id, AnalyticsEvent, created_at > (now() - 24.hours) && event_category == 'authentication')"
+
+  # Event frequency per hour
+  events_per_hour: "count(AnalyticsEvent, event_type == $this.event_type && created_at > (now() - 1.hour))"
+
+  # Security incident severity level
+  security_severity_level: "calculate_security_severity_level(event_data)"
+
+  # Dashboard data freshness
+  data_freshness_minutes: "(now() - last_updated_at).total_minutes"
+
+  # Anomaly detection score
+  anomaly_score: "calculate_anomaly_score(current_metrics, historical_patterns)"
+
+  # Conversion rate (for specific funnels)
+  conversion_rate: "calculate_conversion_rate(funnel_steps, time_period)"
+
+  # Performance benchmark comparison
+  performance_vs_benchmark: "calculate_performance_vs_baseline(current_value, benchmark_value)"
+
+  # User retention rate
+  user_retention_rate: "calculate_user_retention_rate(cohort, time_period)"
+
+  # Data quality score
+  data_quality_score: "calculate_data_quality_score(data_completeness, accuracy, timeliness)"

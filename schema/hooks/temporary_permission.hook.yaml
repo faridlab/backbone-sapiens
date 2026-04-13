@@ -1,0 +1,168 @@
+# TemporaryPermission Workflow - Time-bound permission grants
+# Source: libs/modules/sapiens/docs/spec-sapiens.md UC-010
+
+name: TemporaryPermission
+model: temporary_permission.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - Permission Lifecycle
+# =============================================================================
+states:
+  field: status
+
+  values:
+    pending:
+      initial: true
+      on_enter:
+        - "log(temp_permission.pending, { user_id: user_id, permission_id: permission_id })"
+
+    active:
+      on_enter:
+        - "set: effective_from = effective_from ?? now()"
+        - "log(temp_permission.activated, { user_id: user_id, permission_id: permission_id })"
+        - "emit: TemporaryPermissionActivatedEvent(user_id: user_id, permission_id: permission_id, expires_at: expires_at)"
+
+    expired:
+      final: true
+      on_enter:
+        - "set: revoked_at = now()"
+        - "set: status = expired"
+        - "log(temp_permission.expired, { user_id: user_id, permission_id: permission_id })"
+        - "emit: TemporaryPermissionExpiredEvent(user_id: user_id, permission_id: permission_id)"
+
+    revoked:
+      final: true
+      on_enter:
+        - "set: revoked_at = now()"
+        - "log(temp_permission.revoked, { user_id: user_id, permission_id: permission_id, revoked_by: $actor.id })"
+        - "emit: TemporaryPermissionRevokedEvent(user_id: user_id, permission_id: permission_id, revoked_by: $actor.id)"
+
+  transitions:
+    activate:
+      from: [pending, active]
+      to: active
+      roles: [admin]
+      condition: "effective_from == null || effective_from <= now()"
+      message: "Cannot activate permission - effective date is in the future"
+
+    revoke:
+      from: [pending, active]
+      to: revoked
+      roles: [admin, granter]
+      condition: "$actor.id == granted_by || $actor.has_role('admin')"
+      message: "Only the granter or an admin can revoke this permission"
+
+    auto_expire:
+      from: active
+      to: expired
+      roles: [system]
+      condition: "expires_at <= now()"
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  expires_after_granted:
+    when: [create]
+    condition: "expires_at > granted_at"
+    message: "Expiration time must be after grant time"
+    code: INVALID_EXPIRATION
+
+  max_duration_30_days:
+    when: [create]
+    condition: "(expires_at - granted_at).days <= 30"
+    message: "Temporary permission cannot exceed 30 days"
+    code: MAX_DURATION_EXCEEDED
+
+  reason_required:
+    when: [create]
+    condition: "reason != null && reason.length > 10"
+    message: "A reason (min 10 characters) is required for temporary permissions"
+    code: REASON_REQUIRED
+
+  cannot_modify_revoked:
+    when: [update]
+    condition: "revoked_at == null"
+    message: "Cannot modify a revoked or expired permission"
+    code: PERMISSION_REVOKED
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: create
+      - action: read
+      - action: list
+      - action: update
+      - action: revoke
+
+  user:
+    allow:
+      - action: read
+        if: "user_id == $actor.id"
+    deny:
+      - action: create
+      - action: update
+      - action: revoke
+      - action: delete
+
+  guest:
+    deny:
+      - all
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(temp_permission.granted, { user_id: user_id, permission_id: permission_id, expires_at: expires_at, granted_by: granted_by })"
+      - "emit: TemporaryPermissionGrantedEvent(user_id: user_id, permission_id: permission_id, expires_at: expires_at, granted_by: granted_by)"
+
+  after_update:
+    actions:
+      - "log(temp_permission.updated, { id: id, updated_fields: $changed_fields })"
+
+  after_revoke:
+    actions:
+      - "invalidate_permission_cache(user_id)"
+      - "notify(user_id, temporary_permission_revoked, { permission_id: permission_id, reason: $context.revocation_reason })"
+    if: "user_id != $actor.id"
+
+  scheduled_expiry_check:
+    schedule: "every 5.minutes"
+    actions:
+      - "trigger: expire_temporary_permissions"
+
+  scheduled_expiry_notification:
+    schedule: "every 1.hour"
+    actions:
+      - "trigger: notify_expiring_soon"
+    description: "Notify users whose permissions expire within 24 hours"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  is_active: "status == 'active' && (effective_from == null || effective_from <= now()) && expires_at > now()"
+
+  is_expired: "expires_at <= now() && revoked_at == null"
+
+  time_until_expiry: "expires_at - now()"
+
+  expires_soon: "expires_at <= now() + 24.hours && revoked_at == null"
+
+  duration_days: "(expires_at - granted_at).days"
+
+  remaining_days: "(expires_at - now()).days.max(0)"
+
+  was_notified: "notified_before_expiry == true"
+
+  # Check if permission should be notified
+  should_notify_expiry: "revoked_at == null && expires_at <= now() + 24.hours && notified_before_expiry == false"

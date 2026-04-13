@@ -1,0 +1,370 @@
+models:
+  - name: MFASession
+    collection: mfa_sessions
+    soft_delete: true
+    description: "MFA session management for multi-factor authentication workflows"
+
+    fields:
+      # Identity
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+
+      # Relations
+      user_id:
+        type: uuid
+        attributes: ["@foreign_key(User.id)", "@required"]
+        description: "User undergoing MFA verification"
+
+      device_id:
+        type: uuid
+        attributes: ["@foreign_key(MFADevice.id)", "@required"]
+        description: "MFA device used for this session"
+
+      # Session tokens
+      session_token:
+        type: string
+        attributes: ["@unique", "@required", "@max(128)"]
+        description: "Unique session token for MFA verification"
+
+      session_hash:
+        type: string
+        attributes: ["@unique", "@required", "@max(64)"]
+        description: "Hashed session token for security"
+
+      # Authentication context
+      primary_authentication_method:
+        type: PrimaryAuthMethod
+        attributes: ["@required"]
+        description: "Primary authentication method used"
+
+      mfa_required:
+        type: bool
+        attributes: ["@required"]
+        description: "Whether MFA verification is required"
+
+      mfa_enforced_at:
+        type: datetime?
+        description: "When MFA enforcement began"
+
+      risk_score:
+        type: int
+        attributes: ["@default(0)", "@min(0)", "@max(100)"]
+        description: "Session risk score based on authentication factors"
+
+      trust_level:
+        type: MfaTrustLevel
+        attributes: ["@default(medium)"]
+        description: "Trust level of this authentication session"
+
+      adaptive_authentication_triggered:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether adaptive authentication was triggered"
+
+      additional_factors_required:
+        type: int
+        attributes: ["@default(0)", "@min(0)"]
+        description: "Number of additional MFA factors required"
+
+      ip_risk_score:
+        type: int?
+        attributes: ["@min(0)", "@max(100)"]
+        description: "IP address risk assessment"
+
+      device_risk_score:
+        type: int?
+        attributes: ["@min(0)", "@max(100)"]
+        description: "Device risk assessment"
+
+      location_anomaly:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Geographic location anomaly detected"
+
+      time_anomaly:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Time-based usage anomaly detected"
+
+      # MFA verification details
+      verification_method:
+        type: MFAVerificationMethod
+        attributes: ["@required"]
+        description: "MFA verification method used"
+
+      verification_initiated_at:
+        type: datetime
+        attributes: ["@required"]
+        description: "When MFA verification was initiated"
+
+      verification_completed_at:
+        type: datetime?
+        description: "When MFA verification was completed"
+
+      verification_attempts:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of verification attempts made"
+
+      max_attempts_allowed:
+        type: int
+        attributes: ["@default(5)", "@min(1)", "@max(10)"]
+        description: "Maximum verification attempts allowed"
+
+      verification_success:
+        type: bool?
+        description: "Whether MFA verification was successful"
+
+      verification_time_ms:
+        type: int?
+        description: "Time taken to complete verification in milliseconds"
+
+      device_trust_status:
+        type: DeviceTrustStatus
+        attributes: ["@default(untrusted)"]
+        description: "Trust status of the device used"
+
+      # Session security
+      is_terminated:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether this MFA session has been terminated"
+
+      terminated_at:
+        type: datetime?
+        description: "When the session was terminated"
+
+      termination_reason:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Reason for session termination"
+
+      ip_address:
+        type: string
+        attributes: ["@required", "@max(45)"]
+        description: "IP address used for this session"
+
+      user_agent:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "User agent for this session"
+
+      device_fingerprint:
+        type: string?
+        attributes: ["@max(255)"]
+        description: "Device fingerprint for session binding"
+
+      # Geolocation
+      country:
+        type: string?
+        attributes: ["@max(2)"]
+        description: "Country code (ISO 3166-1 alpha-2)"
+
+      region:
+        type: string?
+        attributes: ["@max(100)"]
+        description: "Region or state"
+
+      city:
+        type: string?
+        attributes: ["@max(100)"]
+        description: "City name"
+
+      latitude:
+        type: float?
+        description: "Latitude coordinate"
+
+      longitude:
+        type: float?
+        description: "Longitude coordinate"
+
+      # Session lifetime
+      expires_at:
+        type: datetime
+        attributes: ["@required"]
+        description: "When this session expires"
+
+      max_duration_minutes:
+        type: int
+        attributes: ["@default(30)", "@min(5)", "@max(1440)"]
+        description: "Maximum session duration in minutes"
+
+      idle_timeout_minutes:
+        type: int
+        attributes: ["@default(15)", "@min(5)", "@max(120)"]
+        description: "Session timeout after inactivity"
+
+      auto_renew_enabled:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Whether to automatically renew active sessions"
+
+      last_activity_at:
+        type: datetime
+        attributes: ["@default(now())"]
+        description: "Last activity timestamp for idle timeout"
+
+      extension_count:
+        type: int
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Number of times this session has been extended"
+
+      # Performance metrics
+      initiation_time_ms:
+        type: int
+        attributes: ["@required"]
+        description: "Time to initiate MFA verification in milliseconds"
+
+      total_session_time_ms:
+        type: int?
+        description: "Total session time from start to completion"
+
+      device_performance_score:
+        type: int?
+        attributes: ["@min(1)", "@max(100)"]
+        description: "Device performance score based on response times"
+
+      network_quality:
+        type: NetworkQuality
+        attributes: ["@default(unknown)"]
+        description: "Network connection quality assessment"
+
+      # Compliance
+      audit_log_required:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Whether audit logging is required for this session"
+
+      data_retention_hours:
+        type: int
+        attributes: ["@default(8760)", "@min(720)", "@max(87600)"]
+        description: "Hours to retain session data after completion"
+
+      # Status
+      status:
+        type: MFASessionStatus
+        attributes: ["@default(initiated)"]
+        description: "Current status of the MFA session"
+
+      # Metadata
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+      device:
+        type: MFADevice
+        attributes: ["@one", "@foreign_key(device_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [user_id, status]
+      - type: index
+        fields: [device_id, status]
+      - type: unique
+        fields: [session_token]
+      - type: unique
+        fields: [session_hash]
+      - type: index
+        fields: [mfa_required, status]
+      - type: index
+        fields: [ip_address, status]
+      - type: index
+        fields: [expires_at]
+      - type: index
+        fields: [created_at]
+      - type: index
+        fields: [verification_method]
+
+enums:
+  - name: PrimaryAuthMethod
+    variants:
+      - name: password
+        default: true
+        description: "Password-based authentication"
+      - name: sso
+        description: "Single Sign-On"
+      - name: oauth
+        description: "OAuth authentication"
+      - name: certificate
+        description: "Client certificate authentication"
+      - name: biometric
+        description: "Biometric authentication"
+
+  - name: MfaTrustLevel
+    variants:
+      - name: low
+        description: "Low trust level"
+      - name: medium
+        default: true
+        description: "Medium trust level"
+      - name: high
+        description: "High trust level"
+      - name: critical
+        description: "Critical trust level"
+
+  - name: MFAVerificationMethod
+    variants:
+      - name: totp
+        default: true
+        description: "Time-based One-Time Password"
+      - name: sms
+        description: "SMS verification"
+      - name: email
+        description: "Email verification"
+      - name: hardware_key
+        description: "Hardware security key"
+      - name: push_notification
+        description: "Push notification verification"
+      - name: backup_code
+        description: "Backup code verification"
+      - name: biometric
+        description: "Biometric verification"
+
+  - name: DeviceTrustStatus
+    variants:
+      - name: trusted
+        description: "Device is trusted"
+      - name: untrusted
+        default: true
+        description: "Device is not trusted"
+      - name: new_device
+        description: "New device"
+      - name: compromised
+        description: "Device may be compromised"
+
+  - name: NetworkQuality
+    variants:
+      - name: excellent
+        description: "Excellent network quality"
+      - name: good
+        description: "Good network quality"
+      - name: fair
+        description: "Fair network quality"
+      - name: poor
+        description: "Poor network quality"
+      - name: unknown
+        default: true
+        description: "Unknown network quality"
+
+  - name: MFASessionStatus
+    variants:
+      - name: initiated
+        default: true
+        description: "Session has been initiated"
+      - name: pending_verification
+        description: "Awaiting MFA verification"
+      - name: verified
+        description: "MFA verification completed successfully"
+      - name: failed
+        description: "MFA verification failed"
+      - name: expired
+        description: "Session has expired"
+      - name: terminated
+        description: "Session was terminated"

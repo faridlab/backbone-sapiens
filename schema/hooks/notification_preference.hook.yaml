@@ -1,0 +1,156 @@
+# NotificationPreference Workflow - Per-user notification settings
+# Source: libs/modules/sapiens/docs/spec-sapiens.md Section 5.4
+
+name: NotificationPreference
+model: notification_preference.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - Preference Lifecycle
+# =============================================================================
+states:
+  field: enabled
+
+  values:
+    enabled:
+      initial: true
+      final: true
+      on_enter:
+        - "log(notification.preferences_enabled, { user_id: user_id })"
+
+    disabled:
+      final: true
+      on_enter:
+        - "log(notification.preferences_disabled, { user_id: user_id })"
+
+  transitions:
+    enable:
+      from: disabled
+      to: enabled
+      roles: [owner, admin]
+
+    disable:
+      from: enabled
+      to: disabled
+      roles: [owner, admin]
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  digest_frequency_valid:
+    when: [create, update]
+    condition: "digest_frequency in ['immediate', 'hourly', 'daily', 'weekly']"
+    message: "Invalid digest frequency. Valid: immediate, hourly, daily, weekly"
+    code: INVALID_DIGEST_FREQUENCY
+
+  at_least_one_channel_enabled:
+    when: [create, update]
+    condition: "email_enabled || sms_enabled || push_enabled || in_app_enabled"
+    message: "At least one notification channel must be enabled"
+    code: NO_CHANNELS_ENABLED
+
+  timezone_valid:
+    when: [create, update]
+    condition: "timezone == null || is_valid_timezone(timezone)"
+    message: "Invalid timezone"
+    code: INVALID_TIMEZONE
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: read
+      - action: list
+
+  user:
+    allow:
+      - action: create
+        if: "user_id == $actor.id"
+      - action: read
+        if: "user_id == $actor.id"
+      - action: update
+        if: "user_id == $actor.id"
+      - action: delete
+        if: "user_id == $actor.id"
+    deny:
+      - action: list
+        if: "user_id != $actor.id"
+
+  guest:
+    deny:
+      - all
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(notification.preferences_created, { user_id: user_id, digest_frequency: digest_frequency })"
+
+  after_update:
+    actions:
+      - "log(notification.preferences_updated, { user_id: user_id, updated_fields: $changed_fields })"
+      - "invalidate_notification_cache(user_id)"
+
+  after_disable:
+    actions:
+      - "log(notification.preferences_disabled, { user_id: user_id })"
+      - "notify(user_id, notifications_disabled, { reason: $context.reason })"
+    if: "enabled == false && $old.enabled == true"
+
+  after_enable:
+    actions:
+      - "log(notification.preferences_enabled, { user_id: user_id })"
+    if: "enabled == true && $old.enabled == false"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  is_active: "enabled == true"
+
+  channels_enabled_count: "(email_enabled ? 1 : 0) + (sms_enabled ? 1 : 0) + (push_enabled ? 1 : 0) + (in_app_enabled ? 1 : 0)"
+
+  has_email_enabled: "email_enabled == true"
+
+  has_sms_enabled: "sms_enabled == true"
+
+  has_push_enabled: "push_enabled == true"
+
+  has_in_app_enabled: "in_app_enabled == true"
+
+  is_immediate_digest: "digest_frequency == 'immediate'"
+
+  digest_hours: |
+    digest_frequency == 'immediate' ? 0 :
+    digest_frequency == 'hourly' ? 1 :
+    digest_frequency == 'daily' ? 24 :
+    digest_frequency == 'weekly' ? 168 : 24
+
+  should_send_immediate: "enabled == true && digest_frequency == 'immediate'"
+
+  # Check if specific notification type is enabled
+  security_notifications_enabled: "notify_security_events == true"
+
+  system_notifications_enabled: "notify_system_updates == true"
+
+  marketing_notifications_enabled: "notify_marketing == true"
+
+  # Notification window
+  is_in_notification_window: |
+    quiet_hours_start == null || quiet_hours_end == null ||
+    (now().hour < quiet_hours_start || now().hour >= quiet_hours_end)
+
+  # Next digest time
+  next_digest_at: |
+    digest_frequency == 'immediate' ? now() :
+    digest_frequency == 'hourly' ? now() + 1.hour :
+    digest_frequency == 'daily' ? today() + 1.day + timezone :
+    digest_frequency == 'weekly' ? next_weekday() + timezone : now() + 1.day

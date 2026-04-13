@@ -1,0 +1,275 @@
+# User Workflow - Complete lifecycle, rules, permissions, and triggers
+# Source: libs/modules/sapiens/docs/domain.md + brd.md
+
+name: User
+model: user.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - User Account Lifecycle
+# =============================================================================
+states:
+  field: status
+
+  values:
+    pending_verification:
+      initial: true
+      on_enter:
+        - "send_email(verification, email)"
+        - "log(user.registered, { user_id: id, email: email })"
+
+    active:
+      on_enter:
+        - "send_email(welcome, email)"
+        - "log(user.activated, { user_id: id })"
+        - "set: email_verified = true"
+
+    inactive:
+      on_enter:
+        - "trigger: invalidate_all_sessions"
+        - "log(user.deactivated, { user_id: id })"
+
+    suspended:
+      final: true
+      on_enter:
+        - "trigger: invalidate_all_sessions"
+        - "send_email(account_suspended, email)"
+        - "notify([admin], User #{username} has been suspended)"
+        - "log(user.suspended, { user_id: id, severity: warning })"
+
+  transitions:
+    verify:
+      from: pending_verification
+      to: active
+      roles: [system]
+      condition: "email_verified == true || $trigger.verification_code_valid"
+      message: "Valid verification required"
+
+    activate:
+      from: pending_verification
+      to: active
+      roles: [admin]
+
+    deactivate:
+      from: active
+      to: inactive
+      roles: [admin, owner]
+      condition: "$actor.id == id || $actor.has_role('admin')"
+
+    reactivate:
+      from: inactive
+      to: active
+      roles: [admin, owner]
+
+    suspend:
+      from: [active, inactive]
+      to: suspended
+      roles: [admin]
+      condition: "$actor.id != id"
+      message: "Cannot suspend your own account"
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  username_format:
+    when: [create, update]
+    condition: "username matches '^[a-zA-Z0-9_-]{3,50}$'"
+    message: "Username must be 3-50 characters, alphanumeric with underscore/hyphen"
+    code: INVALID_USERNAME_FORMAT
+
+  username_lowercase_check:
+    when: [create, update]
+    condition: "username == username.lowercase()"
+    message: "Username should be lowercase"
+    severity: warning
+
+  unique_email:
+    when: [create, update]
+    condition: "count(User, email == $this.email && id != $this.id && metadata.deleted_at == null) == 0"
+    message: "Email is already registered"
+    code: EMAIL_ALREADY_EXISTS
+
+  unique_username:
+    when: [create, update]
+    condition: "count(User, username == $this.username && id != $this.id && metadata.deleted_at == null) == 0"
+    message: "Username is already taken"
+    code: USERNAME_ALREADY_EXISTS
+
+  password_strength:
+    when: [create]
+    condition: >
+      password_hash.length >= 8
+      && $input.password.length >= 12
+      && $input.password matches '[A-Z]'
+      && $input.password matches '[a-z]'
+      && $input.password matches '[0-9]'
+      && $input.password matches '[!@#$%^&*(),.?":{}|<>]'
+    message: "Password must be at least 12 characters with uppercase, lowercase, digit, and special character"
+    code: WEAK_PASSWORD
+
+  account_not_locked:
+    when: [login]
+    condition: "locked_until == null || locked_until < now()"
+    message: "Account is temporarily locked. Try again later."
+    code: ACCOUNT_LOCKED
+
+  max_failed_attempts:
+    when: [login]
+    condition: "failed_login_attempts < 5"
+    message: "Too many failed login attempts. Account locked for 15 minutes."
+    code: MAX_ATTEMPTS_EXCEEDED
+
+# =============================================================================
+# PRIORITY 3: Access Control (RBAC + Hybrid)
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: create
+      - action: read
+      - action: update
+      - action: delete
+      - action: list
+      - action: restore
+      - action: suspend
+      - action: activate
+      - action: reset_password
+      - action: assign_role
+      - action: revoke_role
+    deny:
+      - action: delete
+        if: "$this.id == $actor.id"
+
+  user:
+    allow:
+      - action: read
+        # Note: first_name, last_name, profile_picture_url are now in Profile entity
+        only: [id, username, email, status, "metadata.created_at"]
+        if: "$this.id == $actor.id || status == 'active'"
+      - action: update
+        # Note: profile fields (first_name, last_name, phone_number, profile_picture_url)
+        # should be updated via Profile entity, not User
+        only: [username, email]
+        if: "$this.id == $actor.id"
+      - action: change_password
+        if: "$this.id == $actor.id"
+    deny:
+      - action: delete
+      - action: suspend
+      - action: assign_role
+
+  guest:
+    allow:
+      - action: create
+      - action: read
+        # Note: profile_picture_url is now in Profile entity
+        only: [id, username]
+    deny:
+      - action: update
+      - action: delete
+      - action: list
+
+# =============================================================================
+# PRIORITY 4: Triggers (Side Effects)
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "send_email(verification, email)"
+      - "create: Profile(user_id: id, first_name: $input.first_name ?? '')"
+      - "create: UserSettings(user_id: id, theme: system, language: en, timezone: UTC)"
+      - "log(user.created, { user_id: id, email: email })"
+      - "emit: UserCreatedEvent(user_id: id, email: email, username: username)"
+
+  after_update_email:
+    actions:
+      - "send_email(email_changed_notification, $old.email)"
+      - "send_email(verify_new_email, email)"
+      - "set: email_verified = false"
+      - "set: status = pending_verification"
+      - "trigger: invalidate_all_sessions"
+      - "log(user.email_changed, { user_id: id, old_email: $old.email, new_email: email })"
+      - "emit: UserEmailChangedEvent(user_id: id, old_email: $old.email, new_email: email)"
+    if: "status == 'active'"
+
+  after_update_password_hash:
+    actions:
+      - "trigger: invalidate_all_sessions"
+      - "send_email(password_changed, email)"
+      - "log(security.password_changed, { user_id: id, severity: warning })"
+      - "set: failed_login_attempts = 0"
+      - "set: locked_until = null"
+      - "emit: UserPasswordChangedEvent(user_id: id, reason: $context.reason)"
+
+  after_update_status:
+    actions:
+      - "log(user.status_changed, { user_id: id, old_status: $old.status, new_status: status })"
+      - "emit: UserStatusChangedEvent(user_id: id, old_status: $old.status, new_status: status)"
+
+  before_delete:
+    actions:
+      - "log(user.deleting, { user_id: id })"
+
+  after_delete:
+    actions:
+      - "trigger: invalidate_all_sessions"
+      - "delete: Profile(user_id: id)"
+      - "delete: UserSettings(user_id: id)"
+      - "send_email(account_deleted, email)"
+      - "log(user.deleted, { user_id: id, email: email })"
+      - "emit: UserDeletedEvent(user_id: id, reason: $context.deletion_reason)"
+
+  after_login:
+    actions:
+      - "set: last_login = now()"
+      - "set: failed_login_attempts = 0"
+      - "set: locked_until = null"
+      - "log(auth.login_success, { user_id: id, ip: $context.ip_address })"
+      - "emit: UserLoggedInEvent(user_id: id, session_id: $context.session_id, ip_address: $context.ip_address)"
+
+  after_login_failed:
+    actions:
+      - "set: failed_login_attempts = failed_login_attempts + 1"
+      - "set: locked_until = now() + 15.minutes"
+      - "log(auth.login_failed, { user_id: id, attempt: failed_login_attempts, ip: $context.ip_address, severity: warning })"
+      - "emit: LoginFailedEvent(email_or_username: $context.identifier, reason: $context.failure_reason, ip_address: $context.ip_address)"
+    if: "failed_login_attempts >= 5"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  # Full name concatenation from Profile entity (first + middle + last, filtering empty values)
+  # Note: Profile is now a separate entity linked via user_id (one-to-one)
+  full_name: "profile != null ? profile.first_name + ' ' + profile.last_name : null"
+
+  # Display name with fallback
+  display_name: "username"
+
+  # Check if user is admin
+  is_admin: "roles.any(name == 'ADMIN' || name == 'SUPER_ADMIN')"
+
+  # Check if user is verified and active
+  is_verified: "email_verified == true && status == 'active'"
+
+  # Check if account is locked
+  is_locked: "locked_until != null && locked_until > now()"
+
+  # Active session count
+  active_session_count: "sessions.count(is_active == true && expires_at > now())"
+
+  # Last activity (from sessions)
+  last_activity: "sessions.max(last_activity)"
+
+  # Effective permissions (union of role + direct)
+  effective_permission_count: "roles.sum(permissions.count) + permissions.count(is_active == true)"
+
+  # Check if MFA is enabled (from UserSettings entity)
+  mfa_enabled: "user_settings != null && user_settings.mfa_enabled == true"
+
+  # Profile picture URL (from Profile entity)
+  profile_picture_url: "profile != null ? profile.profile_picture_url : null"

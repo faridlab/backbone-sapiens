@@ -1,0 +1,312 @@
+# MFA Setup Flow
+# Multi-step business process for MFA device enrollment
+# Source: BRD FR-004 (Multi-Factor Authentication)
+
+name: MFASetup
+description: |
+  MFA device enrollment process including:
+  - Device type selection
+  - Secret generation (TOTP) or phone verification (SMS)
+  - Initial code verification
+  - Backup codes generation
+  - User notification
+
+version: 1
+
+trigger:
+  event: MFASetupInitiatedEvent
+  extract:
+    user_id: "event.user_id"
+    device_type: "event.device_type"
+    device_name: "event.device_name"
+    phone_number: "event.phone_number"
+
+config:
+  timeout: 15m
+  persistence: true
+
+context:
+  user: null
+  existing_device: null
+  secret: null
+  qr_code_url: null
+  manual_entry_key: null
+  device_id: null
+  backup_codes: null
+
+steps:
+  - name: validate_user
+    type: action
+    action: query
+    entity: User
+    params:
+      id: "{{ context.user_id }}"
+    on_success:
+      set:
+        user: "{{ result }}"
+      next: check_existing_device
+
+  - name: check_existing_device
+    type: action
+    action: query
+    entity: MFADevice
+    params:
+      user_id: "{{ context.user_id }}"
+      device_type: "{{ context.device_type }}"
+      is_active: true
+    on_success:
+      set:
+        existing_device: "{{ result }}"
+      next: check_can_add
+
+  - name: check_can_add
+    type: condition
+    conditions:
+      - if: "context.device_type != 'totp' || context.existing_device == null"
+        next: route_by_type
+      - else: true
+        next: error_existing_totp
+
+  - name: route_by_type
+    type: condition
+    conditions:
+      - if: "context.device_type == 'totp'"
+        next: generate_totp_secret
+      - else: true
+        next: verify_phone_number
+
+  # TOTP Branch
+  - name: generate_totp_secret
+    type: action
+    action: generate_totp_secret
+    params:
+      user_id: "{{ context.user_id }}"
+      issuer: Sapiens
+      account_name: "{{ context.user.email }}"
+    on_success:
+      set:
+        secret: "{{ result.secret }}"
+        qr_code_url: "{{ result.qr_code_url }}"
+        manual_entry_key: "{{ result.manual_entry_key }}"
+      next: create_totp_device
+
+  - name: create_totp_device
+    type: action
+    action: create
+    entity: MFADevice
+    params:
+      user_id: "{{ context.user_id }}"
+      device_type: totp
+      device_name: "{{ context.device_name }}"
+      secret: "{{ context.secret }}"
+      is_active: false
+    on_success:
+      set:
+        device_id: "{{ result.id }}"
+      next: wait_totp_verification
+
+  - name: wait_totp_verification
+    type: wait
+    wait_for:
+      event: MFACodeVerifiedEvent
+      condition: "event.device_id == context.device_id"
+      timeout: 15m
+    on_event:
+      next: activate_device
+    on_timeout:
+      next: setup_timeout
+
+  # SMS Branch
+  - name: verify_phone_number
+    type: action
+    action: send_sms
+    params:
+      to: "{{ context.phone_number }}"
+      template: phone_verification
+      code_length: 6
+    on_success:
+      next: create_sms_device
+
+  - name: create_sms_device
+    type: action
+    action: create
+    entity: MFADevice
+    params:
+      user_id: "{{ context.user_id }}"
+      device_type: sms
+      device_name: "{{ context.device_name }}"
+      secret: "{{ context.phone_number }}"
+      is_active: false
+    on_success:
+      set:
+        device_id: "{{ result.id }}"
+      next: wait_sms_verification
+
+  - name: wait_sms_verification
+    type: wait
+    wait_for:
+      event: MFACodeVerifiedEvent
+      condition: "event.device_id == context.device_id"
+      timeout: 10m
+    on_event:
+      next: activate_device
+    on_timeout:
+      next: setup_timeout
+
+  # Common completion path
+  - name: activate_device
+    type: action
+    action: update
+    entity: MFADevice
+    params:
+      id: "{{ context.device_id }}"
+      is_active: true
+      verified_at: "{{ now }}"
+    on_success:
+      next: generate_backup_codes
+
+  - name: generate_backup_codes
+    type: action
+    action: generate_backup_codes
+    params:
+      user_id: "{{ context.user_id }}"
+      count: 10
+    on_success:
+      set:
+        backup_codes: "{{ result.codes }}"
+      next: create_backup_device
+
+  - name: create_backup_device
+    type: action
+    action: create
+    entity: MFADevice
+    params:
+      user_id: "{{ context.user_id }}"
+      device_type: backup_codes
+      device_name: "Backup Codes"
+      backup_codes: "{{ context.backup_codes }}"
+      is_active: true
+      verified_at: "{{ now }}"
+    on_success:
+      next: enable_mfa_on_user_settings
+
+  # Note: mfa_enabled is now in UserSettings, not User
+  - name: enable_mfa_on_user_settings
+    type: action
+    action: update
+    entity: UserSettings
+    params:
+      user_id: "{{ context.user_id }}"
+      mfa_enabled: true
+    on_success:
+      next: send_mfa_enabled_email
+
+  - name: send_mfa_enabled_email
+    type: action
+    action: send_email
+    params:
+      template: mfa_enabled
+      to: "{{ context.user.email }}"
+      subject: "MFA has been enabled on your account"
+      data:
+        username: "{{ context.user.username }}"
+        device_type: "{{ context.device_type }}"
+        device_name: "{{ context.device_name }}"
+    on_success:
+      next: log_mfa_setup
+    on_failure:
+      next: log_mfa_setup  # Continue even if email fails
+
+  - name: log_mfa_setup
+    type: action
+    action: audit_log
+    params:
+      action: mfa_device_enrolled
+      user_id: "{{ context.user_id }}"
+      severity: info
+      details:
+        device_type: "{{ context.device_type }}"
+        device_name: "{{ context.device_name }}"
+    on_success:
+      next: complete
+
+  - name: complete
+    type: terminal
+    status: completed
+    emit:
+      event: MFASetupCompletedEvent
+      data:
+        backup_codes: "{{ context.backup_codes }}"
+
+  # Error branches
+  - name: error_existing_totp
+    type: action
+    action: audit_log
+    params:
+      action: mfa_setup_rejected
+      user_id: "{{ context.user_id }}"
+      severity: warning
+      details:
+        reason: existing_totp_device
+    on_success:
+      next: error_end
+
+  - name: error_end
+    type: terminal
+    status: failed
+    reason: "Only one TOTP device allowed per user. Please disable existing device first."
+
+  - name: setup_timeout
+    type: action
+    action: delete
+    entity: MFADevice
+    params:
+      id: "{{ context.device_id }}"
+    on_success:
+      next: log_timeout
+
+  - name: log_timeout
+    type: action
+    action: audit_log
+    params:
+      action: mfa_setup_timeout
+      user_id: "{{ context.user_id }}"
+      severity: info
+    on_success:
+      next: timeout_end
+
+  - name: timeout_end
+    type: terminal
+    status: expired
+    reason: "MFA verification code not received within timeout"
+
+compensation:
+  - name: delete_totp_device
+    condition: "steps.create_totp_device.completed == true"
+    action: delete
+    entity: MFADevice
+    params:
+      id: "{{ context.device_id }}"
+
+  - name: delete_sms_device
+    condition: "steps.create_sms_device.completed == true"
+    action: delete
+    entity: MFADevice
+    params:
+      id: "{{ context.device_id }}"
+
+  - name: delete_backup_device
+    condition: "steps.create_backup_device.completed == true"
+    action: delete
+    entity: MFADevice
+    params:
+      user_id: "{{ context.user_id }}"
+      device_type: backup_codes
+
+  - name: disable_mfa
+    condition: "steps.enable_mfa_on_user_settings.completed == true"
+    action: update
+    entity: UserSettings
+    params:
+      user_id: "{{ context.user_id }}"
+      mfa_enabled: false

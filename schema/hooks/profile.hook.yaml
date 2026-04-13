@@ -1,0 +1,170 @@
+# Profile Workflow - User personal information management
+# Source: libs/modules/sapiens/docs/domain.md
+# Note: Profile is a separate entity from User (1:1 relationship)
+
+name: Profile
+model: user.model.yaml  # Profile is defined in user.model.yaml
+
+# =============================================================================
+# Note: Profile has no state machine - it follows User lifecycle
+# =============================================================================
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  first_name_required:
+    when: [create, update]
+    condition: "first_name != null && first_name.length >= 1"
+    message: "First name is required"
+    code: FIRST_NAME_REQUIRED
+
+  phone_number_format:
+    when: [create, update]
+    condition: "phone_number == null || phone_number matches '^\\+?[1-9]\\d{1,14}$'"
+    message: "Phone number must be in E.164 format"
+    code: INVALID_PHONE_FORMAT
+
+  profile_picture_url_valid:
+    when: [create, update]
+    condition: "profile_picture_url == null || profile_picture_url matches '^https?://'"
+    message: "Profile picture URL must be a valid HTTP(S) URL"
+    code: INVALID_URL_FORMAT
+
+  user_exists:
+    when: [create]
+    condition: "count(User, id == $this.user_id && metadata.deleted_at == null) == 1"
+    message: "User not found or deleted"
+    code: USER_NOT_FOUND
+
+  unique_profile_per_user:
+    when: [create]
+    condition: "count(Profile, user_id == $this.user_id) == 0"
+    message: "Profile already exists for this user"
+    code: PROFILE_EXISTS
+
+  valid_gender:
+    when: [create, update]
+    condition: "gender == null || gender in ['male', 'female']"
+    message: "Gender must be 'male' or 'female'"
+    code: INVALID_GENDER
+
+  dob_in_past:
+    when: [create, update]
+    condition: "dob == null || dob < now()"
+    message: "Date of birth must be in the past"
+    code: DOB_IN_FUTURE
+
+  reasonable_age:
+    when: [create, update]
+    condition: "dob == null || (now() - dob).years <= 150"
+    message: "Date of birth is unreasonably old"
+    code: DOB_UNREASONABLE
+    severity: warning
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: create
+      - action: read
+      - action: update
+      - action: list
+      - action: delete
+    deny:
+      - action: delete
+        if: "$this.user.status == 'active'"  # Cannot delete profile of active user
+
+  user:
+    allow:
+      - action: read
+        if: "user_id == $actor.id"
+      - action: update
+        if: "user_id == $actor.id"
+        only: [first_name, middle_name, last_name, phone_number, profile_picture_url, dob, pob, gender]
+    deny:
+      - action: create   # Created automatically with User
+      - action: delete   # Deleted with User
+      - action: list
+
+  guest:
+    allow:
+      - action: read
+        only: [first_name, profile_picture_url]  # Public info only
+        if: "user.status == 'active'"
+    deny:
+      - action: create
+      - action: update
+      - action: delete
+      - action: list
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(profile.created, { user_id: user_id })"
+      - "emit: ProfileCreatedEvent(user_id: user_id)"
+
+  after_update:
+    actions:
+      - "log(profile.updated, { user_id: user_id, updated_fields: $changed_fields })"
+      - "emit: ProfileUpdatedEvent(user_id: user_id, updated_fields: $changed_fields)"
+
+  after_update_profile_picture_url:
+    actions:
+      - "trigger: process_profile_picture"
+      - "log(profile.picture_changed, { user_id: user_id })"
+    if: "profile_picture_url != null"
+
+  after_delete:
+    actions:
+      - "log(profile.deleted, { user_id: user_id })"
+      - "emit: ProfileDeletedEvent(user_id: user_id)"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  # Full name concatenation (first + middle + last, filtering empty values)
+  full_name: "[first_name, middle_name, last_name].filter(v => v != null && v != '').join(' ')"
+
+  # Display name (first name only)
+  display_name: "first_name"
+
+  # Initials (first letter of first and last name)
+  initials: "(first_name != null ? first_name[0].uppercase() : '') + (last_name != null ? last_name[0].uppercase() : '')"
+
+  # Age calculated from dob
+  age: "dob != null ? (now() - dob).years : null"
+
+  # Check if profile is complete
+  is_complete: "first_name != null && last_name != null && phone_number != null"
+
+  # Profile completeness percentage
+  completeness_percent: |
+    (
+      (first_name != null ? 1 : 0) +
+      (last_name != null ? 1 : 0) +
+      (phone_number != null ? 1 : 0) +
+      (profile_picture_url != null ? 1 : 0) +
+      (dob != null ? 1 : 0) +
+      (gender != null ? 1 : 0)
+    ) / 6 * 100
+
+  # Has profile picture
+  has_avatar: "profile_picture_url != null && profile_picture_url.length > 0"
+
+  # Age category
+  age_category: |
+    age == null ? null :
+    age < 13 ? 'child' :
+    age < 18 ? 'teenager' :
+    age < 65 ? 'adult' : 'senior'

@@ -1,0 +1,196 @@
+# DataExport Workflow - GDPR data export requests
+# Source: libs/modules/sapiens/docs/spec-sapiens.md UC-012
+
+name: DataExport
+model: data_export.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - Export Request Lifecycle
+# =============================================================================
+states:
+  field: status
+
+  values:
+    pending:
+      initial: true
+      on_enter:
+        - "log(data_export.requested, { user_id: user_id, requested_by: requested_by, format: format })"
+        - "emit: DataExportRequestedEvent(user_id: user_id, requested_by: requested_by, format: format)"
+
+    processing:
+      on_enter:
+        - "set: status = processing"
+        - "log(data_export.processing, { id: id })"
+
+    completed:
+      on_enter:
+        - "set: completed_at = now()"
+        - "set: file_url = generate_export_file_url()"
+        - "log(data_export.completed, { id: id, file_url: file_url, file_size_bytes: file_size_bytes })"
+        - "emit: DataExportCompletedEvent(user_id: user_id, export_id: id, file_url: file_url, expires_at: expires_at)"
+        - "send_email(data_export_ready, user.email, { download_url: file_url, expires_at: expires_at })"
+
+    failed:
+      final: true
+      on_enter:
+        - "set: completed_at = now()"
+        - "log(data_export.failed, { id: id, error_message: error_message })"
+        - "emit: DataExportFailedEvent(user_id: user_id, export_id: id, error: error_message)"
+
+    expired:
+      final: true
+      on_enter:
+        - "log(data_export.expired, { id: id })"
+
+  transitions:
+    start_processing:
+      from: pending
+      to: processing
+      roles: [system]
+
+    complete:
+      from: processing
+      to: completed
+      roles: [system]
+
+    fail:
+      from: [pending, processing]
+      to: failed
+      roles: [system]
+
+    expire:
+      from: completed
+      to: expired
+      roles: [system]
+      condition: "expires_at <= now()"
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  user_can_request_own_data:
+    when: [create]
+    condition: "requested_by == user_id || $actor.has_role('admin')"
+    message: "Users can only export their own data"
+    code: UNAUTHORIZED_EXPORT
+
+  admin_requires_justification:
+    when: [create]
+    condition: "requested_by == user_id || (justification != null && justification.length >= 20)"
+    message: "Admins must provide justification (min 20 characters) when exporting another user's data"
+    code: JUSTIFICATION_REQUIRED
+
+  export_format_valid:
+    when: [create]
+    condition: "format in ['json', 'csv', 'pdf', 'xml']"
+    message: "Invalid export format. Supported: json, csv, pdf, xml"
+    code: INVALID_FORMAT
+
+  expires_after_completion:
+    when: [create, update]
+    condition: "expires_at > (completed_at ?? now())"
+    message: "Expiration must be after completion time"
+    code: INVALID_EXPIRATION
+
+  max_retention_30_days:
+    when: [create]
+    condition: "expires_at <= now().days(30)"
+    message: "Export files cannot be retained longer than 30 days (GDPR compliance)"
+    code: MAX_RETENTION_EXCEEDED
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: create
+        with_justification: true
+      - action: read
+      - action: list
+      - action: delete
+
+  user:
+    allow:
+      - action: create
+        if: "user_id == $actor.id"
+      - action: read
+        if: "user_id == $actor.id"
+      - action: list
+        if: "user_id == $actor.id"
+      - action: download
+        if: "user_id == $actor.id && status == 'completed' && expires_at > now()"
+    deny:
+      - action: delete
+        if: "user_id == $actor.id"
+
+  guest:
+    deny:
+      - all
+
+  system:
+    allow:
+      - action: create
+      - action: read
+      - action: update
+      - action: delete
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(data_export.requested, { user_id: user_id, requested_by: requested_by, format: format, justification: justification })"
+      - "emit: DataExportRequestedEvent(user_id: user_id, requested_by: requested_by, format: format, includes: includes)"
+      - "enqueue: process_data_export(id)"
+
+  after_update_status:
+    actions:
+      - "log(data_export.status_changed, { id: id, old_status: $old.status, new_status: status })"
+    if: "$old.status != status"
+
+  after_complete:
+    actions:
+      - "generate_export_file()"
+      - "send_email(data_export_ready, user.email, { download_url: file_url, expires_at: expires_at, format: format })"
+
+  after_fail:
+    actions:
+      - "send_email(data_export_failed, user.email, { error_message: error_message })"
+
+  scheduled_cleanup:
+    schedule: "every 1.day at 03:00"
+    actions:
+      - "trigger: delete_expired_exports"
+      - "trigger: delete_old_failed_exports"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  is_ready: "status == 'completed' && expires_at > now()"
+
+  is_expired: "expires_at <= now()"
+
+  is_processing: "status in ['pending', 'processing']"
+
+  time_until_expiry: "expires_at - now()"
+
+  expires_soon: "expires_at <= now() + chrono::Duration::days(1) && status == 'completed'"
+
+  file_exists: "file_url != null && file_url.length > 0"
+
+  processing_duration: "completed_at != null && metadata.created_at != null ? (completed_at - metadata.created_at) : null"
+
+  retention_days: "(expires_at - (completed_at ?? now())).days"
+
+  file_extension: "format == 'json' ? '.json' : format == 'csv' ? '.csv' : format == 'pdf' ? '.pdf' : '.xml'"
+
+  mime_type: "format == 'json' ? 'application/json' : format == 'csv' ? 'text/csv' : format == 'pdf' ? 'application/pdf' : 'application/xml'"
+
+  download_filename: "'user_' + user_id + '_data_export_' + (metadata.created_at ?? now()).format('%Y%m%d_%H%M%S') + file_extension"

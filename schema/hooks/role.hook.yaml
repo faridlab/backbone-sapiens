@@ -1,0 +1,113 @@
+# Role Workflow - RBAC role management
+# Source: libs/modules/sapiens/docs/domain.md Section 3.2
+
+name: Role
+model: role.model.yaml
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  name_uppercase:
+    when: [create, update]
+    condition: "name == name.uppercase()"
+    message: "Role name must be uppercase (e.g., ADMIN, EDITOR)"
+    code: ROLE_NAME_NOT_UPPERCASE
+
+  unique_name:
+    when: [create, update]
+    # Note: deleted_at is now in metadata.deleted_at
+    condition: "count(Role, name == $this.name && id != $this.id && metadata.deleted_at == null) == 0"
+    message: "Role name already exists"
+    code: ROLE_NAME_EXISTS
+
+  single_default_role:
+    when: [create, update]
+    # Note: deleted_at is now in metadata.deleted_at
+    condition: "is_default == false || count(Role, is_default == true && id != $this.id && metadata.deleted_at == null) == 0"
+    message: "Only one role can be the default role"
+    code: MULTIPLE_DEFAULT_ROLES
+
+  no_users_on_delete:
+    when: [delete]
+    condition: "count(UserRole, role_id == $this.id) == 0"
+    message: "Cannot delete role that is assigned to users. Remove all user assignments first."
+    code: ROLE_HAS_USERS
+
+  reserved_names:
+    when: [create, update]
+    condition: "name not in ['SYSTEM', 'ROOT', 'ANONYMOUS']"
+    message: "This role name is reserved"
+    code: RESERVED_ROLE_NAME
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: create
+      - action: read
+      - action: update
+      - action: list
+      - action: assign_permission
+      - action: revoke_permission
+      - action: delete
+    deny:
+      - action: delete
+        if: "name in ['ADMIN', 'SUPER_ADMIN']"
+
+  user:
+    allow:
+      - action: read
+        only: [id, name, description, is_default]
+      - action: list
+    deny:
+      - action: create
+      - action: update
+      - action: delete
+
+  guest:
+    deny:
+      - all
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(role.created, { role_id: id, name: name })"
+      - "emit: RoleCreatedEvent(role_id: id, name: name)"
+
+  after_update:
+    actions:
+      - "log(role.updated, { role_id: id, name: name })"
+      - "emit: RoleUpdatedEvent(role_id: id, name: name, updated_fields: $changed_fields)"
+
+  after_update_is_default:
+    actions:
+      - "trigger: unset_other_default_roles"
+    if: "is_default == true"
+
+  before_delete:
+    actions:
+      - "log(role.deleting, { role_id: id, name: name })"
+
+  after_delete:
+    actions:
+      - "log(role.deleted, { role_id: id, name: name })"
+      - "emit: RoleDeletedEvent(role_id: id, name: name)"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  user_count: "count(UserRole, role_id == id)"
+  permission_count: "permissions.count"
+  is_system_role: "name in ['ADMIN', 'SUPER_ADMIN', 'USER']"
+  display_label: "name + ' (' + user_count.toString() + ' users)'"

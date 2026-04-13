@@ -1,0 +1,191 @@
+# ImpersonationSession Workflow - Admin impersonation tracking
+# Source: libs/modules/sapiens/docs/spec-sapiens.md UC-011
+
+name: ImpersonationSession
+model: impersonation_session.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - Impersonation Lifecycle
+# =============================================================================
+states:
+  field: status
+
+  values:
+    active:
+      initial: true
+      on_enter:
+        - "log(impersonation.started, { admin_id: admin_id, target_user_id: target_user_id, session_id: session_id, reason: reason })"
+        - "emit: ImpersonationStartedEvent(admin_id: admin_id, target_user_id: target_user_id, session_id: session_id, reason: reason, max_duration_minutes: max_duration_minutes)"
+        - "notify(admin_id, impersonation_started, { target_user_id: target_user_id })"
+
+    ended:
+      final: true
+      on_enter:
+        - "set: ended_at = now()"
+        - "log(impersonation.ended, { admin_id: admin_id, target_user_id: target_user_id, session_id: session_id, actions_performed: actions_performed })"
+        - "emit: ImpersonationEndedEvent(admin_id: admin_id, target_user_id: target_user_id, session_id: session_id, duration_minutes: (ended_at - started_at).minutes)"
+
+    expired:
+      final: true
+      on_enter:
+        - "set: ended_at = now()"
+        - "set: termination_reason = 'Session expired'"
+        - "log(impersonation.expired, { admin_id: admin_id, target_user_id: target_user_id, session_id: session_id })"
+        - "emit: ImpersonationExpiredEvent(admin_id: admin_id, target_user_id: target_user_id, session_id: session_id)"
+
+    terminated:
+      final: true
+      on_enter:
+        - "set: ended_at = now()"
+        - "log(impersonation.terminated, { admin_id: admin_id, target_user_id: target_user_id, terminated_by: terminated_by })"
+        - "emit: ImpersonationTerminatedEvent(admin_id: admin_id, target_user_id: target_user_id, terminated_by: terminated_by, reason: termination_reason)"
+
+  transitions:
+    end:
+      from: active
+      to: ended
+      roles: [admin]
+      condition: "$actor.id == admin_id"
+      message: "Only the originating admin can end the impersonation normally"
+
+    auto_expire:
+      from: active
+      to: expired
+      roles: [system]
+      condition: "(started_at + max_duration_minutes.minutes) <= now()"
+
+    terminate:
+      from: active
+      to: terminated
+      roles: [super_admin]
+
+    force_terminate:
+      from: active
+      to: terminated
+      roles: [admin]
+      condition: "$actor.id != admin_id"
+      message: "Only super-admins can terminate another admin's impersonation session"
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  cannot_impersonate_self:
+    when: [create]
+    condition: "admin_id != target_user_id"
+    message: "Cannot impersonate yourself"
+    code: SELF_IMPERSONATION_FORBIDDEN
+
+  reason_required:
+    when: [create]
+    condition: "reason != null && reason.length >= 20"
+    message: "A detailed reason (min 20 characters) is required for impersonation"
+    code: REASON_REQUIRED
+
+  max_duration_reasonable:
+    when: [create]
+    condition: "max_duration_minutes > 0 && max_duration_minutes <= 480"
+    message: "Duration must be between 1 and 480 minutes (8 hours)"
+    code: INVALID_DURATION
+
+  admin_has_impersonate_role:
+    when: [create]
+    condition: "$actor.has_role('admin') || $actor.has_role('super_admin')"
+    message: "Only administrators can start impersonation sessions"
+    code: UNAUTHORIZED_IMPERSONATION
+
+  max_concurrent_sessions:
+    when: [create]
+    condition: "count(ImpersonationSession, admin_id == $this.admin_id && status == 'active') < 3"
+    message: "Maximum 3 concurrent impersonation sessions per admin"
+    code: MAX_CONCURRENT_EXCEEDED
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: create
+      - action: read
+        if: "admin_id == $actor.id || $actor.has_role('super_admin')"
+      - action: list
+        if: "admin_id == $actor.id || $actor.has_role('super_admin')"
+      - action: end
+        if: "admin_id == $actor.id"
+      - action: terminate
+        if: "admin_id == $actor.id || $actor.has_role('super_admin')"
+    deny:
+      - action: delete
+      - action: update
+
+  audit:
+    allow:
+      - action: read
+      - action: list
+    deny:
+      - action: create
+      - action: update
+      - action: delete
+      - action: end
+      - action: terminate
+
+  guest:
+    deny:
+      - all
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(impersonation.started, { admin_id: admin_id, target_user_id: target_user_id, reason: reason, max_duration: max_duration_minutes })"
+      - "create: AuditLog(user_id: admin_id, action: 'impersonation_started', resource_type: 'user', resource_id: target_user_id.toString(), details: { reason: reason, max_duration_minutes: max_duration_minutes })"
+      - "notify(target_user_id, account_impersonated, { admin_id: admin_id })"
+    if: "target_user_id != admin_id"
+
+  after_end:
+    actions:
+      - "log(impersonation.ended, { admin_id: admin_id, target_user_id: target_user_id, duration_minutes: (ended_at - started_at).minutes, actions_performed: actions_performed })"
+      - "create: AuditLog(user_id: admin_id, action: 'impersonation_ended', resource_type: 'user', resource_id: target_user_id.toString(), details: { duration_minutes: (ended_at - started_at).minutes, actions_performed: actions_performed })"
+
+  after_terminate:
+    actions:
+      - "log(impersonation.terminated, { admin_id: admin_id, target_user_id: target_user_id, terminated_by: terminated_by, reason: termination_reason })"
+      - "notify(admin_id, impersonation_terminated, { target_user_id: target_user_id, reason: termination_reason })"
+
+  scheduled_expiry_check:
+    schedule: "every 1.minute"
+    actions:
+      - "trigger: expire_impersonation_sessions"
+
+  scheduled_warning_notification:
+    schedule: "every 5.minutes"
+    actions:
+      - "trigger: notify_expiring_soon"
+    description: "Notify admin when session will expire in 15 minutes"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  expires_at: "started_at + (max_duration_minutes as i64).minutes"
+
+  is_active: "ended_at == null && (started_at + (max_duration_minutes as i64).minutes) > now()"
+
+  is_expired: "(started_at + (max_duration_minutes as i64).minutes) <= now()"
+
+  duration_minutes: "ended_at != null ? (ended_at - started_at).minutes : null"
+
+  remaining_minutes: "ended_at == null ? ((started_at + (max_duration_minutes as i64).minutes) - now()).minutes.max(0) : 0"
+
+  expires_soon: "ended_at == null && ((started_at + (max_duration_minutes as i64).minutes) - now()).minutes <= 15"
+
+  is_admin_session: "admin_id == $actor?.id"
+
+  can_terminate: "$actor?.has_role('super_admin') || admin_id == $actor?.id"

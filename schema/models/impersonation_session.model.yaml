@@ -1,0 +1,112 @@
+# ImpersonationSession Entity - Admin impersonation tracking
+# Source: libs/modules/sapiens/docs/spec-sapiens.md Section 3.2
+
+models:
+  - name: ImpersonationSession
+    collection: impersonation_sessions
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      admin_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "Admin performing impersonation"
+
+      target_user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "User being impersonated"
+
+      session_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Session.id)"]
+        description: "Linked Session.id"
+
+      started_at:
+        type: datetime
+        attributes: ["@required", "@default(now)"]
+        description: "Start time"
+
+      ended_at:
+        type: datetime?
+        description: "End time"
+
+      max_duration_minutes:
+        type: integer
+        attributes: ["@required", "@default(60)", "@min(1)", "@max(480)"]
+        description: "Max duration in minutes"
+
+      reason:
+        type: string
+        attributes: ["@required", "@max(1000)"]
+        description: "Justification for impersonation"
+
+      actions_performed:
+        type: integer
+        attributes: ["@default(0)", "@non_negative"]
+        description: "Count of actions performed"
+
+      terminated_by:
+        type: uuid?
+        attributes: ["@foreign_key(User.id)"]
+        description: "Who terminated the session"
+
+      termination_reason:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Why session was terminated"
+
+      status:
+        type: ImpersonationSessionStatus
+        attributes: ["@default(active)"]
+        description: "Impersonation session status"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      admin:
+        type: User
+        attributes: ["@one", "@foreign_key(admin_id)"]
+
+      target_user:
+        type: User
+        attributes: ["@one", "@foreign_key(target_user_id)"]
+
+      session:
+        type: Session
+        attributes: ["@one", "@foreign_key(session_id)"]
+
+      terminator:
+        type: User?
+        attributes: ["@one", "@foreign_key(terminated_by)"]
+
+    indexes:
+      - type: index
+        fields: [admin_id, started_at]
+      - type: index
+        fields: [target_user_id, started_at]
+      - type: index
+        fields: [session_id]
+      - type: index
+        fields: [ended_at]
+
+enums:
+  - name: ImpersonationSessionStatus
+    variants:
+      - name: active
+        default: true
+        description: "Impersonation is active"
+      - name: ended
+        description: "Impersonation ended normally"
+      - name: expired
+        description: "Impersonation timed out"
+      - name: terminated
+        description: "Impersonation was terminated early"

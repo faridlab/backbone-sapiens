@@ -1,0 +1,384 @@
+# Account Deletion Flow (GDPR Right to Erasure)
+# Multi-step business process for complete account deletion
+# Source: BRD - GDPR Compliance, FR-005
+
+name: AccountDeletion
+description: |
+  GDPR-compliant account deletion process including:
+  - Verification of request
+  - Grace period for recovery
+  - Data export option
+  - Cascading data deletion
+  - Anonymization of audit logs
+  - Final confirmation
+
+version: 1
+
+trigger:
+  event: AccountDeletionRequestedEvent
+  extract:
+    user_id: "event.user_id"
+    requested_by: "event.requested_by"
+    reason: "event.reason"
+    skip_grace_period: "event.skip_grace_period"
+
+config:
+  timeout: 120d
+  persistence: true
+
+context:
+  user: null
+  export_url: null
+
+steps:
+  - name: get_user
+    type: action
+    action: query
+    entity: User
+    params:
+      id: "{{ context.user_id }}"
+    on_success:
+      set:
+        user: "{{ result }}"
+      next: validate_request
+
+  - name: validate_request
+    type: condition
+    conditions:
+      # Note: deleted_at is now in metadata.deleted_at
+      - if: "context.user != null && context.user.metadata.deleted_at == null"
+        next: check_self_request
+      - else: true
+        next: error_already_deleted
+
+  - name: check_self_request
+    type: condition
+    conditions:
+      - if: "context.user_id == context.requested_by"
+        next: require_password_confirmation
+      - else: true
+        next: admin_deletion_path
+
+  # Self-deletion path - requires password
+  - name: require_password_confirmation
+    type: wait
+    wait_for:
+      event: PasswordConfirmedEvent
+      condition: "event.user_id == context.user_id"
+      timeout: 15m
+    on_event:
+      next: check_grace_period
+    on_timeout:
+      next: confirmation_timeout
+
+  - name: check_grace_period
+    type: condition
+    conditions:
+      - if: "context.skip_grace_period == false"
+        next: start_grace_period
+      - else: true
+        next: proceed_with_deletion
+
+  # Grace period - allows recovery
+  - name: start_grace_period
+    type: action
+    action: update
+    entity: User
+    params:
+      id: "{{ context.user_id }}"
+      status: pending_deletion
+      deletion_scheduled_at: "{{ now + 30d }}"
+    on_success:
+      next: send_deletion_scheduled_email
+
+  - name: send_deletion_scheduled_email
+    type: action
+    action: send_email
+    params:
+      template: account_deletion_scheduled
+      to: "{{ context.user.email }}"
+      subject: "Your account is scheduled for deletion"
+      data:
+        username: "{{ context.user.username }}"
+        deletion_date: "{{ now + 30d }}"
+        cancel_url: "{{ config.cancel_deletion_url }}"
+    on_success:
+      next: log_deletion_scheduled
+    on_failure:
+      next: log_deletion_scheduled  # Continue even if email fails
+
+  - name: log_deletion_scheduled
+    type: action
+    action: audit_log
+    params:
+      action: account_deletion_scheduled
+      user_id: "{{ context.user_id }}"
+      severity: warning
+      details:
+        reason: "{{ context.reason }}"
+        scheduled_for: "{{ now + 30d }}"
+    on_success:
+      next: wait_grace_period
+
+  - name: wait_grace_period
+    type: wait
+    wait_for:
+      event: AccountDeletionCancelledEvent
+      condition: "event.user_id == context.user_id"
+      timeout: 30d
+    on_event:
+      next: handle_cancellation
+    on_timeout:
+      next: proceed_with_deletion
+
+  - name: handle_cancellation
+    type: action
+    action: update
+    entity: User
+    params:
+      id: "{{ context.user_id }}"
+      status: active
+      deletion_scheduled_at: null
+    on_success:
+      next: send_cancellation_email
+
+  - name: send_cancellation_email
+    type: action
+    action: send_email
+    params:
+      template: account_deletion_cancelled
+      to: "{{ context.user.email }}"
+      subject: "Your account deletion has been cancelled"
+      data:
+        username: "{{ context.user.username }}"
+    on_success:
+      next: cancellation_complete
+    on_failure:
+      next: cancellation_complete
+
+  - name: cancellation_complete
+    type: terminal
+    status: cancelled
+    reason: "User cancelled account deletion"
+
+  # Admin deletion path
+  - name: admin_deletion_path
+    type: condition
+    conditions:
+      - if: "context.skip_grace_period == true"
+        next: proceed_with_deletion
+      - else: true
+        next: start_grace_period
+
+  # Actual deletion process
+  - name: proceed_with_deletion
+    type: action
+    action: audit_log
+    params:
+      action: account_deletion_started
+      user_id: "{{ context.user_id }}"
+      severity: warning
+      details:
+        reason: "{{ context.reason }}"
+        requested_by: "{{ context.requested_by }}"
+    on_success:
+      next: offer_data_export
+
+  - name: offer_data_export
+    type: action
+    action: generate_data_export
+    params:
+      user_id: "{{ context.user_id }}"
+      format: json
+      include:
+        - profile
+        - settings
+        - audit_history
+    on_success:
+      set:
+        export_url: "{{ result.download_url }}"
+      next: send_data_export_email
+    on_failure:
+      next: revoke_all_sessions  # Continue even if export fails
+
+  - name: send_data_export_email
+    type: action
+    action: send_email
+    params:
+      template: data_export_ready
+      to: "{{ context.user.email }}"
+      subject: "Your data export is ready"
+      data:
+        username: "{{ context.user.username }}"
+        download_url: "{{ context.export_url }}"
+        expires_in: "7 days"
+    on_success:
+      next: revoke_all_sessions
+    on_failure:
+      next: revoke_all_sessions  # Continue even if email fails
+
+  - name: revoke_all_sessions
+    type: action
+    action: revoke_all_sessions
+    params:
+      user_id: "{{ context.user_id }}"
+      reason: account_deleted
+    on_success:
+      next: delete_mfa_devices
+
+  - name: delete_mfa_devices
+    type: action
+    action: delete_all
+    entity: MFADevice
+    params:
+      user_id: "{{ context.user_id }}"
+    on_success:
+      next: delete_password_tokens
+
+  - name: delete_password_tokens
+    type: action
+    action: delete_all
+    entity: PasswordResetToken
+    params:
+      user_id: "{{ context.user_id }}"
+    on_success:
+      next: delete_sessions
+
+  - name: delete_sessions
+    type: action
+    action: delete_all
+    entity: Session
+    params:
+      user_id: "{{ context.user_id }}"
+    on_success:
+      next: delete_user_settings
+
+  - name: delete_user_settings
+    type: action
+    action: delete
+    entity: UserSettings
+    params:
+      user_id: "{{ context.user_id }}"
+    on_success:
+      next: delete_profile
+
+  # Delete Profile entity (new step for User/Profile split)
+  - name: delete_profile
+    type: action
+    action: delete
+    entity: Profile
+    params:
+      user_id: "{{ context.user_id }}"
+    on_success:
+      next: revoke_user_permissions
+
+  - name: revoke_user_permissions
+    type: action
+    action: delete_all
+    entity: UserPermission
+    params:
+      user_id: "{{ context.user_id }}"
+    on_success:
+      next: revoke_user_roles
+
+  - name: revoke_user_roles
+    type: action
+    action: delete_all
+    entity: UserRole
+    params:
+      user_id: "{{ context.user_id }}"
+    on_success:
+      next: anonymize_audit_logs
+
+  - name: anonymize_audit_logs
+    type: action
+    action: anonymize
+    entity: AuditLog
+    params:
+      user_id: "{{ context.user_id }}"
+      anonymize_fields:
+        - ip_address
+        - user_agent
+      keep_action: true
+    on_success:
+      next: soft_delete_user
+
+  - name: soft_delete_user
+    type: action
+    action: update
+    entity: User
+    params:
+      id: "{{ context.user_id }}"
+      # Note: deleted_at is now in metadata, first_name/last_name/phone_number/profile_picture_url
+      # are now in Profile entity (deleted in delete_profile step)
+      "metadata.deleted_at": "{{ now }}"
+      email: "deleted_{{ context.user_id }}@deleted.local"
+      username: "deleted_{{ context.user_id }}"
+      password_hash: ""
+      status: inactive
+    on_success:
+      next: log_deletion_complete
+
+  - name: log_deletion_complete
+    type: action
+    action: audit_log
+    params:
+      action: account_deleted
+      user_id: "{{ context.user_id }}"
+      severity: warning
+      details:
+        reason: "{{ context.reason }}"
+        requested_by: "{{ context.requested_by }}"
+        data_anonymized: true
+    on_success:
+      next: schedule_hard_delete
+
+  - name: schedule_hard_delete
+    type: action
+    action: schedule_job
+    params:
+      job: hard_delete_user
+      user_id: "{{ context.user_id }}"
+      execute_at: "{{ now + 90d }}"
+    on_success:
+      next: complete
+
+  - name: complete
+    type: terminal
+    status: completed
+    emit:
+      event: AccountDeletedEvent
+      data:
+        user_id: "{{ context.user_id }}"
+        reason: "{{ context.reason }}"
+
+  # Error paths
+  - name: error_already_deleted
+    type: terminal
+    status: failed
+    reason: "User already deleted or not found"
+
+  - name: confirmation_timeout
+    type: action
+    action: audit_log
+    params:
+      action: account_deletion_timeout
+      user_id: "{{ context.user_id }}"
+      severity: info
+      details:
+        reason: password_confirmation_timeout
+    on_success:
+      next: timeout_end
+
+  - name: timeout_end
+    type: terminal
+    status: expired
+    reason: "Password confirmation not received within 15 minutes"
+
+compensation:
+  - name: log_deletion_compensation
+    condition: "steps.soft_delete_user.completed == true"
+    action: audit_log
+    params:
+      action: account_deletion_compensation_failed
+      severity: critical

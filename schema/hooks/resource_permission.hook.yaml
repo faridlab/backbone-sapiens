@@ -1,0 +1,211 @@
+# ResourcePermission Workflow - Resource-level permissions (ACL)
+# Source: libs/modules/sapiens/docs/spec-sapiens.md UC-013
+
+name: ResourcePermission
+model: resource_permission.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - Permission Grant Lifecycle
+# =============================================================================
+states:
+  field: status
+
+  values:
+    active:
+      initial: true
+      on_enter:
+        - "log(resource_permission.granted, { permission_id: permission_id, resource_type: resource_type, resource_id: resource_id, granted_to: granted_to_user_id ?? granted_to_role_id })"
+        - "emit: ResourcePermissionGrantedEvent(permission_id: permission_id, resource_type: resource_type, resource_id: resource_id, granted_to: granted_to_user_id ?? granted_to_role_id, granted_by: granted_by, expires_at: expires_at)"
+
+    expired:
+      final: true
+      on_enter:
+        - "log(resource_permission.expired, { id: id, permission_id: permission_id, resource_type: resource_type, resource_id: resource_id })"
+        - "emit: ResourcePermissionExpiredEvent(permission_id: permission_id, resource_type: resource_type, resource_id: resource_id, granted_to: granted_to_user_id ?? granted_to_role_id)"
+
+    revoked:
+      final: true
+      on_enter:
+        - "log(resource_permission.revoked, { id: id, permission_id: permission_id, revoked_by: $actor.id })"
+        - "emit: ResourcePermissionRevokedEvent(permission_id: permission_id, resource_type: resource_type, resource_id: resource_id, granted_to: granted_to_user_id ?? granted_to_role_id, revoked_by: $actor.id)"
+
+  transitions:
+    auto_expire:
+      from: active
+      to: expired
+      roles: [system]
+      condition: "expires_at != null && expires_at <= now()"
+
+    revoke:
+      from: active
+      to: revoked
+      roles: [admin, granter]
+      condition: "$actor.id == granted_by || $actor.has_role('admin')"
+      message: "Only the granter or an admin can revoke this permission"
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  grant_to_user_or_role:
+    when: [create, update]
+    condition: "(granted_to_user_id == null) != (granted_to_role_id == null)"
+    message: "Permission must be granted to either a user OR a role, not both"
+    code: INVALID_GRANT_TARGET
+
+  resource_type_required:
+    when: [create]
+    condition: "resource_type != null && resource_type.length > 0"
+    message: "Resource type is required"
+    code: RESOURCE_TYPE_REQUIRED
+
+  resource_id_required:
+    when: [create]
+    condition: "resource_id != null && resource_id.length > 0"
+    message: "Resource ID is required"
+    code: RESOURCE_ID_REQUIRED
+
+  expires_in_future:
+    when: [create, update]
+    condition: "expires_at == null || expires_at > granted_at"
+    message: "Expiration must be in the future"
+    code: INVALID_EXPIRATION
+
+  max_duration_by_type:
+    when: [create]
+    condition: |
+      expires_at == null ||
+      (expires_at - granted_at).days <= {
+        'financial_record': 30,
+        'personal_data': 30,
+        'credential': 30,
+        'document': 90,
+        'project': 90,
+        'workspace': 90,
+        'repository': 365,
+        'environment': 365,
+        'service': 365
+      }[resource_type] ?? 90
+    message: "Duration exceeds maximum allowed for this resource type"
+    code: MAX_DURATION_EXCEEDED
+
+  no_duplicate_grants:
+    when: [create]
+    condition: "count(ResourcePermission, permission_id == $this.permission_id && resource_type == $this.resource_type && resource_id == $this.resource_id && granted_to_user_id == $this.granted_to_user_id && granted_to_role_id == $this.granted_to_role_id && status == 'active') == 0"
+    message: "This permission has already been granted"
+    code: DUPLICATE_GRANT
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: create
+      - action: read
+      - action: list
+      - action: update
+      - action: revoke
+
+  resource_owner:
+    allow:
+      - action: create
+        if: "can_grant_on_resource($actor.id, resource_type, resource_id)"
+      - action: read
+        if: "owns_resource($actor.id, resource_type, resource_id)"
+      - action: list
+        if: "owns_resource($actor.id, resource_type, resource_id)"
+      - action: revoke
+        if: "owns_resource($actor.id, resource_type, resource_id)"
+
+  user:
+    allow:
+      - action: read
+        if: "granted_to_user_id == $actor.id"
+      - action: list
+        if: "granted_to_user_id == $actor.id"
+    deny:
+      - action: create
+      - action: update
+      - action: revoke
+      - action: delete
+
+  guest:
+    deny:
+      - all
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(resource_permission.granted, { permission_id: permission_id, resource_type: resource_type, resource_id: resource_id, granted_to: granted_to_user_id ?? granted_to_role_id, granted_by: granted_by })"
+      - "invalidate_permission_cache(granted_to_user_id, granted_to_role_id)"
+      - "emit: ResourcePermissionGrantedEvent(permission_id: permission_id, resource_type: resource_type, resource_id: resource_id, granted_to_user_id: granted_to_user_id, granted_to_role_id: granted_to_role_id, granted_by: granted_by, expires_at: expires_at)"
+
+  after_update:
+    actions:
+      - "log(resource_permission.updated, { id: id, updated_fields: $changed_fields })"
+      - "invalidate_permission_cache(granted_to_user_id, granted_to_role_id)"
+
+  after_revoke:
+    actions:
+      - "invalidate_permission_cache(granted_to_user_id, granted_to_role_id)"
+      - "notify(granted_to_user_id, permission_revoked, { resource_type: resource_type, resource_id: resource_id })"
+    if: "granted_to_user_id != null && granted_to_user_id != $actor.id"
+
+  scheduled_expiry_check:
+    schedule: "every 5.minutes"
+    actions:
+      - "trigger: expire_resource_permissions"
+
+  scheduled_expiry_notification:
+    schedule: "every 1.hour"
+    actions:
+      - "trigger: notify_expiring_soon"
+    description: "Notify users whose permissions expire within 7 days"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  is_active: "status == 'active' && (expires_at == null || expires_at > now())"
+
+  is_expired: "expires_at != null && expires_at <= now() && status != 'revoked'"
+
+  time_until_expiry: "expires_at != null ? (expires_at - now()) : null"
+
+  expires_soon: "expires_at != null && expires_at <= now().days(7)"
+
+  duration_days: "expires_at != null ? (expires_at - granted_at).days : null"
+
+  remaining_days: "expires_at != null ? (expires_at - now()).days.max(0) : null"
+
+  granted_target: "granted_to_user_id != null ? 'user:' + granted_to_user_id : 'role:' + granted_to_role_id"
+
+  resource_key: "resource_type + ':' + resource_id"
+
+  can_revoke: "$actor.id == granted_by || $actor.has_role('admin')"
+
+  is_role_grant: "granted_to_role_id != null"
+
+  is_user_grant: "granted_to_user_id != null"
+
+  # Max allowed duration based on resource type
+  max_allowed_duration: |
+    {
+      'financial_record': 30,
+      'personal_data': 30,
+      'credential': 30,
+      'document': 90,
+      'project': 90,
+      'workspace': 90,
+      'repository': 365,
+      'environment': 365,
+      'service': 365
+    }[resource_type] ?? 90

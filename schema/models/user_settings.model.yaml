@@ -1,0 +1,79 @@
+# UserSettings Entity - User preferences and configuration
+# Source: libs/modules/sapiens/docs/domain.md Section 3.7
+# One-to-one relationship with User
+
+models:
+  - name: UserSettings
+    collection: user_settings
+    soft_delete: true
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id"]
+        description: "Primary key"
+
+      user_id:
+        type: uuid
+        attributes: ["@foreign_key(User.id)"]
+        description: "references User"
+
+      theme:
+        type: Theme
+        attributes: ["@default(system)"]
+        description: "UI theme preference"
+
+      language:
+        type: string
+        attributes: ["@default(en)", "@language_code"]
+        description: "ISO 639-1 two-letter code"
+
+      timezone:
+        type: string
+        attributes: ["@default(UTC)", "@timezone"]
+        description: "IANA timezone (e.g., America/New_York)"
+
+      notifications_enabled:
+        type: bool
+        attributes: ["@default(true)"]
+
+      email_notifications:
+        type: bool
+        attributes: ["@default(true)"]
+
+      sms_notifications:
+        type: bool
+        attributes: ["@default(false)"]
+
+      mfa_enabled:
+        type: bool
+        attributes: ["@default(false)"]
+
+      custom_settings:
+        type: json?
+        description: "Key-value pairs for additional settings"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: index
+        fields: [id]
+
+enums:
+  - name: Theme
+    variants:
+      - name: light
+        description: "Light mode"
+      - name: dark
+        description: "Dark mode"
+      - name: system
+        default: true
+        description: "Follow OS preference"

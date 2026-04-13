@@ -1,0 +1,155 @@
+# SecurityEvent Entity - Security-related events for monitoring and alerting
+# Source: libs/modules/sapiens/docs/spec-sapiens.md Section 3.2
+
+models:
+  - name: SecurityEvent
+    collection: security_events
+    soft_delete: false
+    config:
+      generators:
+        disabled: [bulk-operations, cqrs, projection]
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      user_id:
+        type: uuid?
+        attributes: ["@foreign_key(User.id)"]
+        description: "Affected user"
+
+      session_id:
+        type: uuid?
+        attributes: ["@foreign_key(Session.id)"]
+        description: "Related session"
+
+      event_type:
+        type: SecurityEventType
+        attributes: ["@required"]
+        description: "Type of security event"
+
+      severity:
+        type: SecurityEventSeverity
+        attributes: ["@required"]
+        description: "Event severity"
+
+      ip_address:
+        type: string?
+        attributes: ["@max(45)"]
+        description: "Source IP address"
+
+      user_agent:
+        type: string?
+        attributes: ["@max(500)"]
+        description: "Browser/client info"
+
+      description:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Event description"
+
+      details:
+        type: json?
+        description: "Additional event details"
+
+      resolved:
+        type: bool
+        attributes: ["@default(false)"]
+        description: "Resolution status"
+
+      resolved_at:
+        type: datetime?
+        description: "Resolution timestamp"
+
+      resolved_by_user_id:
+        type: uuid?
+        attributes: ["@foreign_key(User.id)"]
+        description: "Who resolved"
+
+      resolution_notes:
+        type: string?
+        attributes: ["@max(1000)"]
+        description: "Resolution notes"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User?
+        attributes: ["@one", "@foreign_key(user_id)"]
+
+      session:
+        type: Session?
+        attributes: ["@one", "@foreign_key(session_id)"]
+
+      resolver:
+        type: User?
+        attributes: ["@one", "@foreign_key(resolved_by_user_id)"]
+
+    indexes:
+      - type: index
+        fields: [user_id, created_at]
+      - type: index
+        fields: [event_type, created_at]
+      - type: index
+        fields: [severity, resolved]
+      - type: index
+        fields: [created_at]
+      - type: index
+        fields: [ip_address]
+      - type: index
+        fields: [resolved, resolved_at]
+
+enums:
+  - name: SecurityEventType
+    variants:
+      - name: login_failed
+        default: true
+        description: "Failed login attempt"
+      - name: suspicious_login
+        description: "Suspicious login (new location/device)"
+      - name: password_reused
+        description: "Password from history used"
+      - name: account_locked
+        description: "Account auto-locked"
+      - name: privilege_escalation
+        description: "Permission elevation"
+      - name: brute_force_attack
+        description: "Multiple failed login attempts from same source"
+      - name: malicious_content
+        description: "Malicious content detected"
+      - name: impersonation_started
+        description: "Admin started impersonation"
+      - name: impersonation_ended
+        description: "Admin ended impersonation"
+      - name: mfa_enabled
+        description: "MFA was enabled"
+      - name: mfa_disabled
+        description: "MFA was disabled"
+      - name: data_exported
+        description: "User data exported"
+      - name: data_anonymized
+        description: "User data anonymized"
+      - name: rate_limit_exceeded
+        description: "API rate limit exceeded"
+      - name: password_reset_request
+        description: "Password reset requested"
+      - name: password_changed
+        description: "Password was changed"
+
+  - name: SecurityEventSeverity
+    variants:
+      - name: low
+        default: true
+        description: "Informational"
+      - name: medium
+        description: "Warning"
+      - name: high
+        description: "Significant event"
+      - name: critical
+        description: "Immediate action required"

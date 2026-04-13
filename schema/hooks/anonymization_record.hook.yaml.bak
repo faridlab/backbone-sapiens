@@ -1,0 +1,202 @@
+# AnonymizationRecord Workflow - GDPR user anonymization
+# Source: libs/modules/sapiens/docs/spec-sapiens.md UC-015
+
+name: AnonymizationRecord
+model: anonymization_record.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - Anonymization Lifecycle
+# =============================================================================
+states:
+  field: status
+
+  values:
+    pending:
+      initial: true
+      on_enter:
+        - "log(anonymization.requested, { user_id: user_id, method: method, reason: reason })"
+        - "emit: AnonymizationRequestedEvent(user_id: user_id, method: method, requested_by: anonymized_by)"
+
+    processing:
+      on_enter:
+        - "log(anonymization.processing, { user_id: user_id })"
+        - "trigger: begin_user_data_anonymization"
+
+    completed:
+      final: true
+      on_enter:
+        - "log(anonymization.completed, { user_id: user_id, method: method, records_affected: metadata.get("records_affected") })"
+        - "emit: AnonymizationCompletedEvent(user_id: user_id, method: method, anonymized_by: anonymized_by)"
+
+    failed:
+      final: true
+      on_enter:
+        - "log(anonymization.failed, { user_id: user_id, error: metadata.error_message })"
+        - "emit: AnonymizationFailedEvent(user_id: user_id, error: metadata.error_message)"
+
+  transitions:
+    start_processing:
+      from: pending
+      to: processing
+      roles: [system]
+
+    complete:
+      from: processing
+      to: completed
+      roles: [system]
+
+    fail:
+      from: [pending, processing]
+      to: failed
+      roles: [system]
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  only_admins_can_anonymize:
+    when: [create]
+    condition: "$actor.has_role('admin') || $actor.has_role('super_admin')"
+    message: "Only administrators can initiate user anonymization"
+    code: UNAUTHORIZED_ANONYMIZATION
+
+  cannot_anonymize_self:
+    when: [create]
+    condition: "anonymized_by != user_id"
+    message: "Cannot anonymize your own account"
+    code: SELF_ANONYMIZATION_FORBIDDEN
+
+  reason_required:
+    when: [create]
+    condition: "reason != null && reason.length >= 20"
+    message: "A detailed reason (min 20 characters) is required for anonymization"
+    code: REASON_REQUIRED
+
+  method_valid:
+    when: [create]
+    condition: "method in ['full', 'partial', 'pseudonymization']"
+    message: "Invalid anonymization method. Valid: full, partial, pseudonymization"
+    code: INVALID_METHOD
+
+  retention_period_positive:
+    when: [create]
+    condition: "retention_period_days == null || retention_period_days > 0"
+    message: "Retention period must be positive or null"
+    code: INVALID_RETENTION
+
+  max_retention_5_years:
+    when: [create]
+    condition: "retention_period_days == null || retention_period_days <= 1825"
+    message: "Retention period cannot exceed 5 years (GDPR compliance)"
+    code: MAX_RETENTION_EXCEEDED
+
+  original_data_required:
+    when: [create]
+    condition: "original_email != null && original_email.length > 0"
+    message: "Original email must be recorded"
+    code: ORIGINAL_EMAIL_REQUIRED
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: create
+      - action: read
+      - action: list
+
+  audit:
+    allow:
+      - action: read
+      - action: list
+    deny:
+      - action: create
+      - action: update
+      - action: delete
+
+  system:
+    allow:
+      - action: create
+      - action: read
+      - action: update
+
+  user:
+    deny:
+      - all
+
+  guest:
+    deny:
+      - all
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(anonymization.requested, { user_id: user_id, method: method, reason: reason, requested_by: anonymized_by })"
+      - "emit: AnonymizationRequestedEvent(user_id: user_id, method: method, requested_by: anonymized_by, retention_days: retention_period_days)"
+      - "enqueue: process_anonymization_request(id)"
+
+  after_processing:
+    actions:
+      - "anonymize_user_email(user_id, method)"
+      - "anonymize_user_username(user_id, method)"
+      - "anonymize_user_profile(user_id, method)"
+      - "create: AuditLog(user_id: anonymized_by, action: 'user_anonymized', resource_type: 'user', resource_id: user_id.toString(), details: { method: method, reason: reason })"
+
+  after_complete:
+    actions:
+      - "send_email(anonymization_completed, original_email, { anonymization_date: anonymized_at, method: method })"
+      - "invalidate_all_user_sessions(user_id)"
+
+  after_fail:
+    actions:
+      - "notify(anonymized_by, anonymization_failed, { user_id: user_id, error: metadata.error_message })"
+
+  scheduled_deletion:
+    schedule: "every 1.day at 02:00"
+    actions:
+      - "trigger: delete_expired_anonymized_records"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  deletion_date: "anonymized_at + (retention_period_days ?? 365).days"
+
+  can_delete_permanently: "deletion_date <= now()"
+
+  days_until_deletion: "(deletion_date - now()).days.max(0)"
+
+  is_gdpr_compliant: "reason != null && reason.len() > 0"
+
+  anonymized_email: |
+    method == 'full' ? 'deleted@example.com' :
+    method == 'partial' ? 'anonymized@' + original_email.split('@')[1] :
+    'user_' + hash(original_email) + '@' + original_email.split('@')[1]
+
+  anonymized_username: |
+    method == 'full' ? 'deleted_user' :
+    method == 'partial' ? 'anonymized_user' :
+    'user_' + hash(original_username)
+
+  age_days: "(now() - anonymized_at).days"
+
+  is_ready_for_deletion: "status == 'completed' && can_delete_permanently"
+
+  records_count: "metadata.get("records_affected") ?? 0"
+
+  method_display: |
+    method == 'full' ? 'Full Deletion' :
+    method == 'partial' ? 'Partial Anonymization' :
+    'Pseudonymization'
+
+  retention_display: |
+    retention_period_days == null ? 'Permanent' :
+    retention_period_days + ' days'

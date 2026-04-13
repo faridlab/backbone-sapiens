@@ -1,0 +1,193 @@
+# UserOAuthLink Workflow - Social login user linking and management
+# Source: IMPLEMENTATION_ROADMAP.md Phase 4.1 OAuth Integration
+
+name: UserOAuthLink
+model: UserOAuthLink
+
+# =============================================================================
+# PRIORITY 1: State Machine - OAuth Link Lifecycle
+# =============================================================================
+states:
+  field: is_active
+
+  values:
+    linked:
+      initial: true
+      on_enter:
+        - "sync_oauth_profile()"
+        - "log(oauth_link.linked, { user_id: user_id, provider: oauth_provider.provider_name, provider_user_id: provider_user_id })"
+        - "emit: OAuthLinkCreatedEvent(link_id: id, user_id: user_id, provider: oauth_provider.provider_name, provider_user_id: provider_user_id })"
+
+    unlinked:
+      final: true
+      on_enter:
+        - "revoke_oauth_tokens()"
+        - "log(oauth_link.unlinked, { user_id: user_id, provider: oauth_provider.provider_name, provider_user_id: provider_user_id, reason: $context.reason })"
+        - "emit: OAuthLinkDeletedEvent(link_id: id, user_id: user_id, provider: oauth_provider.provider_name, provider_user_id: provider_user_id })"
+
+    requires_verification:
+      on_enter:
+        - "send_email(oauth_verification, user.email)"
+        - "schedule_job(expire_verification, run_at: now() + 24.hours)"
+        - "log(oauth_link.verification_required, { user_id: user_id, provider: oauth_provider.provider_name })"
+
+  transitions:
+    unlink:
+      from: [linked, requires_verification]
+      to: unlinked
+      condition: "$actor.id == user_id || $actor.has_role('admin')"
+      message: "You can only unlink your own OAuth accounts"
+
+    require_verification:
+      from: linked
+      to: requires_verification
+      condition: "$context.verification_required == true"
+
+    verify:
+      from: requires_verification
+      to: linked
+      condition: "$context.verification_valid && oauth_link_verification_token_valid($context.token)"
+      message: "Invalid or expired verification token"
+
+    expire_verification:
+      from: requires_verification
+      to: unlinked
+      condition: "verification_expiry < now()"
+      message: "OAuth linking verification expired"
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  unique_provider_link:
+    when: [create]
+    condition: "count(UserOAuthLink, user_id == $this.user_id && oauth_provider_id == $this.oauth_provider_id && is_active == true && (metadata.deleted_at == null)) == 0"
+    message: "User already has an active link with this OAuth provider"
+    code: PROVIDER_ALREADY_LINKED
+
+  unique_provider_user:
+    when: [create]
+    condition: "count(UserOAuthLink, provider_user_id == $this.provider_user_id && oauth_provider_id == $this.oauth_provider_id && is_active == true && (metadata.deleted_at == null)) == 0"
+    message: "OAuth provider user ID is already linked to another account"
+    code: PROVIDER_USER_ALREADY_LINKED
+
+  valid_provider_user_id:
+    when: [create]
+    condition: "provider_user_id != null && provider_user_id.length > 0"
+    message: "Provider user ID is required"
+    code: MISSING_PROVIDER_USER_ID
+
+  valid_provider_email:
+    when: [create]
+    condition: "provider_email != null && provider_email matches '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'"
+    message: "Invalid provider email format"
+    code: INVALID_PROVIDER_EMAIL
+
+  primary_link_limit:
+    when: [update]
+    condition: "is_primary == true ? count(UserOAuthLink, user_id == $this.user_id && is_primary == true && id != $this.id && is_active == true && (metadata.deleted_at == null)) == 0 : true"
+    message: "User can only have one primary OAuth link"
+    code: MULTIPLE_PRIMARY_LINKS
+
+  sync_policy_compliance:
+    when: [update]
+    condition: "sync_enabled == true || !has_unsynced_changes()"
+    message: "Cannot disable sync when there are unsynchronized changes"
+    code: UNSYNCED_CHANGES_EXIST
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: read
+      - action: list
+      - action: unlink
+    deny:
+      - action: create
+      - action: update
+        if: "$this.user_id != $actor.id"
+
+  user:
+    allow:
+      - action: read
+        if: "$this.user_id == $actor.id"
+      - action: create
+        if: "$this.user_id == $actor.id"
+      - action: update
+        if: "$this.user_id == $actor.id"
+      - action: unlink
+        if: "$this.user_id == $actor.id"
+    deny:
+      - action: list
+      - action: create
+        if: "$this.user_id != $actor.id"
+
+# =============================================================================
+# PRIORITY 4: Triggers (Side Effects)
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "sync_oauth_profile()"
+      - "log(oauth_link.linked, { user_id: user_id, provider: oauth_provider.provider_name, provider_user_id: provider_user_id, ip_address: $context.ip_address })"
+      - "emit: OAuthLinkCreatedEvent(link_id: id, user_id: user_id, provider: oauth_provider.provider_name, provider_user_id: provider_user_id })"
+
+  after_update_sync_enabled_true:
+    actions:
+      - "schedule_profile_sync()"
+      - "log(oauth_link.sync_enabled, { user_id: user_id, provider: oauth_provider.provider_name, enabled: sync_enabled })"
+
+  after_update_is_primary_true:
+    actions:
+      - "set_other_links_as_non_primary(user_id)"
+      - "log(oauth_link.made_primary, { user_id: user_id, provider: oauth_provider.provider_name, provider_user_id: provider_user_id })"
+      - "emit: OAuthLinkMadePrimaryEvent(link_id: id, user_id: user_id, provider: oauth_provider.provider_name })"
+
+  before_delete:
+    actions:
+      - "validate_not_last_auth_method(user_id)"
+      - "log(oauth_link.deleting, { user_id: user_id, provider: oauth_provider.provider_name, provider_user_id: provider_user_id })"
+
+  after_delete:
+    actions:
+      - "revoke_oauth_tokens()"
+      - "notify_oauth_link_unlinked()"
+      - "log(oauth_link.unlinked, { user_id: user_id, provider: oauth_provider.provider_name, provider_user_id: provider_user_id, reason: $context.reason })"
+      - "emit: OAuthLinkDeletedEvent(link_id: id, user_id: user_id, provider: oauth_provider.provider_name, provider_user_id: provider_user_id })"
+
+  after_sync:
+    actions:
+      - "update: last_synced = now()"
+      - "log(oauth_link.synced, { user_id: user_id, provider: oauth_provider.provider_name, fields: $context.synced_fields })"
+      - "emit: OAuthProfileSyncedEvent(link_id: id, user_id: user_id, provider: oauth_provider.provider_name, synced_fields: $context.synced_fields })"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  # Check if link is expired (token expiry)
+  is_token_expired: "token_expires_at != null && token_expires_at < now()"
+
+  # Check if link needs token refresh
+  needs_token_refresh: "token_expires_at != null && token_expires_at < (now() + 1.hour)"
+
+  # Link age in days
+  age_days: "(now() - created_at).total_days"
+
+  # Last sync age in hours
+  last_sync_age_hours: "last_synced != null ? (now() - last_synced).total_hours : null"
+
+  # Provider display name
+  provider_display_name: "oauth_provider.display_name"
+
+  # Provider icon URL (if available)
+  provider_icon_url: "get_provider_icon_url(oauth_provider.provider_name)"
+
+  # Check if this is the user's primary auth method
+  is_primary_auth: "is_primary && user.password_hash == null && count(UserOAuthLink, user_id == user_id && is_active == true && (metadata.deleted_at == null)) == 1"

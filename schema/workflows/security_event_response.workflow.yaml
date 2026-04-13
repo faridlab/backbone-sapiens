@@ -1,0 +1,343 @@
+# Security Event Response Workflow
+# Automated security incident response
+# Source: libs/modules/sapiens/docs/spec-sapiens.md UC-014
+
+name: SecurityEventResponse
+description: |
+  Security event automated response workflow:
+  - Analyze event severity and type
+  - Trigger automatic responses (block IP, lock account)
+  - Notify security team for critical events
+  - Track resolution
+  - Auto-resolve low-risk false positives
+
+version: 1
+
+trigger:
+  event: SecurityEventCreatedEvent
+  extract:
+    event_id: "event.event_id"
+    event_type: "event.event_type"
+    severity: "event.severity"
+    user_id: "event.user_id"
+    ip_address: "event.ip_address"
+
+config:
+  timeout: 72h
+  persistence: true
+
+context:
+  event_id: null
+  event_type: null
+  severity: medium
+  user_id: null
+  ip_address: null
+  requires_response: false
+  response_actions: []
+
+steps:
+  # =========================================================================
+  # Step 1: Analyze event for response requirements
+  # =========================================================================
+  - name: analyze_event
+    type: action
+    action: analyze_security_event
+    params:
+      event_id: "{{ context.event_id }}"
+      event_type: "{{ context.event_type }}"
+      severity: "{{ context.severity }}"
+      user_id: "{{ context.user_id }}"
+      ip_address: "{{ context.ip_address }}"
+
+    on_success:
+      set:
+        requires_response: "{{ result.requires_auto_response }}"
+        response_actions: "{{ result.actions }}"
+        risk_score: "{{ result.risk_score }}"
+        should_notify: "{{ result.should_notify }}"
+      next: check_response_required
+
+  - name: check_response_required
+    type: condition
+    conditions:
+      - if: "requires_response == true"
+        next: execute_auto_response
+      - else:
+        next: check_notification
+
+  # =========================================================================
+  # Step 2: Execute automatic response actions
+  # =========================================================================
+  - name: execute_auto_response
+    type: action
+    action: execute_security_response
+    params:
+      event_id: "{{ context.event_id }}"
+      actions: "{{ context.response_actions }}"
+
+    on_success:
+      set:
+        actions_executed: "{{ result.executed }}"
+        blocked_ip: "{{ result.blocked_ip }}"
+        account_locked: "{{ result.account_locked }}"
+      next: log_response
+
+    on_failure:
+      next: log_response_error
+
+  - name: log_response
+    type: action
+    action: audit_log
+    params:
+      action: security_event_auto_response
+      severity: warning
+      details:
+        event_id: "{{ context.event_id }}"
+        event_type: "{{ context.event_type }}"
+        actions_executed: "{{ context.actions_executed }}"
+        blocked_ip: "{{ context.blocked_ip }}"
+        account_locked: "{{ context.account_locked }}"
+
+    on_success:
+      next: check_notification
+
+  - name: log_response_error
+    type: action
+    action: audit_log
+    params:
+      action: security_event_response_failed
+      severity: error
+      details:
+        event_id: "{{ context.event_id }}"
+        error: "{{ error }}"
+
+    on_success:
+      next: check_notification
+
+  # =========================================================================
+  # Step 3: Check if notification required
+  # =========================================================================
+  - name: check_notification
+    type: condition
+    conditions:
+      - if: "should_notify == true || severity == 'critical'"
+        next: notify_security_team
+      - else:
+        next: check_immediate_attention
+
+  # =========================================================================
+  # Step 4: Notify security team
+  # =========================================================================
+  - name: notify_security_team
+    type: action
+    action: notify
+    params:
+      channel: email
+      template: security_event_alert
+      to: "{{ get_security_team_emails() }}"
+      data:
+        event_id: "{{ context.event_id }}"
+        event_type: "{{ context.event_type }}"
+        severity: "{{ context.severity }}"
+        user_id: "{{ context.user_id }}"
+        ip_address: "{{ context.ip_address }}"
+        risk_score: "{{ context.risk_score }}"
+        actions_taken: "{{ context.response_actions }}"
+
+    on_success:
+      next: check_immediate_attention
+
+    on_failure:
+      next: check_immediate_attention
+
+  # =========================================================================
+  # Step 5: Check for immediate attention requirement
+  # =========================================================================
+  - name: check_immediate_attention
+    type: action
+    action: check_immediate_attention_required
+    params:
+      event_id: "{{ context.event_id }}"
+      event_type: "{{ context.event_type }}"
+      severity: "{{ context.severity }}"
+
+    on_success:
+      set:
+        immediate_attention: "{{ result.required }}"
+      next: handle_attention
+
+  - name: handle_attention
+    type: condition
+    conditions:
+      - if: "immediate_attention == true"
+        next: await_manual_resolution
+      - else:
+        next: check_auto_resolve
+
+  # =========================================================================
+  # Step 6: Await manual resolution (for critical events)
+  # =========================================================================
+  - name: await_manual_resolution
+    type: wait
+    wait_for:
+      event: SecurityEventResolvedEvent
+      condition: "event.event_id == context.event_id"
+      timeout: 72h
+
+    on_event:
+      next: log_resolution
+
+    on_timeout:
+      next: escalate_unresolved
+
+  # =========================================================================
+  # Step 7: Escalate unresolved critical events
+  # =========================================================================
+  - name: escalate_unresolved
+    type: action
+    action: notify
+    params:
+      channel: email
+      template: security_event_escalation
+      to: "{{ get_security_team_emails() }}"
+      priority: high
+      data:
+        event_id: "{{ context.event_id }}"
+        event_type: "{{ context.event_type }}"
+        severity: "{{ context.severity }}"
+        note: "Unresolved for 72 hours - immediate attention required"
+
+    on_success:
+      next: await_escalated_resolution
+
+  - name: await_escalated_resolution
+    type: wait
+    wait_for:
+      event: SecurityEventResolvedEvent
+      condition: "event.event_id == context.event_id"
+      timeout: 24h
+
+    on_event:
+      next: log_resolution
+
+    on_timeout:
+      next: create_escalation_ticket
+
+  - name: create_escalation_ticket
+    type: action
+    action: create
+    entity: Ticket
+    params:
+      title: "Unresolved Security Event - {{ event_type }}"
+      priority: critical
+      assigned_to: "{{ get_security_lead() }}"
+      description: |
+        Security event {{ event_id }} has been unresolved for 96 hours.
+        Type: {{ event_type }}
+        Severity: {{ severity }}
+        Requires immediate investigation.
+
+    on_success:
+      next: complete
+
+  # =========================================================================
+  # Step 8: Check auto-resolve for low-risk events
+  # =========================================================================
+  - name: check_auto_resolve
+    type: action
+    action: check_low_risk_false_positive
+    params:
+      event_id: "{{ context.event_id }}"
+      event_type: "{{ context.event_type }}"
+
+    on_success:
+      set:
+        can_auto_resolve: "{{ result.auto_resolve }}"
+      next: handle_auto_resolve
+
+  - name: handle_auto_resolve
+    type: condition
+    conditions:
+      - if: "can_auto_resolve == true"
+        next: auto_resolve
+      - else:
+        next: await_resolution
+
+  - name: auto_resolve
+    type: transition
+    entity: SecurityEvent
+    id: "{{ context.event_id }}"
+    transition: auto_resolve
+
+    on_success:
+      next: log_auto_resolve
+
+  - name: log_auto_resolve
+    type: action
+    action: audit_log
+    params:
+      action: security_event_auto_resolved
+      severity: info
+      details:
+        event_id: "{{ context.event_id }}"
+        event_type: "{{ context.event_type }}"
+        note: "Automatically resolved as low-risk false positive"
+
+    on_success:
+      next: complete
+
+  # =========================================================================
+  # Step 9: Await standard resolution
+  # =========================================================================
+  - name: await_resolution
+    type: wait
+    wait_for:
+      event: SecurityEventResolvedEvent
+      condition: "event.event_id == context.event_id"
+      timeout: 168h  # 7 days
+
+    on_event:
+      next: log_resolution
+
+    on_timeout:
+      next: mark_stale
+
+  # =========================================================================
+  # Step 10: Log resolution
+  # =========================================================================
+  - name: log_resolution
+    type: action
+    action: audit_log
+    params:
+      action: security_event_resolved
+      severity: info
+      details:
+        event_id: "{{ context.event_id }}"
+        event_type: "{{ context.event_type }}"
+        resolved_by: "{{ get_event_resolved_by(event_id) }}"
+        resolution_notes: "{{ get_event_resolution_notes(event_id) }}"
+
+    on_success:
+      next: complete
+
+  # =========================================================================
+  # Step 11: Mark as stale (old unresolved event)
+  # =========================================================================
+  - name: mark_stale
+    type: action
+    action: update
+    entity: SecurityEvent
+    id: "{{ context.event_id }}"
+    params:
+      metadata_stale: true
+      notes: "Event unresolved for 7 days - marked for review"
+
+    on_success:
+      next: complete
+
+  # =========================================================================
+  # Terminal states
+  # =========================================================================
+  - name: complete
+    type: terminal
+    status: completed

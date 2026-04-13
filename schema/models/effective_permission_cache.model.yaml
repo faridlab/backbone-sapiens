@@ -1,0 +1,80 @@
+# EffectivePermissionCache Entity - Computed effective permissions cache for performance optimization
+# Source: libs/modules/sapiens/docs/spec-sapiens.md
+
+models:
+  - name: EffectivePermissionCache
+    collection: effective_permission_cache
+    soft_delete: true
+    description: "Computed effective permissions cache for performance optimization"
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Primary key"
+
+      user_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(User.id)"]
+        description: "User this cache entry belongs to"
+
+      permission_key:
+        type: string
+        attributes: ["@required", "@max(255)"]
+        description: "Unique permission identifier (resource:action)"
+
+      computed_permissions:
+        type: json
+        attributes: ["@required"]
+        description: "Computed effective permissions with sources"
+
+      computation_details:
+        type: json
+        attributes: ["@required"]
+        description: "Details about how permission was computed"
+
+      scope:
+        type: json
+        attributes: ["@required"]
+        description: "Scoping information for this permission"
+
+      conditions:
+        type: json?
+        description: "Conditions that must be met for permission to be valid"
+
+      usage:
+        type: json
+        attributes: ["@required"]
+        description: "Usage tracking and analytics"
+
+      performance:
+        type: json
+        attributes: ["@required"]
+        description: "Performance metrics for this cache entry"
+
+      cache_stats:
+        type: json
+        attributes: ["@required"]
+        description: "Cache performance statistics"
+
+      invalidation:
+        type: json?
+        description: "Cache invalidation information"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata (created_at, updated_at, deleted_at, created_by, updated_by, deleted_by)"
+
+    relations:
+      user:
+        type: User
+        attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
+
+    indexes:
+      - type: unique
+        fields: [user_id, permission_key]
+      - type: index
+        fields: [user_id]
+      - type: index
+        fields: [created_at]

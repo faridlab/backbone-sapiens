@@ -1,0 +1,145 @@
+# Session Workflow - JWT session management
+# Source: libs/modules/sapiens/docs/domain.md Section 3.9
+
+name: Session
+model: session.model.yaml
+
+# =============================================================================
+# PRIORITY 1: State Machine - Session Lifecycle
+# =============================================================================
+states:
+  field: is_active
+
+  values:
+    active:
+      initial: true
+      on_enter:
+        - "log(session.created, { session_id: id, user_id: user_id })"
+
+    revoked:
+      final: true
+      on_enter:
+        - "set: revoked_at = now()"
+        - "log(session.revoked, { session_id: id, user_id: user_id })"
+
+  transitions:
+    revoke:
+      from: active
+      to: revoked
+      roles: [owner, admin, system]
+
+    expire:
+      from: active
+      to: revoked
+      roles: [system]
+      condition: "expires_at <= now()"
+
+# =============================================================================
+# PRIORITY 2: Validation Rules
+# =============================================================================
+rules:
+  unique_token_hash:
+    when: [create]
+    condition: "count(Session, token_hash == $this.token_hash) == 0"
+    message: "Token hash collision detected"
+    code: TOKEN_HASH_COLLISION
+
+  expires_in_future:
+    when: [create]
+    condition: "expires_at > now()"
+    message: "Session expiry must be in the future"
+    code: INVALID_EXPIRY
+
+  expiry_after_creation:
+    when: [create]
+    # Note: created_at is now in metadata.created_at
+    condition: "expires_at > metadata.created_at"
+    message: "Expiry must be after creation time"
+    code: INVALID_EXPIRY_ORDER
+
+  no_modify_revoked:
+    when: [update]
+    condition: "$old.is_active == true || $field == 'is_active'"
+    message: "Cannot modify revoked session"
+    code: SESSION_REVOKED
+
+# =============================================================================
+# PRIORITY 3: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: read
+      - action: list
+      - action: revoke
+    deny:
+      - action: create      # Sessions created by system only
+      - action: update
+      - action: delete      # Sessions should be revoked, not deleted
+
+  user:
+    allow:
+      - action: read
+        if: "user_id == $actor.id"
+      - action: list
+        if: "user_id == $actor.id"
+      - action: revoke
+        if: "user_id == $actor.id"
+    deny:
+      - action: create
+      - action: update
+      - action: delete
+
+  guest:
+    deny:
+      - all
+
+  system:
+    allow:
+      - action: create
+      - action: read
+      - action: update
+      - action: revoke
+
+# =============================================================================
+# PRIORITY 4: Triggers
+# =============================================================================
+triggers:
+  after_create:
+    actions:
+      - "log(session.created, { session_id: id, user_id: user_id, device_type: device_type, ip_address: ip_address })"
+      - "emit: SessionCreatedEvent(session_id: id, user_id: user_id)"
+
+  after_update_last_activity:
+    # Activity tracking - update silently (no log spam)
+    actions: []
+
+  after_update_is_active:
+    actions:
+      - "log(session.status_changed, { session_id: id, is_active: is_active })"
+      - "emit: SessionRevokedEvent(session_id: id, user_id: user_id)"
+    if: "is_active == false"
+
+  scheduled_expire:
+    schedule: "every 1.hour"
+    actions:
+      - "trigger: expire_sessions_batch"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  is_expired: "expires_at <= now()"
+  is_valid: "is_active == true && expires_at > now()"
+  time_until_expiry: "expires_at - now()"
+  # Note: created_at is now in metadata.created_at
+  age: "now() - metadata.created_at"
+  is_recently_active: "last_activity != null && (now() - last_activity) < 5.minutes"
+  status_label: |
+    is_active == false ? 'Revoked' :
+    is_expired ? 'Expired' :
+    is_recently_active ? 'Active' : 'Idle'

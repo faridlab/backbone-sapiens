@@ -1,0 +1,344 @@
+# Temporary Permission Grant Workflow
+# Time-bound permission grants with expiry handling
+# Source: libs/modules/sapiens/docs/spec-sapiens.md UC-010
+
+name: TemporaryPermissionGrant
+description: |
+  Temporary permission grant workflow:
+  - Validate duration (max 30 days)
+  - Check for duplicate grants
+  - Create time-bound permission
+  - Monitor for expiration
+  - Notify before expiry (24 hours)
+  - Auto-revoke on expiration
+
+version: 1
+
+trigger:
+  event: TemporaryPermissionGrantedEvent
+  extract:
+    user_id: "event.user_id"
+    permission_id: "event.permission_id"
+    expires_at: "event.expires_at"
+    granted_by: "event.granted_by"
+
+config:
+  timeout: "{{ calculate_duration(now(), expires_at) }}m"
+  persistence: true
+
+context:
+  user_id: null
+  permission_id: null
+  expires_at: null
+  granted_by: null
+  temp_permission_id: null
+  duration_days: null
+
+steps:
+  # =========================================================================
+  # Step 1: Validate duration constraints
+  # =========================================================================
+  - name: validate_duration
+    type: action
+    action: validate_temp_permission_duration
+    params:
+      user_id: "{{ context.user_id }}"
+      permission_id: "{{ context.permission_id }}"
+      expires_at: "{{ context.expires_at }}"
+      max_days: 30
+
+    on_success:
+      set:
+        is_valid: "{{ result.valid }}"
+        validation_error: "{{ result.error }}"
+        duration_days: "{{ result.duration_days }}"
+      next: check_duration
+
+    on_failure:
+      next: log_validation_error
+
+  - name: check_duration
+    type: condition
+    conditions:
+      - if: "is_valid == true"
+        next: check_duplicates
+      - else:
+        next: log_validation_error
+
+  - name: log_validation_error
+    type: action
+    action: audit_log
+    params:
+      action: temp_permission_denied
+      user_id: "{{ context.granted_by }}"
+      severity: warning
+      details:
+        target_user_id: "{{ context.user_id }}"
+        permission_id: "{{ context.permission_id }}"
+        reason: "{{ validation_error }}"
+
+    on_success:
+      next: workflow_failed
+
+  # =========================================================================
+  # Step 2: Check for duplicate active grants
+  # =========================================================================
+  - name: check_duplicates
+    type: action
+    action: check_duplicate_permission
+    params:
+      user_id: "{{ context.user_id }}"
+      permission_id: "{{ context.permission_id }}"
+      active_only: true
+
+    on_success:
+      set:
+        has_duplicate: "{{ result.exists }}"
+      next: handle_duplicate
+
+  - name: handle_duplicate
+    type: condition
+    conditions:
+      - if: "has_duplicate == false"
+        next: activate_permission
+      - else:
+        next: log_duplicate
+
+  - name: log_duplicate
+    type: action
+    action: audit_log
+    params:
+      action: temp_permission_denied
+      user_id: "{{ context.granted_by }}"
+      severity: info
+      details:
+        target_user_id: "{{ context.user_id }}"
+        permission_id: "{{ context.permission_id }}"
+        reason: "Active temporary permission already exists"
+
+    on_success:
+      next: workflow_failed
+
+  # =========================================================================
+  # Step 3: Activate the permission
+  # =========================================================================
+  - name: activate_permission
+    type: transition
+    entity: TemporaryPermission
+    filter:
+      user_id: "{{ context.user_id }}"
+      permission_id: "{{ context.permission_id }}"
+      status: pending
+    transition: activate
+
+    on_success:
+      set:
+        temp_permission_id: "{{ result.id }}"
+      next: log_activation
+
+    on_failure:
+      next: log_activation_error
+
+  - name: log_activation_error
+    type: action
+    action: audit_log
+    params:
+      action: temp_permission_failed
+      user_id: "{{ context.granted_by }}"
+      severity: error
+      details:
+        error: "Failed to activate temporary permission"
+
+    on_success:
+      next: workflow_failed
+
+  # =========================================================================
+  # Step 4: Log activation
+  # =========================================================================
+  - name: log_activation
+    type: action
+    action: audit_log
+    params:
+      action: temp_permission_activated
+      user_id: "{{ context.granted_by }}"
+      severity: info
+      details:
+        temp_permission_id: "{{ temp_permission_id }}"
+        target_user_id: "{{ context.user_id }}"
+        permission_id: "{{ context.permission_id }}"
+        expires_at: "{{ context.expires_at }}"
+        duration_days: "{{ context.duration_days }}"
+
+    on_success:
+      set:
+        effective_from: "{{ now() }}"
+      next: notify_user
+
+  # =========================================================================
+  # Step 5: Notify user of granted permission
+  # =========================================================================
+  - name: notify_user
+    type: action
+    action: send_email
+    params:
+      template: temporary_permission_granted
+      to: "{{ get_user_email(user_id) }}"
+      data:
+        permission_name: "{{ get_permission_name(permission_id) }}"
+        expires_at: "{{ context.expires_at }}"
+        duration_days: "{{ context.duration_days }}"
+
+    on_success:
+      next: invalidate_cache
+    on_failure:
+      next: invalidate_cache  # Continue even if email fails
+
+  # =========================================================================
+  # Step 6: Invalidate permission cache
+  # =========================================================================
+  - name: invalidate_cache
+    type: action
+    action: invalidate_permission_cache
+    params:
+      user_id: "{{ context.user_id }}"
+
+    on_success:
+      next: await_expiry
+
+  # =========================================================================
+  # Step 7: Wait for expiration or revocation
+  # =========================================================================
+  - name: await_expiry
+    type: wait
+    wait_for:
+      event: TemporaryPermissionExpiredEvent
+      condition: "event.permission_id == context.permission_id && event.user_id == context.user_id"
+      timeout: "{{ calculate_duration(now(), expires_at) }}m"
+
+    on_event:
+      next: log_expiry
+
+    on_timeout:
+      next: check_and_expire
+
+  # =========================================================================
+  # Step 8: Log expiration
+  # =========================================================================
+  - name: log_expiry
+    type: action
+    action: audit_log
+    params:
+      action: temp_permission_expired
+      user_id: "{{ context.user_id }}"
+      severity: info
+      details:
+        temp_permission_id: "{{ temp_permission_id }}"
+        permission_id: "{{ context.permission_id }}"
+        reason: "Temporary permission duration expired"
+
+    on_success:
+      next: invalidate_cache_after_expiry
+
+  # =========================================================================
+  # Step 9: Check and expire (timeout handler)
+  # =========================================================================
+  - name: check_and_expire
+    type: action
+    action: fetch
+    entity: TemporaryPermission
+    id: "{{ temp_permission_id }}"
+
+    on_success:
+      set:
+        current_status: "{{ result.status }}"
+      next: handle_expiry_check
+
+  - name: handle_expiry_check
+    type: condition
+    conditions:
+      - if: "current_status == 'active' && now() >= expires_at"
+        next: auto_expire
+      - if: "current_status == 'revoked'"
+        next: log_already_revoked
+      - else:
+        next: await_expiry  # Continue waiting
+
+  - name: auto_expire
+    type: transition
+    entity: TemporaryPermission
+    id: "{{ temp_permission_id }}"
+    transition: auto_expire
+
+    on_success:
+      next: log_auto_expiry
+
+  - name: log_auto_expiry
+    type: action
+    action: audit_log
+    params:
+      action: temp_permission_auto_expired
+      user_id: "{{ context.user_id }}"
+      severity: info
+      details:
+        temp_permission_id: "{{ temp_permission_id }}"
+        permission_id: "{{ context.permission_id }}"
+
+    on_success:
+      next: invalidate_cache_after_expiry
+
+  - name: log_already_revoked
+    type: action
+    action: audit_log
+    params:
+      action: temp_permission_revoked
+      user_id: "{{ context.user_id }}"
+      severity: info
+      details:
+        temp_permission_id: "{{ temp_permission_id }}"
+        permission_id: "{{ context.permission_id }}"
+        note: "Permission was manually revoked before expiration"
+
+    on_success:
+      next: complete
+
+  # =========================================================================
+  # Step 10: Invalidate cache after expiry
+  # =========================================================================
+  - name: invalidate_cache_after_expiry
+    type: action
+    action: invalidate_permission_cache
+    params:
+      user_id: "{{ context.user_id }}"
+
+    on_success:
+      next: notify_expiry
+
+  # =========================================================================
+  # Step 11: Notify user of expiry
+  # =========================================================================
+  - name: notify_expiry
+    type: action
+    action: send_email
+    params:
+      template: temporary_permission_expired
+      to: "{{ get_user_email(user_id) }}"
+      data:
+        permission_name: "{{ get_permission_name(permission_id) }}"
+
+    on_success:
+      next: complete
+
+    on_failure:
+      next: complete
+
+  # =========================================================================
+  # Terminal states
+  # =========================================================================
+  - name: complete
+    type: terminal
+    status: completed
+
+  - name: workflow_failed
+    type: terminal
+    status: failed
+    reason: "Temporary permission grant workflow failed"

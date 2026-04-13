@@ -1,0 +1,365 @@
+# Workflow Workflow - Business process automation and orchestration
+# Source: IMPLEMENTATION_ROADMAP.md Phase 8.1 Workflow Automation
+
+name: Workflow
+model: workflow.model.yaml
+
+# =============================================================================
+# PRIORITY 1: Validation Rules
+# =============================================================================
+rules:
+  valid_workflow_type:
+    when: [create, update]
+    condition: "workflow_type in ['user_registration', 'email_verification', 'password_reset', 'account_suspension', 'role_assignment', 'permission_grant', 'mfa_setup', 'email_change', 'account_recovery', 'bulk_user_import', 'oauth_linking', 'device_trust', 'security_review', 'compliance_audit']"
+    message: "Invalid workflow type"
+    code: INVALID_WORKFLOW_TYPE
+
+  valid_trigger_type:
+    when: [create, update]
+    entity: WorkflowDefinition
+    condition: "trigger_type in ['manual', 'scheduled', 'event_based', 'webhook', 'api_call']"
+    message: "Invalid trigger type"
+    code: INVALID_TRIGGER_TYPE
+
+  valid_status_transition:
+    when: [update]
+    entity: Workflow
+    condition: "validate_workflow_status_transition($old_status, status)"
+    message: "Invalid workflow status transition"
+    code: INVALID_STATUS_TRANSITION
+
+  valid_execution_status_transition:
+    when: [update]
+    entity: WorkflowExecution
+    condition: "validate_execution_status_transition($old_status, status)"
+    message: "Invalid execution status transition"
+    code: INVALID_EXECUTION_STATUS_TRANSITION
+
+  valid_action_type:
+    when: [create, update]
+    entity: WorkflowAction
+    condition: "action_type in ['send_email', 'create_task', 'update_record', 'call_api', 'approve', 'reject', 'notify_user', 'schedule_job']"
+    message: "Invalid action type"
+    code: INVALID_ACTION_TYPE
+
+  reasonable_timeout:
+    when: [create, update]
+    entity: WorkflowExecution
+    condition: "timeout_minutes == null || timeout_minutes > 0 && timeout_minutes <= 10080"  # Max 7 days
+    message: "Timeout must be between 1 and 10080 minutes"
+    code: INVALID_TIMEOUT
+
+  valid_step_sequence:
+    when: [create, update]
+    entity: WorkflowStep
+    condition: "step_number > 0 && step_number <= total_steps"
+    message: "Step number must be valid"
+    code: INVALID_STEP_SEQUENCE
+
+  valid_action_order:
+    when: [create, update]
+    entity: WorkflowAction
+    condition: "step_order >= 0"
+    message: "Action order must be non-negative"
+    code: INVALID_ACTION_ORDER
+
+  valid_schedule:
+    when: [create, update]
+    entity: WorkflowDefinition
+    condition: "trigger_type != 'scheduled' || validate_cron_expression(trigger_config.schedule)"
+    message: "Invalid cron schedule expression"
+    code: INVALID_SCHEDULE
+
+# =============================================================================
+# PRIORITY 2: Access Control
+# =============================================================================
+permissions:
+  super_admin:
+    allow:
+      - all
+
+  admin:
+    allow:
+      - action: read
+      - action: list
+      - action: create
+      - action: update
+      - action: execute
+      - action: cancel
+      - action: retry
+    deny:
+      - action: delete
+        if: "$this.created_by != $actor.id"
+
+  workflow_manager:
+    allow:
+      - action: read
+      - action: list
+      - action: create
+      - action: update
+      - action: execute
+      - action: cancel
+      - action: retry
+      - action: manage_definitions
+        if: "$this.created_by == $actor.id"
+    deny:
+      - action: delete
+      - action: system_operations
+
+  user:
+    allow:
+      - action: read
+        if: "$this.initiator_id == $actor.id || $this.target_user_id == $actor.id"
+      - action: execute
+        if: "workflow_type in ['user_registration', 'email_verification', 'password_reset'] && ($this.target_user_id == $actor.id || $this.initiator_id == $actor.id)"
+      - action: approve
+        if: "workflow_type == 'approval' && $this.target_user_id == $actor.id && status == 'running'"
+    deny:
+      - action: create
+      - action: update
+      - action: delete
+      - action: cancel
+      - action: retry
+      - action: manage_definitions
+
+  system:
+    allow:
+      - action: execute
+      - action: update_status
+      - action: process_actions
+      - action: handle_timeouts
+      - action: cleanup_completed
+      - action: trigger_workflows
+
+# =============================================================================
+# PRIORITY 3: Triggers (Side Effects)
+# =============================================================================
+triggers:
+  after_workflow_definition_create:
+    entity: WorkflowDefinition
+    actions:
+      - "validate_workflow_structure()"
+      - "compile_workflow_actions()"
+      - "setup_triggers_if_needed()"
+      - "log(workflow_definition.created, { definition_id: id, workflow_type: workflow_type, trigger_type: trigger_type })"
+      - "emit: WorkflowDefinitionCreatedEvent(id: id, workflow_type: workflow_type, trigger_type: trigger_type })"
+
+  after_workflow_start:
+    entity: Workflow
+    actions:
+      - "set: started_at = now()"
+      - "create_workflow_steps()"
+      - "initialize_workflow_context()"
+      - "execute_first_step()"
+      - "log(workflow.started, { workflow_id: id, workflow_type: workflow_type, initiator_id: initiator_id })"
+      - "emit: WorkflowStartedEvent(id: id, workflow_type: workflow_type, initiator_id: initiator_id, started_at: now() })"
+
+  after_workflow_execution_start:
+    entity: WorkflowExecution
+    actions:
+      - "set: started_at = now()"
+      - "initialize_execution_context()"
+      - "execute_first_action()"
+      - "log(workflow_execution.started, { execution_id: id, workflow_definition_id: workflow_definition_id })"
+      - "emit: WorkflowExecutionStartedEvent(id: id, workflow_definition_id: workflow_definition_id, started_at: now() })"
+
+  after_step_complete:
+    entity: WorkflowStep
+    actions:
+      - "set: completed_at = now()"
+      - "calculate_step_duration()"
+      - "update_workflow_progress()"
+      - "execute_next_step()"
+      - "check_workflow_completion()"
+      - "log(workflow.step_completed, { step_id: id, workflow_id: workflow_id, step_number: step_number })"
+      - "emit: WorkflowStepCompletedEvent(id: id, workflow_id: workflow_id, step_number: step_number, completed_at: now() })"
+
+  after_action_execution_complete:
+    entity: WorkflowActionExecution
+    actions:
+      - "set: completed_at = now()"
+      - "calculate_action_duration()"
+      - "update_execution_progress()"
+      - "execute_next_action()"
+      - "check_execution_completion()"
+      - "log(workflow.action_execution_completed, { action_execution_id: id, action_type: action_type, duration_ms: duration_ms })"
+      - "emit: WorkflowActionExecutionCompletedEvent(id: id, action_type: action_type, completed_at: now() })"
+
+  after_workflow_complete:
+    entity: Workflow
+    actions:
+      - "set: completed_at = now()"
+      - "calculate_workflow_duration()"
+      - "generate_completion_summary()"
+      - "notify_workflow_participants()"
+      - "log(workflow.completed, { workflow_id: id, workflow_type: workflow_type, duration_minutes: duration_minutes })"
+      - "emit: WorkflowCompletedEvent(id: id, workflow_type: workflow_type, status: status, completed_at: now() })"
+
+  after_workflow_execution_complete:
+    entity: WorkflowExecution
+    actions:
+      - "set: completed_at = now()"
+      - "calculate_execution_summary()"
+      - "generate_execution_report()"
+      - "notify_workflow_initiator()"
+      - "log(workflow_execution.completed, { execution_id: id, status: status, total_duration_ms: total_duration_ms })"
+      - "emit: WorkflowExecutionCompletedEvent(id: id, status: status, completed_at: now() })"
+
+  after_workflow_fail:
+    entity: Workflow
+    actions:
+      - "set: failed_at = now()"
+      - "set: error_message = $context.error_message"
+      - "handle_workflow_failure()"
+      - "notify_administrators()"
+      - "log(workflow.failed, { workflow_id: id, error_message: error_message, failed_at: failed_at })"
+      - "emit: WorkflowFailedEvent(id: id, error_message: $context.error_message, failed_at: now() })"
+
+  after_workflow_timeout:
+    entity: Workflow
+    actions:
+      - "set: status = 'expired'"
+      - "handle_workflow_timeout()"
+      - "notify_workflow_participants()"
+      - "log(workflow.timeout, { workflow_id: id, timeout_duration: timeout_minutes })"
+      - "emit: WorkflowTimeoutEvent(id: id, timed_out_at: now() })"
+
+  after_step_retry:
+    entity: WorkflowStep
+    actions:
+      - "increment_retry_count()"
+      - "reset_step_status()"
+      - "log(workflow.step_retried, { step_id: id, retry_count: retry_count })"
+
+# =============================================================================
+# PRIORITY 4: Scheduled Jobs and Background Tasks
+# =============================================================================
+jobs:
+  execute_scheduled_workflows:
+    schedule: "* * * * *"  # Every minute
+    actions:
+      - "find_due_scheduled_workflow_definitions()"
+      - "create_workflow_instances_for_schedules(due_definitions)"
+      - "execute_scheduled_workflow_instances(instances)"
+      - "log(workflow.scheduled_executed, { executed_count: $executed_count })"
+
+  process_event_based_triggers:
+    schedule: "* * * * *"  # Every minute
+    actions:
+      - "check_workflow_event_triggers()"
+      - "create_workflow_executions_for_events(triggered_events)"
+      - "log(workflow.event_triggered, { executions_created: $executions_created_count })"
+
+  check_workflow_timeouts:
+    schedule: "*/5 * * * *"  # Every 5 minutes
+    actions:
+      - "find_timeout_workflows()"
+      - "find_timeout_executions()"
+      - "handle_workflow_timeouts(timeout_workflows)"
+      - "handle_execution_timeouts(timeout_executions)"
+      - "log(workflow.timeouts_handled, { timeouts_handled: $timeouts_handled_count })"
+
+  cleanup_completed_workflows:
+    schedule: "0 2 * * *"  # Daily at 2 AM
+    actions:
+      - "find_workflows_older_than(90.days)"
+      - "find_executions_older_than(90.days)"
+      - "archive_completed_workflows(old_workflows)"
+      - "archive_completed_executions(old_executions)"
+      - "log(workflow.cleanup_completed, { archived_count: $archived_count })"
+
+  retry_failed_workflows:
+    schedule: "0 */2 * * *"  # Every 2 hours
+    actions:
+      - "find_retryable_failed_workflows()"
+      - "find_retryable_failed_executions()"
+      - "retry_failed_workflows(retryable_workflows)"
+      - "retry_failed_executions(retryable_executions)"
+      - "log(workflow.retries_completed, { retried_count: $retried_count })"
+
+  update_workflow_statistics:
+    schedule: "0 1 * * *"  # Daily at 1 AM
+    actions:
+      - "calculate_workflow_performance_metrics()"
+      - "update_workflow_statistics_dashboard()"
+      - "identify_workflow_bottlenecks()"
+      - "update_workflow_health_indicators()"
+      - "log(workflow.statistics_updated, { workflows_analyzed: $workflows_analyzed_count })"
+
+  process_webhook_triggers:
+    schedule: "* * * * *"  # Every minute
+    actions:
+      - "process_pending_workflow_webhooks()"
+      - "validate_webhook_signatures()"
+      - "create_workflows_from_valid_webhooks(valid_webhooks)"
+      - "log(workflow.webhooks_processed, { webhooks_processed: $webhooks_processed_count })"
+
+# =============================================================================
+# PRIORITY 5: Computed Fields
+# =============================================================================
+computed:
+  # Workflow duration in minutes
+  workflow_duration_minutes: "started_at != null && completed_at != null ? (completed_at - started_at).total_minutes : (started_at != null ? (now() - started_at).total_minutes : 0)"
+
+  # Execution duration in minutes
+  execution_duration_minutes: "started_at != null && completed_at != null ? (completed_at - started_at).total_minutes : (started_at != null ? (now() - started_at).total_minutes : 0)"
+
+  # Step duration in minutes
+  step_duration_minutes: "started_at != null && completed_at != null ? (completed_at - started_at).total_minutes : null"
+
+  # Time until timeout in minutes
+  time_until_timeout_minutes: "timeout_minutes != null && started_at != null ? timeout_minutes - workflow_duration_minutes : null"
+
+  # Workflow progress percentage
+  workflow_progress_percentage: "total_steps > 0 ? (current_step / total_steps) * 100 : 0"
+
+  # Execution progress percentage
+  execution_progress_percentage: "total_actions > 0 ? (current_action / total_actions) * 100 : 0"
+
+  # Is workflow overdue
+  is_workflow_overdue: "time_until_timeout_minutes != null && time_until_timeout_minutes < 0"
+
+  # Is execution overdue
+  is_execution_overdue: "time_until_timeout_minutes != null && time_until_timeout_minutes < 0"
+
+  # Workflow success rate (0-100)
+  workflow_success_rate: "calculate_workflow_success_rate(workflow_type, time_period)"
+
+  # Average workflow execution time in minutes
+  average_execution_time: "calculate_average_execution_time(workflow_type)"
+
+  # Current workflow health status
+  workflow_health_status: "workflow_success_rate >= 95 ? 'excellent' : (workflow_success_rate >= 85 ? 'good' : (workflow_success_rate >= 70 ? 'fair' : 'poor'))"
+
+  # Is workflow active (has recent executions)
+  is_workflow_active: "last_execution_at != null && (now() - last_execution_at).total_days <= 30"
+
+  # Workflow bottleneck detection
+  has_workflow_bottleneck: "average_execution_time > expected_duration * 1.5"
+
+  # Workflow completion rate
+  workflow_completion_rate: "calculate_workflow_completion_rate(workflow_type)"
+
+  # Workflow priority level
+  workflow_priority_level: "workflow_type in ['account_suspension', 'security_review', 'compliance_audit'] ? 'high' : (workflow_type in ['role_assignment', 'permission_grant'] ? 'medium' : 'low')"
+
+  # Next scheduled execution time
+  next_scheduled_execution_at: "calculate_next_scheduled_execution(trigger_config)"
+
+  # Workflow complexity score
+  workflow_complexity_score: "calculate_workflow_complexity(total_steps, conditional_logic_count, integration_count)"
+
+  # Automation value score
+  automation_value_score: "calculate_automation_value(time_saved_per_execution, execution_frequency, manual_effort)"
+
+  # Action execution efficiency
+  action_execution_efficiency: "calculate_action_execution_efficiency(duration_ms, expected_duration_ms, success_count)"
+
+  # Workflow retry rate
+  workflow_retry_rate: "calculate_workflow_retry_rate(workflow_id, time_period)"
+
+  # Workflow error rate
+  workflow_error_rate: "calculate_workflow_error_rate(workflow_id, time_period)"
+
+  # User workflow participation score
+  user_workflow_participation: "calculate_user_workflow_participation(user_id, workflow_type, time_period)"
