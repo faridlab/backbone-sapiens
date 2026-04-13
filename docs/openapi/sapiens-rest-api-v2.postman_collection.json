@@ -1,0 +1,415 @@
+{
+  "info": {
+    "name": "Sapiens REST API - Complete CRUD Scenarios",
+    "description": "Comprehensive CRUD test scenarios for Sapiens User Management Service.\n\n**Updated Schema:**\n- first_name (required, 1-100 chars)\n- middle_name (optional, max 100 chars)\n- last_name (optional, max 100 chars)\n- full_name (computed, read-only)\n\n**Test Scenarios Included:**\n1. Complete User Lifecycle (Create → Read → Update → Delete)\n2. Authentication Flow\n3. Profile Management\n4. Session Management\n5. MFA Setup\n6. Password Operations\n7. Admin Operations\n\n**Base URL (Dev):** http://localhost:3003/api/v1\n**Base URL (Prod):** https://api.startapp.id/sapiens/api/v1",
+    "_postman_id": "sapiens-rest-v2-2025",
+    "version": "2.1.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:3003/api/v1"},
+    {"key": "token", "value": ""},
+    {"key": "refreshToken", "value": ""},
+    {"key": "userId", "value": ""},
+    {"key": "testUserId", "value": ""},
+    {"key": "testEmail", "value": ""},
+    {"key": "sessionId", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "Scenario 1: Complete User Lifecycle",
+      "description": "Full CRUD flow: Register → Login → Get Profile → Update → Delete",
+      "item": [
+        {
+          "name": "Step 1: Register New User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', () => {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has user data', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('id');",
+                  "    pm.expect(json).to.have.property('email');",
+                  "    pm.expect(json).to.have.property('first_name');",
+                  "    pm.expect(json).to.have.property('full_name');",
+                  "    ",
+                  "    // Save for next steps",
+                  "    pm.collectionVariables.set('testUserId', json.id);",
+                  "    pm.collectionVariables.set('testEmail', json.email);",
+                  "});",
+                  "",
+                  "pm.test('Full name is computed correctly', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.full_name).to.equal('Alice Marie Johnson');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice.johnson.{{$randomInt}}@example.com\",\n  \"password\": \"SecureP@ss123\",\n  \"first_name\": \"Alice\",\n  \"middle_name\": \"Marie\",\n  \"last_name\": \"Johnson\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Step 2: Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login successful', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Token received', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('token');",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email_or_username\": \"{{testEmail}}\",\n  \"password\": \"SecureP@ss123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Step 3: Get My Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Profile retrieved', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.first_name).to.equal('Alice');",
+                  "    pm.expect(json.middle_name).to.equal('Marie');",
+                  "    pm.expect(json.last_name).to.equal('Johnson');",
+                  "    pm.expect(json.full_name).to.equal('Alice Marie Johnson');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/auth/protected/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "protected", "me"]
+            }
+          }
+        },
+        {
+          "name": "Step 4: Update Profile - Change Middle Name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Profile updated', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.middle_name).to.equal('Elizabeth');",
+                  "    pm.expect(json.full_name).to.equal('Alice Elizabeth Johnson');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Alice\",\n  \"middle_name\": \"Elizabeth\",\n  \"last_name\": \"Johnson\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{testUserId}}/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId", "profile"],
+              "variable": [{"key": "userId", "value": "{{testUserId}}"}]
+            }
+          }
+        },
+        {
+          "name": "Step 5: Update Profile - Remove Middle Name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Middle name removed', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.middle_name).to.be.null;",
+                  "    pm.expect(json.full_name).to.equal('Alice Johnson');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Alice\",\n  \"middle_name\": null,\n  \"last_name\": \"Johnson\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{testUserId}}/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId", "profile"],
+              "variable": [{"key": "userId", "value": "{{testUserId}}"}]
+            }
+          }
+        },
+        {
+          "name": "Step 6: Delete Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Account deleted', () => {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/users/{{testUserId}}/account",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId", "account"],
+              "variable": [{"key": "userId", "value": "{{testUserId}}"}]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Scenario 2: Name Variations",
+      "description": "Test different name combinations",
+      "item": [
+        {
+          "name": "Create User - First Name Only",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"madonna.{{$randomInt}}@example.com\",\n  \"password\": \"SecureP@ss123\",\n  \"first_name\": \"Madonna\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Create user with only first name (like Madonna, Cher)"
+          }
+        },
+        {
+          "name": "Create User - First and Last Only",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe.{{$randomInt}}@example.com\",\n  \"password\": \"SecureP@ss123\",\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Most common pattern: first + last name"
+          }
+        },
+        {
+          "name": "Create User - All Three Names",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jfk.{{$randomInt}}@example.com\",\n  \"password\": \"SecureP@ss123\",\n  \"first_name\": \"John\",\n  \"middle_name\": \"Fitzgerald\",\n  \"last_name\": \"Kennedy\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Full formal name with middle name"
+          }
+        },
+        {
+          "name": "Create User - Multiple Middle Names",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"pablo.{{$randomInt}}@example.com\",\n  \"password\": \"SecureP@ss123\",\n  \"first_name\": \"Pablo\",\n  \"middle_name\": \"Diego José Francisco de Paula Juan Nepomuceno María\",\n  \"last_name\": \"Picasso\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Test long middle name (like Pablo Picasso's full name)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Scenario 3: Data Migration Test",
+      "description": "Test with existing users from MongoDB migration",
+      "item": [
+        {
+          "name": "Login as Root User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Root login successful', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    pm.collectionVariables.set('userId', json.user.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email_or_username\": \"root@startapp.id\",\n  \"password\": \"PiQS5SVL012D\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Root User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Root profile has migrated schema', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('first_name');",
+                  "    pm.expect(json).to.have.property('middle_name');",
+                  "    pm.expect(json).to.have.property('last_name');",
+                  "    pm.expect(json).to.have.property('full_name');",
+                  "    ",
+                  "    // Root user: first_name='System', last_name='Administrator'",
+                  "    pm.expect(json.first_name).to.equal('System');",
+                  "    pm.expect(json.last_name).to.equal('Administrator');",
+                  "    pm.expect(json.full_name).to.equal('System Administrator');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/auth/protected/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "protected", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser.{{$randomInt}}@example.com\",\n  \"password\": \"SecureP@ss123\",\n  \"first_name\": \"New\",\n  \"middle_name\": \"Test\",\n  \"last_name\": \"User\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email_or_username\": \"root@startapp.id\",\n  \"password\": \"PiQS5SVL012D\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,651 @@
+{
+  "info": {
+    "name": "Sapiens RBAC REST API",
+    "description": "Role-Based Access Control (RBAC) REST API for Sapiens User Management Service.\n\nThis API provides comprehensive CRUD operations with 12 endpoints per entity:\n- GET /{entity} - List all\n- POST /{entity} - Create\n- GET /{entity}/{id} - Get by ID\n- PUT /{entity}/{id} - Full update\n- PATCH /{entity}/{id} - Partial update\n- DELETE /{entity}/{id} - Soft delete\n- GET /{entity}/search - Search\n- POST /{entity}/bulk - Bulk create\n- POST /{entity}/upsert - Upsert\n- GET /{entity}/trash - List deleted\n- POST /{entity}/{id}/restore - Restore\n- DELETE /{entity}/trash - Empty trash\n\n**Authentication:** All endpoints require JWT Bearer token authentication.\n\n**Base URL (Dev):** http://localhost:3003/api/v1\n**Base URL (Prod):** https://api.startapp.id/sapiens/api/v1",
+    "_postman_id": "550e8400-e29b-41d4-a716-446655440100",
+    "version": "2.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:3003/api/v1", "type": "string"},
+    {"key": "token", "value": "", "type": "string"},
+    {"key": "refreshToken", "value": "", "type": "string"},
+    {"key": "userId", "value": "", "type": "string"},
+    {"key": "roleId", "value": "", "type": "string"},
+    {"key": "permissionId", "value": "", "type": "string"},
+    {"key": "sessionId", "value": "", "type": "string"},
+    {"key": "userRoleId", "value": "", "type": "string"},
+    {"key": "rolePermissionId", "value": "", "type": "string"},
+    {"key": "userPermissionId", "value": "", "type": "string"},
+    {"key": "userPreferenceId", "value": "", "type": "string"},
+    {"key": "userSettingsId", "value": "", "type": "string"},
+    {"key": "userSessionId", "value": "", "type": "string"},
+    {"key": "userSecurityEventId", "value": "", "type": "string"},
+    {"key": "mfaDeviceId", "value": "", "type": "string"},
+    {"key": "passwordResetTokenId", "value": "", "type": "string"},
+    {"key": "auditLogId", "value": "", "type": "string"},
+    {"key": "policyId", "value": "", "type": "string"},
+    {"key": "policyAssignmentId", "value": "", "type": "string"},
+    {"key": "systemSettingsId", "value": "", "type": "string"}
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Authentication endpoints (login, register, password reset, email verification)",
+      "item": [
+        {"name": "Login", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"email_or_username\": \"john.doe@example.com\",\n  \"password\": \"SecureP@ss123\"\n}"}, "url": {"raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"]}}, "description": "Authenticate user and get JWT tokens"},
+        {"name": "Register", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"username\": \"newuser\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"SecureP@ss123\",\n  \"first_name\": \"New\",\n  \"last_name\": \"User\"\n}"}, "url": {"raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"]}}, "description": "Register a new user account"},
+        {"name": "Refresh Token", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"refresh_token\": \"{{refreshToken}}\"\n}"}, "url": {"raw": "{{baseUrl}}/auth/refresh-token", "host": ["{{baseUrl}}"], "path": ["auth", "refresh-token"]}}, "description": "Get new access token using refresh token"},
+        {"name": "Forgot Password", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"email\": \"john.doe@example.com\"\n}"}, "url": {"raw": "{{baseUrl}}/auth/forgot-password", "host": ["{{baseUrl}}"], "path": ["auth", "forgot-password"]}}, "description": "Request password reset email"},
+        {"name": "Reset Password", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"token\": \"reset-token-from-email\",\n  \"new_password\": \"NewSecureP@ss123\",\n  \"confirm_password\": \"NewSecureP@ss123\"\n}"}, "url": {"raw": "{{baseUrl}}/auth/reset-password", "host": ["{{baseUrl}}"], "path": ["auth", "reset-password"]}}, "description": "Reset password using token from email"},
+        {"name": "Verify Email", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"token\": \"verification-token-from-email\"\n}"}, "url": {"raw": "{{baseUrl}}/auth/verify-email", "host": ["{{baseUrl}}"], "path": ["auth", "verify-email"]}}, "description": "Verify email address using token"},
+        {"name": "Resend Verification", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"email\": \"john.doe@example.com\"\n}"}, "url": {"raw": "{{baseUrl}}/auth/resend-verification", "host": ["{{baseUrl}}"], "path": ["auth", "resend-verification"]}}, "description": "Resend email verification link"},
+        {"name": "Logout", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"all_sessions\": false\n}"}, "url": {"raw": "{{baseUrl}}/auth/protected/logout", "host": ["{{baseUrl}}"], "path": ["auth", "protected", "logout"]}}, "description": "Logout current session or all sessions"},
+        {"name": "Get Current User", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/auth/protected/me", "host": ["{{baseUrl}}"], "path": ["auth", "protected", "me"]}}, "description": "Get currently authenticated user info"}
+      ]
+    },
+    {
+      "name": "MFA",
+      "description": "Multi-Factor Authentication setup and management",
+      "item": [
+        {"name": "Setup MFA", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/auth/mfa/setup", "host": ["{{baseUrl}}"], "path": ["auth", "mfa", "setup"]}}, "description": "Initialize MFA setup, returns TOTP secret and QR code URL"},
+        {"name": "Verify MFA", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"verification_code\": \"123456\"\n}"}, "url": {"raw": "{{baseUrl}}/auth/mfa/verify", "host": ["{{baseUrl}}"], "path": ["auth", "mfa", "verify"]}}, "description": "Verify TOTP code to complete MFA setup"},
+        {"name": "Disable MFA", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"password\": \"SecureP@ss123\",\n  \"verification_code\": \"123456\"\n}"}, "url": {"raw": "{{baseUrl}}/auth/mfa/disable", "host": ["{{baseUrl}}"], "path": ["auth", "mfa", "disable"]}}, "description": "Disable MFA for current user"},
+        {"name": "List MFA Devices", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/auth/mfa/devices", "host": ["{{baseUrl}}"], "path": ["auth", "mfa", "devices"]}}, "description": "List all MFA devices for current user"},
+        {"name": "Remove MFA Device", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/auth/mfa/devices/:deviceId", "host": ["{{baseUrl}}"], "path": ["auth", "mfa", "devices", ":deviceId"], "variable": [{"key": "deviceId", "value": "{{mfaDeviceId}}"}]}}, "description": "Remove an MFA device by ID"},
+        {"name": "Regenerate Backup Codes", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/auth/mfa/regenerate-backup", "host": ["{{baseUrl}}"], "path": ["auth", "mfa", "regenerate-backup"]}}, "description": "Generate new backup codes (invalidates old ones)"}
+      ]
+    },
+    {
+      "name": "User Operations",
+      "description": "User profile, password, email, sessions, and admin operations",
+      "item": [
+        {"name": "Get User Profile", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/users/:userId/profile", "host": ["{{baseUrl}}"], "path": ["users", ":userId", "profile"], "variable": [{"key": "userId", "value": "{{userId}}"}]}}, "description": "Get user profile information"},
+        {"name": "Update User Profile", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"phone\": \"+1234567890\"\n}"}, "url": {"raw": "{{baseUrl}}/users/:userId/profile", "host": ["{{baseUrl}}"], "path": ["users", ":userId", "profile"], "variable": [{"key": "userId", "value": "{{userId}}"}]}}, "description": "Update user profile information"},
+        {"name": "Change Password", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"current_password\": \"OldP@ss123\",\n  \"new_password\": \"NewP@ss123\",\n  \"confirm_password\": \"NewP@ss123\"\n}"}, "url": {"raw": "{{baseUrl}}/users/:userId/change-password", "host": ["{{baseUrl}}"], "path": ["users", ":userId", "change-password"], "variable": [{"key": "userId", "value": "{{userId}}"}]}}, "description": "Change user password"},
+        {"name": "Change Email", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"new_email\": \"newemail@example.com\",\n  \"password\": \"CurrentP@ss123\"\n}"}, "url": {"raw": "{{baseUrl}}/users/:userId/change-email", "host": ["{{baseUrl}}"], "path": ["users", ":userId", "change-email"], "variable": [{"key": "userId", "value": "{{userId}}"}]}}, "description": "Request email change (sends verification)"},
+        {"name": "List User Sessions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/users/:userId/sessions", "host": ["{{baseUrl}}"], "path": ["users", ":userId", "sessions"], "variable": [{"key": "userId", "value": "{{userId}}"}]}}, "description": "List all active sessions for user"},
+        {"name": "Revoke User Session", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/users/:userId/sessions/:sessionId", "host": ["{{baseUrl}}"], "path": ["users", ":userId", "sessions", ":sessionId"], "variable": [{"key": "userId", "value": "{{userId}}"}, {"key": "sessionId", "value": "{{sessionId}}"}]}}, "description": "Revoke a specific session"},
+        {"name": "Revoke All Sessions", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/users/:userId/sessions/all", "host": ["{{baseUrl}}"], "path": ["users", ":userId", "sessions", "all"], "variable": [{"key": "userId", "value": "{{userId}}"}]}}, "description": "Revoke all sessions for user"},
+        {"name": "Get User Activity", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/users/:userId/activity?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["users", ":userId", "activity"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}], "variable": [{"key": "userId", "value": "{{userId}}"}]}}, "description": "Get user activity log"},
+        {"name": "Delete User Account", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/users/:userId/account", "host": ["{{baseUrl}}"], "path": ["users", ":userId", "account"], "variable": [{"key": "userId", "value": "{{userId}}"}]}}, "description": "Self-service account deletion"},
+        {"name": "Suspend User", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"reason\": \"Policy violation\",\n  \"duration_hours\": 24\n}"}, "url": {"raw": "{{baseUrl}}/users/:userId/suspend", "host": ["{{baseUrl}}"], "path": ["users", ":userId", "suspend"], "variable": [{"key": "userId", "value": "{{userId}}"}]}}, "description": "Suspend user account (admin)"},
+        {"name": "Unsuspend User", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"reason\": \"Suspension period ended\"\n}"}, "url": {"raw": "{{baseUrl}}/users/:userId/unsuspend", "host": ["{{baseUrl}}"], "path": ["users", ":userId", "unsuspend"], "variable": [{"key": "userId", "value": "{{userId}}"}]}}, "description": "Unsuspend user account (admin)"},
+        {"name": "Admin Reset Password", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"new_password\": \"TempP@ss123\",\n  \"send_email\": true,\n  \"require_change\": true\n}"}, "url": {"raw": "{{baseUrl}}/users/:userId/admin-reset-password", "host": ["{{baseUrl}}"], "path": ["users", ":userId", "admin-reset-password"], "variable": [{"key": "userId", "value": "{{userId}}"}]}}, "description": "Admin reset user password"},
+        {"name": "Advanced User Search", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/users/search?status=active&email_verified=true&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["users", "search"], "query": [{"key": "status", "value": "active"}, {"key": "email_verified", "value": "true"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Advanced search with filters (admin)"}
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "User entity CRUD operations (12 endpoints)",
+      "item": [
+        {
+          "name": "List users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users?page=1&limit=20&sort=-created_at",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"],
+              "query": [
+                {"key": "page", "value": "1", "description": "Page number (1-indexed)"},
+                {"key": "limit", "value": "20", "description": "Items per page"},
+                {"key": "sort", "value": "-created_at", "description": "Sort field (- for desc)"}
+              ]
+            },
+            "description": "Retrieve a paginated list of all users"
+          }
+        },
+        {
+          "name": "Create user",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"johndoe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecureP@ss123\",\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"phone\": \"+1234567890\",\n  \"is_active\": true\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"]},
+            "description": "Create a new user account"
+          }
+        },
+        {
+          "name": "Get user by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":id"],
+              "variable": [{"key": "id", "value": "{{userId}}", "description": "User UUID"}]
+            },
+            "description": "Retrieve a user by ID"
+          }
+        },
+        {
+          "name": "Update user (full)",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"johndoe\",\n  \"email\": \"john.doe@example.com\",\n  \"first_name\": \"John\",\n  \"last_name\": \"Smith\",\n  \"phone\": \"+1987654321\",\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":id"],
+              "variable": [{"key": "id", "value": "{{userId}}"}]
+            },
+            "description": "Full update of user (all fields required)"
+          }
+        },
+        {
+          "name": "Update user (partial)",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Jane\",\n  \"is_active\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":id"],
+              "variable": [{"key": "id", "value": "{{userId}}"}]
+            },
+            "description": "Partial update of user (only specified fields)"
+          }
+        },
+        {
+          "name": "Delete user",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":id"],
+              "variable": [{"key": "id", "value": "{{userId}}"}]
+            },
+            "description": "Soft delete a user"
+          }
+        },
+        {
+          "name": "Search users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/search?q=john&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "search"],
+              "query": [
+                {"key": "q", "value": "john", "description": "Search query"},
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"}
+              ]
+            },
+            "description": "Search users by username, email, or name"
+          }
+        },
+        {
+          "name": "Bulk create users",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\"username\": \"user1\", \"email\": \"user1@example.com\", \"password\": \"Pass123!\", \"first_name\": \"User\", \"last_name\": \"One\"},\n    {\"username\": \"user2\", \"email\": \"user2@example.com\", \"password\": \"Pass123!\", \"first_name\": \"User\", \"last_name\": \"Two\"}\n  ]\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/users/bulk", "host": ["{{baseUrl}}"], "path": ["users", "bulk"]},
+            "description": "Create multiple users at once"
+          }
+        },
+        {
+          "name": "Upsert user",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"johndoe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecureP@ss123\",\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/users/upsert", "host": ["{{baseUrl}}"], "path": ["users", "upsert"]},
+            "description": "Create or update user based on unique fields"
+          }
+        },
+        {
+          "name": "List deleted users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/trash?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "trash"],
+              "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]
+            },
+            "description": "List soft-deleted users"
+          }
+        },
+        {
+          "name": "Restore user",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id/restore",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":id", "restore"],
+              "variable": [{"key": "id", "value": "{{userId}}"}]
+            },
+            "description": "Restore a soft-deleted user"
+          }
+        },
+        {
+          "name": "Empty users trash",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/users/trash", "host": ["{{baseUrl}}"], "path": ["users", "trash"]},
+            "description": "Permanently delete all soft-deleted users"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "description": "Role entity CRUD operations (12 endpoints)",
+      "item": [
+        {
+          "name": "List roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/roles?page=1&limit=20&sort=-created_at",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles"],
+              "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-created_at"}]
+            },
+            "description": "Retrieve a paginated list of all roles"
+          }
+        },
+        {
+          "name": "Create role",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"content_editor\",\n  \"description\": \"Content editor with write permissions\",\n  \"is_default\": false\n}"},
+            "url": {"raw": "{{baseUrl}}/roles", "host": ["{{baseUrl}}"], "path": ["roles"]},
+            "description": "Create a new role"
+          }
+        },
+        {
+          "name": "Get role by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/roles/:id", "host": ["{{baseUrl}}"], "path": ["roles", ":id"], "variable": [{"key": "id", "value": "{{roleId}}"}]},
+            "description": "Retrieve a role by ID"
+          }
+        },
+        {
+          "name": "Update role (full)",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"senior_editor\",\n  \"description\": \"Senior editor with advanced permissions\",\n  \"is_default\": false\n}"},
+            "url": {"raw": "{{baseUrl}}/roles/:id", "host": ["{{baseUrl}}"], "path": ["roles", ":id"], "variable": [{"key": "id", "value": "{{roleId}}"}]},
+            "description": "Full update of role"
+          }
+        },
+        {
+          "name": "Update role (partial)",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"description\": \"Updated description\"\n}"},
+            "url": {"raw": "{{baseUrl}}/roles/:id", "host": ["{{baseUrl}}"], "path": ["roles", ":id"], "variable": [{"key": "id", "value": "{{roleId}}"}]},
+            "description": "Partial update of role"
+          }
+        },
+        {
+          "name": "Delete role",
+          "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/roles/:id", "host": ["{{baseUrl}}"], "path": ["roles", ":id"], "variable": [{"key": "id", "value": "{{roleId}}"}]}},
+            "description": "Soft delete a role"
+        },
+        {
+          "name": "Search roles",
+          "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/roles/search?q=editor&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["roles", "search"], "query": [{"key": "q", "value": "editor"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}},
+            "description": "Search roles by name or description"
+        },
+        {
+          "name": "Bulk create roles",
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"name\": \"role1\", \"description\": \"Role 1\"},\n    {\"name\": \"role2\", \"description\": \"Role 2\"}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/roles/bulk", "host": ["{{baseUrl}}"], "path": ["roles", "bulk"]}},
+            "description": "Create multiple roles at once"
+        },
+        {
+          "name": "Upsert role",
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"name\": \"content_editor\",\n  \"description\": \"Content editor role\"\n}"}, "url": {"raw": "{{baseUrl}}/roles/upsert", "host": ["{{baseUrl}}"], "path": ["roles", "upsert"]}},
+            "description": "Create or update role"
+        },
+        {
+          "name": "List deleted roles",
+          "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/roles/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["roles", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}},
+            "description": "List soft-deleted roles"
+        },
+        {
+          "name": "Restore role",
+          "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/roles/:id/restore", "host": ["{{baseUrl}}"], "path": ["roles", ":id", "restore"], "variable": [{"key": "id", "value": "{{roleId}}"}]}},
+            "description": "Restore a soft-deleted role"
+        },
+        {
+          "name": "Empty roles trash",
+          "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/roles/trash", "host": ["{{baseUrl}}"], "path": ["roles", "trash"]}},
+            "description": "Permanently delete all soft-deleted roles"
+        }
+      ]
+    },
+    {
+      "name": "Permissions",
+      "description": "Permission entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List permissions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/permissions?page=1&limit=20&sort=-created_at", "host": ["{{baseUrl}}"], "path": ["permissions"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-created_at"}]}}, "description": "List all permissions"},
+        {"name": "Create permission", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"name\": \"read:posts\",\n  \"description\": \"Permission to read posts\",\n  \"resource\": \"posts\",\n  \"action\": \"read\"\n}"}, "url": {"raw": "{{baseUrl}}/permissions", "host": ["{{baseUrl}}"], "path": ["permissions"]}}, "description": "Create a new permission"},
+        {"name": "Get permission by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/permissions/:id", "host": ["{{baseUrl}}"], "path": ["permissions", ":id"], "variable": [{"key": "id", "value": "{{permissionId}}"}]}}, "description": "Get permission by ID"},
+        {"name": "Update permission (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"name\": \"write:posts\",\n  \"description\": \"Permission to write posts\",\n  \"resource\": \"posts\",\n  \"action\": \"write\"\n}"}, "url": {"raw": "{{baseUrl}}/permissions/:id", "host": ["{{baseUrl}}"], "path": ["permissions", ":id"], "variable": [{"key": "id", "value": "{{permissionId}}"}]}}, "description": "Full update permission"},
+        {"name": "Update permission (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"description\": \"Updated description\"\n}"}, "url": {"raw": "{{baseUrl}}/permissions/:id", "host": ["{{baseUrl}}"], "path": ["permissions", ":id"], "variable": [{"key": "id", "value": "{{permissionId}}"}]}}, "description": "Partial update permission"},
+        {"name": "Delete permission", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/permissions/:id", "host": ["{{baseUrl}}"], "path": ["permissions", ":id"], "variable": [{"key": "id", "value": "{{permissionId}}"}]}}, "description": "Soft delete permission"},
+        {"name": "Search permissions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/permissions/search?q=posts&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["permissions", "search"], "query": [{"key": "q", "value": "posts"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search permissions"},
+        {"name": "Bulk create permissions", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"name\": \"read:posts\", \"resource\": \"posts\", \"action\": \"read\"},\n    {\"name\": \"write:posts\", \"resource\": \"posts\", \"action\": \"write\"}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/permissions/bulk", "host": ["{{baseUrl}}"], "path": ["permissions", "bulk"]}}, "description": "Bulk create permissions"},
+        {"name": "Upsert permission", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"name\": \"read:posts\",\n  \"resource\": \"posts\",\n  \"action\": \"read\"\n}"}, "url": {"raw": "{{baseUrl}}/permissions/upsert", "host": ["{{baseUrl}}"], "path": ["permissions", "upsert"]}}, "description": "Upsert permission"},
+        {"name": "List deleted permissions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/permissions/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["permissions", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted permissions"},
+        {"name": "Restore permission", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/permissions/:id/restore", "host": ["{{baseUrl}}"], "path": ["permissions", ":id", "restore"], "variable": [{"key": "id", "value": "{{permissionId}}"}]}}, "description": "Restore permission"},
+        {"name": "Empty permissions trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/permissions/trash", "host": ["{{baseUrl}}"], "path": ["permissions", "trash"]}}, "description": "Empty permissions trash"}
+      ]
+    },
+    {
+      "name": "Sessions",
+      "description": "Session entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List sessions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/sessions?page=1&limit=20&sort=-created_at", "host": ["{{baseUrl}}"], "path": ["sessions"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-created_at"}]}}, "description": "List all sessions"},
+        {"name": "Create session", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"token\": \"session_token_here\",\n  \"ip_address\": \"192.168.1.1\",\n  \"user_agent\": \"Mozilla/5.0\",\n  \"expires_at\": \"2025-12-31T23:59:59Z\"\n}"}, "url": {"raw": "{{baseUrl}}/sessions", "host": ["{{baseUrl}}"], "path": ["sessions"]}}, "description": "Create a new session"},
+        {"name": "Get session by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/sessions/:id", "host": ["{{baseUrl}}"], "path": ["sessions", ":id"], "variable": [{"key": "id", "value": "{{sessionId}}"}]}}, "description": "Get session by ID"},
+        {"name": "Update session (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"expires_at\": \"2025-12-31T23:59:59Z\",\n  \"is_active\": true\n}"}, "url": {"raw": "{{baseUrl}}/sessions/:id", "host": ["{{baseUrl}}"], "path": ["sessions", ":id"], "variable": [{"key": "id", "value": "{{sessionId}}"}]}}, "description": "Full update session"},
+        {"name": "Update session (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"is_active\": false\n}"}, "url": {"raw": "{{baseUrl}}/sessions/:id", "host": ["{{baseUrl}}"], "path": ["sessions", ":id"], "variable": [{"key": "id", "value": "{{sessionId}}"}]}}, "description": "Partial update session"},
+        {"name": "Delete session", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/sessions/:id", "host": ["{{baseUrl}}"], "path": ["sessions", ":id"], "variable": [{"key": "id", "value": "{{sessionId}}"}]}}, "description": "Soft delete session"},
+        {"name": "Search sessions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/sessions/search?q=192.168&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["sessions", "search"], "query": [{"key": "q", "value": "192.168"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search sessions"},
+        {"name": "Bulk create sessions", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"user_id\": \"{{userId}}\", \"token\": \"token1\", \"ip_address\": \"192.168.1.1\"},\n    {\"user_id\": \"{{userId}}\", \"token\": \"token2\", \"ip_address\": \"192.168.1.2\"}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/sessions/bulk", "host": ["{{baseUrl}}"], "path": ["sessions", "bulk"]}}, "description": "Bulk create sessions"},
+        {"name": "Upsert session", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"token\": \"session_token\",\n  \"ip_address\": \"192.168.1.1\"\n}"}, "url": {"raw": "{{baseUrl}}/sessions/upsert", "host": ["{{baseUrl}}"], "path": ["sessions", "upsert"]}}, "description": "Upsert session"},
+        {"name": "List deleted sessions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/sessions/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["sessions", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted sessions"},
+        {"name": "Restore session", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/sessions/:id/restore", "host": ["{{baseUrl}}"], "path": ["sessions", ":id", "restore"], "variable": [{"key": "id", "value": "{{sessionId}}"}]}}, "description": "Restore session"},
+        {"name": "Empty sessions trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/sessions/trash", "host": ["{{baseUrl}}"], "path": ["sessions", "trash"]}}, "description": "Empty sessions trash"}
+      ]
+    },
+    {
+      "name": "User Roles",
+      "description": "User-Role assignment entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List user-roles", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-roles?page=1&limit=20&sort=-created_at", "host": ["{{baseUrl}}"], "path": ["user-roles"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-created_at"}]}}, "description": "List all user-role assignments"},
+        {"name": "Create user-role", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"role_id\": \"{{roleId}}\"\n}"}, "url": {"raw": "{{baseUrl}}/user-roles", "host": ["{{baseUrl}}"], "path": ["user-roles"]}}, "description": "Assign role to user"},
+        {"name": "Get user-role by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-roles/:id", "host": ["{{baseUrl}}"], "path": ["user-roles", ":id"], "variable": [{"key": "id", "value": "{{userRoleId}}"}]}}, "description": "Get user-role by ID"},
+        {"name": "Update user-role (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"role_id\": \"{{roleId}}\",\n  \"is_active\": true\n}"}, "url": {"raw": "{{baseUrl}}/user-roles/:id", "host": ["{{baseUrl}}"], "path": ["user-roles", ":id"], "variable": [{"key": "id", "value": "{{userRoleId}}"}]}}, "description": "Full update user-role"},
+        {"name": "Update user-role (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"is_active\": false\n}"}, "url": {"raw": "{{baseUrl}}/user-roles/:id", "host": ["{{baseUrl}}"], "path": ["user-roles", ":id"], "variable": [{"key": "id", "value": "{{userRoleId}}"}]}}, "description": "Partial update user-role"},
+        {"name": "Delete user-role", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/user-roles/:id", "host": ["{{baseUrl}}"], "path": ["user-roles", ":id"], "variable": [{"key": "id", "value": "{{userRoleId}}"}]}}, "description": "Soft delete user-role"},
+        {"name": "Search user-roles", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-roles/search?q={{userId}}&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["user-roles", "search"], "query": [{"key": "q", "value": "{{userId}}"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search user-roles"},
+        {"name": "Bulk create user-roles", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"user_id\": \"{{userId}}\", \"role_id\": \"role1\"},\n    {\"user_id\": \"{{userId}}\", \"role_id\": \"role2\"}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/user-roles/bulk", "host": ["{{baseUrl}}"], "path": ["user-roles", "bulk"]}}, "description": "Bulk assign roles"},
+        {"name": "Upsert user-role", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"role_id\": \"{{roleId}}\"\n}"}, "url": {"raw": "{{baseUrl}}/user-roles/upsert", "host": ["{{baseUrl}}"], "path": ["user-roles", "upsert"]}}, "description": "Upsert user-role"},
+        {"name": "List deleted user-roles", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-roles/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["user-roles", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted user-roles"},
+        {"name": "Restore user-role", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/user-roles/:id/restore", "host": ["{{baseUrl}}"], "path": ["user-roles", ":id", "restore"], "variable": [{"key": "id", "value": "{{userRoleId}}"}]}}, "description": "Restore user-role"},
+        {"name": "Empty user-roles trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/user-roles/trash", "host": ["{{baseUrl}}"], "path": ["user-roles", "trash"]}}, "description": "Empty user-roles trash"}
+      ]
+    },
+    {
+      "name": "Role Permissions",
+      "description": "Role-Permission assignment entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List role-permissions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/role-permissions?page=1&limit=20&sort=-created_at", "host": ["{{baseUrl}}"], "path": ["role-permissions"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-created_at"}]}}, "description": "List all role-permission assignments"},
+        {"name": "Create role-permission", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"role_id\": \"{{roleId}}\",\n  \"permission_id\": \"{{permissionId}}\"\n}"}, "url": {"raw": "{{baseUrl}}/role-permissions", "host": ["{{baseUrl}}"], "path": ["role-permissions"]}}, "description": "Assign permission to role"},
+        {"name": "Get role-permission by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/role-permissions/:id", "host": ["{{baseUrl}}"], "path": ["role-permissions", ":id"], "variable": [{"key": "id", "value": "{{rolePermissionId}}"}]}}, "description": "Get role-permission by ID"},
+        {"name": "Update role-permission (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"role_id\": \"{{roleId}}\",\n  \"permission_id\": \"{{permissionId}}\",\n  \"is_active\": true\n}"}, "url": {"raw": "{{baseUrl}}/role-permissions/:id", "host": ["{{baseUrl}}"], "path": ["role-permissions", ":id"], "variable": [{"key": "id", "value": "{{rolePermissionId}}"}]}}, "description": "Full update role-permission"},
+        {"name": "Update role-permission (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"is_active\": false\n}"}, "url": {"raw": "{{baseUrl}}/role-permissions/:id", "host": ["{{baseUrl}}"], "path": ["role-permissions", ":id"], "variable": [{"key": "id", "value": "{{rolePermissionId}}"}]}}, "description": "Partial update role-permission"},
+        {"name": "Delete role-permission", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/role-permissions/:id", "host": ["{{baseUrl}}"], "path": ["role-permissions", ":id"], "variable": [{"key": "id", "value": "{{rolePermissionId}}"}]}}, "description": "Soft delete role-permission"},
+        {"name": "Search role-permissions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/role-permissions/search?q={{roleId}}&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["role-permissions", "search"], "query": [{"key": "q", "value": "{{roleId}}"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search role-permissions"},
+        {"name": "Bulk create role-permissions", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"role_id\": \"{{roleId}}\", \"permission_id\": \"perm1\"},\n    {\"role_id\": \"{{roleId}}\", \"permission_id\": \"perm2\"}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/role-permissions/bulk", "host": ["{{baseUrl}}"], "path": ["role-permissions", "bulk"]}}, "description": "Bulk assign permissions to role"},
+        {"name": "Upsert role-permission", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"role_id\": \"{{roleId}}\",\n  \"permission_id\": \"{{permissionId}}\"\n}"}, "url": {"raw": "{{baseUrl}}/role-permissions/upsert", "host": ["{{baseUrl}}"], "path": ["role-permissions", "upsert"]}}, "description": "Upsert role-permission"},
+        {"name": "List deleted role-permissions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/role-permissions/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["role-permissions", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted role-permissions"},
+        {"name": "Restore role-permission", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/role-permissions/:id/restore", "host": ["{{baseUrl}}"], "path": ["role-permissions", ":id", "restore"], "variable": [{"key": "id", "value": "{{rolePermissionId}}"}]}}, "description": "Restore role-permission"},
+        {"name": "Empty role-permissions trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/role-permissions/trash", "host": ["{{baseUrl}}"], "path": ["role-permissions", "trash"]}}, "description": "Empty role-permissions trash"}
+      ]
+    },
+    {
+      "name": "User Permissions",
+      "description": "User-Permission (direct grant) entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List user-permissions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-permissions?page=1&limit=20&sort=-created_at", "host": ["{{baseUrl}}"], "path": ["user-permissions"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-created_at"}]}}, "description": "List all user direct permissions"},
+        {"name": "Create user-permission", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"permission_id\": \"{{permissionId}}\",\n  \"reason\": \"Temporary access\",\n  \"expires_at\": \"2025-12-31T23:59:59Z\"\n}"}, "url": {"raw": "{{baseUrl}}/user-permissions", "host": ["{{baseUrl}}"], "path": ["user-permissions"]}}, "description": "Grant direct permission to user"},
+        {"name": "Get user-permission by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-permissions/:id", "host": ["{{baseUrl}}"], "path": ["user-permissions", ":id"], "variable": [{"key": "id", "value": "{{userPermissionId}}"}]}}, "description": "Get user-permission by ID"},
+        {"name": "Update user-permission (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"permission_id\": \"{{permissionId}}\",\n  \"reason\": \"Extended access\",\n  \"expires_at\": \"2026-06-30T23:59:59Z\"\n}"}, "url": {"raw": "{{baseUrl}}/user-permissions/:id", "host": ["{{baseUrl}}"], "path": ["user-permissions", ":id"], "variable": [{"key": "id", "value": "{{userPermissionId}}"}]}}, "description": "Full update user-permission"},
+        {"name": "Update user-permission (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"expires_at\": \"2026-12-31T23:59:59Z\"\n}"}, "url": {"raw": "{{baseUrl}}/user-permissions/:id", "host": ["{{baseUrl}}"], "path": ["user-permissions", ":id"], "variable": [{"key": "id", "value": "{{userPermissionId}}"}]}}, "description": "Partial update user-permission"},
+        {"name": "Delete user-permission", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/user-permissions/:id", "host": ["{{baseUrl}}"], "path": ["user-permissions", ":id"], "variable": [{"key": "id", "value": "{{userPermissionId}}"}]}}, "description": "Revoke user permission"},
+        {"name": "Search user-permissions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-permissions/search?q={{userId}}&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["user-permissions", "search"], "query": [{"key": "q", "value": "{{userId}}"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search user-permissions"},
+        {"name": "Bulk create user-permissions", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"user_id\": \"{{userId}}\", \"permission_id\": \"perm1\"},\n    {\"user_id\": \"{{userId}}\", \"permission_id\": \"perm2\"}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/user-permissions/bulk", "host": ["{{baseUrl}}"], "path": ["user-permissions", "bulk"]}}, "description": "Bulk grant permissions"},
+        {"name": "Upsert user-permission", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"permission_id\": \"{{permissionId}}\"\n}"}, "url": {"raw": "{{baseUrl}}/user-permissions/upsert", "host": ["{{baseUrl}}"], "path": ["user-permissions", "upsert"]}}, "description": "Upsert user-permission"},
+        {"name": "List deleted user-permissions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-permissions/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["user-permissions", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted user-permissions"},
+        {"name": "Restore user-permission", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/user-permissions/:id/restore", "host": ["{{baseUrl}}"], "path": ["user-permissions", ":id", "restore"], "variable": [{"key": "id", "value": "{{userPermissionId}}"}]}}, "description": "Restore user-permission"},
+        {"name": "Empty user-permissions trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/user-permissions/trash", "host": ["{{baseUrl}}"], "path": ["user-permissions", "trash"]}}, "description": "Empty user-permissions trash"}
+      ]
+    },
+    {
+      "name": "User Preferences",
+      "description": "User preference entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List user-preferences", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-preferences?page=1&limit=20&sort=-updated_at", "host": ["{{baseUrl}}"], "path": ["user-preferences"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-updated_at"}]}}, "description": "List all user preferences"},
+        {"name": "Create user-preference", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"theme\": \"dark\",\n  \"language\": \"en\",\n  \"timezone\": \"America/New_York\",\n  \"notifications_enabled\": true\n}"}, "url": {"raw": "{{baseUrl}}/user-preferences", "host": ["{{baseUrl}}"], "path": ["user-preferences"]}}, "description": "Create user preference"},
+        {"name": "Get user-preference by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-preferences/:id", "host": ["{{baseUrl}}"], "path": ["user-preferences", ":id"], "variable": [{"key": "id", "value": "{{userPreferenceId}}"}]}}, "description": "Get user-preference by ID"},
+        {"name": "Update user-preference (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"theme\": \"light\",\n  \"language\": \"es\",\n  \"timezone\": \"Europe/London\",\n  \"notifications_enabled\": false\n}"}, "url": {"raw": "{{baseUrl}}/user-preferences/:id", "host": ["{{baseUrl}}"], "path": ["user-preferences", ":id"], "variable": [{"key": "id", "value": "{{userPreferenceId}}"}]}}, "description": "Full update user-preference"},
+        {"name": "Update user-preference (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"theme\": \"dark\"\n}"}, "url": {"raw": "{{baseUrl}}/user-preferences/:id", "host": ["{{baseUrl}}"], "path": ["user-preferences", ":id"], "variable": [{"key": "id", "value": "{{userPreferenceId}}"}]}}, "description": "Partial update user-preference"},
+        {"name": "Delete user-preference", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/user-preferences/:id", "host": ["{{baseUrl}}"], "path": ["user-preferences", ":id"], "variable": [{"key": "id", "value": "{{userPreferenceId}}"}]}}, "description": "Delete user-preference"},
+        {"name": "Search user-preferences", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-preferences/search?q=dark&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["user-preferences", "search"], "query": [{"key": "q", "value": "dark"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search user-preferences"},
+        {"name": "Bulk create user-preferences", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"user_id\": \"user1\", \"theme\": \"dark\", \"language\": \"en\"},\n    {\"user_id\": \"user2\", \"theme\": \"light\", \"language\": \"es\"}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/user-preferences/bulk", "host": ["{{baseUrl}}"], "path": ["user-preferences", "bulk"]}}, "description": "Bulk create user-preferences"},
+        {"name": "Upsert user-preference", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"theme\": \"dark\",\n  \"language\": \"en\"\n}"}, "url": {"raw": "{{baseUrl}}/user-preferences/upsert", "host": ["{{baseUrl}}"], "path": ["user-preferences", "upsert"]}}, "description": "Upsert user-preference"},
+        {"name": "List deleted user-preferences", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-preferences/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["user-preferences", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted user-preferences"},
+        {"name": "Restore user-preference", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/user-preferences/:id/restore", "host": ["{{baseUrl}}"], "path": ["user-preferences", ":id", "restore"], "variable": [{"key": "id", "value": "{{userPreferenceId}}"}]}}, "description": "Restore user-preference"},
+        {"name": "Empty user-preferences trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/user-preferences/trash", "host": ["{{baseUrl}}"], "path": ["user-preferences", "trash"]}}, "description": "Empty user-preferences trash"}
+      ]
+    },
+    {
+      "name": "User Settings",
+      "description": "User settings entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List user-settings", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-settings?page=1&limit=20&sort=-updated_at", "host": ["{{baseUrl}}"], "path": ["user-settings"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-updated_at"}]}}, "description": "List all user settings"},
+        {"name": "Create user-settings", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"key\": \"dashboard_layout\",\n  \"value\": \"grid\",\n  \"category\": \"ui\"\n}"}, "url": {"raw": "{{baseUrl}}/user-settings", "host": ["{{baseUrl}}"], "path": ["user-settings"]}}, "description": "Create user settings"},
+        {"name": "Get user-settings by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-settings/:id", "host": ["{{baseUrl}}"], "path": ["user-settings", ":id"], "variable": [{"key": "id", "value": "{{userSettingsId}}"}]}}, "description": "Get user-settings by ID"},
+        {"name": "Update user-settings (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"key\": \"dashboard_layout\",\n  \"value\": \"list\",\n  \"category\": \"ui\"\n}"}, "url": {"raw": "{{baseUrl}}/user-settings/:id", "host": ["{{baseUrl}}"], "path": ["user-settings", ":id"], "variable": [{"key": "id", "value": "{{userSettingsId}}"}]}}, "description": "Full update user-settings"},
+        {"name": "Update user-settings (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"value\": \"compact\"\n}"}, "url": {"raw": "{{baseUrl}}/user-settings/:id", "host": ["{{baseUrl}}"], "path": ["user-settings", ":id"], "variable": [{"key": "id", "value": "{{userSettingsId}}"}]}}, "description": "Partial update user-settings"},
+        {"name": "Delete user-settings", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/user-settings/:id", "host": ["{{baseUrl}}"], "path": ["user-settings", ":id"], "variable": [{"key": "id", "value": "{{userSettingsId}}"}]}}, "description": "Delete user-settings"},
+        {"name": "Search user-settings", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-settings/search?q=dashboard&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["user-settings", "search"], "query": [{"key": "q", "value": "dashboard"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search user-settings"},
+        {"name": "Bulk create user-settings", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"user_id\": \"{{userId}}\", \"key\": \"setting1\", \"value\": \"val1\"},\n    {\"user_id\": \"{{userId}}\", \"key\": \"setting2\", \"value\": \"val2\"}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/user-settings/bulk", "host": ["{{baseUrl}}"], "path": ["user-settings", "bulk"]}}, "description": "Bulk create user-settings"},
+        {"name": "Upsert user-settings", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"key\": \"dashboard_layout\",\n  \"value\": \"grid\"\n}"}, "url": {"raw": "{{baseUrl}}/user-settings/upsert", "host": ["{{baseUrl}}"], "path": ["user-settings", "upsert"]}}, "description": "Upsert user-settings"},
+        {"name": "List deleted user-settings", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-settings/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["user-settings", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted user-settings"},
+        {"name": "Restore user-settings", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/user-settings/:id/restore", "host": ["{{baseUrl}}"], "path": ["user-settings", ":id", "restore"], "variable": [{"key": "id", "value": "{{userSettingsId}}"}]}}, "description": "Restore user-settings"},
+        {"name": "Empty user-settings trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/user-settings/trash", "host": ["{{baseUrl}}"], "path": ["user-settings", "trash"]}}, "description": "Empty user-settings trash"}
+      ]
+    },
+    {
+      "name": "User Sessions",
+      "description": "User session entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List user-sessions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-sessions?page=1&limit=20&sort=-created_at", "host": ["{{baseUrl}}"], "path": ["user-sessions"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-created_at"}]}}, "description": "List all user sessions"},
+        {"name": "Create user-session", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"session_id\": \"{{sessionId}}\",\n  \"device_type\": \"desktop\",\n  \"device_name\": \"Chrome on Windows\",\n  \"ip_address\": \"192.168.1.1\"\n}"}, "url": {"raw": "{{baseUrl}}/user-sessions", "host": ["{{baseUrl}}"], "path": ["user-sessions"]}}, "description": "Create user session"},
+        {"name": "Get user-session by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-sessions/:id", "host": ["{{baseUrl}}"], "path": ["user-sessions", ":id"], "variable": [{"key": "id", "value": "{{userSessionId}}"}]}}, "description": "Get user-session by ID"},
+        {"name": "Update user-session (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"is_active\": false,\n  \"ended_at\": \"2025-11-21T12:00:00Z\"\n}"}, "url": {"raw": "{{baseUrl}}/user-sessions/:id", "host": ["{{baseUrl}}"], "path": ["user-sessions", ":id"], "variable": [{"key": "id", "value": "{{userSessionId}}"}]}}, "description": "Full update user-session"},
+        {"name": "Update user-session (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"is_active\": false\n}"}, "url": {"raw": "{{baseUrl}}/user-sessions/:id", "host": ["{{baseUrl}}"], "path": ["user-sessions", ":id"], "variable": [{"key": "id", "value": "{{userSessionId}}"}]}}, "description": "Partial update user-session"},
+        {"name": "Delete user-session", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/user-sessions/:id", "host": ["{{baseUrl}}"], "path": ["user-sessions", ":id"], "variable": [{"key": "id", "value": "{{userSessionId}}"}]}}, "description": "Delete user-session"},
+        {"name": "Search user-sessions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-sessions/search?q=desktop&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["user-sessions", "search"], "query": [{"key": "q", "value": "desktop"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search user-sessions"},
+        {"name": "Bulk create user-sessions", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"user_id\": \"{{userId}}\", \"device_type\": \"desktop\"},\n    {\"user_id\": \"{{userId}}\", \"device_type\": \"mobile\"}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/user-sessions/bulk", "host": ["{{baseUrl}}"], "path": ["user-sessions", "bulk"]}}, "description": "Bulk create user-sessions"},
+        {"name": "Upsert user-session", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"device_type\": \"desktop\"\n}"}, "url": {"raw": "{{baseUrl}}/user-sessions/upsert", "host": ["{{baseUrl}}"], "path": ["user-sessions", "upsert"]}}, "description": "Upsert user-session"},
+        {"name": "List deleted user-sessions", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-sessions/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["user-sessions", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted user-sessions"},
+        {"name": "Restore user-session", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/user-sessions/:id/restore", "host": ["{{baseUrl}}"], "path": ["user-sessions", ":id", "restore"], "variable": [{"key": "id", "value": "{{userSessionId}}"}]}}, "description": "Restore user-session"},
+        {"name": "Empty user-sessions trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/user-sessions/trash", "host": ["{{baseUrl}}"], "path": ["user-sessions", "trash"]}}, "description": "Empty user-sessions trash"}
+      ]
+    },
+    {
+      "name": "User Security Events",
+      "description": "User security event entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List user-security-events", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-security-events?page=1&limit=20&sort=-created_at", "host": ["{{baseUrl}}"], "path": ["user-security-events"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-created_at"}]}}, "description": "List all security events"},
+        {"name": "Create user-security-event", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"event_type\": \"LOGIN_ATTEMPT\",\n  \"ip_address\": \"192.168.1.1\",\n  \"user_agent\": \"Mozilla/5.0\",\n  \"success\": true\n}"}, "url": {"raw": "{{baseUrl}}/user-security-events", "host": ["{{baseUrl}}"], "path": ["user-security-events"]}}, "description": "Create security event"},
+        {"name": "Get user-security-event by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-security-events/:id", "host": ["{{baseUrl}}"], "path": ["user-security-events", ":id"], "variable": [{"key": "id", "value": "{{userSecurityEventId}}"}]}}, "description": "Get security event by ID"},
+        {"name": "Update user-security-event (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"reviewed\": true,\n  \"reviewed_by\": \"admin\",\n  \"review_notes\": \"Verified\"\n}"}, "url": {"raw": "{{baseUrl}}/user-security-events/:id", "host": ["{{baseUrl}}"], "path": ["user-security-events", ":id"], "variable": [{"key": "id", "value": "{{userSecurityEventId}}"}]}}, "description": "Full update security event"},
+        {"name": "Update user-security-event (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"reviewed\": true\n}"}, "url": {"raw": "{{baseUrl}}/user-security-events/:id", "host": ["{{baseUrl}}"], "path": ["user-security-events", ":id"], "variable": [{"key": "id", "value": "{{userSecurityEventId}}"}]}}, "description": "Partial update security event"},
+        {"name": "Delete user-security-event", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/user-security-events/:id", "host": ["{{baseUrl}}"], "path": ["user-security-events", ":id"], "variable": [{"key": "id", "value": "{{userSecurityEventId}}"}]}}, "description": "Delete security event"},
+        {"name": "Search user-security-events", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-security-events/search?q=LOGIN&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["user-security-events", "search"], "query": [{"key": "q", "value": "LOGIN"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search security events"},
+        {"name": "Bulk create user-security-events", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"user_id\": \"{{userId}}\", \"event_type\": \"LOGIN\", \"success\": true},\n    {\"user_id\": \"{{userId}}\", \"event_type\": \"LOGOUT\", \"success\": true}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/user-security-events/bulk", "host": ["{{baseUrl}}"], "path": ["user-security-events", "bulk"]}}, "description": "Bulk create security events"},
+        {"name": "Upsert user-security-event", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"event_type\": \"LOGIN_ATTEMPT\",\n  \"success\": true\n}"}, "url": {"raw": "{{baseUrl}}/user-security-events/upsert", "host": ["{{baseUrl}}"], "path": ["user-security-events", "upsert"]}}, "description": "Upsert security event"},
+        {"name": "List deleted user-security-events", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/user-security-events/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["user-security-events", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted security events"},
+        {"name": "Restore user-security-event", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/user-security-events/:id/restore", "host": ["{{baseUrl}}"], "path": ["user-security-events", ":id", "restore"], "variable": [{"key": "id", "value": "{{userSecurityEventId}}"}]}}, "description": "Restore security event"},
+        {"name": "Empty user-security-events trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/user-security-events/trash", "host": ["{{baseUrl}}"], "path": ["user-security-events", "trash"]}}, "description": "Empty security events trash"}
+      ]
+    },
+    {
+      "name": "MFA Devices",
+      "description": "MFA device entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List mfa-devices", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/mfa-devices?page=1&limit=20&sort=-created_at", "host": ["{{baseUrl}}"], "path": ["mfa-devices"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-created_at"}]}}, "description": "List all MFA devices"},
+        {"name": "Create mfa-device", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"device_type\": \"TOTP\",\n  \"device_name\": \"Google Authenticator\",\n  \"secret_key\": \"JBSWY3DPEHPK3PXP\",\n  \"is_primary\": true\n}"}, "url": {"raw": "{{baseUrl}}/mfa-devices", "host": ["{{baseUrl}}"], "path": ["mfa-devices"]}}, "description": "Register MFA device"},
+        {"name": "Get mfa-device by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/mfa-devices/:id", "host": ["{{baseUrl}}"], "path": ["mfa-devices", ":id"], "variable": [{"key": "id", "value": "{{mfaDeviceId}}"}]}}, "description": "Get MFA device by ID"},
+        {"name": "Update mfa-device (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"device_name\": \"Primary Authenticator\",\n  \"is_verified\": true,\n  \"is_primary\": true\n}"}, "url": {"raw": "{{baseUrl}}/mfa-devices/:id", "host": ["{{baseUrl}}"], "path": ["mfa-devices", ":id"], "variable": [{"key": "id", "value": "{{mfaDeviceId}}"}]}}, "description": "Full update MFA device"},
+        {"name": "Update mfa-device (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"is_verified\": true\n}"}, "url": {"raw": "{{baseUrl}}/mfa-devices/:id", "host": ["{{baseUrl}}"], "path": ["mfa-devices", ":id"], "variable": [{"key": "id", "value": "{{mfaDeviceId}}"}]}}, "description": "Partial update MFA device"},
+        {"name": "Delete mfa-device", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/mfa-devices/:id", "host": ["{{baseUrl}}"], "path": ["mfa-devices", ":id"], "variable": [{"key": "id", "value": "{{mfaDeviceId}}"}]}}, "description": "Delete MFA device"},
+        {"name": "Search mfa-devices", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/mfa-devices/search?q=TOTP&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["mfa-devices", "search"], "query": [{"key": "q", "value": "TOTP"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search MFA devices"},
+        {"name": "Bulk create mfa-devices", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"user_id\": \"{{userId}}\", \"device_type\": \"TOTP\", \"device_name\": \"Authenticator 1\"},\n    {\"user_id\": \"{{userId}}\", \"device_type\": \"SMS\", \"device_name\": \"Phone\"}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/mfa-devices/bulk", "host": ["{{baseUrl}}"], "path": ["mfa-devices", "bulk"]}}, "description": "Bulk register MFA devices"},
+        {"name": "Upsert mfa-device", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"device_type\": \"TOTP\",\n  \"device_name\": \"Google Authenticator\"\n}"}, "url": {"raw": "{{baseUrl}}/mfa-devices/upsert", "host": ["{{baseUrl}}"], "path": ["mfa-devices", "upsert"]}}, "description": "Upsert MFA device"},
+        {"name": "List deleted mfa-devices", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/mfa-devices/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["mfa-devices", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted MFA devices"},
+        {"name": "Restore mfa-device", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/mfa-devices/:id/restore", "host": ["{{baseUrl}}"], "path": ["mfa-devices", ":id", "restore"], "variable": [{"key": "id", "value": "{{mfaDeviceId}}"}]}}, "description": "Restore MFA device"},
+        {"name": "Empty mfa-devices trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/mfa-devices/trash", "host": ["{{baseUrl}}"], "path": ["mfa-devices", "trash"]}}, "description": "Empty MFA devices trash"}
+      ]
+    },
+    {
+      "name": "Password Reset Tokens",
+      "description": "Password reset token entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List password-reset-tokens", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/password-reset-tokens?page=1&limit=20&sort=-created_at", "host": ["{{baseUrl}}"], "path": ["password-reset-tokens"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-created_at"}]}}, "description": "List all password reset tokens"},
+        {"name": "Create password-reset-token", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"email\": \"user@example.com\",\n  \"token\": \"secure_random_token\",\n  \"expires_at\": \"2025-11-22T12:00:00Z\"\n}"}, "url": {"raw": "{{baseUrl}}/password-reset-tokens", "host": ["{{baseUrl}}"], "path": ["password-reset-tokens"]}}, "description": "Create password reset token"},
+        {"name": "Get password-reset-token by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/password-reset-tokens/:id", "host": ["{{baseUrl}}"], "path": ["password-reset-tokens", ":id"], "variable": [{"key": "id", "value": "{{passwordResetTokenId}}"}]}}, "description": "Get token by ID"},
+        {"name": "Update password-reset-token (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"used\": true,\n  \"used_at\": \"2025-11-21T12:00:00Z\"\n}"}, "url": {"raw": "{{baseUrl}}/password-reset-tokens/:id", "host": ["{{baseUrl}}"], "path": ["password-reset-tokens", ":id"], "variable": [{"key": "id", "value": "{{passwordResetTokenId}}"}]}}, "description": "Full update token"},
+        {"name": "Update password-reset-token (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"used\": true\n}"}, "url": {"raw": "{{baseUrl}}/password-reset-tokens/:id", "host": ["{{baseUrl}}"], "path": ["password-reset-tokens", ":id"], "variable": [{"key": "id", "value": "{{passwordResetTokenId}}"}]}}, "description": "Partial update token"},
+        {"name": "Delete password-reset-token", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/password-reset-tokens/:id", "host": ["{{baseUrl}}"], "path": ["password-reset-tokens", ":id"], "variable": [{"key": "id", "value": "{{passwordResetTokenId}}"}]}}, "description": "Delete token"},
+        {"name": "Search password-reset-tokens", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/password-reset-tokens/search?q=example.com&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["password-reset-tokens", "search"], "query": [{"key": "q", "value": "example.com"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search tokens"},
+        {"name": "Bulk create password-reset-tokens", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"user_id\": \"user1\", \"email\": \"user1@example.com\", \"token\": \"token1\"},\n    {\"user_id\": \"user2\", \"email\": \"user2@example.com\", \"token\": \"token2\"}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/password-reset-tokens/bulk", "host": ["{{baseUrl}}"], "path": ["password-reset-tokens", "bulk"]}}, "description": "Bulk create tokens"},
+        {"name": "Upsert password-reset-token", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"email\": \"user@example.com\",\n  \"token\": \"new_token\"\n}"}, "url": {"raw": "{{baseUrl}}/password-reset-tokens/upsert", "host": ["{{baseUrl}}"], "path": ["password-reset-tokens", "upsert"]}}, "description": "Upsert token"},
+        {"name": "List deleted password-reset-tokens", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/password-reset-tokens/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["password-reset-tokens", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted tokens"},
+        {"name": "Restore password-reset-token", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/password-reset-tokens/:id/restore", "host": ["{{baseUrl}}"], "path": ["password-reset-tokens", ":id", "restore"], "variable": [{"key": "id", "value": "{{passwordResetTokenId}}"}]}}, "description": "Restore token"},
+        {"name": "Empty password-reset-tokens trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/password-reset-tokens/trash", "host": ["{{baseUrl}}"], "path": ["password-reset-tokens", "trash"]}}, "description": "Empty tokens trash"}
+      ]
+    },
+    {
+      "name": "Audit Logs",
+      "description": "Audit log entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List audit-logs", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/audit-logs?page=1&limit=20&sort=-created_at", "host": ["{{baseUrl}}"], "path": ["audit-logs"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-created_at"}]}}, "description": "List all audit logs"},
+        {"name": "Create audit-log", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"action\": \"USER_LOGIN\",\n  \"entity_type\": \"user\",\n  \"entity_id\": \"{{userId}}\",\n  \"ip_address\": \"192.168.1.1\",\n  \"details\": {\"method\": \"password\"}\n}"}, "url": {"raw": "{{baseUrl}}/audit-logs", "host": ["{{baseUrl}}"], "path": ["audit-logs"]}}, "description": "Create audit log"},
+        {"name": "Get audit-log by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/audit-logs/:id", "host": ["{{baseUrl}}"], "path": ["audit-logs", ":id"], "variable": [{"key": "id", "value": "{{auditLogId}}"}]}}, "description": "Get audit log by ID"},
+        {"name": "Update audit-log (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"reviewed\": true,\n  \"reviewed_by\": \"admin\"\n}"}, "url": {"raw": "{{baseUrl}}/audit-logs/:id", "host": ["{{baseUrl}}"], "path": ["audit-logs", ":id"], "variable": [{"key": "id", "value": "{{auditLogId}}"}]}}, "description": "Full update audit log"},
+        {"name": "Update audit-log (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"reviewed\": true\n}"}, "url": {"raw": "{{baseUrl}}/audit-logs/:id", "host": ["{{baseUrl}}"], "path": ["audit-logs", ":id"], "variable": [{"key": "id", "value": "{{auditLogId}}"}]}}, "description": "Partial update audit log"},
+        {"name": "Delete audit-log", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/audit-logs/:id", "host": ["{{baseUrl}}"], "path": ["audit-logs", ":id"], "variable": [{"key": "id", "value": "{{auditLogId}}"}]}}, "description": "Delete audit log"},
+        {"name": "Search audit-logs", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/audit-logs/search?q=LOGIN&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["audit-logs", "search"], "query": [{"key": "q", "value": "LOGIN"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search audit logs"},
+        {"name": "Bulk create audit-logs", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"user_id\": \"{{userId}}\", \"action\": \"LOGIN\", \"entity_type\": \"user\"},\n    {\"user_id\": \"{{userId}}\", \"action\": \"LOGOUT\", \"entity_type\": \"user\"}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/audit-logs/bulk", "host": ["{{baseUrl}}"], "path": ["audit-logs", "bulk"]}}, "description": "Bulk create audit logs"},
+        {"name": "Upsert audit-log", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"action\": \"USER_LOGIN\",\n  \"entity_type\": \"user\"\n}"}, "url": {"raw": "{{baseUrl}}/audit-logs/upsert", "host": ["{{baseUrl}}"], "path": ["audit-logs", "upsert"]}}, "description": "Upsert audit log"},
+        {"name": "List deleted audit-logs", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/audit-logs/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["audit-logs", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted audit logs"},
+        {"name": "Restore audit-log", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/audit-logs/:id/restore", "host": ["{{baseUrl}}"], "path": ["audit-logs", ":id", "restore"], "variable": [{"key": "id", "value": "{{auditLogId}}"}]}}, "description": "Restore audit log"},
+        {"name": "Empty audit-logs trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/audit-logs/trash", "host": ["{{baseUrl}}"], "path": ["audit-logs", "trash"]}}, "description": "Empty audit logs trash"}
+      ]
+    },
+    {
+      "name": "Policies",
+      "description": "Policy entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List policies", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/policies?page=1&limit=20&sort=-created_at", "host": ["{{baseUrl}}"], "path": ["policies"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-created_at"}]}}, "description": "List all policies"},
+        {"name": "Create policy", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"name\": \"read_documents\",\n  \"description\": \"Policy to read documents\",\n  \"effect\": \"ALLOW\",\n  \"actions\": [\"read\", \"list\"],\n  \"resources\": [\"documents/*\"],\n  \"is_active\": true\n}"}, "url": {"raw": "{{baseUrl}}/policies", "host": ["{{baseUrl}}"], "path": ["policies"]}}, "description": "Create policy"},
+        {"name": "Get policy by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/policies/:id", "host": ["{{baseUrl}}"], "path": ["policies", ":id"], "variable": [{"key": "id", "value": "{{policyId}}"}]}}, "description": "Get policy by ID"},
+        {"name": "Update policy (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"name\": \"read_all_documents\",\n  \"description\": \"Updated policy\",\n  \"effect\": \"ALLOW\",\n  \"actions\": [\"read\", \"list\", \"download\"],\n  \"resources\": [\"documents/*\"],\n  \"is_active\": true\n}"}, "url": {"raw": "{{baseUrl}}/policies/:id", "host": ["{{baseUrl}}"], "path": ["policies", ":id"], "variable": [{"key": "id", "value": "{{policyId}}"}]}}, "description": "Full update policy"},
+        {"name": "Update policy (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"is_active\": false\n}"}, "url": {"raw": "{{baseUrl}}/policies/:id", "host": ["{{baseUrl}}"], "path": ["policies", ":id"], "variable": [{"key": "id", "value": "{{policyId}}"}]}}, "description": "Partial update policy"},
+        {"name": "Delete policy", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/policies/:id", "host": ["{{baseUrl}}"], "path": ["policies", ":id"], "variable": [{"key": "id", "value": "{{policyId}}"}]}}, "description": "Delete policy"},
+        {"name": "Search policies", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/policies/search?q=documents&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["policies", "search"], "query": [{"key": "q", "value": "documents"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search policies"},
+        {"name": "Bulk create policies", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"name\": \"policy1\", \"effect\": \"ALLOW\", \"actions\": [\"read\"]},\n    {\"name\": \"policy2\", \"effect\": \"DENY\", \"actions\": [\"delete\"]}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/policies/bulk", "host": ["{{baseUrl}}"], "path": ["policies", "bulk"]}}, "description": "Bulk create policies"},
+        {"name": "Upsert policy", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"name\": \"read_documents\",\n  \"effect\": \"ALLOW\",\n  \"actions\": [\"read\"]\n}"}, "url": {"raw": "{{baseUrl}}/policies/upsert", "host": ["{{baseUrl}}"], "path": ["policies", "upsert"]}}, "description": "Upsert policy"},
+        {"name": "List deleted policies", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/policies/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["policies", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted policies"},
+        {"name": "Restore policy", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/policies/:id/restore", "host": ["{{baseUrl}}"], "path": ["policies", ":id", "restore"], "variable": [{"key": "id", "value": "{{policyId}}"}]}}, "description": "Restore policy"},
+        {"name": "Empty policies trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/policies/trash", "host": ["{{baseUrl}}"], "path": ["policies", "trash"]}}, "description": "Empty policies trash"}
+      ]
+    },
+    {
+      "name": "Policy Assignments",
+      "description": "Policy assignment entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List policy-assignments", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/policy-assignments?page=1&limit=20&sort=-created_at", "host": ["{{baseUrl}}"], "path": ["policy-assignments"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-created_at"}]}}, "description": "List all policy assignments"},
+        {"name": "Create policy-assignment", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"policy_id\": \"{{policyId}}\",\n  \"principal_type\": \"USER\",\n  \"principal_id\": \"{{userId}}\",\n  \"scope\": \"workspace:123\",\n  \"is_active\": true\n}"}, "url": {"raw": "{{baseUrl}}/policy-assignments", "host": ["{{baseUrl}}"], "path": ["policy-assignments"]}}, "description": "Create policy assignment"},
+        {"name": "Get policy-assignment by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/policy-assignments/:id", "host": ["{{baseUrl}}"], "path": ["policy-assignments", ":id"], "variable": [{"key": "id", "value": "{{policyAssignmentId}}"}]}}, "description": "Get policy assignment by ID"},
+        {"name": "Update policy-assignment (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"policy_id\": \"{{policyId}}\",\n  \"principal_type\": \"USER\",\n  \"principal_id\": \"{{userId}}\",\n  \"scope\": \"workspace:456\",\n  \"is_active\": true\n}"}, "url": {"raw": "{{baseUrl}}/policy-assignments/:id", "host": ["{{baseUrl}}"], "path": ["policy-assignments", ":id"], "variable": [{"key": "id", "value": "{{policyAssignmentId}}"}]}}, "description": "Full update policy assignment"},
+        {"name": "Update policy-assignment (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"is_active\": false\n}"}, "url": {"raw": "{{baseUrl}}/policy-assignments/:id", "host": ["{{baseUrl}}"], "path": ["policy-assignments", ":id"], "variable": [{"key": "id", "value": "{{policyAssignmentId}}"}]}}, "description": "Partial update policy assignment"},
+        {"name": "Delete policy-assignment", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/policy-assignments/:id", "host": ["{{baseUrl}}"], "path": ["policy-assignments", ":id"], "variable": [{"key": "id", "value": "{{policyAssignmentId}}"}]}}, "description": "Delete policy assignment"},
+        {"name": "Search policy-assignments", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/policy-assignments/search?q=workspace&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["policy-assignments", "search"], "query": [{"key": "q", "value": "workspace"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search policy assignments"},
+        {"name": "Bulk create policy-assignments", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"policy_id\": \"{{policyId}}\", \"principal_type\": \"USER\", \"principal_id\": \"user1\"},\n    {\"policy_id\": \"{{policyId}}\", \"principal_type\": \"USER\", \"principal_id\": \"user2\"}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/policy-assignments/bulk", "host": ["{{baseUrl}}"], "path": ["policy-assignments", "bulk"]}}, "description": "Bulk create policy assignments"},
+        {"name": "Upsert policy-assignment", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"policy_id\": \"{{policyId}}\",\n  \"principal_type\": \"USER\",\n  \"principal_id\": \"{{userId}}\"\n}"}, "url": {"raw": "{{baseUrl}}/policy-assignments/upsert", "host": ["{{baseUrl}}"], "path": ["policy-assignments", "upsert"]}}, "description": "Upsert policy assignment"},
+        {"name": "List deleted policy-assignments", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/policy-assignments/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["policy-assignments", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted policy assignments"},
+        {"name": "Restore policy-assignment", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/policy-assignments/:id/restore", "host": ["{{baseUrl}}"], "path": ["policy-assignments", ":id", "restore"], "variable": [{"key": "id", "value": "{{policyAssignmentId}}"}]}}, "description": "Restore policy assignment"},
+        {"name": "Empty policy-assignments trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/policy-assignments/trash", "host": ["{{baseUrl}}"], "path": ["policy-assignments", "trash"]}}, "description": "Empty policy assignments trash"}
+      ]
+    },
+    {
+      "name": "System Settings",
+      "description": "System settings entity CRUD operations (12 endpoints)",
+      "item": [
+        {"name": "List system-settings", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/system-settings?page=1&limit=20&sort=-updated_at", "host": ["{{baseUrl}}"], "path": ["system-settings"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "sort", "value": "-updated_at"}]}}, "description": "List all system settings"},
+        {"name": "Create system-settings", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"key\": \"max_login_attempts\",\n  \"value\": \"5\",\n  \"category\": \"security\",\n  \"description\": \"Max failed login attempts\",\n  \"is_editable\": true\n}"}, "url": {"raw": "{{baseUrl}}/system-settings", "host": ["{{baseUrl}}"], "path": ["system-settings"]}}, "description": "Create system settings"},
+        {"name": "Get system-settings by ID", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/system-settings/:id", "host": ["{{baseUrl}}"], "path": ["system-settings", ":id"], "variable": [{"key": "id", "value": "{{systemSettingsId}}"}]}}, "description": "Get system settings by ID"},
+        {"name": "Update system-settings (full)", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"key\": \"max_login_attempts\",\n  \"value\": \"3\",\n  \"category\": \"security\",\n  \"description\": \"Reduced to 3\",\n  \"is_editable\": true\n}"}, "url": {"raw": "{{baseUrl}}/system-settings/:id", "host": ["{{baseUrl}}"], "path": ["system-settings", ":id"], "variable": [{"key": "id", "value": "{{systemSettingsId}}"}]}}, "description": "Full update system settings"},
+        {"name": "Update system-settings (partial)", "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"value\": \"10\"\n}"}, "url": {"raw": "{{baseUrl}}/system-settings/:id", "host": ["{{baseUrl}}"], "path": ["system-settings", ":id"], "variable": [{"key": "id", "value": "{{systemSettingsId}}"}]}}, "description": "Partial update system settings"},
+        {"name": "Delete system-settings", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/system-settings/:id", "host": ["{{baseUrl}}"], "path": ["system-settings", ":id"], "variable": [{"key": "id", "value": "{{systemSettingsId}}"}]}}, "description": "Delete system settings"},
+        {"name": "Search system-settings", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/system-settings/search?q=security&page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["system-settings", "search"], "query": [{"key": "q", "value": "security"}, {"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "Search system settings"},
+        {"name": "Bulk create system-settings", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"items\": [\n    {\"key\": \"setting1\", \"value\": \"val1\", \"category\": \"general\"},\n    {\"key\": \"setting2\", \"value\": \"val2\", \"category\": \"security\"}\n  ]\n}"}, "url": {"raw": "{{baseUrl}}/system-settings/bulk", "host": ["{{baseUrl}}"], "path": ["system-settings", "bulk"]}}, "description": "Bulk create system settings"},
+        {"name": "Upsert system-settings", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"key\": \"max_login_attempts\",\n  \"value\": \"5\",\n  \"category\": \"security\"\n}"}, "url": {"raw": "{{baseUrl}}/system-settings/upsert", "host": ["{{baseUrl}}"], "path": ["system-settings", "upsert"]}}, "description": "Upsert system settings"},
+        {"name": "List deleted system-settings", "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/system-settings/trash?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["system-settings", "trash"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]}}, "description": "List deleted system settings"},
+        {"name": "Restore system-settings", "request": {"method": "POST", "header": [], "url": {"raw": "{{baseUrl}}/system-settings/:id/restore", "host": ["{{baseUrl}}"], "path": ["system-settings", ":id", "restore"], "variable": [{"key": "id", "value": "{{systemSettingsId}}"}]}}, "description": "Restore system settings"},
+        {"name": "Empty system-settings trash", "request": {"method": "DELETE", "header": [], "url": {"raw": "{{baseUrl}}/system-settings/trash", "host": ["{{baseUrl}}"], "path": ["system-settings", "trash"]}}, "description": "Empty system settings trash"}
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": ["if (!pm.variables.get(\"token\")) { console.log(\"Warning: No authentication token found.\"); }"]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": ["pm.test(\"Response time is less than 2000ms\", function () { pm.expect(pm.response.responseTime).to.be.below(2000); });"]
+      }
+    }
+  ]
+}

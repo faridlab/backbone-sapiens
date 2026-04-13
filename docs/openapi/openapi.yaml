@@ -1,0 +1,5252 @@
+openapi: 3.0.3
+info:
+  title: Sapiens User Management REST API
+  description: |
+    Comprehensive REST API for Sapiens User Management Service.
+
+    This API provides full CRUD operations for all user management entities including:
+    - User Management (CRUD + authentication)
+    - Role-Based Access Control (RBAC)
+    - Session Management
+    - Security Events and Audit Logging
+    - MFA Device Management
+    - Policy Management
+    - User Preferences and Settings
+    - System Settings
+
+    ## Authentication
+    All endpoints require JWT Bearer token authentication.
+
+    ## Base URL
+    - Development: `http://localhost:3003/api/v1`
+    - Production: `https://api.startapp.id/sapiens/api/v1`
+
+    ## Rate Limiting
+    - 100 requests per minute for GET operations
+    - 50 requests per minute for POST/PUT/PATCH operations
+    - 30 requests per minute for DELETE operations
+  version: 1.0.0
+  contact:
+    name: Sapiens API Support
+    email: support@startapp.id
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3003/api/v1
+    description: Development server
+  - url: https://api.startapp.id/sapiens/api/v1
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: Authentication operations (login, register, password reset)
+  - name: MFA
+    description: Multi-factor authentication setup and management
+  - name: Users
+    description: User management operations
+  - name: Sessions
+    description: Session management operations
+  - name: User Sessions
+    description: User-specific session management
+  - name: User Security Events
+    description: Security event tracking and monitoring
+  - name: MFA Devices
+    description: Multi-factor authentication device management
+  - name: Password Reset Tokens
+    description: Password reset token management
+  - name: Audit Logs
+    description: Audit log operations (read-only)
+  - name: Roles
+    description: Role management operations
+  - name: Permissions
+    description: Permission management operations
+  - name: Role-Permission Assignments
+    description: Assign and manage permissions for roles
+  - name: User-Role Assignments
+    description: Assign and manage roles for users
+  - name: User-Permission Grants
+    description: Grant direct permissions to users (Hybrid RBAC)
+  - name: Policies
+    description: Policy management operations
+  - name: Policy Assignments
+    description: Policy assignment management
+  - name: User Preferences
+    description: User preference management
+  - name: User Settings
+    description: User settings management
+  - name: System Settings
+    description: System-wide settings management
+
+security:
+  - BearerAuth: []
+
+paths:
+  # ============================================================================
+  # AUTHENTICATION ENDPOINTS (Public)
+  # ============================================================================
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: User login
+      description: Authenticate user with email/username and password
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email_or_username, password]
+              properties:
+                email_or_username:
+                  type: string
+                  description: Email address or username
+                  example: "user@example.com"
+                password:
+                  type: string
+                  format: password
+                  description: User password
+                  example: "SecurePass123!"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: User registration
+      description: Register a new user account
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /auth/refresh-token:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      description: Get a new access token using refresh token
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+                  description: Valid refresh token
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid or expired refresh token
+
+  /auth/forgot-password:
+    post:
+      tags: [Authentication]
+      summary: Request password reset
+      description: Send password reset email to user
+      operationId: forgotPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User email address
+      responses:
+        '200':
+          description: Password reset email sent (if account exists)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "If an account exists with this email, a reset link has been sent"
+
+  /auth/reset-password:
+    post:
+      tags: [Authentication]
+      summary: Reset password
+      description: Reset password using token from email
+      operationId: resetPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, new_password]
+              properties:
+                token:
+                  type: string
+                  description: Password reset token from email
+                new_password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  description: New password
+                confirm_password:
+                  type: string
+                  format: password
+                  description: Confirm new password
+      responses:
+        '200':
+          description: Password reset successful
+        '400':
+          description: Invalid or expired token
+
+  /auth/verify-email:
+    post:
+      tags: [Authentication]
+      summary: Verify email address
+      description: Verify user email using token
+      operationId: verifyEmail
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+                  description: Email verification token
+      responses:
+        '200':
+          description: Email verified successfully
+        '400':
+          description: Invalid or expired token
+
+  /auth/resend-verification:
+    post:
+      tags: [Authentication]
+      summary: Resend verification email
+      description: Resend email verification link
+      operationId: resendVerification
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Verification email sent
+
+  # ============================================================================
+  # PROTECTED AUTH ENDPOINTS
+  # ============================================================================
+  /auth/protected/logout:
+    post:
+      tags: [Authentication]
+      summary: User logout
+      description: Logout current session or all sessions
+      operationId: logout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session_id:
+                  type: string
+                  description: Specific session to logout (optional)
+                all_sessions:
+                  type: boolean
+                  default: false
+                  description: Logout from all sessions
+      responses:
+        '204':
+          description: Logout successful
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/protected/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user
+      description: Get currently authenticated user's information
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: Current user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ============================================================================
+  # MFA ENDPOINTS
+  # ============================================================================
+  /auth/mfa/setup:
+    post:
+      tags: [MFA]
+      summary: Setup MFA
+      description: Initialize MFA setup for current user
+      operationId: setupMfa
+      responses:
+        '200':
+          description: MFA setup initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  secret:
+                    type: string
+                    description: TOTP secret (base32 encoded)
+                  qr_code_url:
+                    type: string
+                    description: URL for QR code to scan with authenticator app
+                  instructions:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/mfa/verify:
+    post:
+      tags: [MFA]
+      summary: Verify MFA code
+      description: Verify TOTP code to complete MFA setup or authenticate
+      operationId: verifyMfa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [verification_code]
+              properties:
+                verification_code:
+                  type: string
+                  pattern: '^\d{6}$'
+                  description: 6-digit TOTP code
+      responses:
+        '200':
+          description: MFA verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  mfa_enabled:
+                    type: boolean
+        '400':
+          description: Invalid verification code
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/mfa/disable:
+    post:
+      tags: [MFA]
+      summary: Disable MFA
+      description: Disable MFA for current user
+      operationId: disableMfa
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  format: password
+                  description: Current password for verification
+                verification_code:
+                  type: string
+                  description: Current TOTP code
+      responses:
+        '200':
+          description: MFA disabled successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/mfa/devices:
+    get:
+      tags: [MFA]
+      summary: List MFA devices
+      description: List all MFA devices for current user
+      operationId: listMfaDevices
+      responses:
+        '200':
+          description: List of MFA devices
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  devices:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MfaDeviceResponse'
+                  total:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/mfa/devices/{deviceId}:
+    delete:
+      tags: [MFA]
+      summary: Remove MFA device
+      description: Remove an MFA device by ID
+      operationId: removeMfaDevice
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Device removed successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /auth/mfa/regenerate-backup:
+    post:
+      tags: [MFA]
+      summary: Regenerate backup codes
+      description: Generate new backup codes (invalidates old ones)
+      operationId: regenerateBackupCodes
+      responses:
+        '200':
+          description: Backup codes regenerated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  backup_codes:
+                    type: array
+                    items:
+                      type: string
+                    description: Array of 10 backup codes
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ============================================================================
+  # USERS ENDPOINTS
+  # ============================================================================
+  /users:
+    get:
+      tags: [Users]
+      summary: List all users
+      description: Retrieve a paginated list of all users in the system
+      operationId: listUsers
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Users]
+      summary: Create a new user
+      description: Create a new user with specified details
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /users/{userId}:
+    get:
+      tags: [Users]
+      summary: Get user by ID
+      description: Retrieve detailed information about a specific user
+      operationId: getUserById
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [Users]
+      summary: Update user
+      description: Update an existing user's information
+      operationId: updateUser
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags: [Users]
+      summary: Delete user
+      description: Delete a user from the system (soft delete)
+      operationId: deleteUser
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '204':
+          description: User deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /users/search:
+    get:
+      tags: [Users]
+      summary: Search users
+      description: Search users by username, email, or name
+      operationId: searchUsers
+      parameters:
+        - name: q
+          in: query
+          description: Search query string
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: status
+          in: query
+          description: Filter by user status
+          schema:
+            type: string
+            enum: [active, inactive, suspended]
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /users/{userId}:
+    patch:
+      tags: [Users]
+      summary: Partial update user (PATCH)
+      description: Update specific fields of a user
+      operationId: partialUpdateUser
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartialUpdateUserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /users/bulk:
+    post:
+      tags: [Users]
+      summary: Bulk create users
+      description: Create multiple users in a single request
+      operationId: bulkCreateUsers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkCreateUsersRequest'
+      responses:
+        '201':
+          description: Users created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkCreateUsersResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /users/upsert:
+    post:
+      tags: [Users]
+      summary: Upsert user
+      description: Update existing user or create new one
+      operationId: upsertUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertUserRequest'
+      responses:
+        '200':
+          description: User upserted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertUserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /users/trash:
+    get:
+      tags: [Users]
+      summary: List deleted users
+      description: Retrieve soft-deleted users from trash
+      operationId: listDeletedUsers
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Successfully retrieved deleted users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    delete:
+      tags: [Users]
+      summary: Empty trash
+      description: Permanently delete all soft-deleted users
+      operationId: emptyUsersTrash
+      parameters:
+        - name: before
+          in: query
+          description: Delete items deleted before this timestamp
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Trash emptied successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyTrashResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /users/{userId}/restore:
+    post:
+      tags: [Users]
+      summary: Restore deleted user
+      description: Restore a soft-deleted user from trash
+      operationId: restoreUser
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: User restored successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestoreUserResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: User is not deleted
+
+  # ============================================================================
+  # SESSIONS ENDPOINTS
+  # ============================================================================
+  /sessions:
+    get:
+      tags: [Sessions]
+      summary: List all sessions
+      description: Retrieve a paginated list of all active sessions in the system
+      operationId: listSessions
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Sessions]
+      summary: Create a new session
+      description: Create a new session for a user
+      operationId: createSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+      responses:
+        '201':
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /sessions/{sessionId}:
+    get:
+      tags: [Sessions]
+      summary: Get session by ID
+      description: Retrieve detailed information about a specific session
+      operationId: getSessionById
+      parameters:
+        - $ref: '#/components/parameters/SessionIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [Sessions]
+      summary: Update session
+      description: Update an existing session's information
+      operationId: updateSession
+      parameters:
+        - $ref: '#/components/parameters/SessionIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSessionRequest'
+      responses:
+        '200':
+          description: Session updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags: [Sessions]
+      summary: Delete session
+      description: Invalidate and delete a session
+      operationId: deleteSession
+      parameters:
+        - $ref: '#/components/parameters/SessionIdParam'
+      responses:
+        '204':
+          description: Session deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /sessions/search:
+    get:
+      tags: [Sessions]
+      summary: Search sessions
+      description: Search sessions by user ID, IP address, or device info
+      operationId: searchSessions
+      parameters:
+        - name: q
+          in: query
+          description: Search query string
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: is_active
+          in: query
+          description: Filter by active status
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ============================================================================
+  # USER SESSIONS ENDPOINTS
+  # ============================================================================
+  /user-sessions:
+    get:
+      tags: [User Sessions]
+      summary: List all user sessions
+      description: Retrieve a paginated list of all user session associations
+      operationId: listUserSessions
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved user sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSessionListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [User Sessions]
+      summary: Create a new user session
+      description: Create a new user session association
+      operationId: createUserSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserSessionRequest'
+      responses:
+        '201':
+          description: User session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSessionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /user-sessions/{userSessionId}:
+    get:
+      tags: [User Sessions]
+      summary: Get user session by ID
+      description: Retrieve detailed information about a specific user session
+      operationId: getUserSessionById
+      parameters:
+        - $ref: '#/components/parameters/UserSessionIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved user session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSessionResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [User Sessions]
+      summary: Update user session
+      description: Update an existing user session
+      operationId: updateUserSession
+      parameters:
+        - $ref: '#/components/parameters/UserSessionIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserSessionRequest'
+      responses:
+        '200':
+          description: User session updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSessionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags: [User Sessions]
+      summary: Delete user session
+      description: Delete a user session association
+      operationId: deleteUserSession
+      parameters:
+        - $ref: '#/components/parameters/UserSessionIdParam'
+      responses:
+        '204':
+          description: User session deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /user-sessions/search:
+    get:
+      tags: [User Sessions]
+      summary: Search user sessions
+      description: Search user sessions by user ID or session ID
+      operationId: searchUserSessions
+      parameters:
+        - name: q
+          in: query
+          description: Search query string
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: user_id
+          in: query
+          description: Filter by user ID
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSessionListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ============================================================================
+  # USER SECURITY EVENTS ENDPOINTS
+  # ============================================================================
+  /user-security-events:
+    get:
+      tags: [User Security Events]
+      summary: List all user security events
+      description: Retrieve a paginated list of all user security events
+      operationId: listUserSecurityEvents
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved security events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSecurityEventListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [User Security Events]
+      summary: Create a new security event
+      description: Record a new user security event
+      operationId: createUserSecurityEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserSecurityEventRequest'
+      responses:
+        '201':
+          description: Security event created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSecurityEventResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /user-security-events/{eventId}:
+    get:
+      tags: [User Security Events]
+      summary: Get security event by ID
+      description: Retrieve detailed information about a specific security event
+      operationId: getUserSecurityEventById
+      parameters:
+        - $ref: '#/components/parameters/SecurityEventIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved security event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSecurityEventResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [User Security Events]
+      summary: Update security event
+      description: Update an existing security event
+      operationId: updateUserSecurityEvent
+      parameters:
+        - $ref: '#/components/parameters/SecurityEventIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserSecurityEventRequest'
+      responses:
+        '200':
+          description: Security event updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSecurityEventResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags: [User Security Events]
+      summary: Delete security event
+      description: Delete a security event
+      operationId: deleteUserSecurityEvent
+      parameters:
+        - $ref: '#/components/parameters/SecurityEventIdParam'
+      responses:
+        '204':
+          description: Security event deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /user-security-events/search:
+    get:
+      tags: [User Security Events]
+      summary: Search security events
+      description: Search security events by user ID, event type, or IP address
+      operationId: searchUserSecurityEvents
+      parameters:
+        - name: q
+          in: query
+          description: Search query string
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: event_type
+          in: query
+          description: Filter by event type
+          schema:
+            type: string
+            enum: [login_success, login_failure, logout, password_change, mfa_enabled, mfa_disabled, suspicious_activity]
+        - name: user_id
+          in: query
+          description: Filter by user ID
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSecurityEventListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ============================================================================
+  # MFA DEVICES ENDPOINTS
+  # ============================================================================
+  /mfa-devices:
+    get:
+      tags: [MFA Devices]
+      summary: List all MFA devices
+      description: Retrieve a paginated list of all MFA devices
+      operationId: listMfaDevices
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved MFA devices
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MfaDeviceListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [MFA Devices]
+      summary: Register a new MFA device
+      description: Register a new MFA device for a user
+      operationId: createMfaDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMfaDeviceRequest'
+      responses:
+        '201':
+          description: MFA device registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MfaDeviceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /mfa-devices/{deviceId}:
+    get:
+      tags: [MFA Devices]
+      summary: Get MFA device by ID
+      description: Retrieve detailed information about a specific MFA device
+      operationId: getMfaDeviceById
+      parameters:
+        - $ref: '#/components/parameters/MfaDeviceIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved MFA device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MfaDeviceResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [MFA Devices]
+      summary: Update MFA device
+      description: Update an existing MFA device
+      operationId: updateMfaDevice
+      parameters:
+        - $ref: '#/components/parameters/MfaDeviceIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMfaDeviceRequest'
+      responses:
+        '200':
+          description: MFA device updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MfaDeviceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags: [MFA Devices]
+      summary: Delete MFA device
+      description: Remove an MFA device from a user's account
+      operationId: deleteMfaDevice
+      parameters:
+        - $ref: '#/components/parameters/MfaDeviceIdParam'
+      responses:
+        '204':
+          description: MFA device deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /mfa-devices/search:
+    get:
+      tags: [MFA Devices]
+      summary: Search MFA devices
+      description: Search MFA devices by user ID, device type, or name
+      operationId: searchMfaDevices
+      parameters:
+        - name: q
+          in: query
+          description: Search query string
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: device_type
+          in: query
+          description: Filter by device type
+          schema:
+            type: string
+            enum: [totp, sms, email, hardware_key]
+        - name: user_id
+          in: query
+          description: Filter by user ID
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MfaDeviceListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ============================================================================
+  # PASSWORD RESET TOKENS ENDPOINTS
+  # ============================================================================
+  /password-reset-tokens:
+    get:
+      tags: [Password Reset Tokens]
+      summary: List all password reset tokens
+      description: Retrieve a paginated list of all password reset tokens
+      operationId: listPasswordResetTokens
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved password reset tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetTokenListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Password Reset Tokens]
+      summary: Create a new password reset token
+      description: Generate a new password reset token for a user
+      operationId: createPasswordResetToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePasswordResetTokenRequest'
+      responses:
+        '201':
+          description: Password reset token created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetTokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /password-reset-tokens/{tokenId}:
+    get:
+      tags: [Password Reset Tokens]
+      summary: Get password reset token by ID
+      description: Retrieve detailed information about a specific password reset token
+      operationId: getPasswordResetTokenById
+      parameters:
+        - $ref: '#/components/parameters/PasswordResetTokenIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved password reset token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetTokenResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [Password Reset Tokens]
+      summary: Update password reset token
+      description: Update an existing password reset token
+      operationId: updatePasswordResetToken
+      parameters:
+        - $ref: '#/components/parameters/PasswordResetTokenIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePasswordResetTokenRequest'
+      responses:
+        '200':
+          description: Password reset token updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetTokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags: [Password Reset Tokens]
+      summary: Delete password reset token
+      description: Invalidate and delete a password reset token
+      operationId: deletePasswordResetToken
+      parameters:
+        - $ref: '#/components/parameters/PasswordResetTokenIdParam'
+      responses:
+        '204':
+          description: Password reset token deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /password-reset-tokens/search:
+    get:
+      tags: [Password Reset Tokens]
+      summary: Search password reset tokens
+      description: Search password reset tokens by user ID or status
+      operationId: searchPasswordResetTokens
+      parameters:
+        - name: q
+          in: query
+          description: Search query string
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: user_id
+          in: query
+          description: Filter by user ID
+          schema:
+            type: string
+            format: uuid
+        - name: is_used
+          in: query
+          description: Filter by used status
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetTokenListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ============================================================================
+  # AUDIT LOGS ENDPOINTS (Read-Only)
+  # ============================================================================
+  /audit-logs:
+    get:
+      tags: [Audit Logs]
+      summary: List all audit logs
+      description: Retrieve a paginated list of all audit logs
+      operationId: listAuditLogs
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved audit logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Audit Logs]
+      summary: Create a new audit log
+      description: Record a new audit log entry
+      operationId: createAuditLog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAuditLogRequest'
+      responses:
+        '201':
+          description: Audit log created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /audit-logs/{logId}:
+    get:
+      tags: [Audit Logs]
+      summary: Get audit log by ID
+      description: Retrieve detailed information about a specific audit log entry
+      operationId: getAuditLogById
+      parameters:
+        - $ref: '#/components/parameters/AuditLogIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved audit log
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [Audit Logs]
+      summary: Update audit log
+      description: Update an existing audit log entry (for adding notes only)
+      operationId: updateAuditLog
+      parameters:
+        - $ref: '#/components/parameters/AuditLogIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAuditLogRequest'
+      responses:
+        '200':
+          description: Audit log updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /audit-logs/search:
+    get:
+      tags: [Audit Logs]
+      summary: Search audit logs
+      description: Search audit logs by action, user ID, or resource type
+      operationId: searchAuditLogs
+      parameters:
+        - name: q
+          in: query
+          description: Search query string
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: action
+          in: query
+          description: Filter by action type
+          schema:
+            type: string
+            enum: [create, read, update, delete, login, logout, export]
+        - name: user_id
+          in: query
+          description: Filter by user ID
+          schema:
+            type: string
+            format: uuid
+        - name: resource_type
+          in: query
+          description: Filter by resource type
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ============================================================================
+  # ROLES ENDPOINTS
+  # ============================================================================
+  /roles:
+    get:
+      tags: [Roles]
+      summary: List all roles
+      description: Retrieve a paginated list of all roles in the system
+      operationId: listRoles
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved roles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Roles]
+      summary: Create a new role
+      description: Create a new role with specified name and description
+      operationId: createRole
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoleRequest'
+      responses:
+        '201':
+          description: Role created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /roles/{roleId}:
+    get:
+      tags: [Roles]
+      summary: Get role by ID
+      description: Retrieve detailed information about a specific role
+      operationId: getRoleById
+      parameters:
+        - $ref: '#/components/parameters/RoleIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [Roles]
+      summary: Update role
+      description: Update an existing role's information
+      operationId: updateRole
+      parameters:
+        - $ref: '#/components/parameters/RoleIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoleRequest'
+      responses:
+        '200':
+          description: Role updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags: [Roles]
+      summary: Delete role
+      description: Delete a role from the system (soft delete)
+      operationId: deleteRole
+      parameters:
+        - $ref: '#/components/parameters/RoleIdParam'
+      responses:
+        '204':
+          description: Role deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /roles/search:
+    get:
+      tags: [Roles]
+      summary: Search roles
+      description: Search roles by name or description
+      operationId: searchRoles
+      parameters:
+        - name: q
+          in: query
+          description: Search query string
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /roles/{roleId}/users:
+    get:
+      tags: [Roles]
+      summary: Get users with role
+      description: Retrieve all users who have been assigned this role
+      operationId: getUsersWithRole
+      parameters:
+        - $ref: '#/components/parameters/RoleIdParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Successfully retrieved users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # ============================================================================
+  # PERMISSIONS ENDPOINTS
+  # ============================================================================
+  /permissions:
+    get:
+      tags: [Permissions]
+      summary: List all permissions
+      description: Retrieve a paginated list of all permissions in the system
+      operationId: listPermissions
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    post:
+      tags: [Permissions]
+      summary: Create a new permission
+      description: Create a new permission with specified name and resource
+      operationId: createPermission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePermissionRequest'
+      responses:
+        '201':
+          description: Permission created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /permissions/{permissionId}:
+    get:
+      tags: [Permissions]
+      summary: Get permission by ID
+      description: Retrieve detailed information about a specific permission
+      operationId: getPermissionById
+      parameters:
+        - $ref: '#/components/parameters/PermissionIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved permission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [Permissions]
+      summary: Update permission
+      description: Update an existing permission's information
+      operationId: updatePermission
+      parameters:
+        - $ref: '#/components/parameters/PermissionIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePermissionRequest'
+      responses:
+        '200':
+          description: Permission updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags: [Permissions]
+      summary: Delete permission
+      description: Delete a permission from the system (soft delete)
+      operationId: deletePermission
+      parameters:
+        - $ref: '#/components/parameters/PermissionIdParam'
+      responses:
+        '204':
+          description: Permission deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /permissions/search:
+    get:
+      tags: [Permissions]
+      summary: Search permissions
+      description: Search permissions by name or resource
+      operationId: searchPermissions
+      parameters:
+        - name: q
+          in: query
+          description: Search query string
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /permissions/{permissionId}/roles:
+    get:
+      tags: [Permissions]
+      summary: Get roles with permission
+      description: Retrieve all roles that have been granted this permission
+      operationId: getRolesWithPermission
+      parameters:
+        - $ref: '#/components/parameters/PermissionIdParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Successfully retrieved roles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # ============================================================================
+  # ROLE-PERMISSION ASSIGNMENTS
+  # ============================================================================
+  /roles/{roleId}/permissions:
+    get:
+      tags: [Role-Permission Assignments]
+      summary: List role permissions
+      description: Retrieve all permissions assigned to a role
+      operationId: getRolePermissions
+      parameters:
+        - $ref: '#/components/parameters/RoleIdParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Successfully retrieved permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    post:
+      tags: [Role-Permission Assignments]
+      summary: Assign permission to role
+      description: Grant a permission to a role
+      operationId: assignPermissionToRole
+      parameters:
+        - $ref: '#/components/parameters/RoleIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignPermissionRequest'
+      responses:
+        '201':
+          description: Permission assigned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /roles/{roleId}/permissions/{permissionId}:
+    delete:
+      tags: [Role-Permission Assignments]
+      summary: Remove permission from role
+      description: Revoke a permission from a role
+      operationId: removePermissionFromRole
+      parameters:
+        - $ref: '#/components/parameters/RoleIdParam'
+        - $ref: '#/components/parameters/PermissionIdParam'
+      responses:
+        '204':
+          description: Permission removed successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /roles/{roleId}/permissions/effective:
+    get:
+      tags: [Role-Permission Assignments]
+      summary: Get effective permissions
+      description: Retrieve all effective permissions for a role (including inherited)
+      operationId: getRoleEffectivePermissions
+      parameters:
+        - $ref: '#/components/parameters/RoleIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved effective permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EffectivePermissionsResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # ============================================================================
+  # USER-ROLE ASSIGNMENTS
+  # ============================================================================
+  /users/{userId}/roles:
+    get:
+      tags: [User-Role Assignments]
+      summary: List user roles
+      description: Retrieve all roles assigned to a user
+      operationId: getUserRoles
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Successfully retrieved roles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    post:
+      tags: [User-Role Assignments]
+      summary: Assign role to user
+      description: Grant a role to a user
+      operationId: assignRoleToUser
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignRoleRequest'
+      responses:
+        '201':
+          description: Role assigned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /users/{userId}/roles/{roleId}:
+    delete:
+      tags: [User-Role Assignments]
+      summary: Remove role from user
+      description: Revoke a role from a user
+      operationId: removeRoleFromUser
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/RoleIdParam'
+      responses:
+        '204':
+          description: Role removed successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # ============================================================================
+  # USER-PERMISSION GRANTS (Hybrid RBAC)
+  # ============================================================================
+  /users/{userId}/permissions:
+    get:
+      tags: [User-Permission Grants]
+      summary: List user direct permissions
+      description: Retrieve all permissions directly granted to a user (not via roles)
+      operationId: getUserDirectPermissions
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Successfully retrieved permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    post:
+      tags: [User-Permission Grants]
+      summary: Grant direct permission to user
+      description: Grant a permission directly to a user (Hybrid RBAC)
+      operationId: grantPermissionToUser
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrantUserPermissionRequest'
+      responses:
+        '201':
+          description: Permission granted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /users/{userId}/permissions/{permissionId}:
+    delete:
+      tags: [User-Permission Grants]
+      summary: Revoke direct permission from user
+      description: Revoke a directly granted permission from a user
+      operationId: revokePermissionFromUser
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/PermissionIdParam'
+      responses:
+        '204':
+          description: Permission revoked successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /users/{userId}/permissions/effective:
+    get:
+      tags: [User-Permission Grants]
+      summary: Get user effective permissions
+      description: Retrieve all effective permissions for a user (role-based + direct grants)
+      operationId: getUserEffectivePermissions
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved effective permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EffectivePermissionsResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # ============================================================================
+  # USER PROFILE & ADMIN OPERATIONS
+  # ============================================================================
+  /users/{userId}/profile:
+    get:
+      tags: [Users]
+      summary: Get user profile
+      description: Retrieve user profile information
+      operationId: getUserProfile
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [Users]
+      summary: Update user profile
+      description: Update user profile information
+      operationId: updateUserProfile
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /users/{userId}/change-password:
+    post:
+      tags: [Users]
+      summary: Change user password
+      description: Change password for user (requires current password verification)
+      operationId: changePassword
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [current_password, new_password]
+              properties:
+                current_password:
+                  type: string
+                  format: password
+                  description: Current password
+                new_password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  description: New password
+                confirm_password:
+                  type: string
+                  format: password
+                  description: Confirm new password
+      responses:
+        '200':
+          description: Password changed successfully
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          description: Current password incorrect
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /users/{userId}/change-email:
+    post:
+      tags: [Users]
+      summary: Change user email
+      description: Request email change (sends verification to new email)
+      operationId: changeEmail
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [new_email, password]
+              properties:
+                new_email:
+                  type: string
+                  format: email
+                  description: New email address
+                password:
+                  type: string
+                  format: password
+                  description: Current password for verification
+      responses:
+        '200':
+          description: Verification email sent to new address
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          description: Password incorrect
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /users/{userId}/sessions:
+    get:
+      tags: [User Sessions]
+      summary: List user sessions
+      description: List all active sessions for a user
+      operationId: listUserSessions
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: List of user sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /users/{userId}/sessions/{sessionId}:
+    delete:
+      tags: [User Sessions]
+      summary: Revoke user session
+      description: Revoke a specific session for a user
+      operationId: revokeUserSession
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Session ID
+      responses:
+        '200':
+          description: Session revoked successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /users/{userId}/sessions/all:
+    delete:
+      tags: [User Sessions]
+      summary: Revoke all user sessions
+      description: Revoke all sessions for a user
+      operationId: revokeAllUserSessions
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: All sessions revoked successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /users/{userId}/activity:
+    get:
+      tags: [Users]
+      summary: Get user activity log
+      description: Retrieve activity/audit log for a user
+      operationId: getUserActivity
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: User activity log
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: string
+                  activities:
+                    type: array
+                    items:
+                      type: object
+                  total:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /users/{userId}/account:
+    delete:
+      tags: [Users]
+      summary: Delete user account
+      description: Self-service account deletion (schedules deletion)
+      operationId: deleteUserAccount
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: Account deletion initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Account deletion initiated. Your account will be deleted within 30 days."
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /users/{userId}/suspend:
+    post:
+      tags: [Users]
+      summary: Suspend user
+      description: Suspend a user account (admin operation, controlled by roles/permissions)
+      operationId: suspendUser
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: Reason for suspension
+                duration_hours:
+                  type: integer
+                  description: Suspension duration in hours (optional, permanent if not set)
+      responses:
+        '200':
+          description: User suspended successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /users/{userId}/unsuspend:
+    post:
+      tags: [Users]
+      summary: Unsuspend user
+      description: Unsuspend a user account (admin operation, controlled by roles/permissions)
+      operationId: unsuspendUser
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: Reason for unsuspension
+      responses:
+        '200':
+          description: User unsuspended successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /users/{userId}/admin-reset-password:
+    post:
+      tags: [Users]
+      summary: Admin reset password
+      description: Reset user password (admin operation, controlled by roles/permissions)
+      operationId: adminResetPassword
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                new_password:
+                  type: string
+                  format: password
+                  description: New password (optional, generates random if not provided)
+                send_email:
+                  type: boolean
+                  default: true
+                  description: Send password reset notification email
+                require_change:
+                  type: boolean
+                  default: true
+                  description: Require user to change password on next login
+      responses:
+        '200':
+          description: Password reset successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  temporary_password:
+                    type: string
+                    description: Only returned if auto-generated and send_email is false
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # ============================================================================
+  # POLICIES ENDPOINTS
+  # ============================================================================
+  /policies:
+    get:
+      tags: [Policies]
+      summary: List all policies
+      description: Retrieve a paginated list of all policies
+      operationId: listPolicies
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved policies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Policies]
+      summary: Create a new policy
+      description: Create a new access control policy
+      operationId: createPolicy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePolicyRequest'
+      responses:
+        '201':
+          description: Policy created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /policies/{policyId}:
+    get:
+      tags: [Policies]
+      summary: Get policy by ID
+      description: Retrieve detailed information about a specific policy
+      operationId: getPolicyById
+      parameters:
+        - $ref: '#/components/parameters/PolicyIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [Policies]
+      summary: Update policy
+      description: Update an existing policy
+      operationId: updatePolicy
+      parameters:
+        - $ref: '#/components/parameters/PolicyIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePolicyRequest'
+      responses:
+        '200':
+          description: Policy updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags: [Policies]
+      summary: Delete policy
+      description: Delete a policy from the system
+      operationId: deletePolicy
+      parameters:
+        - $ref: '#/components/parameters/PolicyIdParam'
+      responses:
+        '204':
+          description: Policy deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /policies/search:
+    get:
+      tags: [Policies]
+      summary: Search policies
+      description: Search policies by name or description
+      operationId: searchPolicies
+      parameters:
+        - name: q
+          in: query
+          description: Search query string
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: effect
+          in: query
+          description: Filter by effect
+          schema:
+            type: string
+            enum: [allow, deny]
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ============================================================================
+  # POLICY ASSIGNMENTS ENDPOINTS
+  # ============================================================================
+  /policy-assignments:
+    get:
+      tags: [Policy Assignments]
+      summary: List all policy assignments
+      description: Retrieve a paginated list of all policy assignments
+      operationId: listPolicyAssignments
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved policy assignments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyAssignmentListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Policy Assignments]
+      summary: Create a new policy assignment
+      description: Assign a policy to a user, role, or group
+      operationId: createPolicyAssignment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePolicyAssignmentRequest'
+      responses:
+        '201':
+          description: Policy assignment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyAssignmentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /policy-assignments/{assignmentId}:
+    get:
+      tags: [Policy Assignments]
+      summary: Get policy assignment by ID
+      description: Retrieve detailed information about a specific policy assignment
+      operationId: getPolicyAssignmentById
+      parameters:
+        - $ref: '#/components/parameters/PolicyAssignmentIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved policy assignment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyAssignmentResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [Policy Assignments]
+      summary: Update policy assignment
+      description: Update an existing policy assignment
+      operationId: updatePolicyAssignment
+      parameters:
+        - $ref: '#/components/parameters/PolicyAssignmentIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePolicyAssignmentRequest'
+      responses:
+        '200':
+          description: Policy assignment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyAssignmentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags: [Policy Assignments]
+      summary: Delete policy assignment
+      description: Remove a policy assignment
+      operationId: deletePolicyAssignment
+      parameters:
+        - $ref: '#/components/parameters/PolicyAssignmentIdParam'
+      responses:
+        '204':
+          description: Policy assignment deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /policy-assignments/search:
+    get:
+      tags: [Policy Assignments]
+      summary: Search policy assignments
+      description: Search policy assignments by policy ID, principal type, or principal ID
+      operationId: searchPolicyAssignments
+      parameters:
+        - name: q
+          in: query
+          description: Search query string
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: policy_id
+          in: query
+          description: Filter by policy ID
+          schema:
+            type: string
+            format: uuid
+        - name: principal_type
+          in: query
+          description: Filter by principal type
+          schema:
+            type: string
+            enum: [user, role, group]
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyAssignmentListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ============================================================================
+  # USER PREFERENCES ENDPOINTS
+  # ============================================================================
+  /user-preferences:
+    get:
+      tags: [User Preferences]
+      summary: List all user preferences
+      description: Retrieve a paginated list of all user preferences
+      operationId: listUserPreferences
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved user preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferenceListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [User Preferences]
+      summary: Create user preference
+      description: Create a new user preference
+      operationId: createUserPreference
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserPreferenceRequest'
+      responses:
+        '201':
+          description: User preference created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferenceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /user-preferences/{preferenceId}:
+    get:
+      tags: [User Preferences]
+      summary: Get user preference by ID
+      description: Retrieve detailed information about a specific user preference
+      operationId: getUserPreferenceById
+      parameters:
+        - $ref: '#/components/parameters/UserPreferenceIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved user preference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferenceResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [User Preferences]
+      summary: Update user preference
+      description: Update an existing user preference
+      operationId: updateUserPreference
+      parameters:
+        - $ref: '#/components/parameters/UserPreferenceIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserPreferenceRequest'
+      responses:
+        '200':
+          description: User preference updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferenceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags: [User Preferences]
+      summary: Delete user preference
+      description: Delete a user preference
+      operationId: deleteUserPreference
+      parameters:
+        - $ref: '#/components/parameters/UserPreferenceIdParam'
+      responses:
+        '204':
+          description: User preference deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /user-preferences/search:
+    get:
+      tags: [User Preferences]
+      summary: Search user preferences
+      description: Search user preferences by user ID or key
+      operationId: searchUserPreferences
+      parameters:
+        - name: q
+          in: query
+          description: Search query string
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: user_id
+          in: query
+          description: Filter by user ID
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferenceListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ============================================================================
+  # USER SETTINGS ENDPOINTS
+  # ============================================================================
+  /user-settings:
+    get:
+      tags: [User Settings]
+      summary: List all user settings
+      description: Retrieve a paginated list of all user settings
+      operationId: listUserSettings
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved user settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettingsListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [User Settings]
+      summary: Create user settings
+      description: Create new user settings
+      operationId: createUserSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserSettingsRequest'
+      responses:
+        '201':
+          description: User settings created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettingsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /user-settings/{settingsId}:
+    get:
+      tags: [User Settings]
+      summary: Get user settings by ID
+      description: Retrieve detailed information about specific user settings
+      operationId: getUserSettingsById
+      parameters:
+        - $ref: '#/components/parameters/UserSettingsIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved user settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettingsResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [User Settings]
+      summary: Update user settings
+      description: Update existing user settings
+      operationId: updateUserSettings
+      parameters:
+        - $ref: '#/components/parameters/UserSettingsIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserSettingsRequest'
+      responses:
+        '200':
+          description: User settings updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettingsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags: [User Settings]
+      summary: Delete user settings
+      description: Delete user settings
+      operationId: deleteUserSettings
+      parameters:
+        - $ref: '#/components/parameters/UserSettingsIdParam'
+      responses:
+        '204':
+          description: User settings deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /user-settings/search:
+    get:
+      tags: [User Settings]
+      summary: Search user settings
+      description: Search user settings by user ID
+      operationId: searchUserSettings
+      parameters:
+        - name: q
+          in: query
+          description: Search query string
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: user_id
+          in: query
+          description: Filter by user ID
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettingsListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ============================================================================
+  # SYSTEM SETTINGS ENDPOINTS
+  # ============================================================================
+  /system-settings:
+    get:
+      tags: [System Settings]
+      summary: List all system settings
+      description: Retrieve a paginated list of all system settings
+      operationId: listSystemSettings
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved system settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemSettingsListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [System Settings]
+      summary: Create system setting
+      description: Create a new system setting
+      operationId: createSystemSetting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSystemSettingsRequest'
+      responses:
+        '201':
+          description: System setting created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemSettingsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /system-settings/{settingId}:
+    get:
+      tags: [System Settings]
+      summary: Get system setting by ID
+      description: Retrieve detailed information about a specific system setting
+      operationId: getSystemSettingById
+      parameters:
+        - $ref: '#/components/parameters/SystemSettingsIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved system setting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemSettingsResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [System Settings]
+      summary: Update system setting
+      description: Update an existing system setting
+      operationId: updateSystemSetting
+      parameters:
+        - $ref: '#/components/parameters/SystemSettingsIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSystemSettingsRequest'
+      responses:
+        '200':
+          description: System setting updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemSettingsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags: [System Settings]
+      summary: Delete system setting
+      description: Delete a system setting
+      operationId: deleteSystemSetting
+      parameters:
+        - $ref: '#/components/parameters/SystemSettingsIdParam'
+      responses:
+        '204':
+          description: System setting deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /system-settings/search:
+    get:
+      tags: [System Settings]
+      summary: Search system settings
+      description: Search system settings by key or category
+      operationId: searchSystemSettings
+      parameters:
+        - name: q
+          in: query
+          description: Search query string
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: category
+          in: query
+          description: Filter by category
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemSettingsListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+# ==============================================================================
+# COMPONENTS
+# ==============================================================================
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from authentication endpoint
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Page number (1-indexed)
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    LimitParam:
+      name: limit
+      in: query
+      description: Number of items per page
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+    SortParam:
+      name: sort
+      in: query
+      description: Sort field and direction (prefix with - for descending)
+      required: false
+      schema:
+        type: string
+        example: "-created_at"
+
+    UserIdParam:
+      name: userId
+      in: path
+      description: User unique identifier (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    RoleIdParam:
+      name: roleId
+      in: path
+      description: Role unique identifier (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    PermissionIdParam:
+      name: permissionId
+      in: path
+      description: Permission unique identifier
+      required: true
+      schema:
+        type: string
+
+    SessionIdParam:
+      name: sessionId
+      in: path
+      description: Session unique identifier (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    UserSessionIdParam:
+      name: userSessionId
+      in: path
+      description: User session unique identifier (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    SecurityEventIdParam:
+      name: eventId
+      in: path
+      description: Security event unique identifier (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    MfaDeviceIdParam:
+      name: deviceId
+      in: path
+      description: MFA device unique identifier (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    PasswordResetTokenIdParam:
+      name: tokenId
+      in: path
+      description: Password reset token unique identifier (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    AuditLogIdParam:
+      name: logId
+      in: path
+      description: Audit log unique identifier (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    PolicyIdParam:
+      name: policyId
+      in: path
+      description: Policy unique identifier (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    PolicyAssignmentIdParam:
+      name: assignmentId
+      in: path
+      description: Policy assignment unique identifier (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    UserPreferenceIdParam:
+      name: preferenceId
+      in: path
+      description: User preference unique identifier (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    UserSettingsIdParam:
+      name: settingsId
+      in: path
+      description: User settings unique identifier (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    SystemSettingsIdParam:
+      name: settingId
+      in: path
+      description: System setting unique identifier (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    # ============================================================================
+    # User Schemas
+    # ============================================================================
+    User:
+      type: object
+      required:
+        - id
+        - username
+        - email
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: User's first name (required)
+        middle_name:
+          type: string
+          maxLength: 100
+          description: User's middle name (optional)
+          nullable: true
+        last_name:
+          type: string
+          maxLength: 100
+          description: User's last name (optional)
+          nullable: true
+        full_name:
+          type: string
+          readOnly: true
+          description: Computed full name (first + middle + last)
+        phone:
+          type: string
+        avatar_url:
+          type: string
+          format: uri
+        status:
+          type: string
+          enum: [active, inactive, suspended, pending]
+        email_verified:
+          type: boolean
+        phone_verified:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    CreateUserRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          description: User password (min 8 characters)
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: User's first name (required)
+        middle_name:
+          type: string
+          maxLength: 100
+          description: User's middle name (optional)
+          nullable: true
+        last_name:
+          type: string
+          maxLength: 100
+          description: User's last name (optional)
+          nullable: true
+        phone:
+          type: string
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        phone:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+
+    UserResponse:
+      allOf:
+        - $ref: '#/components/schemas/User'
+
+    UserListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # Authentication Schemas
+    # ============================================================================
+    LoginResponse:
+      type: object
+      required:
+        - access_token
+        - token_type
+        - user
+      properties:
+        access_token:
+          type: string
+          description: JWT access token
+        refresh_token:
+          type: string
+          description: JWT refresh token
+        token_type:
+          type: string
+          default: Bearer
+        expires_in:
+          type: integer
+          description: Token expiration time in seconds
+        user:
+          $ref: '#/components/schemas/UserResponse'
+
+    TokenResponse:
+      type: object
+      required:
+        - access_token
+        - token_type
+      properties:
+        access_token:
+          type: string
+          description: New JWT access token
+        refresh_token:
+          type: string
+          description: New refresh token (if rotation enabled)
+        token_type:
+          type: string
+          default: Bearer
+        expires_in:
+          type: integer
+          description: Token expiration time in seconds
+
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: User password (min 8 characters)
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: User's first name (optional during registration)
+        middle_name:
+          type: string
+          maxLength: 100
+          description: User's middle name (optional)
+          nullable: true
+        last_name:
+          type: string
+          maxLength: 100
+          description: User's last name (optional)
+          nullable: true
+
+    PartialUpdateUserRequest:
+      type: object
+      properties:
+        update_mask:
+          type: array
+          items:
+            type: string
+          description: Fields to update
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        phone:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+
+    BulkCreateUsersRequest:
+      type: object
+      required:
+        - entities
+      properties:
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateUserRequest'
+          maxItems: 100
+
+    BulkCreateUsersResponse:
+      type: object
+      properties:
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        created_count:
+          type: integer
+        errors:
+          type: array
+          items:
+            type: string
+
+    UpsertUserRequest:
+      type: object
+      required:
+        - email
+        - username
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: If provided, update existing; otherwise create new
+        email:
+          type: string
+          format: email
+        username:
+          type: string
+        password:
+          type: string
+          minLength: 8
+        first_name:
+          type: string
+        last_name:
+          type: string
+
+    UpsertUserResponse:
+      type: object
+      properties:
+        entity:
+          $ref: '#/components/schemas/User'
+        created:
+          type: boolean
+          description: true if created, false if updated
+
+    RestoreUserResponse:
+      type: object
+      properties:
+        entity:
+          $ref: '#/components/schemas/User'
+        success:
+          type: boolean
+        message:
+          type: string
+
+    EmptyTrashResponse:
+      type: object
+      properties:
+        deleted_count:
+          type: integer
+          format: int64
+        success:
+          type: boolean
+        message:
+          type: string
+
+    # ============================================================================
+    # Session Schemas
+    # ============================================================================
+    Session:
+      type: object
+      required:
+        - id
+        - user_id
+        - token
+        - created_at
+        - expires_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        token:
+          type: string
+        ip_address:
+          type: string
+        user_agent:
+          type: string
+        device_info:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        last_activity_at:
+          type: string
+          format: date-time
+
+    CreateSessionRequest:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        ip_address:
+          type: string
+        user_agent:
+          type: string
+        device_info:
+          type: string
+        expires_in_seconds:
+          type: integer
+          default: 86400
+
+    UpdateSessionRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        last_activity_at:
+          type: string
+          format: date-time
+
+    SessionResponse:
+      allOf:
+        - $ref: '#/components/schemas/Session'
+
+    SessionListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Session'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # User Session Schemas
+    # ============================================================================
+    UserSession:
+      type: object
+      required:
+        - id
+        - user_id
+        - session_id
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          additionalProperties: true
+
+    CreateUserSessionRequest:
+      type: object
+      required:
+        - user_id
+        - session_id
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        metadata:
+          type: object
+          additionalProperties: true
+
+    UpdateUserSessionRequest:
+      type: object
+      properties:
+        metadata:
+          type: object
+          additionalProperties: true
+
+    UserSessionResponse:
+      allOf:
+        - $ref: '#/components/schemas/UserSession'
+
+    UserSessionListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserSession'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # User Security Event Schemas
+    # ============================================================================
+    UserSecurityEvent:
+      type: object
+      required:
+        - id
+        - user_id
+        - event_type
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+          enum: [login_success, login_failure, logout, password_change, mfa_enabled, mfa_disabled, suspicious_activity]
+        ip_address:
+          type: string
+        user_agent:
+          type: string
+        location:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+        risk_level:
+          type: string
+          enum: [low, medium, high, critical]
+        created_at:
+          type: string
+          format: date-time
+
+    CreateUserSecurityEventRequest:
+      type: object
+      required:
+        - user_id
+        - event_type
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+          enum: [login_success, login_failure, logout, password_change, mfa_enabled, mfa_disabled, suspicious_activity]
+        ip_address:
+          type: string
+        user_agent:
+          type: string
+        location:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+        risk_level:
+          type: string
+          enum: [low, medium, high, critical]
+
+    UpdateUserSecurityEventRequest:
+      type: object
+      properties:
+        details:
+          type: object
+          additionalProperties: true
+        risk_level:
+          type: string
+          enum: [low, medium, high, critical]
+
+    UserSecurityEventResponse:
+      allOf:
+        - $ref: '#/components/schemas/UserSecurityEvent'
+
+    UserSecurityEventListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserSecurityEvent'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # MFA Device Schemas
+    # ============================================================================
+    MfaDevice:
+      type: object
+      required:
+        - id
+        - user_id
+        - device_type
+        - is_primary
+        - is_verified
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        device_type:
+          type: string
+          enum: [totp, sms, email, hardware_key]
+        device_name:
+          type: string
+        is_primary:
+          type: boolean
+        is_verified:
+          type: boolean
+        last_used_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateMfaDeviceRequest:
+      type: object
+      required:
+        - user_id
+        - device_type
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        device_type:
+          type: string
+          enum: [totp, sms, email, hardware_key]
+        device_name:
+          type: string
+        is_primary:
+          type: boolean
+          default: false
+
+    UpdateMfaDeviceRequest:
+      type: object
+      properties:
+        device_name:
+          type: string
+        is_primary:
+          type: boolean
+        is_verified:
+          type: boolean
+
+    MfaDeviceResponse:
+      allOf:
+        - $ref: '#/components/schemas/MfaDevice'
+
+    MfaDeviceListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MfaDevice'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # Password Reset Token Schemas
+    # ============================================================================
+    PasswordResetToken:
+      type: object
+      required:
+        - id
+        - user_id
+        - token
+        - expires_at
+        - is_used
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        token:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        is_used:
+          type: boolean
+        used_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    CreatePasswordResetTokenRequest:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        expires_in_hours:
+          type: integer
+          default: 24
+
+    UpdatePasswordResetTokenRequest:
+      type: object
+      properties:
+        is_used:
+          type: boolean
+        used_at:
+          type: string
+          format: date-time
+
+    PasswordResetTokenResponse:
+      allOf:
+        - $ref: '#/components/schemas/PasswordResetToken'
+
+    PasswordResetTokenListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PasswordResetToken'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # Audit Log Schemas
+    # ============================================================================
+    AuditLog:
+      type: object
+      required:
+        - id
+        - user_id
+        - action
+        - resource_type
+        - resource_id
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        action:
+          type: string
+          enum: [create, read, update, delete, login, logout, export]
+        resource_type:
+          type: string
+        resource_id:
+          type: string
+        old_value:
+          type: object
+          additionalProperties: true
+        new_value:
+          type: object
+          additionalProperties: true
+        ip_address:
+          type: string
+        user_agent:
+          type: string
+        notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    CreateAuditLogRequest:
+      type: object
+      required:
+        - user_id
+        - action
+        - resource_type
+        - resource_id
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        action:
+          type: string
+          enum: [create, read, update, delete, login, logout, export]
+        resource_type:
+          type: string
+        resource_id:
+          type: string
+        old_value:
+          type: object
+          additionalProperties: true
+        new_value:
+          type: object
+          additionalProperties: true
+        ip_address:
+          type: string
+        user_agent:
+          type: string
+        notes:
+          type: string
+
+    UpdateAuditLogRequest:
+      type: object
+      properties:
+        notes:
+          type: string
+
+    AuditLogResponse:
+      allOf:
+        - $ref: '#/components/schemas/AuditLog'
+
+    AuditLogListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLog'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # Role Schemas
+    # ============================================================================
+    Role:
+      type: object
+      required:
+        - id
+        - name
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Role unique identifier
+        name:
+          type: string
+          minLength: 2
+          maxLength: 50
+          description: Role name (unique, alphanumeric + underscore)
+          example: "editor"
+        description:
+          type: string
+          maxLength: 500
+          description: Role description
+          example: "Content editor with write permissions"
+        is_default:
+          type: boolean
+          description: Whether this role is assigned to new users by default
+          default: false
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Soft delete timestamp
+
+    CreateRoleRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9_]+$'
+          example: "editor"
+        description:
+          type: string
+          maxLength: 500
+          example: "Content editor with write permissions"
+        is_default:
+          type: boolean
+          default: false
+
+    UpdateRoleRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9_]+$'
+        description:
+          type: string
+          maxLength: 500
+        is_default:
+          type: boolean
+
+    RoleResponse:
+      allOf:
+        - $ref: '#/components/schemas/Role'
+
+    RoleListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # Permission Schemas
+    # ============================================================================
+    Permission:
+      type: object
+      required:
+        - id
+        - name
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          description: Permission unique identifier
+          example: "read:posts"
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          description: Permission name in action:resource format
+          example: "read:posts"
+        description:
+          type: string
+          maxLength: 500
+          description: Permission description
+          example: "Permission to read blog posts"
+        resource:
+          type: string
+          maxLength: 50
+          description: Resource this permission applies to
+          example: "posts"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    CreatePermissionRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          pattern: '^[a-z_]+:[a-z_]+$'
+          example: "read:posts"
+        description:
+          type: string
+          maxLength: 500
+          example: "Permission to read blog posts"
+        resource:
+          type: string
+          maxLength: 50
+          example: "posts"
+
+    UpdatePermissionRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          pattern: '^[a-z_]+:[a-z_]+$'
+        description:
+          type: string
+          maxLength: 500
+        resource:
+          type: string
+          maxLength: 50
+
+    PermissionResponse:
+      allOf:
+        - $ref: '#/components/schemas/Permission'
+
+    PermissionListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # User Permission (Direct Grant) Schemas
+    # ============================================================================
+    UserPermission:
+      type: object
+      required:
+        - id
+        - user_id
+        - permission_id
+        - granted_at
+        - granted_by
+        - reason
+        - is_active
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        permission_id:
+          type: string
+        permission_name:
+          type: string
+          description: Human-readable permission name
+        granted_at:
+          type: string
+          format: date-time
+        granted_by:
+          type: string
+          format: uuid
+          description: User ID who granted this permission
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Expiration timestamp for temporary grants
+        reason:
+          type: string
+          description: Justification for direct permission grant
+        resource_id:
+          type: string
+          nullable: true
+          description: Specific resource ID for resource-scoped permissions
+        resource_type:
+          type: string
+          nullable: true
+          description: Type of resource (e.g., "post", "project")
+        is_active:
+          type: boolean
+          description: Whether permission is currently active
+        revoked_at:
+          type: string
+          format: date-time
+          nullable: true
+        revoked_by:
+          type: string
+          format: uuid
+          nullable: true
+        revoked_reason:
+          type: string
+          nullable: true
+
+    GrantUserPermissionRequest:
+      type: object
+      required:
+        - permission_id
+        - reason
+      properties:
+        permission_id:
+          type: string
+          example: "write:posts"
+        reason:
+          type: string
+          minLength: 10
+          maxLength: 500
+          example: "Temporary permission for Q4 2025 campaign"
+        expires_at:
+          type: string
+          format: date-time
+          description: Optional expiration date for temporary access
+        resource_id:
+          type: string
+          description: Optional resource ID for resource-specific permission
+        resource_type:
+          type: string
+          description: Optional resource type
+
+    UserPermissionListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserPermission'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # Assignment Schemas
+    # ============================================================================
+    AssignPermissionRequest:
+      type: object
+      required:
+        - permission_id
+      properties:
+        permission_id:
+          type: string
+          example: "read:posts"
+
+    AssignRoleRequest:
+      type: object
+      required:
+        - role_id
+      properties:
+        role_id:
+          type: string
+          format: uuid
+
+    # ============================================================================
+    # Policy Schemas
+    # ============================================================================
+    Policy:
+      type: object
+      required:
+        - id
+        - name
+        - effect
+        - actions
+        - resources
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        effect:
+          type: string
+          enum: [allow, deny]
+        actions:
+          type: array
+          items:
+            type: string
+        resources:
+          type: array
+          items:
+            type: string
+        conditions:
+          type: object
+          additionalProperties: true
+        priority:
+          type: integer
+          default: 0
+        is_active:
+          type: boolean
+          default: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreatePolicyRequest:
+      type: object
+      required:
+        - name
+        - effect
+        - actions
+        - resources
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        effect:
+          type: string
+          enum: [allow, deny]
+        actions:
+          type: array
+          items:
+            type: string
+        resources:
+          type: array
+          items:
+            type: string
+        conditions:
+          type: object
+          additionalProperties: true
+        priority:
+          type: integer
+          default: 0
+
+    UpdatePolicyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        effect:
+          type: string
+          enum: [allow, deny]
+        actions:
+          type: array
+          items:
+            type: string
+        resources:
+          type: array
+          items:
+            type: string
+        conditions:
+          type: object
+          additionalProperties: true
+        priority:
+          type: integer
+        is_active:
+          type: boolean
+
+    PolicyResponse:
+      allOf:
+        - $ref: '#/components/schemas/Policy'
+
+    PolicyListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Policy'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # Policy Assignment Schemas
+    # ============================================================================
+    PolicyAssignment:
+      type: object
+      required:
+        - id
+        - policy_id
+        - principal_type
+        - principal_id
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        policy_id:
+          type: string
+          format: uuid
+        principal_type:
+          type: string
+          enum: [user, role, group]
+        principal_id:
+          type: string
+          format: uuid
+        scope:
+          type: string
+        is_active:
+          type: boolean
+          default: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreatePolicyAssignmentRequest:
+      type: object
+      required:
+        - policy_id
+        - principal_type
+        - principal_id
+      properties:
+        policy_id:
+          type: string
+          format: uuid
+        principal_type:
+          type: string
+          enum: [user, role, group]
+        principal_id:
+          type: string
+          format: uuid
+        scope:
+          type: string
+
+    UpdatePolicyAssignmentRequest:
+      type: object
+      properties:
+        scope:
+          type: string
+        is_active:
+          type: boolean
+
+    PolicyAssignmentResponse:
+      allOf:
+        - $ref: '#/components/schemas/PolicyAssignment'
+
+    PolicyAssignmentListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyAssignment'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # User Preference Schemas
+    # ============================================================================
+    UserPreference:
+      type: object
+      required:
+        - id
+        - user_id
+        - key
+        - value
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        value:
+          type: string
+        category:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateUserPreferenceRequest:
+      type: object
+      required:
+        - user_id
+        - key
+        - value
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        value:
+          type: string
+        category:
+          type: string
+
+    UpdateUserPreferenceRequest:
+      type: object
+      properties:
+        value:
+          type: string
+        category:
+          type: string
+
+    UserPreferenceResponse:
+      allOf:
+        - $ref: '#/components/schemas/UserPreference'
+
+    UserPreferenceListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserPreference'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # User Settings Schemas
+    # ============================================================================
+    UserSettings:
+      type: object
+      required:
+        - id
+        - user_id
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        theme:
+          type: string
+          enum: [light, dark, system]
+          default: system
+        language:
+          type: string
+          default: "en"
+        timezone:
+          type: string
+          default: "UTC"
+        notifications_enabled:
+          type: boolean
+          default: true
+        email_notifications:
+          type: boolean
+          default: true
+        push_notifications:
+          type: boolean
+          default: true
+        two_factor_enabled:
+          type: boolean
+          default: false
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateUserSettingsRequest:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        theme:
+          type: string
+          enum: [light, dark, system]
+        language:
+          type: string
+        timezone:
+          type: string
+        notifications_enabled:
+          type: boolean
+        email_notifications:
+          type: boolean
+        push_notifications:
+          type: boolean
+
+    UpdateUserSettingsRequest:
+      type: object
+      properties:
+        theme:
+          type: string
+          enum: [light, dark, system]
+        language:
+          type: string
+        timezone:
+          type: string
+        notifications_enabled:
+          type: boolean
+        email_notifications:
+          type: boolean
+        push_notifications:
+          type: boolean
+        two_factor_enabled:
+          type: boolean
+
+    UserSettingsResponse:
+      allOf:
+        - $ref: '#/components/schemas/UserSettings'
+
+    UserSettingsListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserSettings'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # System Settings Schemas
+    # ============================================================================
+    SystemSettings:
+      type: object
+      required:
+        - id
+        - key
+        - value
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        value:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        is_public:
+          type: boolean
+          default: false
+        is_readonly:
+          type: boolean
+          default: false
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateSystemSettingsRequest:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        is_public:
+          type: boolean
+          default: false
+        is_readonly:
+          type: boolean
+          default: false
+
+    UpdateSystemSettingsRequest:
+      type: object
+      properties:
+        value:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        is_public:
+          type: boolean
+        is_readonly:
+          type: boolean
+
+    SystemSettingsResponse:
+      allOf:
+        - $ref: '#/components/schemas/SystemSettings'
+
+    SystemSettingsListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SystemSettings'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    # ============================================================================
+    # Effective Permissions Schema
+    # ============================================================================
+    EffectivePermissionsResponse:
+      type: object
+      required:
+        - permissions
+        - total
+        - sources
+      properties:
+        permissions:
+          type: array
+          items:
+            type: string
+          description: List of all effective permission identifiers
+          example: ["read:posts", "write:posts", "delete:posts"]
+        total:
+          type: integer
+          description: Total number of effective permissions
+          example: 15
+        sources:
+          type: object
+          description: Breakdown of permission sources
+          properties:
+            role_based:
+              type: array
+              items:
+                type: object
+                properties:
+                  role:
+                    type: string
+                    example: "editor"
+                  permissions:
+                    type: array
+                    items:
+                      type: string
+            direct_grants:
+              type: array
+              items:
+                type: object
+                properties:
+                  permission:
+                    type: string
+                  reason:
+                    type: string
+                  expires_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+
+    # ============================================================================
+    # Utility Schemas
+    # ============================================================================
+    PaginationInfo:
+      type: object
+      required:
+        - total
+        - page
+        - limit
+        - total_pages
+      properties:
+        total:
+          type: integer
+          format: int64
+          description: Total number of items
+          example: 150
+        page:
+          type: integer
+          description: Current page number
+          example: 1
+        limit:
+          type: integer
+          description: Items per page
+          example: 20
+        total_pages:
+          type: integer
+          description: Total number of pages
+          example: 8
+        has_next:
+          type: boolean
+          description: Whether there is a next page
+        has_prev:
+          type: boolean
+          description: Whether there is a previous page
+
+    MessageResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: "Operation completed successfully"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - status
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Invalid role name format"
+        status:
+          type: integer
+          description: HTTP status code
+          example: 400
+        details:
+          type: object
+          description: Additional error details
+          additionalProperties: true
+
+  responses:
+    BadRequestError:
+      description: Bad request - validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "VALIDATION_ERROR"
+            message: "Invalid request parameters"
+            status: 400
+            details:
+              field: "name"
+              reason: "Name must be alphanumeric"
+
+    UnauthorizedError:
+      description: Unauthorized - missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "UNAUTHORIZED"
+            message: "Missing or invalid authentication token"
+            status: 401
+
+    ForbiddenError:
+      description: Forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "FORBIDDEN"
+            message: "Insufficient permissions to perform this operation"
+            status: 403
+
+    NotFoundError:
+      description: Not found - resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "NOT_FOUND"
+            message: "Resource not found"
+            status: 404
+
+    ConflictError:
+      description: Conflict - resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "CONFLICT"
+            message: "Resource with this identifier already exists"
+            status: 409
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "INTERNAL_SERVER_ERROR"
+            message: "An unexpected error occurred"
+            status: 500

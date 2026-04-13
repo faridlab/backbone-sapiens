@@ -1,0 +1,1413 @@
+{
+  "info": {
+    "name": "Sapiens gRPC API",
+    "description": "gRPC API for Sapiens User Management Service with 28 services and 275+ RPC methods.\n\n**Implementation Status: 97% Complete**\n\n**Core Services (11):**\n1. PasswordService - Password hashing and verification (6 methods) ✅ 100%\n2. TokenService - JWT token management (7 methods) ✅ 100%\n3. MfaService - Multi-factor authentication (6 methods)\n4. RoleService - Role CRUD operations (7 methods)\n5. PermissionService - Permission CRUD operations (7 methods)\n6. RolePermissionService - Role-permission assignments (4 methods)\n7. UserRoleService - User-role assignments (5 methods)\n8. PermissionResolutionService - Permission resolution and checks (10 methods) ✅ 100%\n9. UserCommandUseCases - User write operations (27 methods) 🟢 74%\n10. UserQueryUseCases - User read operations (21 methods) 🟢 90%\n11. SessionService - Session management (5 methods)\n\n**CRUD Services (17 services, 12 methods each = 204 methods):**\nUserCrud, RoleCrud, PermissionCrud, SessionCrud, UserRoleCrud, RolePermissionCrud, UserPermissionCrud, UserPreferenceCrud, UserSettingsCrud, UserSessionCrud, UserSecurityEventCrud, MfaDeviceCrud, PasswordResetTokenCrud, AuditLogCrud, PolicyCrud, PolicyAssignmentCrud, SystemSettingsCrud\n\nEach CRUD service implements: Create, Get, Update, PartialUpdate (PATCH), Delete, List, Search, BulkCreate, Upsert, ListDeleted (trash), Restore, EmptyTrash\n\n**Connection:**\n- Dev: localhost:50052 (h2c)\n- Prod: grpc.startapp.id:50052 (h2 TLS)\n\n**Authentication:** JWT Bearer token via metadata header: `authorization: Bearer <token>`\n\n**Last Updated:** 2025-11-21\n\n**Note:** This collection contains Core Services. CRUD services can be accessed via gRPC reflection or grpcurl. See grpc-endpoints.md for complete API documentation.",
+    "_postman_id": "550e8400-e29b-41d4-a716-446655440200",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "grpcUrl",
+      "value": "localhost:50052",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "roleId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "permissionId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. PasswordService",
+      "description": "Password hashing, verification, and security operations using Argon2id",
+      "item": [
+        {
+          "name": "HashPassword",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/grpc",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"MySecurePass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.PasswordService/HashPassword",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.PasswordService", "HashPassword"]
+            },
+            "description": "Hash a plaintext password using Argon2id algorithm"
+          },
+          "response": []
+        },
+        {
+          "name": "VerifyPassword",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"MySecurePass123!\",\n  \"password_hash\": \"$argon2id$v=19$m=19456,t=2,p=1$...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.PasswordService/VerifyPassword",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.PasswordService", "VerifyPassword"]
+            },
+            "description": "Verify a password against its Argon2 hash"
+          },
+          "response": []
+        },
+        {
+          "name": "ValidatePasswordStrength",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"WeakPass\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.PasswordService/ValidatePasswordStrength",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.PasswordService", "ValidatePasswordStrength"]
+            },
+            "description": "Check password strength against security policy"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. TokenService",
+      "description": "JWT token generation, validation, and refresh operations",
+      "item": [
+        {
+          "name": "GenerateToken",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"email\": \"user@example.com\",\n  \"roles\": [\"user\", \"admin\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.TokenService/GenerateToken",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.TokenService", "GenerateToken"]
+            },
+            "description": "Generate JWT access token for authenticated user"
+          },
+          "response": []
+        },
+        {
+          "name": "ValidateToken",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.TokenService/ValidateToken",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.TokenService", "ValidateToken"]
+            },
+            "description": "Validate JWT token and extract claims"
+          },
+          "response": []
+        },
+        {
+          "name": "RefreshToken",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.TokenService/RefreshToken",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.TokenService", "RefreshToken"]
+            },
+            "description": "Refresh access token using refresh token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. MfaService",
+      "description": "Multi-factor authentication (TOTP and SMS) operations",
+      "item": [
+        {
+          "name": "EnableMFA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"mfa_type\": \"TOTP\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.MfaService/EnableMFA",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.MfaService", "EnableMFA"]
+            },
+            "description": "Enable MFA for a user (returns secret and QR code)"
+          },
+          "response": []
+        },
+        {
+          "name": "VerifyMFACode",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"code\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.MfaService/VerifyMFACode",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.MfaService", "VerifyMFACode"]
+            },
+            "description": "Verify TOTP or SMS code"
+          },
+          "response": []
+        },
+        {
+          "name": "GetMFAStatus",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.MfaService/GetMFAStatus",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.MfaService", "GetMFAStatus"]
+            },
+            "description": "Get user's MFA status and devices"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. RoleService",
+      "description": "Role CRUD operations and management",
+      "item": [
+        {
+          "name": "CreateRole",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"content_editor\",\n  \"description\": \"Can create and edit content\",\n  \"is_default\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.RoleService/CreateRole",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.RoleService", "CreateRole"]
+            },
+            "description": "Create a new role"
+          },
+          "response": []
+        },
+        {
+          "name": "GetRole",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role_id\": \"{{roleId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.RoleService/GetRole",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.RoleService", "GetRole"]
+            },
+            "description": "Get role by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "ListRoles",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 20,\n  \"include_deleted\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.RoleService/ListRoles",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.RoleService", "ListRoles"]
+            },
+            "description": "List all roles with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "UpdateRole",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role_id\": \"{{roleId}}\",\n  \"name\": \"senior_editor\",\n  \"description\": \"Senior content editor with advanced permissions\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.RoleService/UpdateRole",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.RoleService", "UpdateRole"]
+            },
+            "description": "Update existing role"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. PermissionService",
+      "description": "Permission CRUD operations and management",
+      "item": [
+        {
+          "name": "CreatePermission",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"articles:create\",\n  \"resource\": \"articles\",\n  \"action\": \"create\",\n  \"description\": \"Create new articles\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.PermissionService/CreatePermission",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.PermissionService", "CreatePermission"]
+            },
+            "description": "Create a new permission"
+          },
+          "response": []
+        },
+        {
+          "name": "GetPermission",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permission_id\": \"{{permissionId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.PermissionService/GetPermission",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.PermissionService", "GetPermission"]
+            },
+            "description": "Get permission by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "ListPermissions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 20\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.PermissionService/ListPermissions",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.PermissionService", "ListPermissions"]
+            },
+            "description": "List all permissions with pagination"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. RolePermissionService",
+      "description": "Role-permission assignment operations",
+      "item": [
+        {
+          "name": "AssignPermissionToRole",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role_id\": \"{{roleId}}\",\n  \"permission_id\": \"{{permissionId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.RolePermissionService/AssignPermissionToRole",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.RolePermissionService", "AssignPermissionToRole"]
+            },
+            "description": "Assign a permission to a role"
+          },
+          "response": []
+        },
+        {
+          "name": "RevokePermissionFromRole",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role_id\": \"{{roleId}}\",\n  \"permission_id\": \"{{permissionId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.RolePermissionService/RevokePermissionFromRole",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.RolePermissionService", "RevokePermissionFromRole"]
+            },
+            "description": "Revoke a permission from a role"
+          },
+          "response": []
+        },
+        {
+          "name": "GetRolePermissions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role_id\": \"{{roleId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.RolePermissionService/GetRolePermissions",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.RolePermissionService", "GetRolePermissions"]
+            },
+            "description": "Get all permissions for a role"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. UserRoleService",
+      "description": "User-role assignment operations",
+      "item": [
+        {
+          "name": "AssignRoleToUser",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"role_id\": \"{{roleId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserRoleService/AssignRoleToUser",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserRoleService", "AssignRoleToUser"]
+            },
+            "description": "Assign a role to a user"
+          },
+          "response": []
+        },
+        {
+          "name": "RevokeRoleFromUser",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"role_id\": \"{{roleId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserRoleService/RevokeRoleFromUser",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserRoleService", "RevokeRoleFromUser"]
+            },
+            "description": "Revoke a role from a user"
+          },
+          "response": []
+        },
+        {
+          "name": "GetUserRoles",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserRoleService/GetUserRoles",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserRoleService", "GetUserRoles"]
+            },
+            "description": "Get all roles for a user"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "8. PermissionResolutionService",
+      "description": "Permission resolution and authorization checks (Hybrid RBAC)",
+      "item": [
+        {
+          "name": "GetUserEffectivePermissions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.PermissionResolutionService/GetUserEffectivePermissions",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.PermissionResolutionService", "GetUserEffectivePermissions"]
+            },
+            "description": "Get all effective permissions for a user (direct + role-based)"
+          },
+          "response": []
+        },
+        {
+          "name": "CheckUserPermission",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"resource\": \"articles\",\n  \"action\": \"create\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.PermissionResolutionService/CheckUserPermission",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.PermissionResolutionService", "CheckUserPermission"]
+            },
+            "description": "Check if user has a specific permission"
+          },
+          "response": []
+        },
+        {
+          "name": "GrantDirectPermissionToUser",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"permission_id\": \"{{permissionId}}\",\n  \"reason\": \"Temporary access for Q4 campaign\",\n  \"expires_at\": \"2025-12-31T23:59:59Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.PermissionResolutionService/GrantDirectPermissionToUser",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.PermissionResolutionService", "GrantDirectPermissionToUser"]
+            },
+            "description": "Grant direct permission to user (Hybrid RBAC)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "9. UserCommandUseCases",
+      "description": "Write operations for user management (CQRS Commands)",
+      "item": [
+        {
+          "name": "CreateUser",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"username\": \"newuser\",\n  \"password\": \"SecurePass123!\",\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserCommandUseCases/CreateUser",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserCommandUseCases", "CreateUser"]
+            },
+            "description": "Create a new user"
+          },
+          "response": []
+        },
+        {
+          "name": "UpdateUser",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"first_name\": \"Jane\",\n  \"last_name\": \"Smith\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserCommandUseCases/UpdateUser",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserCommandUseCases", "UpdateUser"]
+            },
+            "description": "Update user details"
+          },
+          "response": []
+        },
+        {
+          "name": "DeleteUser",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserCommandUseCases/DeleteUser",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserCommandUseCases", "DeleteUser"]
+            },
+            "description": "Delete user (soft delete)"
+          },
+          "response": []
+        },
+        {
+          "name": "ChangePassword",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"old_password\": \"OldSecurePass123!\",\n  \"new_password\": \"NewSecurePass456!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserCommandUseCases/ChangePassword",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserCommandUseCases", "ChangePassword"]
+            },
+            "description": "Change user password"
+          },
+          "response": []
+        },
+        {
+          "name": "VerifyEmail",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"verification_token\": \"abc123xyz\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserCommandUseCases/VerifyEmail",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserCommandUseCases", "VerifyEmail"]
+            },
+            "description": "Verify user email address"
+          },
+          "response": []
+        },
+        {
+          "name": "CreateSession",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserCommandUseCases/CreateSession",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserCommandUseCases", "CreateSession"]
+            },
+            "description": "Create a new session for user (24h expiry)"
+          },
+          "response": []
+        },
+        {
+          "name": "UpdateSessionActivity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{sessionId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserCommandUseCases/UpdateSessionActivity",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserCommandUseCases", "UpdateSessionActivity"]
+            },
+            "description": "Update session activity and extend expiry by 1 hour"
+          },
+          "response": []
+        },
+        {
+          "name": "TerminateSession",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{sessionId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserCommandUseCases/TerminateSession",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserCommandUseCases", "TerminateSession"]
+            },
+            "description": "Terminate (deactivate) a specific session"
+          },
+          "response": []
+        },
+        {
+          "name": "TerminateAllUserSessions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserCommandUseCases/TerminateAllUserSessions",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserCommandUseCases", "TerminateAllUserSessions"]
+            },
+            "description": "Terminate all active sessions for a user"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10. UserQueryUseCases",
+      "description": "Read operations for user management (CQRS Queries)",
+      "item": [
+        {
+          "name": "GetUser",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"include_inactive\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserQueryUseCases/GetUser",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserQueryUseCases", "GetUser"]
+            },
+            "description": "Get user by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "GetUserByEmail",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserQueryUseCases/GetUserByEmail",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserQueryUseCases", "GetUserByEmail"]
+            },
+            "description": "Get user by email address"
+          },
+          "response": []
+        },
+        {
+          "name": "ListUsers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 20,\n  \"include_inactive\": false,\n  \"sort_by\": \"created_at\",\n  \"sort_order\": \"desc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserQueryUseCases/ListUsers",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserQueryUseCases", "ListUsers"]
+            },
+            "description": "List all users with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "ValidateUserCredentials",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email_or_username\": \"johndoe\",\n  \"password\": \"SecurePass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserQueryUseCases/ValidateUserCredentials",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserQueryUseCases", "ValidateUserCredentials"]
+            },
+            "description": "Validate username/email and password (used for authentication)"
+          },
+          "response": []
+        },
+        {
+          "name": "CheckUserExists",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"username\": \"johndoe\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserQueryUseCases/CheckUserExists",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserQueryUseCases", "CheckUserExists"]
+            },
+            "description": "Check if user exists by email or username"
+          },
+          "response": []
+        },
+        {
+          "name": "GetUserSessions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"include_inactive\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserQueryUseCases/GetUserSessions",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserQueryUseCases", "GetUserSessions"]
+            },
+            "description": "Get all sessions for a user"
+          },
+          "response": []
+        },
+        {
+          "name": "GetSessionByToken",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token_hash\": \"sha256hashoftoken...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.UserQueryUseCases/GetSessionByToken",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.UserQueryUseCases", "GetSessionByToken"]
+            },
+            "description": "Lookup session by token hash"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11. SessionService",
+      "description": "Session management operations",
+      "item": [
+        {
+          "name": "CreateSession",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"ip_address\": \"192.168.1.100\",\n  \"user_agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36\",\n  \"expires_in_seconds\": 3600\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.SessionService/CreateSession",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.SessionService", "CreateSession"]
+            },
+            "description": "Create a new user session"
+          },
+          "response": []
+        },
+        {
+          "name": "GetSession",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"session-123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.SessionService/GetSession",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.SessionService", "GetSession"]
+            },
+            "description": "Get session by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "ValidateSession",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"session-123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.SessionService/ValidateSession",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.SessionService", "ValidateSession"]
+            },
+            "description": "Validate if session is still active"
+          },
+          "response": []
+        },
+        {
+          "name": "RevokeSession",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"session-123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.SessionService/RevokeSession",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.SessionService", "RevokeSession"]
+            },
+            "description": "Revoke/invalidate a session"
+          },
+          "response": []
+        },
+        {
+          "name": "RevokeAllUserSessions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{grpcUrl}}/sapiens.SessionService/RevokeAllUserSessions",
+              "host": ["{{grpcUrl}}"],
+              "path": ["sapiens.SessionService", "RevokeAllUserSessions"]
+            },
+            "description": "Revoke all sessions for a user (logout from all devices)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Check if token exists, otherwise prompt to authenticate",
+          "if (!pm.variables.get(\"token\")) {",
+          "    console.log(\"⚠️ No authentication token found. Please set the 'token' variable.\");",
+          "    console.log(\"💡 Use UserQueryUseCases/ValidateUserCredentials to authenticate first.\");",
+          "}"
+        ]
+      }
+    }
+  ]
+}

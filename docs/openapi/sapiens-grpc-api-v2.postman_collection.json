@@ -1,0 +1,234 @@
+{
+  "info": {
+    "name": "Sapiens gRPC API - Updated Schema",
+    "description": "gRPC API test collection for Sapiens User Management Service.\n\n**Updated Schema:**\n- first_name (required, 1-100 chars)\n- middle_name (optional, max 100 chars)\n- last_name (optional, max 100 chars)\n- full_name (computed, read-only)\n\n**gRPC Services:**\n1. UserCommandUseCases (CRUD operations)\n2. UserQueryUseCases (Read operations)\n3. PasswordService (Password operations)\n4. TokenService (Token operations)\n\n**gRPC Server:** localhost:50052\n\n**Note:** Use gRPC tools like grpcurl, BloomRPC, or Postman gRPC to test these endpoints.",
+    "_postman_id": "sapiens-grpc-v2-2025",
+    "version": "2.1.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "grpcHost", "value": "localhost:50052"},
+    {"key": "userId", "value": ""},
+    {"key": "token", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "User Commands (CRUD)",
+      "description": "UserCommandUseCases gRPC service",
+      "item": [
+        {
+          "name": "CreateUser",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "grpc",
+              "options": {
+                "protobuf": {
+                  "message": "CreateUserRequest",
+                  "service": "domain.usecase.sapiens.UserCommandUseCases"
+                }
+              },
+              "raw": "{\n  \"email\": \"alice.smith@example.com\",\n  \"username\": \"alicesmith\",\n  \"password\": \"SecureP@ss123\",\n  \"first_name\": \"Alice\",\n  \"middle_name\": \"Marie\",\n  \"last_name\": \"Smith\"\n}"
+            },
+            "url": {
+              "raw": "grpc://{{grpcHost}}/domain.usecase.sapiens.UserCommandUseCases/CreateUser",
+              "protocol": "grpc",
+              "host": ["{{grpcHost}}"],
+              "path": ["domain.usecase.sapiens.UserCommandUseCases", "CreateUser"]
+            }
+          }
+        },
+        {
+          "name": "CreateUser - Only First Name",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "grpc",
+              "raw": "{\n  \"email\": \"madonna@example.com\",\n  \"username\": \"madonna\",\n  \"password\": \"SecureP@ss123\",\n  \"first_name\": \"Madonna\"\n}"
+            },
+            "url": {
+              "raw": "grpc://{{grpcHost}}/domain.usecase.sapiens.UserCommandUseCases/CreateUser",
+              "protocol": "grpc",
+              "host": ["{{grpcHost}}"],
+              "path": ["domain.usecase.sapiens.UserCommandUseCases", "CreateUser"]
+            }
+          }
+        },
+        {
+          "name": "CreateUser - All Three Names",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "grpc",
+              "raw": "{\n  \"email\": \"jfk@example.com\",\n  \"username\": \"jfkennedy\",\n  \"password\": \"SecureP@ss123\",\n  \"first_name\": \"John\",\n  \"middle_name\": \"Fitzgerald\",\n  \"last_name\": \"Kennedy\"\n}"
+            },
+            "url": {
+              "raw": "grpc://{{grpcHost}}/domain.usecase.sapiens.UserCommandUseCases/CreateUser",
+              "protocol": "grpc",
+              "host": ["{{grpcHost}}"],
+              "path": ["domain.usecase.sapiens.UserCommandUseCases", "CreateUser"]
+            }
+          }
+        },
+        {
+          "name": "UpdateUser",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "grpc",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"email\": \"alice.updated@example.com\",\n  \"first_name\": \"Alice\",\n  \"middle_name\": \"Elizabeth\",\n  \"last_name\": \"Johnson\"\n}"
+            },
+            "url": {
+              "raw": "grpc://{{grpcHost}}/domain.usecase.sapiens.UserCommandUseCases/UpdateUser",
+              "protocol": "grpc",
+              "host": ["{{grpcHost}}"],
+              "path": ["domain.usecase.sapiens.UserCommandUseCases", "UpdateUser"]
+            }
+          }
+        },
+        {
+          "name": "DeleteUser",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "grpc",
+              "raw": "{\n  \"user_id\": \"{{userId}}\"\n}"
+            },
+            "url": {
+              "raw": "grpc://{{grpcHost}}/domain.usecase.sapiens.UserCommandUseCases/DeleteUser",
+              "protocol": "grpc",
+              "host": ["{{grpcHost}}"],
+              "path": ["domain.usecase.sapiens.UserCommandUseCases", "DeleteUser"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Queries (Read)",
+      "description": "UserQueryUseCases gRPC service",
+      "item": [
+        {
+          "name": "GetUser",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "grpc",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"include_inactive\": false\n}"
+            },
+            "url": {
+              "raw": "grpc://{{grpcHost}}/domain.usecase.sapiens.UserQueryUseCases/GetUser",
+              "protocol": "grpc",
+              "host": ["{{grpcHost}}"],
+              "path": ["domain.usecase.sapiens.UserQueryUseCases", "GetUser"]
+            }
+          }
+        },
+        {
+          "name": "SearchUsers - By First Name",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "grpc",
+              "raw": "{\n  \"search_term\": \"Alice\",\n  \"page\": 1,\n  \"page_size\": 20\n}"
+            },
+            "url": {
+              "raw": "grpc://{{grpcHost}}/domain.usecase.sapiens.UserQueryUseCases/SearchUsers",
+              "protocol": "grpc",
+              "host": ["{{grpcHost}}"],
+              "path": ["domain.usecase.sapiens.UserQueryUseCases", "SearchUsers"]
+            }
+          }
+        },
+        {
+          "name": "SearchUsers - By Last Name",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "grpc",
+              "raw": "{\n  \"search_term\": \"Johnson\",\n  \"page\": 1,\n  \"page_size\": 20\n}"
+            },
+            "url": {
+              "raw": "grpc://{{grpcHost}}/domain.usecase.sapiens.UserQueryUseCases/SearchUsers",
+              "protocol": "grpc",
+              "host": ["{{grpcHost}}"],
+              "path": ["domain.usecase.sapiens.UserQueryUseCases", "SearchUsers"]
+            }
+          }
+        },
+        {
+          "name": "SearchUsers - By Full Name",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "grpc",
+              "raw": "{\n  \"search_term\": \"Alice Johnson\",\n  \"page\": 1,\n  \"page_size\": 20\n}"
+            },
+            "url": {
+              "raw": "grpc://{{grpcHost}}/domain.usecase.sapiens.UserQueryUseCases/SearchUsers",
+              "protocol": "grpc",
+              "host": ["{{grpcHost}}"],
+              "path": ["domain.usecase.sapiens.UserQueryUseCases", "SearchUsers"]
+            }
+          }
+        },
+        {
+          "name": "ListUsers",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "grpc",
+              "raw": "{\n  \"page\": 1,\n  \"page_size\": 20,\n  \"include_inactive\": false\n}"
+            },
+            "url": {
+              "raw": "grpc://{{grpcHost}}/domain.usecase.sapiens.UserQueryUseCases/ListUsers",
+              "protocol": "grpc",
+              "host": ["{{grpcHost}}"],
+              "path": ["domain.usecase.sapiens.UserQueryUseCases", "ListUsers"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Test Scenarios",
+      "description": "Complete test scenarios with grpcurl commands",
+      "item": [
+        {
+          "name": "Scenario 1: Create User with All Names",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "# grpcurl command:\ngrpcurl -plaintext \\\n  -d '{\n    \"email\": \"test@example.com\",\n    \"username\": \"testuser\",\n    \"password\": \"SecureP@ss123\",\n    \"first_name\": \"Test\",\n    \"middle_name\": \"Middle\",\n    \"last_name\": \"User\"\n  }' \\\n  localhost:50052 \\\n  domain.usecase.sapiens.UserCommandUseCases/CreateUser\n\n# Expected Response:\n{\n  \"success\": true,\n  \"message\": \"User created successfully\",\n  \"data\": {\n    \"id\": \"<user-id>\",\n    \"email\": \"test@example.com\",\n    \"username\": \"testuser\",\n    \"first_name\": \"Test\",\n    \"middle_name\": \"Middle\",\n    \"last_name\": \"User\",\n    \"full_name\": \"Test Middle User\",\n    ...\n  }\n}"
+            },
+            "url": {"raw": ""}
+          }
+        },
+        {
+          "name": "Scenario 2: Search by Full Name",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "# grpcurl command:\ngrpcurl -plaintext \\\n  -d '{\n    \"search_term\": \"Test User\",\n    \"page\": 1,\n    \"page_size\": 10\n  }' \\\n  localhost:50052 \\\n  domain.usecase.sapiens.UserQueryUseCases/SearchUsers\n\n# Should find users matching:\n# - first_name contains \"Test\"\n# - last_name contains \"User\"\n# - OR full_name contains \"Test User\""
+            },
+            "url": {"raw": ""}
+          }
+        }
+      ]
+    }
+  ]
+}
