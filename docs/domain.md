@@ -151,7 +151,7 @@ enum UserStatus {
 - Email: Must be valid RFC 5322 format, normalized to lowercase
 - Password: Min 12 chars, complexity requirements (uppercase, lowercase, digit, special)
 - Status: 'suspended' for temporary bans, 'inactive' for soft deletes
-- Account lockout: 5 failed login attempts → lock for 15 minutes
+- Account lockout: 5 failed login attempts → lock for 5 minutes
 - Email verification: Required before full account activation
 
 **Invariants**:

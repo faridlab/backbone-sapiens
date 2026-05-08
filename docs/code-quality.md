@@ -110,7 +110,7 @@ Execution Time: 0.01s
 |---------|--------|
 | MFA Support | Implemented (TOTP, SMS, Email, BackupCode) |
 | Session Management | Advanced with device tracking |
-| Account Lockout | 5 attempts / 15 min |
+| Account Lockout | 5 attempts / 5 min |
 | Rate Limiting | Middleware ready |
 | JWT Token Management | backbone-auth integration |
 

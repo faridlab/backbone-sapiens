@@ -2419,7 +2419,7 @@ X-RateLimit-Reset: 1705680000
 
 3. **Failed Attempt Handling**:
    - Increment `failed_login_attempts` counter
-   - If attempts >= 5: Lock account for 15 minutes
+   - If attempts >= 5: Lock account for 5 minutes
    - Log failed attempt with IP and user agent
 
 4. **Success Path**:
@@ -2510,14 +2510,14 @@ X-RateLimit-Reset: 1705680000
 | Error Condition | HTTP Status | Error Code | Message |
 |----------------|-------------|------------|---------|
 | Invalid credentials | 401 | AUTH_INVALID_CREDENTIALS | "Invalid email or password" |
-| Account locked | 423 | AUTH_ACCOUNT_LOCKED | "Account locked due to failed attempts. Try again in 15 minutes." |
+| Account locked | 423 | AUTH_ACCOUNT_LOCKED | "Account locked due to failed attempts. Try again in 5 minutes." |
 | Account suspended | 403 | AUTH_ACCOUNT_SUSPENDED | "Account has been suspended" |
 | MFA code invalid | 401 | AUTH_MFA_INVALID | "Invalid MFA code" |
 | MFA code expired | 401 | AUTH_MFA_EXPIRED | "MFA code has expired. Request a new code." |
 
 **Security Requirements**:
 - Rate limiting: 10 login attempts per IP per minute
-- Account lockout: 5 failed attempts = 15 minute lockout
+- Account lockout: 5 failed attempts = 5 minute lockout
 - JWT expiry: 24 hours for access token, 7 days for refresh token
 - Secure token storage: HttpOnly, Secure, SameSite cookies
 - CSRF protection for OAuth callbacks

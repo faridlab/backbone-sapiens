@@ -88,7 +88,7 @@ Main Flow:
 
 Alternative Flows:
 - Invalid credentials: Increment failed_login_attempts
-- Account locked: Return error ACCOUNT_LOCKED (15 min lockout after 5 failures)
+- Account locked: Return error ACCOUNT_LOCKED (5 min lockout after 5 failures)
 - MFA required: Redirect to MFA verification
 
 Business Rules:
@@ -547,7 +547,7 @@ Related Entities: User, Permission, TemporaryPermission, AuditLog, Notification
 ##### Business Rules
 
 1. Email must be verified before account becomes active
-2. Account locked for 15 minutes after 5 failed login attempts
+2. Account locked for 5 minutes after 5 failed login attempts
 3. Password change invalidates all existing sessions
 4. Username cannot be changed after creation (immutable)
 
