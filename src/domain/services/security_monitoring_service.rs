@@ -384,7 +384,7 @@ impl SecurityMonitoringService for DefaultSecurityMonitoringService {
         };
 
         if should_lock {
-            let lockout_duration = Duration::minutes(15);
+            let lockout_duration = Duration::minutes(5);
             let locked_until = Utc::now() + lockout_duration;
 
             {

@@ -51,7 +51,7 @@ pub enum UserError {
     WeakPassword(String),
     #[error("Account is temporarily locked. Try again later.: {0}")]
     AccountLocked(String),
-    #[error("Too many failed login attempts. Account locked for 15 minutes.: {0}")]
+    #[error("Too many failed login attempts. Account locked for 5 minutes.: {0}")]
     MaxAttemptsExceeded(String),
 }
 

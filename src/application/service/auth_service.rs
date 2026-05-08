@@ -289,7 +289,7 @@ impl AuthService {
         if !valid {
             let new_attempts = user.failed_login_attempts + 1;
             let lock_until = if new_attempts >= 5 {
-                Some(Utc::now() + Duration::minutes(15))
+                Some(Utc::now() + Duration::minutes(5))
             } else {
                 None
             };

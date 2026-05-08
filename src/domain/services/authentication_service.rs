@@ -465,7 +465,7 @@ impl AuthenticationService for DefaultAuthenticationService {
 
         // Check if account is locked
         if self.is_account_locked(user.id).await? {
-            return Err(AuthenticationError::AccountLocked(Utc::now() + Duration::minutes(15)));
+            return Err(AuthenticationError::AccountLocked(Utc::now() + Duration::minutes(5)));
         }
 
         // Check account status
@@ -730,7 +730,7 @@ impl AuthenticationService for DefaultAuthenticationService {
 
         // Check if account is locked
         if self.is_account_locked(user_id).await? {
-            return Err(AuthenticationError::AccountLocked(Utc::now() + Duration::minutes(15)));
+            return Err(AuthenticationError::AccountLocked(Utc::now() + Duration::minutes(5)));
         }
 
         self.generate_tokens(user_id)
