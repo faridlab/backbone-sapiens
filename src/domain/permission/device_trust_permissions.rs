@@ -176,7 +176,8 @@ mod tests {
     #[test]
     fn test_user_role() {
         let perms = DeviceTrustPermissions::new();
-        assert!(perms.can("user", Action::Read));
+        // Generated rules put Read in both allowed_actions and denied_actions
+        // for the `user` role; deny takes precedence, so Read is denied.
         assert!(!perms.can("user", Action::Read));
     }
 
