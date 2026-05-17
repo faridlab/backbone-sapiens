@@ -355,7 +355,7 @@ mod tests {
         let integration_bus = Arc::new(IntegrationEventBus::new());
         let publisher = SapiensIntegrationEventPublisher::new(integration_bus);
 
-        assert_eq!(publisher.name, "SapiensIntegrationEventPublisher");
+        assert_eq!(publisher.name(), "SapiensIntegrationEventPublisher");
         assert!(publisher.should_retry());
         assert_eq!(publisher.max_retries(), 3);
     }
