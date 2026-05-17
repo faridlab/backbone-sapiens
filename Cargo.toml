@@ -1,6 +1,6 @@
 [package]
 name = "backbone-sapiens"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 description = "Sapiens Bounded Context: User Management Module for Backbone Framework"
 
