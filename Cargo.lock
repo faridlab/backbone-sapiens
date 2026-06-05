@@ -323,7 +323,7 @@ dependencies = [
 [[package]]
 name = "backbone-auth"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.4.0#ac878a39228bf7042b233276d3d1727c96b52b23"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.5.0#0feb16f008e2a976511e22417179ed0e237f9806"
 dependencies = [
  "anyhow",
  "argon2",
@@ -347,12 +347,13 @@ dependencies = [
 [[package]]
 name = "backbone-core"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.4.0#ac878a39228bf7042b233276d3d1727c96b52b23"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.5.0#0feb16f008e2a976511e22417179ed0e237f9806"
 dependencies = [
  "anyhow",
  "async-trait",
  "axum",
  "backbone-messaging",
+ "backbone-orm",
  "chrono",
  "prost",
  "regex",
@@ -373,7 +374,7 @@ dependencies = [
 [[package]]
 name = "backbone-email"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.4.0#ac878a39228bf7042b233276d3d1727c96b52b23"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.5.0#0feb16f008e2a976511e22417179ed0e237f9806"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -392,7 +393,7 @@ dependencies = [
 [[package]]
 name = "backbone-messaging"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.4.0#ac878a39228bf7042b233276d3d1727c96b52b23"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.5.0#0feb16f008e2a976511e22417179ed0e237f9806"
 dependencies = [
  "async-trait",
  "chrono",
@@ -407,7 +408,7 @@ dependencies = [
 [[package]]
 name = "backbone-orm"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.4.0#ac878a39228bf7042b233276d3d1727c96b52b23"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.5.0#0feb16f008e2a976511e22417179ed0e237f9806"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -424,7 +425,7 @@ dependencies = [
 
 [[package]]
 name = "backbone-sapiens"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "anyhow",
  "argon2",
