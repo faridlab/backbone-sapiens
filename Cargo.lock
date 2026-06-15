@@ -323,7 +323,7 @@ dependencies = [
 [[package]]
 name = "backbone-auth"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.0#01396b68ac013a15fbb8e5a951f392647fc24b7e"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.1#204ea5db443fead6e4a1ee47d88e890b11faebb4"
 dependencies = [
  "anyhow",
  "argon2",
@@ -347,7 +347,7 @@ dependencies = [
 [[package]]
 name = "backbone-core"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.0#01396b68ac013a15fbb8e5a951f392647fc24b7e"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.1#204ea5db443fead6e4a1ee47d88e890b11faebb4"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -374,7 +374,7 @@ dependencies = [
 [[package]]
 name = "backbone-email"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.0#01396b68ac013a15fbb8e5a951f392647fc24b7e"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.1#204ea5db443fead6e4a1ee47d88e890b11faebb4"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -393,7 +393,7 @@ dependencies = [
 [[package]]
 name = "backbone-messaging"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.0#01396b68ac013a15fbb8e5a951f392647fc24b7e"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.1#204ea5db443fead6e4a1ee47d88e890b11faebb4"
 dependencies = [
  "async-trait",
  "chrono",
@@ -408,7 +408,7 @@ dependencies = [
 [[package]]
 name = "backbone-orm"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.0#01396b68ac013a15fbb8e5a951f392647fc24b7e"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.1#204ea5db443fead6e4a1ee47d88e890b11faebb4"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -425,7 +425,7 @@ dependencies = [
 
 [[package]]
 name = "backbone-sapiens"
-version = "0.1.14"
+version = "0.1.15"
 dependencies = [
  "anyhow",
  "argon2",
@@ -1004,7 +1004,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -2078,7 +2078,7 @@ version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -2974,7 +2974,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -3269,7 +3269,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a766e1110788c36f4fa1c2b71b387a7815aa65f88ce0229841826633d93723e"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -3624,10 +3624,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.4.2",
+ "getrandom 0.3.4",
  "once_cell",
  "rustix",
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
