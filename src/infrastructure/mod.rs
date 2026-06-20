@@ -4,8 +4,6 @@
 
 pub mod persistence;
 
-// <<< CUSTOM
-// END CUSTOM
 // <<< CUSTOM: Add auth module export
 pub mod auth;
 // <<< CUSTOM: Add messaging module export
