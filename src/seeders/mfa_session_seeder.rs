@@ -40,8 +40,8 @@ impl Seeder for SeedMFASessionSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if mfa_sessions table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM mfa_sessions")
+        // Check if sapiens.mfa_sessions table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.mfa_sessions")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedMFASessionSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM mfa_sessions")
+        sqlx::query("DELETE FROM sapiens.mfa_sessions")
             .execute(pool)
             .await?;
         Ok(())

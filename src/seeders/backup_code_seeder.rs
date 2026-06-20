@@ -40,8 +40,8 @@ impl Seeder for SeedBackupCodeSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if backup_codes table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM backup_codes")
+        // Check if sapiens.backup_codes table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.backup_codes")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedBackupCodeSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM backup_codes")
+        sqlx::query("DELETE FROM sapiens.backup_codes")
             .execute(pool)
             .await?;
         Ok(())

@@ -40,8 +40,8 @@ impl Seeder for SeedPasswordCreationContextSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if password_creation_contexts table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM password_creation_contexts")
+        // Check if sapiens.password_creation_contexts table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.password_creation_contexts")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedPasswordCreationContextSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM password_creation_contexts")
+        sqlx::query("DELETE FROM sapiens.password_creation_contexts")
             .execute(pool)
             .await?;
         Ok(())

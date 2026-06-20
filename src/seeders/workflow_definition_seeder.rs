@@ -40,8 +40,8 @@ impl Seeder for SeedWorkflowDefinitionSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if workflow_definitions table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM workflow_definitions")
+        // Check if sapiens.workflow_definitions table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.workflow_definitions")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedWorkflowDefinitionSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM workflow_definitions")
+        sqlx::query("DELETE FROM sapiens.workflow_definitions")
             .execute(pool)
             .await?;
         Ok(())

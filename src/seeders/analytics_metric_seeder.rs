@@ -40,8 +40,8 @@ impl Seeder for SeedAnalyticsMetricSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if analytics_metrics table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM analytics_metrics")
+        // Check if sapiens.analytics_metrics table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.analytics_metrics")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedAnalyticsMetricSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM analytics_metrics")
+        sqlx::query("DELETE FROM sapiens.analytics_metrics")
             .execute(pool)
             .await?;
         Ok(())

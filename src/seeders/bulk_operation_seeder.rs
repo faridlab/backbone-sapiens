@@ -40,8 +40,8 @@ impl Seeder for SeedBulkOperationSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if bulk_operations table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM bulk_operations")
+        // Check if sapiens.bulk_operations table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.bulk_operations")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedBulkOperationSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM bulk_operations")
+        sqlx::query("DELETE FROM sapiens.bulk_operations")
             .execute(pool)
             .await?;
         Ok(())

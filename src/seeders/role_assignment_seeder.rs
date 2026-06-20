@@ -40,8 +40,8 @@ impl Seeder for SeedRoleAssignmentSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if role_assignments table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM role_assignments")
+        // Check if sapiens.role_assignments table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.role_assignments")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedRoleAssignmentSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM role_assignments")
+        sqlx::query("DELETE FROM sapiens.role_assignments")
             .execute(pool)
             .await?;
         Ok(())

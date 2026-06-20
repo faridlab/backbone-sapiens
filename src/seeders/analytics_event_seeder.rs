@@ -40,8 +40,8 @@ impl Seeder for SeedAnalyticsEventSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if analytics_events table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM analytics_events")
+        // Check if sapiens.analytics_events table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.analytics_events")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedAnalyticsEventSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM analytics_events")
+        sqlx::query("DELETE FROM sapiens.analytics_events")
             .execute(pool)
             .await?;
         Ok(())

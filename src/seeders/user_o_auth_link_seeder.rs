@@ -40,8 +40,8 @@ impl Seeder for SeedUserOAuthLinkSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if user_oauth_links table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM user_oauth_links")
+        // Check if sapiens.user_oauth_links table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.user_oauth_links")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedUserOAuthLinkSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM user_oauth_links")
+        sqlx::query("DELETE FROM sapiens.user_oauth_links")
             .execute(pool)
             .await?;
         Ok(())

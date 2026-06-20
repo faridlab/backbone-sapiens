@@ -40,8 +40,8 @@ impl Seeder for SeedDirectPermissionGrantSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if direct_permission_grants table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM direct_permission_grants")
+        // Check if sapiens.direct_permission_grants table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.direct_permission_grants")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedDirectPermissionGrantSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM direct_permission_grants")
+        sqlx::query("DELETE FROM sapiens.direct_permission_grants")
             .execute(pool)
             .await?;
         Ok(())

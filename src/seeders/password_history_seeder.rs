@@ -40,8 +40,8 @@ impl Seeder for SeedPasswordHistorySeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if password_history table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM password_history")
+        // Check if sapiens.password_history table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.password_history")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedPasswordHistorySeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM password_history")
+        sqlx::query("DELETE FROM sapiens.password_history")
             .execute(pool)
             .await?;
         Ok(())

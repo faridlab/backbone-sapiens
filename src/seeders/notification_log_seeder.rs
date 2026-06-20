@@ -40,8 +40,8 @@ impl Seeder for SeedNotificationLogSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if notification_logs table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM notification_logs")
+        // Check if sapiens.notification_logs table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.notification_logs")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedNotificationLogSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM notification_logs")
+        sqlx::query("DELETE FROM sapiens.notification_logs")
             .execute(pool)
             .await?;
         Ok(())

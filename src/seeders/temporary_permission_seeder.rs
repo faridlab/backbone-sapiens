@@ -40,8 +40,8 @@ impl Seeder for SeedTemporaryPermissionSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if temporary_permissions table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM temporary_permissions")
+        // Check if sapiens.temporary_permissions table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.temporary_permissions")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedTemporaryPermissionSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM temporary_permissions")
+        sqlx::query("DELETE FROM sapiens.temporary_permissions")
             .execute(pool)
             .await?;
         Ok(())

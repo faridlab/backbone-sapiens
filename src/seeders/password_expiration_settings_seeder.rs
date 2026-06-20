@@ -40,8 +40,8 @@ impl Seeder for SeedPasswordExpirationSettingsSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if password_expiration_settings table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM password_expiration_settings")
+        // Check if sapiens.password_expiration_settings table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.password_expiration_settings")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedPasswordExpirationSettingsSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM password_expiration_settings")
+        sqlx::query("DELETE FROM sapiens.password_expiration_settings")
             .execute(pool)
             .await?;
         Ok(())

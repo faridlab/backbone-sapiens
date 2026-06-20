@@ -40,8 +40,8 @@ impl Seeder for SeedEffectivePermissionCacheSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if effective_permission_cache table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM effective_permission_cache")
+        // Check if sapiens.effective_permission_cache table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.effective_permission_cache")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedEffectivePermissionCacheSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM effective_permission_cache")
+        sqlx::query("DELETE FROM sapiens.effective_permission_cache")
             .execute(pool)
             .await?;
         Ok(())

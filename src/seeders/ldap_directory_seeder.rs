@@ -40,8 +40,8 @@ impl Seeder for SeedLDAPDirectorySeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if ldap_directories table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM ldap_directories")
+        // Check if sapiens.ldap_directories table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.ldap_directories")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedLDAPDirectorySeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM ldap_directories")
+        sqlx::query("DELETE FROM sapiens.ldap_directories")
             .execute(pool)
             .await?;
         Ok(())

@@ -40,8 +40,8 @@ impl Seeder for SeedPasswordResetSecuritySeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if password_reset_security table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM password_reset_security")
+        // Check if sapiens.password_reset_security table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.password_reset_security")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedPasswordResetSecuritySeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM password_reset_security")
+        sqlx::query("DELETE FROM sapiens.password_reset_security")
             .execute(pool)
             .await?;
         Ok(())

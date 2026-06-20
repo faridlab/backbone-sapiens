@@ -40,8 +40,8 @@ impl Seeder for SeedOrganizationPermissionSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if organization_permissions table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM organization_permissions")
+        // Check if sapiens.organization_permissions table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.organization_permissions")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedOrganizationPermissionSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM organization_permissions")
+        sqlx::query("DELETE FROM sapiens.organization_permissions")
             .execute(pool)
             .await?;
         Ok(())

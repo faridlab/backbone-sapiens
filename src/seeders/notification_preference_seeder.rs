@@ -40,8 +40,8 @@ impl Seeder for SeedNotificationPreferenceSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if sapiens_notification_preferences table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens_notification_preferences")
+        // Check if sapiens.sapiens_notification_preferences table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.sapiens_notification_preferences")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedNotificationPreferenceSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM sapiens_notification_preferences")
+        sqlx::query("DELETE FROM sapiens.sapiens_notification_preferences")
             .execute(pool)
             .await?;
         Ok(())

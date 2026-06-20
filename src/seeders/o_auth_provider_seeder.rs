@@ -40,8 +40,8 @@ impl Seeder for SeedOAuthProviderSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if oauth_providers table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM oauth_providers")
+        // Check if sapiens.oauth_providers table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.oauth_providers")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedOAuthProviderSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM oauth_providers")
+        sqlx::query("DELETE FROM sapiens.oauth_providers")
             .execute(pool)
             .await?;
         Ok(())

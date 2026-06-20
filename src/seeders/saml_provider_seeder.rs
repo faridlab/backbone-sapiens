@@ -40,8 +40,8 @@ impl Seeder for SeedSAMLProviderSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if saml_providers table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM saml_providers")
+        // Check if sapiens.saml_providers table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.saml_providers")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedSAMLProviderSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM saml_providers")
+        sqlx::query("DELETE FROM sapiens.saml_providers")
             .execute(pool)
             .await?;
         Ok(())

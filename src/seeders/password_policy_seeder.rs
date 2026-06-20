@@ -40,8 +40,8 @@ impl Seeder for SeedPasswordPolicySeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if password_policies table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM password_policies")
+        // Check if sapiens.password_policies table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.password_policies")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedPasswordPolicySeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM password_policies")
+        sqlx::query("DELETE FROM sapiens.password_policies")
             .execute(pool)
             .await?;
         Ok(())

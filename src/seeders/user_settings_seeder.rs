@@ -40,8 +40,8 @@ impl Seeder for SeedUserSettingsSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if user_settings table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM user_settings")
+        // Check if sapiens.user_settings table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.user_settings")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedUserSettingsSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM user_settings")
+        sqlx::query("DELETE FROM sapiens.user_settings")
             .execute(pool)
             .await?;
         Ok(())

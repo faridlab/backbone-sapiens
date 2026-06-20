@@ -40,8 +40,8 @@ impl Seeder for SeedPermissionConflictSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if permission_conflicts table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM permission_conflicts")
+        // Check if sapiens.permission_conflicts table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.permission_conflicts")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedPermissionConflictSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM permission_conflicts")
+        sqlx::query("DELETE FROM sapiens.permission_conflicts")
             .execute(pool)
             .await?;
         Ok(())

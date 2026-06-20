@@ -40,8 +40,8 @@ impl Seeder for SeedDataExportSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if data_exports table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM data_exports")
+        // Check if sapiens.data_exports table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.data_exports")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedDataExportSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM data_exports")
+        sqlx::query("DELETE FROM sapiens.data_exports")
             .execute(pool)
             .await?;
         Ok(())

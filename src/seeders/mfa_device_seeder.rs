@@ -40,8 +40,8 @@ impl Seeder for SeedMFADeviceSeeder {
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
-        // Check if mfa_devices table has any data
-        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM mfa_devices")
+        // Check if sapiens.mfa_devices table has any data
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM sapiens.mfa_devices")
             .fetch_one(pool)
             .await?;
         Ok(count.0 == 0)
@@ -55,7 +55,7 @@ impl Seeder for SeedMFADeviceSeeder {
     }
 
     async fn rollback(&self, pool: &PgPool) -> Result<()> {
-        sqlx::query("DELETE FROM mfa_devices")
+        sqlx::query("DELETE FROM sapiens.mfa_devices")
             .execute(pool)
             .await?;
         Ok(())
