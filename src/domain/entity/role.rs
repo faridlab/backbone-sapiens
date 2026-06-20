@@ -49,7 +49,6 @@ impl std::ops::Deref for RoleId {
 pub struct Role {
     pub id: Uuid,
     pub name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub is_default: bool,
     #[serde(default)]

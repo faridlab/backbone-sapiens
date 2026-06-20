@@ -7,7 +7,6 @@ use super::OAuthProviderType;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{OAuthProviderStateMachine, OAuthProviderState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for OAuthProvider
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

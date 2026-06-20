@@ -57,7 +57,6 @@ pub struct PasswordHistory {
     pub creation_context: serde_json::Value,
     pub status: PasswordHistoryStatus,
     pub usage: serde_json::Value,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub expiry: Option<serde_json::Value>,
     #[serde(default)]
     #[sqlx(json)]
@@ -244,6 +243,9 @@ impl backbone_orm::EntityRepoMeta for PasswordHistory {
     }
     fn search_fields() -> &'static [&'static str] {
         &["password_hash"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId")]
     }
 }
 

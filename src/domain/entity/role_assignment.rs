@@ -55,30 +55,21 @@ pub struct RoleAssignment {
     pub role_id: Uuid,
     pub assigned_by: Uuid,
     pub assigned_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
     pub priority: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub scope: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub conditions: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_assignment_id: Option<Uuid>,
     pub inheritance_level: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub inherited_from: Option<Uuid>,
     pub conflicts_with: Vec<Uuid>,
     pub conflict_resolution: ConflictResolutionType,
     pub has_conflicts: bool,
     pub conflict_types: Vec<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub detected_conflicts: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_used_at: Option<DateTime<Utc>>,
     pub usage_count: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub modification_history: Option<serde_json::Value>,
     pub status: RoleAssignmentStatus,
     pub warning_sent: bool,
@@ -384,6 +375,9 @@ impl backbone_orm::EntityRepoMeta for RoleAssignment {
     }
     fn search_fields() -> &'static [&'static str] {
         &[]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("role", "roles", "roleId"), ("assigner", "users", "assignedBy"), ("parentAssignment", "role_assignments", "parentAssignmentId"), ("inheritedFromAssignment", "role_assignments", "inheritedFrom")]
     }
 }
 

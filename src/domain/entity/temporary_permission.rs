@@ -7,7 +7,6 @@ use super::TemporaryPermissionStatus;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{TemporaryPermissionStateMachine, TemporaryPermissionState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for TemporaryPermission
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -58,11 +57,8 @@ pub struct TemporaryPermission {
     pub granted_by: Uuid,
     pub granted_at: DateTime<Utc>,
     pub expires_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub revoked_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub revoked_by: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
     pub notified_before_expiry: bool,
     pub(crate) status: TemporaryPermissionStatus,
@@ -286,6 +282,9 @@ impl backbone_orm::EntityRepoMeta for TemporaryPermission {
     }
     fn search_fields() -> &'static [&'static str] {
         &[]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("permission", "permissions", "permissionId"), ("granter", "users", "grantedBy")]
     }
 }
 

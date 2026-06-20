@@ -51,7 +51,6 @@ pub struct UserRole {
     pub user_id: Uuid,
     pub role_id: Uuid,
     pub assigned_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub assigned_by: Option<Uuid>,
     #[serde(default)]
     #[sqlx(json)]
@@ -217,6 +216,9 @@ impl backbone_orm::EntityRepoMeta for UserRole {
     }
     fn search_fields() -> &'static [&'static str] {
         &[]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("role", "roles", "roleId"), ("assigner", "users", "assignedBy")]
     }
 }
 

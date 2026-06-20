@@ -54,17 +54,11 @@ pub struct BulkOperationResult {
     pub row_number: i32,
     pub record_type: String,
     pub status: BulkOperationResultStatus,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub input_data: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub output_data: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub warning_message: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub processed_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub processing_duration_ms: Option<i32>,
     #[serde(default)]
     #[sqlx(json)]
@@ -289,6 +283,9 @@ impl backbone_orm::EntityRepoMeta for BulkOperationResult {
     }
     fn search_fields() -> &'static [&'static str] {
         &["record_type"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("bulkOperation", "bulk_operations", "bulkOperationId")]
     }
 }
 

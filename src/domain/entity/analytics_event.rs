@@ -51,22 +51,14 @@ impl std::ops::Deref for AnalyticsEventId {
 pub struct AnalyticsEvent {
     pub id: Uuid,
     pub event_type: AnalyticsEventType,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub session_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub resource_type: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub resource_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub properties: Option<serde_json::Value>,
     pub timestamp: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub ip_address: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_agent: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub geographic_data: Option<serde_json::Value>,
     pub processed: bool,
     #[serde(default)]
@@ -304,6 +296,9 @@ impl backbone_orm::EntityRepoMeta for AnalyticsEvent {
     }
     fn search_fields() -> &'static [&'static str] {
         &[]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("session", "sessions", "sessionId")]
     }
 }
 

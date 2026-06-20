@@ -61,48 +61,33 @@ pub struct MFASession {
     pub session_hash: String,
     pub primary_authentication_method: PrimaryAuthMethod,
     pub mfa_required: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub mfa_enforced_at: Option<DateTime<Utc>>,
     pub risk_score: i32,
     pub trust_level: MfaTrustLevel,
     pub adaptive_authentication_triggered: bool,
     pub additional_factors_required: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub ip_risk_score: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub device_risk_score: Option<i32>,
     pub location_anomaly: bool,
     pub time_anomaly: bool,
     pub verification_method: MFAVerificationMethod,
     pub verification_initiated_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub verification_completed_at: Option<DateTime<Utc>>,
     pub verification_attempts: i32,
     pub max_attempts_allowed: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub verification_success: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub verification_time_ms: Option<i32>,
     pub device_trust_status: DeviceTrustStatus,
     pub is_terminated: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub terminated_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub termination_reason: Option<String>,
     pub ip_address: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_agent: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub device_fingerprint: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub country: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub region: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub city: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub latitude: Option<f64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub longitude: Option<f64>,
     pub expires_at: DateTime<Utc>,
     pub max_duration_minutes: i32,
@@ -111,9 +96,7 @@ pub struct MFASession {
     pub last_activity_at: DateTime<Utc>,
     pub extension_count: i32,
     pub initiation_time_ms: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub total_session_time_ms: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub device_performance_score: Option<i32>,
     pub network_quality: NetworkQuality,
     pub audit_log_required: bool,
@@ -562,6 +545,9 @@ impl backbone_orm::EntityRepoMeta for MFASession {
     }
     fn search_fields() -> &'static [&'static str] {
         &["session_token", "session_hash", "ip_address"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("device", "mfa_devices", "deviceId")]
     }
 }
 

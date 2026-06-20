@@ -51,24 +51,16 @@ impl std::ops::Deref for NotificationLogId {
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct NotificationLog {
     pub id: Uuid,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub notification_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub template_id: Option<Uuid>,
     pub recipient_type: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub recipient_id: Option<Uuid>,
     pub channel: NotificationChannel,
     pub status: NotificationLogStatus,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub sent_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub delivered_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub failed_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub external_id: Option<String>,
     #[serde(default)]
     #[sqlx(json)]
@@ -312,6 +304,9 @@ impl backbone_orm::EntityRepoMeta for NotificationLog {
     }
     fn search_fields() -> &'static [&'static str] {
         &["recipient_type"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("notification", "notifications", "notificationId"), ("template", "notification_templates", "templateId"), ("recipient", "users", "recipientId")]
     }
 }
 

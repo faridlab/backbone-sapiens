@@ -7,7 +7,6 @@ use super::LDAPDirectoryStatus;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{LDAPDirectoryStateMachine, LDAPDirectoryState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for LDAPDirectory
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -65,11 +64,8 @@ pub struct LDAPDirectory {
     pub search_filter: String,
     pub attribute_mapping: serde_json::Value,
     pub sync_enabled: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub sync_interval_minutes: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_sync_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_sync_result: Option<serde_json::Value>,
     pub is_active: bool,
     pub(crate) status: LDAPDirectoryStatus,

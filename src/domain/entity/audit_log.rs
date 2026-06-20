@@ -50,27 +50,18 @@ impl std::ops::Deref for AuditLogId {
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct AuditLog {
     pub id: Uuid,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_id: Option<Uuid>,
     pub action: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub details: Option<serde_json::Value>,
     pub severity: AuditLogSeverity,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub ip_address: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_agent: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub session_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub resource_type: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub resource_id: Option<String>,
     pub timestamp: DateTime<Utc>,
     pub archived: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub archived_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub archive_location: Option<String>,
     #[serde(default)]
     #[sqlx(json)]
@@ -321,6 +312,9 @@ impl backbone_orm::EntityRepoMeta for AuditLog {
     }
     fn search_fields() -> &'static [&'static str] {
         &["action"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("session", "sessions", "sessionId")]
     }
 }
 

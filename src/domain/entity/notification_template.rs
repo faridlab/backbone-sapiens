@@ -54,10 +54,8 @@ pub struct NotificationTemplate {
     pub name: String,
     pub notification_type: NotificationType,
     pub channel: NotificationChannel,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub subject_template: Option<String>,
     pub message_template: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub variables: Option<serde_json::Value>,
     pub is_active: bool,
     pub language: String,

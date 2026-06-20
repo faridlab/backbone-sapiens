@@ -7,7 +7,6 @@ use super::SAMLProviderStatus;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{SAMLProviderStateMachine, SAMLProviderState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for SAMLProvider
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -57,11 +56,9 @@ pub struct SAMLProvider {
     pub display_name: String,
     pub entity_id: String,
     pub sso_url: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub slo_url: Option<String>,
     pub certificate: String,
     pub acs_url: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub sls_url: Option<String>,
     pub name_id_format: String,
     pub attribute_mapping: serde_json::Value,

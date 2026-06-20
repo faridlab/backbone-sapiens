@@ -7,7 +7,6 @@ use super::UserStatus;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{UserStateMachine, UserState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for User
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -59,9 +58,7 @@ pub struct User {
     pub(crate) status: UserStatus,
     pub email_verified: bool,
     pub failed_login_attempts: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub locked_until: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_login: Option<DateTime<Utc>>,
     #[serde(default)]
     #[sqlx(json)]

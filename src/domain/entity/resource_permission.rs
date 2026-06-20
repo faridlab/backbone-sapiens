@@ -7,7 +7,6 @@ use super::ResourcePermissionStatus;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{ResourcePermissionStateMachine, ResourcePermissionState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for ResourcePermission
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -56,15 +55,11 @@ pub struct ResourcePermission {
     pub permission_id: Uuid,
     pub resource_type: String,
     pub resource_id: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub granted_to_user_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub granted_to_role_id: Option<Uuid>,
     pub granted_by: Uuid,
     pub granted_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
     pub(crate) status: ResourcePermissionStatus,
     #[serde(default)]
@@ -294,6 +289,9 @@ impl backbone_orm::EntityRepoMeta for ResourcePermission {
     }
     fn search_fields() -> &'static [&'static str] {
         &["resource_type", "resource_id"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("permission", "permissions", "permissionId"), ("grantedUser", "users", "grantedToUserId"), ("grantedRole", "roles", "grantedToRoleId"), ("granter", "users", "grantedBy")]
     }
 }
 

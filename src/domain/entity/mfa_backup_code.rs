@@ -52,59 +52,43 @@ impl std::ops::Deref for MFABackupCodeId {
 pub struct MFABackupCode {
     pub id: Uuid,
     pub user_id: Uuid,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub device_id: Option<Uuid>,
     pub batch_id: Uuid,
     pub code: String,
     pub code_hash: String,
     pub code_index: i32,
     pub generated_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub generated_by: Option<Uuid>,
     pub generation_method: GenerationMethod,
     pub generation_ip: String,
     pub algorithm_version: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub used_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub used_ip: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub used_user_agent: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub session_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub verification_attempt: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub time_since_generation: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub usage_risk_score: Option<i32>,
     pub is_consumed: bool,
     pub consumption_attempts: i32,
     pub successful_verification: bool,
     pub is_revoked: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub revoked_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub revoked_by: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub revocation_reason: Option<String>,
     pub compromised: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub compromised_detected_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub compromise_detection_method: Option<CompromiseDetectionMethod>,
     pub expires_at: DateTime<Utc>,
     pub created_with_expiry: bool,
     pub grace_period_hours: i32,
     pub auto_renew_enabled: bool,
     pub renewal_reminder_sent: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_access_before_expiry: Option<DateTime<Utc>>,
     pub creation_notification_sent: bool,
     pub expiry_warning_sent: bool,
     pub usage_notification_sent: bool,
     pub security_alert_sent: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_notification_at: Option<DateTime<Utc>>,
     pub gdpr_compliant: bool,
     pub audit_log_required: bool,
@@ -519,6 +503,9 @@ impl backbone_orm::EntityRepoMeta for MFABackupCode {
     }
     fn search_fields() -> &'static [&'static str] {
         &["code", "code_hash", "generation_ip", "algorithm_version"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("device", "mfa_devices", "deviceId")]
     }
 }
 

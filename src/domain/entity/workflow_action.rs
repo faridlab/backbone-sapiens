@@ -53,15 +53,11 @@ pub struct WorkflowAction {
     pub workflow_definition_id: Uuid,
     pub action_type: ActionType,
     pub action_name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub step_order: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub parameters: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub conditions: Option<serde_json::Value>,
     pub is_required: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub timeout_minutes: Option<i32>,
     #[serde(default)]
     #[sqlx(json)]
@@ -265,6 +261,9 @@ impl backbone_orm::EntityRepoMeta for WorkflowAction {
     }
     fn search_fields() -> &'static [&'static str] {
         &["action_name"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("workflowDefinition", "workflow_definitions", "workflowDefinitionId")]
     }
 }
 
