@@ -9,8 +9,7 @@ mod temporary_permission_grant_workflow;
 mod user_registration_workflow;
 mod user_suspension_workflow;
 
-pub use account_deletion_workflow::{AccountDeletionFlowStatus, AccountDeletionFlowStep, AccountDeletionFlowInstance, AccountDeletionStepHandler, AccountDeletionFlowExecutor};
-pub use backbone_core::flow::FlowError;
+pub use account_deletion_workflow::{AccountDeletionFlowStatus, AccountDeletionFlowStep, AccountDeletionFlowInstance, AccountDeletionStepHandler, AccountDeletionFlowExecutor, FlowError};
 pub use user_anonymization_request_workflow::{UserAnonymizationRequestFlowStatus, UserAnonymizationRequestFlowStep, UserAnonymizationRequestFlowInstance, UserAnonymizationRequestStepHandler, UserAnonymizationRequestFlowExecutor};
 pub use data_export_request_workflow::{DataExportRequestFlowStatus, DataExportRequestFlowStep, DataExportRequestFlowInstance, DataExportRequestStepHandler, DataExportRequestFlowExecutor};
 pub use impersonation_request_workflow::{ImpersonationRequestFlowStatus, ImpersonationRequestFlowStep, ImpersonationRequestFlowInstance, ImpersonationRequestStepHandler, ImpersonationRequestFlowExecutor};
