@@ -54,19 +54,13 @@ pub struct AnalyticsReport {
     pub id: Uuid,
     pub report_name: String,
     pub report_type: AnalyticsReportType,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub parameters: Option<serde_json::Value>,
     pub format: ReportFormat,
     pub generated_by: Uuid,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub generated_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub file_path: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub file_size: Option<i32>,
     pub status: ReportStatus,
     pub download_count: i32,
@@ -302,6 +296,9 @@ impl backbone_orm::EntityRepoMeta for AnalyticsReport {
     }
     fn search_fields() -> &'static [&'static str] {
         &["report_name"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("generator", "users", "generatedBy")]
     }
 }
 

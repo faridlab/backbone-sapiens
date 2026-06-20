@@ -58,13 +58,10 @@ pub struct DeviceTrust {
     pub trust_level: TrustLevel,
     pub is_trusted: bool,
     pub trusted_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<DateTime<Utc>>,
     pub last_used_at: DateTime<Utc>,
     pub usage_count: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub ip_address: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<serde_json::Value>,
     pub risk_score: f64,
     pub requires_mfa: bool,
@@ -285,6 +282,9 @@ impl backbone_orm::EntityRepoMeta for DeviceTrust {
     }
     fn search_fields() -> &'static [&'static str] {
         &["device_fingerprint", "device_name"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId")]
     }
 }
 

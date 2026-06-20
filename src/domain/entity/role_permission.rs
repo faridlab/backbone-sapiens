@@ -202,6 +202,9 @@ impl backbone_orm::EntityRepoMeta for RolePermission {
     fn search_fields() -> &'static [&'static str] {
         &[]
     }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("role", "roles", "roleId"), ("permission", "permissions", "permissionId")]
+    }
 }
 
 /// Builder for RolePermission entity

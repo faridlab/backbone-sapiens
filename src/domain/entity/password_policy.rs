@@ -49,7 +49,6 @@ impl std::ops::Deref for PasswordPolicyId {
 pub struct PasswordPolicy {
     pub id: Uuid,
     pub name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub organization_id: Option<Uuid>,
     pub is_active: bool,
     pub password_requirements: serde_json::Value,

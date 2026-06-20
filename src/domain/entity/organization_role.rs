@@ -50,9 +50,7 @@ pub struct OrganizationRole {
     pub id: Uuid,
     pub organization_id: Uuid,
     pub name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub permissions: Option<serde_json::Value>,
     pub is_active: bool,
     #[serde(default)]

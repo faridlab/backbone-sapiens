@@ -52,11 +52,9 @@ pub struct OrganizationUser {
     pub id: Uuid,
     pub organization_id: Uuid,
     pub user_id: Uuid,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub role_id: Option<Uuid>,
     pub status: OrganizationMembershipStatus,
     pub joined_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub left_at: Option<DateTime<Utc>>,
     #[serde(default)]
     #[sqlx(json)]
@@ -243,6 +241,9 @@ impl backbone_orm::EntityRepoMeta for OrganizationUser {
     }
     fn search_fields() -> &'static [&'static str] {
         &[]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("role", "roles", "roleId")]
     }
 }
 

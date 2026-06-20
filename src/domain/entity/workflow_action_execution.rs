@@ -54,19 +54,12 @@ pub struct WorkflowActionExecution {
     pub workflow_action_id: Uuid,
     pub action_order: i32,
     pub status: WorkflowActionExecutionStatus,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub input_data: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub output_data: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub started_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub completed_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub failed_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub duration_ms: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
     pub retry_count: i32,
     #[serde(default)]
@@ -307,6 +300,9 @@ impl backbone_orm::EntityRepoMeta for WorkflowActionExecution {
     }
     fn search_fields() -> &'static [&'static str] {
         &[]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("workflowExecution", "workflow_executions", "workflowExecutionId"), ("workflowAction", "workflow_actions", "workflowActionId")]
     }
 }
 

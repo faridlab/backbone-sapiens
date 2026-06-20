@@ -53,11 +53,8 @@ pub struct BackupCode {
     pub code_hash: String,
     pub code_index: i32,
     pub is_used: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub used_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub used_ip: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub used_user_agent: Option<String>,
     pub expires_at: DateTime<Utc>,
     #[serde(default)]
@@ -255,6 +252,9 @@ impl backbone_orm::EntityRepoMeta for BackupCode {
     }
     fn search_fields() -> &'static [&'static str] {
         &["batch_id", "code_hash"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId")]
     }
 }
 

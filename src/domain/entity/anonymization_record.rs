@@ -58,7 +58,6 @@ pub struct AnonymizationRecord {
     pub anonymized_at: DateTime<Utc>,
     pub reason: String,
     pub method: AnonymizationMethod,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub retention_period_days: Option<i32>,
     #[serde(default)]
     #[sqlx(json)]
@@ -251,6 +250,9 @@ impl backbone_orm::EntityRepoMeta for AnonymizationRecord {
     }
     fn search_fields() -> &'static [&'static str] {
         &["original_email", "original_username", "reason"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("anonymizer", "users", "anonymizedBy")]
     }
 }
 

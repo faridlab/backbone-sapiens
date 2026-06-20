@@ -8,7 +8,6 @@ use super::SecurityEventSeverity;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{SecurityEventStateMachine, SecurityEventState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for SecurityEvent
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -54,26 +53,17 @@ impl std::ops::Deref for SecurityEventId {
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct SecurityEvent {
     pub id: Uuid,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub session_id: Option<Uuid>,
     pub event_type: SecurityEventType,
     pub severity: SecurityEventSeverity,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub ip_address: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_agent: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub details: Option<serde_json::Value>,
     pub(crate) resolved: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub resolved_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub resolved_by_user_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub resolution_notes: Option<String>,
     #[serde(default)]
     #[sqlx(json)]
@@ -336,6 +326,9 @@ impl backbone_orm::EntityRepoMeta for SecurityEvent {
     }
     fn search_fields() -> &'static [&'static str] {
         &[]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("session", "sessions", "sessionId"), ("resolver", "users", "resolvedByUserId")]
     }
 }
 

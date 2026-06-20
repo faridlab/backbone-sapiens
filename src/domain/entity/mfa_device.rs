@@ -9,7 +9,6 @@ use super::MFADeviceStatus;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{MFADeviceStateMachine, MFADeviceState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for MFADevice
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -57,29 +56,17 @@ pub struct MFADevice {
     pub id: Uuid,
     pub user_id: Uuid,
     pub device_type: MFADeviceType,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub device_name: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub phone_number: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub email_address: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub totp_secret: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub secret: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub hardware_key_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub push_token: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub device_fingerprint: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub manufacturer: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub model: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub operating_system: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub app_version: Option<String>,
     pub is_primary: bool,
     pub is_backup: bool,
@@ -87,34 +74,25 @@ pub struct MFADevice {
     pub auto_approval_enabled: bool,
     pub trusted_duration_hours: i32,
     pub enrolled_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub enrolled_by: Option<Uuid>,
     pub enrollment_method: EnrollmentMethod,
     pub enrollment_ip: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub enrollment_user_agent: Option<String>,
     pub verification_attempts: i32,
     pub backup_codes_generated: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub verified_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_used: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_used_at: Option<DateTime<Utc>>,
     pub usage_count: i32,
     pub successful_verifications: i32,
     pub failed_verifications: i32,
     pub is_locked: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub locked_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub locked_until: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub lock_reason: Option<String>,
     pub risk_score: i32,
     pub(crate) is_active: bool,
     pub status: MFADeviceStatus,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub backup_codes_data: Option<serde_json::Value>,
     #[serde(default)]
     #[sqlx(json)]
@@ -565,6 +543,9 @@ impl backbone_orm::EntityRepoMeta for MFADevice {
     }
     fn search_fields() -> &'static [&'static str] {
         &["enrollment_ip"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId")]
     }
 }
 

@@ -50,19 +50,13 @@ pub struct OrganizationPermission {
     pub id: Uuid,
     pub organization_id: Uuid,
     pub permission_id: Uuid,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub permission_name: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub resource_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub resource_type: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub role_id: Option<Uuid>,
     pub granted_by: Uuid,
     pub granted_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
     pub is_active: bool,
     #[serde(default)]
@@ -289,6 +283,9 @@ impl backbone_orm::EntityRepoMeta for OrganizationPermission {
     }
     fn search_fields() -> &'static [&'static str] {
         &[]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("permission", "permissions", "permissionId"), ("role", "roles", "roleId"), ("granter", "users", "grantedBy")]
     }
 }
 

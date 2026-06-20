@@ -53,12 +53,10 @@ pub struct EffectivePermissionCache {
     pub computed_permissions: serde_json::Value,
     pub computation_details: serde_json::Value,
     pub scope: serde_json::Value,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub conditions: Option<serde_json::Value>,
     pub usage: serde_json::Value,
     pub performance: serde_json::Value,
     pub cache_stats: serde_json::Value,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub invalidation: Option<serde_json::Value>,
     #[serde(default)]
     #[sqlx(json)]
@@ -253,6 +251,9 @@ impl backbone_orm::EntityRepoMeta for EffectivePermissionCache {
     }
     fn search_fields() -> &'static [&'static str] {
         &["permission_key"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId")]
     }
 }
 

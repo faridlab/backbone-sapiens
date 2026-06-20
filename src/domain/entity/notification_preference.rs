@@ -7,7 +7,6 @@ use super::DigestFrequency;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{NotificationPreferenceStateMachine, NotificationPreferenceState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for NotificationPreference
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -57,9 +56,7 @@ pub struct NotificationPreference {
     pub notification_type: String,
     pub channel_enabled: bool,
     pub channels: serde_json::Value,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub quiet_hours_start: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub quiet_hours_end: Option<String>,
     pub quiet_timezone: String,
     pub digest_enabled: bool,
@@ -273,6 +270,9 @@ impl backbone_orm::EntityRepoMeta for NotificationPreference {
     }
     fn search_fields() -> &'static [&'static str] {
         &["notification_type", "quiet_timezone"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId")]
     }
 }
 

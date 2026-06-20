@@ -55,22 +55,14 @@ pub struct WorkflowStep {
     pub step_number: i32,
     pub step_type: WorkflowStepType,
     pub step_name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub status: WorkflowStepStatus,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub parameters: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub result: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub started_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub completed_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub failed_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub duration_ms: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
     pub retry_count: i32,
     #[serde(default)]
@@ -325,6 +317,9 @@ impl backbone_orm::EntityRepoMeta for WorkflowStep {
     }
     fn search_fields() -> &'static [&'static str] {
         &["step_name"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("workflow", "workflows", "workflowId")]
     }
 }
 

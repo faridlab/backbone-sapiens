@@ -8,7 +8,6 @@ use super::DataExportFormat;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{DataExportStateMachine, DataExportState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for DataExport
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -58,17 +57,12 @@ pub struct DataExport {
     pub requested_by: Uuid,
     pub requested_at: DateTime<Utc>,
     pub(crate) status: DataExportStatus,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub file_path: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub file_url: Option<String>,
     pub expires_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub completed_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub record_count: Option<i32>,
     pub format: DataExportFormat,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub justification: Option<String>,
     #[serde(default)]
     #[sqlx(json)]
@@ -306,6 +300,9 @@ impl backbone_orm::EntityRepoMeta for DataExport {
     }
     fn search_fields() -> &'static [&'static str] {
         &[]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("requester", "users", "requestedBy")]
     }
 }
 

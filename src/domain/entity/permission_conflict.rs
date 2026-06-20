@@ -53,11 +53,9 @@ pub struct PermissionConflict {
     pub id: Uuid,
     pub conflict_type: String,
     pub severity: ConflictSeverity,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub conflicting_entity_id: Uuid,
     pub resolution_status: ConflictResolutionStatus,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub resolved_at: Option<DateTime<Utc>>,
     #[serde(default)]
     #[sqlx(json)]

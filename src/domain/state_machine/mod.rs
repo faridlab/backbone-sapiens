@@ -17,7 +17,33 @@ mod user_o_auth_link_state_machine;
 mod user_permission_state_machine;
 mod user_saml_link_state_machine;
 
-pub use backbone_core::state_machine::StateMachineError;
+/// Shared error type for all state machines in this module
+#[derive(Debug, Clone, thiserror::Error)]
+pub enum StateMachineError {
+    #[error("Invalid state: {0}")]
+    InvalidState(String),
+
+    #[error("Invalid transition: {0}")]
+    InvalidTransition(String),
+
+    #[error("Transition '{transition}' not allowed from state '{from}'")]
+    TransitionNotAllowed {
+        transition: String,
+        from: String,
+    },
+
+    #[error("Role '{role}' not authorized for transition '{transition}'")]
+    RoleNotAuthorized {
+        role: String,
+        transition: String,
+    },
+
+    #[error("Guard condition failed for transition '{0}'")]
+    GuardFailed(String),
+
+    #[error("Cannot transition from final state '{0}'")]
+    FinalStateReached(String),
+}
 
 pub use data_export_state_machine::{DataExportState, DataExportTransition, DataExportStateMachine};
 pub use email_verification_token_state_machine::{EmailVerificationTokenState, EmailVerificationTokenTransition, EmailVerificationTokenStateMachine};

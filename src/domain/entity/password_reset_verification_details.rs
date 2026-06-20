@@ -48,18 +48,12 @@ impl std::ops::Deref for PasswordResetVerificationDetailsId {
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct PasswordResetVerificationDetails {
     pub id: Uuid,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub verified_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub verification_ip: Option<String>,
     pub verification_attempts: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_attempt_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub verification_method: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub device_fingerprint: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub geolocation: Option<serde_json::Value>,
     #[serde(default)]
     #[sqlx(json)]

@@ -50,7 +50,6 @@ pub struct SystemSettings {
     pub id: Uuid,
     pub key: String,
     pub value: serde_json::Value,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[serde(default)]
     #[sqlx(json)]
@@ -210,6 +209,9 @@ impl backbone_orm::EntityRepoMeta for SystemSettings {
     }
     fn search_fields() -> &'static [&'static str] {
         &["key"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("updater", "users", "updatedBy")]
     }
 }
 
