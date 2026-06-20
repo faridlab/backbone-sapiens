@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS role_assignments (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.role_assignments (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     role_id UUID NOT NULL,
@@ -49,29 +51,29 @@ CREATE TABLE IF NOT EXISTS role_assignments (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_role_assignments_user_id_status ON role_assignments (user_id, status);
+CREATE INDEX IF NOT EXISTS idx_role_assignments_user_id_status ON sapiens.role_assignments (user_id, status);
 
-CREATE INDEX IF NOT EXISTS idx_role_assignments_role_id ON role_assignments (role_id);
+CREATE INDEX IF NOT EXISTS idx_role_assignments_role_id ON sapiens.role_assignments (role_id);
 
-CREATE INDEX IF NOT EXISTS idx_role_assignments_assigned_by ON role_assignments (assigned_by);
+CREATE INDEX IF NOT EXISTS idx_role_assignments_assigned_by ON sapiens.role_assignments (assigned_by);
 
-CREATE INDEX IF NOT EXISTS idx_role_assignments_status_expires_at ON role_assignments (status, expires_at);
+CREATE INDEX IF NOT EXISTS idx_role_assignments_status_expires_at ON sapiens.role_assignments (status, expires_at);
 
-CREATE INDEX IF NOT EXISTS idx_role_assignments_parent_assignment_id ON role_assignments (parent_assignment_id);
+CREATE INDEX IF NOT EXISTS idx_role_assignments_parent_assignment_id ON sapiens.role_assignments (parent_assignment_id);
 
-CREATE INDEX IF NOT EXISTS idx_role_assignments_has_conflicts_status ON role_assignments (has_conflicts, status);
+CREATE INDEX IF NOT EXISTS idx_role_assignments_has_conflicts_status ON sapiens.role_assignments (has_conflicts, status);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_role_assignments_metadata_gin ON role_assignments USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_role_assignments_metadata_deleted_at ON role_assignments ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_role_assignments_metadata_created_at ON role_assignments ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_role_assignments_metadata_updated_at ON role_assignments ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_role_assignments_metadata_gin ON sapiens.role_assignments USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_role_assignments_metadata_deleted_at ON sapiens.role_assignments ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_role_assignments_metadata_created_at ON sapiens.role_assignments ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_role_assignments_metadata_updated_at ON sapiens.role_assignments ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION role_assignments_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.role_assignments_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -84,16 +86,16 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS role_assignments_insert_audit ON role_assignments;
-CREATE TRIGGER role_assignments_insert_audit BEFORE INSERT ON role_assignments
-    FOR EACH ROW EXECUTE FUNCTION role_assignments_audit_timestamp();
+DROP TRIGGER IF EXISTS role_assignments_insert_audit ON sapiens.role_assignments;
+CREATE TRIGGER role_assignments_insert_audit BEFORE INSERT ON sapiens.role_assignments
+    FOR EACH ROW EXECUTE FUNCTION sapiens.role_assignments_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS role_assignments_update_audit ON role_assignments;
-CREATE TRIGGER role_assignments_update_audit BEFORE UPDATE ON role_assignments
-    FOR EACH ROW EXECUTE FUNCTION role_assignments_audit_timestamp();
+DROP TRIGGER IF EXISTS role_assignments_update_audit ON sapiens.role_assignments;
+CREATE TRIGGER role_assignments_update_audit BEFORE UPDATE ON sapiens.role_assignments
+    FOR EACH ROW EXECUTE FUNCTION sapiens.role_assignments_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE role_assignments ADD CONSTRAINT fk_role_assignments_user_id FOREIGN KEY (user_id) REFERENCES users (id);
-ALTER TABLE role_assignments ADD CONSTRAINT fk_role_assignments_role_id FOREIGN KEY (role_id) REFERENCES roles (id);
-ALTER TABLE role_assignments ADD CONSTRAINT fk_role_assignments_parent_assignment_id FOREIGN KEY (parent_assignment_id) REFERENCES role_assignments (id);
+ALTER TABLE sapiens.role_assignments ADD CONSTRAINT fk_role_assignments_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+ALTER TABLE sapiens.role_assignments ADD CONSTRAINT fk_role_assignments_role_id FOREIGN KEY (role_id) REFERENCES roles (id);
+ALTER TABLE sapiens.role_assignments ADD CONSTRAINT fk_role_assignments_parent_assignment_id FOREIGN KEY (parent_assignment_id) REFERENCES sapiens.role_assignments (id);

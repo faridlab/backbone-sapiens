@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS audit_logs (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.audit_logs (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID,
     action TEXT NOT NULL,
@@ -29,31 +31,31 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id_timestamp ON audit_logs (user_id, timestamp);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id_timestamp ON sapiens.audit_logs (user_id, timestamp);
 
-CREATE INDEX IF NOT EXISTS idx_audit_logs_action_timestamp ON audit_logs (action, timestamp);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action_timestamp ON sapiens.audit_logs (action, timestamp);
 
-CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs (timestamp);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON sapiens.audit_logs (timestamp);
 
-CREATE INDEX IF NOT EXISTS idx_audit_logs_severity_timestamp ON audit_logs (severity, timestamp);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_severity_timestamp ON sapiens.audit_logs (severity, timestamp);
 
-CREATE INDEX IF NOT EXISTS idx_audit_logs_archived_timestamp ON audit_logs (archived, timestamp);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_archived_timestamp ON sapiens.audit_logs (archived, timestamp);
 
-CREATE INDEX IF NOT EXISTS idx_audit_logs_session_id ON audit_logs (session_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_session_id ON sapiens.audit_logs (session_id);
 
-CREATE INDEX IF NOT EXISTS idx_audit_logs_resource_type_resource_id ON audit_logs (resource_type, resource_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_resource_type_resource_id ON sapiens.audit_logs (resource_type, resource_id);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_audit_logs_metadata_gin ON audit_logs USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_audit_logs_metadata_deleted_at ON audit_logs ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_audit_logs_metadata_created_at ON audit_logs ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_audit_logs_metadata_updated_at ON audit_logs ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_audit_logs_metadata_gin ON sapiens.audit_logs USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_metadata_deleted_at ON sapiens.audit_logs ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_audit_logs_metadata_created_at ON sapiens.audit_logs ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_audit_logs_metadata_updated_at ON sapiens.audit_logs ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION audit_logs_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.audit_logs_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -66,15 +68,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS audit_logs_insert_audit ON audit_logs;
-CREATE TRIGGER audit_logs_insert_audit BEFORE INSERT ON audit_logs
-    FOR EACH ROW EXECUTE FUNCTION audit_logs_audit_timestamp();
+DROP TRIGGER IF EXISTS audit_logs_insert_audit ON sapiens.audit_logs;
+CREATE TRIGGER audit_logs_insert_audit BEFORE INSERT ON sapiens.audit_logs
+    FOR EACH ROW EXECUTE FUNCTION sapiens.audit_logs_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS audit_logs_update_audit ON audit_logs;
-CREATE TRIGGER audit_logs_update_audit BEFORE UPDATE ON audit_logs
-    FOR EACH ROW EXECUTE FUNCTION audit_logs_audit_timestamp();
+DROP TRIGGER IF EXISTS audit_logs_update_audit ON sapiens.audit_logs;
+CREATE TRIGGER audit_logs_update_audit BEFORE UPDATE ON sapiens.audit_logs
+    FOR EACH ROW EXECUTE FUNCTION sapiens.audit_logs_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE audit_logs ADD CONSTRAINT fk_audit_logs_user_id FOREIGN KEY (user_id) REFERENCES users (id);
-ALTER TABLE audit_logs ADD CONSTRAINT fk_audit_logs_session_id FOREIGN KEY (session_id) REFERENCES sessions (id);
+ALTER TABLE sapiens.audit_logs ADD CONSTRAINT fk_audit_logs_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+ALTER TABLE sapiens.audit_logs ADD CONSTRAINT fk_audit_logs_session_id FOREIGN KEY (session_id) REFERENCES sapiens.sessions (id);

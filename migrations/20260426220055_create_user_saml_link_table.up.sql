@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS user_saml_links (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.user_saml_links (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     provider_id UUID NOT NULL,
@@ -25,27 +27,27 @@ CREATE TABLE IF NOT EXISTS user_saml_links (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_user_saml_links_user_id ON user_saml_links (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_saml_links_user_id ON sapiens.user_saml_links (user_id);
 
-CREATE INDEX IF NOT EXISTS idx_user_saml_links_provider_id ON user_saml_links (provider_id);
+CREATE INDEX IF NOT EXISTS idx_user_saml_links_provider_id ON sapiens.user_saml_links (provider_id);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_user_saml_links_provider_id_name_id ON user_saml_links (provider_id, name_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_saml_links_provider_id_name_id ON sapiens.user_saml_links (provider_id, name_id);
 
-CREATE INDEX IF NOT EXISTS idx_user_saml_links_user_id_is_primary ON user_saml_links (user_id, is_primary);
+CREATE INDEX IF NOT EXISTS idx_user_saml_links_user_id_is_primary ON sapiens.user_saml_links (user_id, is_primary);
 
-CREATE INDEX IF NOT EXISTS idx_user_saml_links_status ON user_saml_links (status);
+CREATE INDEX IF NOT EXISTS idx_user_saml_links_status ON sapiens.user_saml_links (status);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_user_saml_links_metadata_gin ON user_saml_links USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_user_saml_links_metadata_deleted_at ON user_saml_links ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_user_saml_links_metadata_created_at ON user_saml_links ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_user_saml_links_metadata_updated_at ON user_saml_links ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_user_saml_links_metadata_gin ON sapiens.user_saml_links USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_user_saml_links_metadata_deleted_at ON sapiens.user_saml_links ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_user_saml_links_metadata_created_at ON sapiens.user_saml_links ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_user_saml_links_metadata_updated_at ON sapiens.user_saml_links ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION user_saml_links_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.user_saml_links_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -58,15 +60,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS user_saml_links_insert_audit ON user_saml_links;
-CREATE TRIGGER user_saml_links_insert_audit BEFORE INSERT ON user_saml_links
-    FOR EACH ROW EXECUTE FUNCTION user_saml_links_audit_timestamp();
+DROP TRIGGER IF EXISTS user_saml_links_insert_audit ON sapiens.user_saml_links;
+CREATE TRIGGER user_saml_links_insert_audit BEFORE INSERT ON sapiens.user_saml_links
+    FOR EACH ROW EXECUTE FUNCTION sapiens.user_saml_links_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS user_saml_links_update_audit ON user_saml_links;
-CREATE TRIGGER user_saml_links_update_audit BEFORE UPDATE ON user_saml_links
-    FOR EACH ROW EXECUTE FUNCTION user_saml_links_audit_timestamp();
+DROP TRIGGER IF EXISTS user_saml_links_update_audit ON sapiens.user_saml_links;
+CREATE TRIGGER user_saml_links_update_audit BEFORE UPDATE ON sapiens.user_saml_links
+    FOR EACH ROW EXECUTE FUNCTION sapiens.user_saml_links_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE user_saml_links ADD CONSTRAINT fk_user_saml_links_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE user_saml_links ADD CONSTRAINT fk_user_saml_links_provider_id FOREIGN KEY (provider_id) REFERENCES saml_providers (id);
+ALTER TABLE sapiens.user_saml_links ADD CONSTRAINT fk_user_saml_links_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.user_saml_links ADD CONSTRAINT fk_user_saml_links_provider_id FOREIGN KEY (provider_id) REFERENCES sapiens.saml_providers (id);

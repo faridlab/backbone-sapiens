@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS analytics_metrics (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.analytics_metrics (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     metric_name TEXT NOT NULL,
     metric_type analytics_metric_type NOT NULL,
@@ -34,27 +36,27 @@ CREATE TABLE IF NOT EXISTS analytics_metrics (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_analytics_metrics_metric_name_period_start_period_end ON analytics_metrics (metric_name, period_start, period_end);
+CREATE INDEX IF NOT EXISTS idx_analytics_metrics_metric_name_period_start_period_end ON sapiens.analytics_metrics (metric_name, period_start, period_end);
 
-CREATE INDEX IF NOT EXISTS idx_analytics_metrics_metric_type_period_start ON analytics_metrics (metric_type, period_start);
+CREATE INDEX IF NOT EXISTS idx_analytics_metrics_metric_type_period_start ON sapiens.analytics_metrics (metric_type, period_start);
 
-CREATE INDEX IF NOT EXISTS idx_analytics_metrics_aggregation_level_period_start ON analytics_metrics (aggregation_level, period_start);
+CREATE INDEX IF NOT EXISTS idx_analytics_metrics_aggregation_level_period_start ON sapiens.analytics_metrics (aggregation_level, period_start);
 
-CREATE INDEX IF NOT EXISTS idx_analytics_metrics_organization_id_period_start ON analytics_metrics (organization_id, period_start);
+CREATE INDEX IF NOT EXISTS idx_analytics_metrics_organization_id_period_start ON sapiens.analytics_metrics (organization_id, period_start);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_analytics_metrics_metric_name_dimensions_period_start_period_end_aggregation_level ON analytics_metrics (metric_name, dimensions, period_start, period_end, aggregation_level);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_analytics_metrics_metric_name_dimensions_period_start_period_end_aggregation_level ON sapiens.analytics_metrics (metric_name, dimensions, period_start, period_end, aggregation_level);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_analytics_metrics_metadata_gin ON analytics_metrics USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_analytics_metrics_metadata_deleted_at ON analytics_metrics ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_analytics_metrics_metadata_created_at ON analytics_metrics ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_analytics_metrics_metadata_updated_at ON analytics_metrics ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_analytics_metrics_metadata_gin ON sapiens.analytics_metrics USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_analytics_metrics_metadata_deleted_at ON sapiens.analytics_metrics ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_analytics_metrics_metadata_created_at ON sapiens.analytics_metrics ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_analytics_metrics_metadata_updated_at ON sapiens.analytics_metrics ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION analytics_metrics_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.analytics_metrics_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -67,11 +69,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS analytics_metrics_insert_audit ON analytics_metrics;
-CREATE TRIGGER analytics_metrics_insert_audit BEFORE INSERT ON analytics_metrics
-    FOR EACH ROW EXECUTE FUNCTION analytics_metrics_audit_timestamp();
+DROP TRIGGER IF EXISTS analytics_metrics_insert_audit ON sapiens.analytics_metrics;
+CREATE TRIGGER analytics_metrics_insert_audit BEFORE INSERT ON sapiens.analytics_metrics
+    FOR EACH ROW EXECUTE FUNCTION sapiens.analytics_metrics_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS analytics_metrics_update_audit ON analytics_metrics;
-CREATE TRIGGER analytics_metrics_update_audit BEFORE UPDATE ON analytics_metrics
-    FOR EACH ROW EXECUTE FUNCTION analytics_metrics_audit_timestamp();
+DROP TRIGGER IF EXISTS analytics_metrics_update_audit ON sapiens.analytics_metrics;
+CREATE TRIGGER analytics_metrics_update_audit BEFORE UPDATE ON sapiens.analytics_metrics
+    FOR EACH ROW EXECUTE FUNCTION sapiens.analytics_metrics_audit_timestamp();

@@ -1,3 +1,3 @@
--- Down: drop sessions table
-DROP TABLE IF EXISTS sessions CASCADE;
-DROP FUNCTION IF EXISTS sessions_audit_timestamp() CASCADE;
+-- Down: drop sapiens.sessions table
+DROP TABLE IF EXISTS sapiens.sessions CASCADE;
+DROP FUNCTION IF EXISTS sapiens.sessions_audit_timestamp() CASCADE;

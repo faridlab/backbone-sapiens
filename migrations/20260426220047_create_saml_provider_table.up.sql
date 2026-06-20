@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS saml_providers (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.saml_providers (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     display_name TEXT NOT NULL,
@@ -28,27 +30,27 @@ CREATE TABLE IF NOT EXISTS saml_providers (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_saml_providers_name ON saml_providers (name);
+CREATE INDEX IF NOT EXISTS idx_saml_providers_name ON sapiens.saml_providers (name);
 
-CREATE INDEX IF NOT EXISTS idx_saml_providers_is_active ON saml_providers (is_active);
+CREATE INDEX IF NOT EXISTS idx_saml_providers_is_active ON sapiens.saml_providers (is_active);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_saml_providers_entity_id ON saml_providers (entity_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_saml_providers_entity_id ON sapiens.saml_providers (entity_id);
 
-CREATE INDEX IF NOT EXISTS idx_saml_providers_status ON saml_providers (status);
+CREATE INDEX IF NOT EXISTS idx_saml_providers_status ON sapiens.saml_providers (status);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_saml_providers_name ON saml_providers (name);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_saml_providers_name ON sapiens.saml_providers (name);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_saml_providers_metadata_gin ON saml_providers USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_saml_providers_metadata_deleted_at ON saml_providers ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_saml_providers_metadata_created_at ON saml_providers ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_saml_providers_metadata_updated_at ON saml_providers ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_saml_providers_metadata_gin ON sapiens.saml_providers USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_saml_providers_metadata_deleted_at ON sapiens.saml_providers ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_saml_providers_metadata_created_at ON sapiens.saml_providers ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_saml_providers_metadata_updated_at ON sapiens.saml_providers ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION saml_providers_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.saml_providers_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -61,11 +63,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS saml_providers_insert_audit ON saml_providers;
-CREATE TRIGGER saml_providers_insert_audit BEFORE INSERT ON saml_providers
-    FOR EACH ROW EXECUTE FUNCTION saml_providers_audit_timestamp();
+DROP TRIGGER IF EXISTS saml_providers_insert_audit ON sapiens.saml_providers;
+CREATE TRIGGER saml_providers_insert_audit BEFORE INSERT ON sapiens.saml_providers
+    FOR EACH ROW EXECUTE FUNCTION sapiens.saml_providers_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS saml_providers_update_audit ON saml_providers;
-CREATE TRIGGER saml_providers_update_audit BEFORE UPDATE ON saml_providers
-    FOR EACH ROW EXECUTE FUNCTION saml_providers_audit_timestamp();
+DROP TRIGGER IF EXISTS saml_providers_update_audit ON sapiens.saml_providers;
+CREATE TRIGGER saml_providers_update_audit BEFORE UPDATE ON sapiens.saml_providers
+    FOR EACH ROW EXECUTE FUNCTION sapiens.saml_providers_audit_timestamp();

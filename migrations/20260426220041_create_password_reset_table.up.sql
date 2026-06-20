@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS password_resets (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.password_resets (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     token TEXT NOT NULL,
@@ -34,27 +36,27 @@ CREATE TABLE IF NOT EXISTS password_resets (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_password_resets_user_id ON password_resets (user_id);
+CREATE INDEX IF NOT EXISTS idx_password_resets_user_id ON sapiens.password_resets (user_id);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_password_resets_token ON password_resets (token);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_password_resets_token ON sapiens.password_resets (token);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_password_resets_token_hash ON password_resets (token_hash);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_password_resets_token_hash ON sapiens.password_resets (token_hash);
 
-CREATE INDEX IF NOT EXISTS idx_password_resets_status_expires_at ON password_resets (status, expires_at);
+CREATE INDEX IF NOT EXISTS idx_password_resets_status_expires_at ON sapiens.password_resets (status, expires_at);
 
-CREATE INDEX IF NOT EXISTS idx_password_resets_created_at ON password_resets (((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_password_resets_created_at ON sapiens.password_resets (((metadata->>'created_at')));
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_password_resets_metadata_gin ON password_resets USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_password_resets_metadata_deleted_at ON password_resets ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_password_resets_metadata_created_at ON password_resets ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_password_resets_metadata_updated_at ON password_resets ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_password_resets_metadata_gin ON sapiens.password_resets USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_password_resets_metadata_deleted_at ON sapiens.password_resets ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_password_resets_metadata_created_at ON sapiens.password_resets ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_password_resets_metadata_updated_at ON sapiens.password_resets ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION password_resets_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.password_resets_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -67,16 +69,16 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS password_resets_insert_audit ON password_resets;
-CREATE TRIGGER password_resets_insert_audit BEFORE INSERT ON password_resets
-    FOR EACH ROW EXECUTE FUNCTION password_resets_audit_timestamp();
+DROP TRIGGER IF EXISTS password_resets_insert_audit ON sapiens.password_resets;
+CREATE TRIGGER password_resets_insert_audit BEFORE INSERT ON sapiens.password_resets
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_resets_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS password_resets_update_audit ON password_resets;
-CREATE TRIGGER password_resets_update_audit BEFORE UPDATE ON password_resets
-    FOR EACH ROW EXECUTE FUNCTION password_resets_audit_timestamp();
+DROP TRIGGER IF EXISTS password_resets_update_audit ON sapiens.password_resets;
+CREATE TRIGGER password_resets_update_audit BEFORE UPDATE ON sapiens.password_resets
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_resets_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE password_resets ADD CONSTRAINT fk_password_resets_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE password_resets ADD CONSTRAINT fk_password_resets_verification_details_id FOREIGN KEY (verification_details_id) REFERENCES password_reset_verification_details (id);
-ALTER TABLE password_resets ADD CONSTRAINT fk_password_resets_security_id FOREIGN KEY (security_id) REFERENCES password_reset_security (id);
+ALTER TABLE sapiens.password_resets ADD CONSTRAINT fk_password_resets_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.password_resets ADD CONSTRAINT fk_password_resets_verification_details_id FOREIGN KEY (verification_details_id) REFERENCES sapiens.password_reset_verification_details (id);
+ALTER TABLE sapiens.password_resets ADD CONSTRAINT fk_password_resets_security_id FOREIGN KEY (security_id) REFERENCES sapiens.password_reset_security (id);

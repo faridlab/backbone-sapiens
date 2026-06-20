@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS temporary_permissions (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.temporary_permissions (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     permission_id UUID NOT NULL,
@@ -26,23 +28,23 @@ CREATE TABLE IF NOT EXISTS temporary_permissions (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_temporary_permissions_user_id_expires_at ON temporary_permissions (user_id, expires_at);
+CREATE INDEX IF NOT EXISTS idx_temporary_permissions_user_id_expires_at ON sapiens.temporary_permissions (user_id, expires_at);
 
-CREATE INDEX IF NOT EXISTS idx_temporary_permissions_expires_at ON temporary_permissions (expires_at);
+CREATE INDEX IF NOT EXISTS idx_temporary_permissions_expires_at ON sapiens.temporary_permissions (expires_at);
 
-CREATE INDEX IF NOT EXISTS idx_temporary_permissions_revoked_at ON temporary_permissions (revoked_at);
+CREATE INDEX IF NOT EXISTS idx_temporary_permissions_revoked_at ON sapiens.temporary_permissions (revoked_at);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_temporary_permissions_metadata_gin ON temporary_permissions USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_temporary_permissions_metadata_deleted_at ON temporary_permissions ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_temporary_permissions_metadata_created_at ON temporary_permissions ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_temporary_permissions_metadata_updated_at ON temporary_permissions ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_temporary_permissions_metadata_gin ON sapiens.temporary_permissions USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_temporary_permissions_metadata_deleted_at ON sapiens.temporary_permissions ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_temporary_permissions_metadata_created_at ON sapiens.temporary_permissions ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_temporary_permissions_metadata_updated_at ON sapiens.temporary_permissions ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION temporary_permissions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.temporary_permissions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -55,15 +57,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS temporary_permissions_insert_audit ON temporary_permissions;
-CREATE TRIGGER temporary_permissions_insert_audit BEFORE INSERT ON temporary_permissions
-    FOR EACH ROW EXECUTE FUNCTION temporary_permissions_audit_timestamp();
+DROP TRIGGER IF EXISTS temporary_permissions_insert_audit ON sapiens.temporary_permissions;
+CREATE TRIGGER temporary_permissions_insert_audit BEFORE INSERT ON sapiens.temporary_permissions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.temporary_permissions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS temporary_permissions_update_audit ON temporary_permissions;
-CREATE TRIGGER temporary_permissions_update_audit BEFORE UPDATE ON temporary_permissions
-    FOR EACH ROW EXECUTE FUNCTION temporary_permissions_audit_timestamp();
+DROP TRIGGER IF EXISTS temporary_permissions_update_audit ON sapiens.temporary_permissions;
+CREATE TRIGGER temporary_permissions_update_audit BEFORE UPDATE ON sapiens.temporary_permissions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.temporary_permissions_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE temporary_permissions ADD CONSTRAINT fk_temporary_permissions_user_id FOREIGN KEY (user_id) REFERENCES users (id);
-ALTER TABLE temporary_permissions ADD CONSTRAINT fk_temporary_permissions_permission_id FOREIGN KEY (permission_id) REFERENCES permissions (id);
+ALTER TABLE sapiens.temporary_permissions ADD CONSTRAINT fk_temporary_permissions_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+ALTER TABLE sapiens.temporary_permissions ADD CONSTRAINT fk_temporary_permissions_permission_id FOREIGN KEY (permission_id) REFERENCES permissions (id);

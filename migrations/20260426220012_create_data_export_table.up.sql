@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS data_exports (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.data_exports (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     requested_by UUID NOT NULL,
@@ -36,25 +38,25 @@ CREATE TABLE IF NOT EXISTS data_exports (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_data_exports_user_id_requested_at ON data_exports (user_id, requested_at);
+CREATE INDEX IF NOT EXISTS idx_data_exports_user_id_requested_at ON sapiens.data_exports (user_id, requested_at);
 
-CREATE INDEX IF NOT EXISTS idx_data_exports_requested_by_requested_at ON data_exports (requested_by, requested_at);
+CREATE INDEX IF NOT EXISTS idx_data_exports_requested_by_requested_at ON sapiens.data_exports (requested_by, requested_at);
 
-CREATE INDEX IF NOT EXISTS idx_data_exports_status ON data_exports (status);
+CREATE INDEX IF NOT EXISTS idx_data_exports_status ON sapiens.data_exports (status);
 
-CREATE INDEX IF NOT EXISTS idx_data_exports_expires_at ON data_exports (expires_at);
+CREATE INDEX IF NOT EXISTS idx_data_exports_expires_at ON sapiens.data_exports (expires_at);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_data_exports_metadata_gin ON data_exports USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_data_exports_metadata_deleted_at ON data_exports ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_data_exports_metadata_created_at ON data_exports ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_data_exports_metadata_updated_at ON data_exports ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_data_exports_metadata_gin ON sapiens.data_exports USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_data_exports_metadata_deleted_at ON sapiens.data_exports ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_data_exports_metadata_created_at ON sapiens.data_exports ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_data_exports_metadata_updated_at ON sapiens.data_exports ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION data_exports_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.data_exports_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -67,14 +69,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS data_exports_insert_audit ON data_exports;
-CREATE TRIGGER data_exports_insert_audit BEFORE INSERT ON data_exports
-    FOR EACH ROW EXECUTE FUNCTION data_exports_audit_timestamp();
+DROP TRIGGER IF EXISTS data_exports_insert_audit ON sapiens.data_exports;
+CREATE TRIGGER data_exports_insert_audit BEFORE INSERT ON sapiens.data_exports
+    FOR EACH ROW EXECUTE FUNCTION sapiens.data_exports_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS data_exports_update_audit ON data_exports;
-CREATE TRIGGER data_exports_update_audit BEFORE UPDATE ON data_exports
-    FOR EACH ROW EXECUTE FUNCTION data_exports_audit_timestamp();
+DROP TRIGGER IF EXISTS data_exports_update_audit ON sapiens.data_exports;
+CREATE TRIGGER data_exports_update_audit BEFORE UPDATE ON sapiens.data_exports
+    FOR EACH ROW EXECUTE FUNCTION sapiens.data_exports_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE data_exports ADD CONSTRAINT fk_data_exports_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+ALTER TABLE sapiens.data_exports ADD CONSTRAINT fk_data_exports_user_id FOREIGN KEY (user_id) REFERENCES users (id);

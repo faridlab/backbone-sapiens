@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS workflow_action_executions (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.workflow_action_executions (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     workflow_execution_id UUID NOT NULL,
     workflow_action_id UUID NOT NULL,
@@ -28,27 +30,27 @@ CREATE TABLE IF NOT EXISTS workflow_action_executions (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_workflow_execution_id_action_order ON workflow_action_executions (workflow_execution_id, action_order);
+CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_workflow_execution_id_action_order ON sapiens.workflow_action_executions (workflow_execution_id, action_order);
 
-CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_workflow_action_id ON workflow_action_executions (workflow_action_id);
+CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_workflow_action_id ON sapiens.workflow_action_executions (workflow_action_id);
 
-CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_status ON workflow_action_executions (status);
+CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_status ON sapiens.workflow_action_executions (status);
 
-CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_started_at ON workflow_action_executions (started_at);
+CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_started_at ON sapiens.workflow_action_executions (started_at);
 
-CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_completed_at ON workflow_action_executions (completed_at);
+CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_completed_at ON sapiens.workflow_action_executions (completed_at);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_metadata_gin ON workflow_action_executions USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_metadata_deleted_at ON workflow_action_executions ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_metadata_created_at ON workflow_action_executions ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_metadata_updated_at ON workflow_action_executions ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_metadata_gin ON sapiens.workflow_action_executions USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_metadata_deleted_at ON sapiens.workflow_action_executions ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_metadata_created_at ON sapiens.workflow_action_executions ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_workflow_action_executions_metadata_updated_at ON sapiens.workflow_action_executions ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION workflow_action_executions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.workflow_action_executions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -61,15 +63,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS workflow_action_executions_insert_audit ON workflow_action_executions;
-CREATE TRIGGER workflow_action_executions_insert_audit BEFORE INSERT ON workflow_action_executions
-    FOR EACH ROW EXECUTE FUNCTION workflow_action_executions_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_action_executions_insert_audit ON sapiens.workflow_action_executions;
+CREATE TRIGGER workflow_action_executions_insert_audit BEFORE INSERT ON sapiens.workflow_action_executions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_action_executions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS workflow_action_executions_update_audit ON workflow_action_executions;
-CREATE TRIGGER workflow_action_executions_update_audit BEFORE UPDATE ON workflow_action_executions
-    FOR EACH ROW EXECUTE FUNCTION workflow_action_executions_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_action_executions_update_audit ON sapiens.workflow_action_executions;
+CREATE TRIGGER workflow_action_executions_update_audit BEFORE UPDATE ON sapiens.workflow_action_executions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_action_executions_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE workflow_action_executions ADD CONSTRAINT fk_workflow_action_executions_workflow_execution_id FOREIGN KEY (workflow_execution_id) REFERENCES workflow_executions (id) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE workflow_action_executions ADD CONSTRAINT fk_workflow_action_executions_workflow_action_id FOREIGN KEY (workflow_action_id) REFERENCES workflow_actions (id);
+ALTER TABLE sapiens.workflow_action_executions ADD CONSTRAINT fk_workflow_action_executions_workflow_execution_id FOREIGN KEY (workflow_execution_id) REFERENCES sapiens.workflow_executions (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.workflow_action_executions ADD CONSTRAINT fk_workflow_action_executions_workflow_action_id FOREIGN KEY (workflow_action_id) REFERENCES sapiens.workflow_actions (id);

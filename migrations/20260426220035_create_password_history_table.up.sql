@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS password_history (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.password_history (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     password_hash TEXT NOT NULL,
@@ -24,25 +26,25 @@ CREATE TABLE IF NOT EXISTS password_history (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_password_history_user_id_status ON password_history (user_id, status);
+CREATE INDEX IF NOT EXISTS idx_password_history_user_id_status ON sapiens.password_history (user_id, status);
 
-CREATE INDEX IF NOT EXISTS idx_password_history_user_id_created_at ON password_history (user_id, ((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_password_history_user_id_created_at ON sapiens.password_history (user_id, ((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_password_history_status ON password_history (status);
+CREATE INDEX IF NOT EXISTS idx_password_history_status ON sapiens.password_history (status);
 
-CREATE INDEX IF NOT EXISTS idx_password_history_created_at ON password_history (((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_password_history_created_at ON sapiens.password_history (((metadata->>'created_at')));
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_password_history_metadata_gin ON password_history USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_password_history_metadata_deleted_at ON password_history ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_password_history_metadata_created_at ON password_history ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_password_history_metadata_updated_at ON password_history ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_password_history_metadata_gin ON sapiens.password_history USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_password_history_metadata_deleted_at ON sapiens.password_history ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_password_history_metadata_created_at ON sapiens.password_history ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_password_history_metadata_updated_at ON sapiens.password_history ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION password_history_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.password_history_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -55,14 +57,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS password_history_insert_audit ON password_history;
-CREATE TRIGGER password_history_insert_audit BEFORE INSERT ON password_history
-    FOR EACH ROW EXECUTE FUNCTION password_history_audit_timestamp();
+DROP TRIGGER IF EXISTS password_history_insert_audit ON sapiens.password_history;
+CREATE TRIGGER password_history_insert_audit BEFORE INSERT ON sapiens.password_history
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_history_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS password_history_update_audit ON password_history;
-CREATE TRIGGER password_history_update_audit BEFORE UPDATE ON password_history
-    FOR EACH ROW EXECUTE FUNCTION password_history_audit_timestamp();
+DROP TRIGGER IF EXISTS password_history_update_audit ON sapiens.password_history;
+CREATE TRIGGER password_history_update_audit BEFORE UPDATE ON sapiens.password_history
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_history_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE password_history ADD CONSTRAINT fk_password_history_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.password_history ADD CONSTRAINT fk_password_history_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;

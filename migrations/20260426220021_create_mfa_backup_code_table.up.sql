@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS mfa_backup_codes (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.mfa_backup_codes (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     device_id UUID,
@@ -67,31 +69,31 @@ CREATE TABLE IF NOT EXISTS mfa_backup_codes (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_user_id_batch_id ON mfa_backup_codes (user_id, batch_id);
+CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_user_id_batch_id ON sapiens.mfa_backup_codes (user_id, batch_id);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_user_id_is_consumed ON mfa_backup_codes (user_id, is_consumed);
+CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_user_id_is_consumed ON sapiens.mfa_backup_codes (user_id, is_consumed);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_device_id ON mfa_backup_codes (device_id);
+CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_device_id ON sapiens.mfa_backup_codes (device_id);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_used_at ON mfa_backup_codes (used_at);
+CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_used_at ON sapiens.mfa_backup_codes (used_at);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_is_revoked ON mfa_backup_codes (is_revoked);
+CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_is_revoked ON sapiens.mfa_backup_codes (is_revoked);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_expires_at ON mfa_backup_codes (expires_at);
+CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_expires_at ON sapiens.mfa_backup_codes (expires_at);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_generated_at ON mfa_backup_codes (generated_at);
+CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_generated_at ON sapiens.mfa_backup_codes (generated_at);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_metadata_gin ON mfa_backup_codes USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_metadata_deleted_at ON mfa_backup_codes ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_metadata_created_at ON mfa_backup_codes ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_metadata_updated_at ON mfa_backup_codes ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_metadata_gin ON sapiens.mfa_backup_codes USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_metadata_deleted_at ON sapiens.mfa_backup_codes ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_metadata_created_at ON sapiens.mfa_backup_codes ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_mfa_backup_codes_metadata_updated_at ON sapiens.mfa_backup_codes ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION mfa_backup_codes_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.mfa_backup_codes_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -104,15 +106,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS mfa_backup_codes_insert_audit ON mfa_backup_codes;
-CREATE TRIGGER mfa_backup_codes_insert_audit BEFORE INSERT ON mfa_backup_codes
-    FOR EACH ROW EXECUTE FUNCTION mfa_backup_codes_audit_timestamp();
+DROP TRIGGER IF EXISTS mfa_backup_codes_insert_audit ON sapiens.mfa_backup_codes;
+CREATE TRIGGER mfa_backup_codes_insert_audit BEFORE INSERT ON sapiens.mfa_backup_codes
+    FOR EACH ROW EXECUTE FUNCTION sapiens.mfa_backup_codes_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS mfa_backup_codes_update_audit ON mfa_backup_codes;
-CREATE TRIGGER mfa_backup_codes_update_audit BEFORE UPDATE ON mfa_backup_codes
-    FOR EACH ROW EXECUTE FUNCTION mfa_backup_codes_audit_timestamp();
+DROP TRIGGER IF EXISTS mfa_backup_codes_update_audit ON sapiens.mfa_backup_codes;
+CREATE TRIGGER mfa_backup_codes_update_audit BEFORE UPDATE ON sapiens.mfa_backup_codes
+    FOR EACH ROW EXECUTE FUNCTION sapiens.mfa_backup_codes_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE mfa_backup_codes ADD CONSTRAINT fk_mfa_backup_codes_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE mfa_backup_codes ADD CONSTRAINT fk_mfa_backup_codes_device_id FOREIGN KEY (device_id) REFERENCES mfa_devices (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.mfa_backup_codes ADD CONSTRAINT fk_mfa_backup_codes_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.mfa_backup_codes ADD CONSTRAINT fk_mfa_backup_codes_device_id FOREIGN KEY (device_id) REFERENCES sapiens.mfa_devices (id) ON DELETE CASCADE ON UPDATE CASCADE;

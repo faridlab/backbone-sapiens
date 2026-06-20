@@ -28,7 +28,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS notifications (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.notifications (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     notification_type notification_type NOT NULL,
@@ -49,31 +51,31 @@ CREATE TABLE IF NOT EXISTS notifications (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_notifications_user_id_is_read ON notifications (user_id, is_read);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id_is_read ON sapiens.notifications (user_id, is_read);
 
-CREATE INDEX IF NOT EXISTS idx_notifications_user_id_created_at ON notifications (user_id, ((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id_created_at ON sapiens.notifications (user_id, ((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_notifications_notification_type_created_at ON notifications (notification_type, ((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_notifications_notification_type_created_at ON sapiens.notifications (notification_type, ((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_notifications_channel_created_at ON notifications (channel, ((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_notifications_channel_created_at ON sapiens.notifications (channel, ((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_notifications_priority_created_at ON notifications (priority, ((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_notifications_priority_created_at ON sapiens.notifications (priority, ((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_notifications_expires_at ON notifications (expires_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_expires_at ON sapiens.notifications (expires_at);
 
-CREATE INDEX IF NOT EXISTS idx_notifications_read_at ON notifications (read_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_read_at ON sapiens.notifications (read_at);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_notifications_metadata_gin ON notifications USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_notifications_metadata_deleted_at ON notifications ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_notifications_metadata_created_at ON notifications ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_notifications_metadata_updated_at ON notifications ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_notifications_metadata_gin ON sapiens.notifications USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_notifications_metadata_deleted_at ON sapiens.notifications ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_notifications_metadata_created_at ON sapiens.notifications ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_notifications_metadata_updated_at ON sapiens.notifications ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION notifications_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.notifications_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -86,14 +88,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS notifications_insert_audit ON notifications;
-CREATE TRIGGER notifications_insert_audit BEFORE INSERT ON notifications
-    FOR EACH ROW EXECUTE FUNCTION notifications_audit_timestamp();
+DROP TRIGGER IF EXISTS notifications_insert_audit ON sapiens.notifications;
+CREATE TRIGGER notifications_insert_audit BEFORE INSERT ON sapiens.notifications
+    FOR EACH ROW EXECUTE FUNCTION sapiens.notifications_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS notifications_update_audit ON notifications;
-CREATE TRIGGER notifications_update_audit BEFORE UPDATE ON notifications
-    FOR EACH ROW EXECUTE FUNCTION notifications_audit_timestamp();
+DROP TRIGGER IF EXISTS notifications_update_audit ON sapiens.notifications;
+CREATE TRIGGER notifications_update_audit BEFORE UPDATE ON sapiens.notifications
+    FOR EACH ROW EXECUTE FUNCTION sapiens.notifications_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE notifications ADD CONSTRAINT fk_notifications_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.notifications ADD CONSTRAINT fk_notifications_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;

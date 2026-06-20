@@ -28,7 +28,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS analytics_reports (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.analytics_reports (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     report_name TEXT NOT NULL,
     report_type analytics_report_type NOT NULL,
@@ -46,27 +48,27 @@ CREATE TABLE IF NOT EXISTS analytics_reports (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_analytics_reports_report_type_generated_at ON analytics_reports (report_type, generated_at);
+CREATE INDEX IF NOT EXISTS idx_analytics_reports_report_type_generated_at ON sapiens.analytics_reports (report_type, generated_at);
 
-CREATE INDEX IF NOT EXISTS idx_analytics_reports_generated_by_generated_at ON analytics_reports (generated_by, generated_at);
+CREATE INDEX IF NOT EXISTS idx_analytics_reports_generated_by_generated_at ON sapiens.analytics_reports (generated_by, generated_at);
 
-CREATE INDEX IF NOT EXISTS idx_analytics_reports_status_generated_at ON analytics_reports (status, generated_at);
+CREATE INDEX IF NOT EXISTS idx_analytics_reports_status_generated_at ON sapiens.analytics_reports (status, generated_at);
 
-CREATE INDEX IF NOT EXISTS idx_analytics_reports_expires_at ON analytics_reports (expires_at);
+CREATE INDEX IF NOT EXISTS idx_analytics_reports_expires_at ON sapiens.analytics_reports (expires_at);
 
-CREATE INDEX IF NOT EXISTS idx_analytics_reports_download_count ON analytics_reports (download_count);
+CREATE INDEX IF NOT EXISTS idx_analytics_reports_download_count ON sapiens.analytics_reports (download_count);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_analytics_reports_metadata_gin ON analytics_reports USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_analytics_reports_metadata_deleted_at ON analytics_reports ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_analytics_reports_metadata_created_at ON analytics_reports ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_analytics_reports_metadata_updated_at ON analytics_reports ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_analytics_reports_metadata_gin ON sapiens.analytics_reports USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_analytics_reports_metadata_deleted_at ON sapiens.analytics_reports ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_analytics_reports_metadata_created_at ON sapiens.analytics_reports ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_analytics_reports_metadata_updated_at ON sapiens.analytics_reports ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION analytics_reports_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.analytics_reports_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -79,11 +81,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS analytics_reports_insert_audit ON analytics_reports;
-CREATE TRIGGER analytics_reports_insert_audit BEFORE INSERT ON analytics_reports
-    FOR EACH ROW EXECUTE FUNCTION analytics_reports_audit_timestamp();
+DROP TRIGGER IF EXISTS analytics_reports_insert_audit ON sapiens.analytics_reports;
+CREATE TRIGGER analytics_reports_insert_audit BEFORE INSERT ON sapiens.analytics_reports
+    FOR EACH ROW EXECUTE FUNCTION sapiens.analytics_reports_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS analytics_reports_update_audit ON analytics_reports;
-CREATE TRIGGER analytics_reports_update_audit BEFORE UPDATE ON analytics_reports
-    FOR EACH ROW EXECUTE FUNCTION analytics_reports_audit_timestamp();
+DROP TRIGGER IF EXISTS analytics_reports_update_audit ON sapiens.analytics_reports;
+CREATE TRIGGER analytics_reports_update_audit BEFORE UPDATE ON sapiens.analytics_reports
+    FOR EACH ROW EXECUTE FUNCTION sapiens.analytics_reports_audit_timestamp();

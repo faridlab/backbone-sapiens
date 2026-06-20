@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS resource_permissions (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.resource_permissions (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     permission_id UUID NOT NULL,
     resource_type TEXT NOT NULL,
@@ -26,27 +28,27 @@ CREATE TABLE IF NOT EXISTS resource_permissions (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_resource_permissions_resource_type_resource_id ON resource_permissions (resource_type, resource_id);
+CREATE INDEX IF NOT EXISTS idx_resource_permissions_resource_type_resource_id ON sapiens.resource_permissions (resource_type, resource_id);
 
-CREATE INDEX IF NOT EXISTS idx_resource_permissions_granted_to_user_id ON resource_permissions (granted_to_user_id);
+CREATE INDEX IF NOT EXISTS idx_resource_permissions_granted_to_user_id ON sapiens.resource_permissions (granted_to_user_id);
 
-CREATE INDEX IF NOT EXISTS idx_resource_permissions_granted_to_role_id ON resource_permissions (granted_to_role_id);
+CREATE INDEX IF NOT EXISTS idx_resource_permissions_granted_to_role_id ON sapiens.resource_permissions (granted_to_role_id);
 
-CREATE INDEX IF NOT EXISTS idx_resource_permissions_expires_at ON resource_permissions (expires_at);
+CREATE INDEX IF NOT EXISTS idx_resource_permissions_expires_at ON sapiens.resource_permissions (expires_at);
 
-CREATE INDEX IF NOT EXISTS idx_resource_permissions_status ON resource_permissions (status);
+CREATE INDEX IF NOT EXISTS idx_resource_permissions_status ON sapiens.resource_permissions (status);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_resource_permissions_metadata_gin ON resource_permissions USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_resource_permissions_metadata_deleted_at ON resource_permissions ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_resource_permissions_metadata_created_at ON resource_permissions ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_resource_permissions_metadata_updated_at ON resource_permissions ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_resource_permissions_metadata_gin ON sapiens.resource_permissions USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_resource_permissions_metadata_deleted_at ON sapiens.resource_permissions ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_resource_permissions_metadata_created_at ON sapiens.resource_permissions ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_resource_permissions_metadata_updated_at ON sapiens.resource_permissions ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION resource_permissions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.resource_permissions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -59,14 +61,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS resource_permissions_insert_audit ON resource_permissions;
-CREATE TRIGGER resource_permissions_insert_audit BEFORE INSERT ON resource_permissions
-    FOR EACH ROW EXECUTE FUNCTION resource_permissions_audit_timestamp();
+DROP TRIGGER IF EXISTS resource_permissions_insert_audit ON sapiens.resource_permissions;
+CREATE TRIGGER resource_permissions_insert_audit BEFORE INSERT ON sapiens.resource_permissions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.resource_permissions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS resource_permissions_update_audit ON resource_permissions;
-CREATE TRIGGER resource_permissions_update_audit BEFORE UPDATE ON resource_permissions
-    FOR EACH ROW EXECUTE FUNCTION resource_permissions_audit_timestamp();
+DROP TRIGGER IF EXISTS resource_permissions_update_audit ON sapiens.resource_permissions;
+CREATE TRIGGER resource_permissions_update_audit BEFORE UPDATE ON sapiens.resource_permissions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.resource_permissions_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE resource_permissions ADD CONSTRAINT fk_resource_permissions_permission_id FOREIGN KEY (permission_id) REFERENCES permissions (id);
+ALTER TABLE sapiens.resource_permissions ADD CONSTRAINT fk_resource_permissions_permission_id FOREIGN KEY (permission_id) REFERENCES permissions (id);

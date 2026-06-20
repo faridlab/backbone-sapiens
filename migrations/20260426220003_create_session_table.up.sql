@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS sessions (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.sessions (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     token_hash TEXT NOT NULL,
@@ -28,27 +30,27 @@ CREATE TABLE IF NOT EXISTS sessions (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_sessions_token_hash ON sessions (token_hash);
+CREATE INDEX IF NOT EXISTS idx_sessions_token_hash ON sapiens.sessions (token_hash);
 
-CREATE INDEX IF NOT EXISTS idx_sessions_user_id_is_active ON sessions (user_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_sessions_user_id_is_active ON sapiens.sessions (user_id, is_active);
 
-CREATE INDEX IF NOT EXISTS idx_sessions_user_id_created_at ON sessions (user_id, ((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_sessions_user_id_created_at ON sapiens.sessions (user_id, ((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions (expires_at);
+CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sapiens.sessions (expires_at);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_sessions_token_hash ON sessions (token_hash);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sessions_token_hash ON sapiens.sessions (token_hash);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_sessions_metadata_gin ON sessions USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_sessions_metadata_deleted_at ON sessions ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_sessions_metadata_created_at ON sessions ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_sessions_metadata_updated_at ON sessions ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_sessions_metadata_gin ON sapiens.sessions USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_sessions_metadata_deleted_at ON sapiens.sessions ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_sessions_metadata_created_at ON sapiens.sessions ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_sessions_metadata_updated_at ON sapiens.sessions ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION sessions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.sessions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -61,14 +63,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS sessions_insert_audit ON sessions;
-CREATE TRIGGER sessions_insert_audit BEFORE INSERT ON sessions
-    FOR EACH ROW EXECUTE FUNCTION sessions_audit_timestamp();
+DROP TRIGGER IF EXISTS sessions_insert_audit ON sapiens.sessions;
+CREATE TRIGGER sessions_insert_audit BEFORE INSERT ON sapiens.sessions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.sessions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS sessions_update_audit ON sessions;
-CREATE TRIGGER sessions_update_audit BEFORE UPDATE ON sessions
-    FOR EACH ROW EXECUTE FUNCTION sessions_audit_timestamp();
+DROP TRIGGER IF EXISTS sessions_update_audit ON sapiens.sessions;
+CREATE TRIGGER sessions_update_audit BEFORE UPDATE ON sapiens.sessions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.sessions_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE sessions ADD CONSTRAINT fk_sessions_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.sessions ADD CONSTRAINT fk_sessions_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;

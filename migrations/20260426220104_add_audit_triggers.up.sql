@@ -9,11 +9,11 @@
 --   - metadata->'updated_at' on INSERT and UPDATE
 
 -- ==============================================================================
--- Table: AnalyticsEvent (analytics_events)
+-- Table: AnalyticsEvent (sapiens.analytics_events)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION analytics_events_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.analytics_events_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -26,21 +26,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS analytics_events_insert_audit ON analytics_events;
-CREATE TRIGGER analytics_events_insert_audit BEFORE INSERT ON analytics_events
-    FOR EACH ROW EXECUTE FUNCTION analytics_events_audit_timestamp();
+DROP TRIGGER IF EXISTS analytics_events_insert_audit ON sapiens.analytics_events;
+CREATE TRIGGER analytics_events_insert_audit BEFORE INSERT ON sapiens.analytics_events
+    FOR EACH ROW EXECUTE FUNCTION sapiens.analytics_events_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS analytics_events_update_audit ON analytics_events;
-CREATE TRIGGER analytics_events_update_audit BEFORE UPDATE ON analytics_events
-    FOR EACH ROW EXECUTE FUNCTION analytics_events_audit_timestamp();
+DROP TRIGGER IF EXISTS analytics_events_update_audit ON sapiens.analytics_events;
+CREATE TRIGGER analytics_events_update_audit BEFORE UPDATE ON sapiens.analytics_events
+    FOR EACH ROW EXECUTE FUNCTION sapiens.analytics_events_audit_timestamp();
 
 -- ==============================================================================
--- Table: AnalyticsMetric (analytics_metrics)
+-- Table: AnalyticsMetric (sapiens.analytics_metrics)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION analytics_metrics_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.analytics_metrics_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -53,21 +53,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS analytics_metrics_insert_audit ON analytics_metrics;
-CREATE TRIGGER analytics_metrics_insert_audit BEFORE INSERT ON analytics_metrics
-    FOR EACH ROW EXECUTE FUNCTION analytics_metrics_audit_timestamp();
+DROP TRIGGER IF EXISTS analytics_metrics_insert_audit ON sapiens.analytics_metrics;
+CREATE TRIGGER analytics_metrics_insert_audit BEFORE INSERT ON sapiens.analytics_metrics
+    FOR EACH ROW EXECUTE FUNCTION sapiens.analytics_metrics_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS analytics_metrics_update_audit ON analytics_metrics;
-CREATE TRIGGER analytics_metrics_update_audit BEFORE UPDATE ON analytics_metrics
-    FOR EACH ROW EXECUTE FUNCTION analytics_metrics_audit_timestamp();
+DROP TRIGGER IF EXISTS analytics_metrics_update_audit ON sapiens.analytics_metrics;
+CREATE TRIGGER analytics_metrics_update_audit BEFORE UPDATE ON sapiens.analytics_metrics
+    FOR EACH ROW EXECUTE FUNCTION sapiens.analytics_metrics_audit_timestamp();
 
 -- ==============================================================================
--- Table: AnalyticsReport (analytics_reports)
+-- Table: AnalyticsReport (sapiens.analytics_reports)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION analytics_reports_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.analytics_reports_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -80,21 +80,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS analytics_reports_insert_audit ON analytics_reports;
-CREATE TRIGGER analytics_reports_insert_audit BEFORE INSERT ON analytics_reports
-    FOR EACH ROW EXECUTE FUNCTION analytics_reports_audit_timestamp();
+DROP TRIGGER IF EXISTS analytics_reports_insert_audit ON sapiens.analytics_reports;
+CREATE TRIGGER analytics_reports_insert_audit BEFORE INSERT ON sapiens.analytics_reports
+    FOR EACH ROW EXECUTE FUNCTION sapiens.analytics_reports_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS analytics_reports_update_audit ON analytics_reports;
-CREATE TRIGGER analytics_reports_update_audit BEFORE UPDATE ON analytics_reports
-    FOR EACH ROW EXECUTE FUNCTION analytics_reports_audit_timestamp();
+DROP TRIGGER IF EXISTS analytics_reports_update_audit ON sapiens.analytics_reports;
+CREATE TRIGGER analytics_reports_update_audit BEFORE UPDATE ON sapiens.analytics_reports
+    FOR EACH ROW EXECUTE FUNCTION sapiens.analytics_reports_audit_timestamp();
 
 -- ==============================================================================
--- Table: AnonymizationRecord (anonymization_records)
+-- Table: AnonymizationRecord (sapiens.anonymization_records)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION anonymization_records_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.anonymization_records_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -107,21 +107,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS anonymization_records_insert_audit ON anonymization_records;
-CREATE TRIGGER anonymization_records_insert_audit BEFORE INSERT ON anonymization_records
-    FOR EACH ROW EXECUTE FUNCTION anonymization_records_audit_timestamp();
+DROP TRIGGER IF EXISTS anonymization_records_insert_audit ON sapiens.anonymization_records;
+CREATE TRIGGER anonymization_records_insert_audit BEFORE INSERT ON sapiens.anonymization_records
+    FOR EACH ROW EXECUTE FUNCTION sapiens.anonymization_records_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS anonymization_records_update_audit ON anonymization_records;
-CREATE TRIGGER anonymization_records_update_audit BEFORE UPDATE ON anonymization_records
-    FOR EACH ROW EXECUTE FUNCTION anonymization_records_audit_timestamp();
+DROP TRIGGER IF EXISTS anonymization_records_update_audit ON sapiens.anonymization_records;
+CREATE TRIGGER anonymization_records_update_audit BEFORE UPDATE ON sapiens.anonymization_records
+    FOR EACH ROW EXECUTE FUNCTION sapiens.anonymization_records_audit_timestamp();
 
 -- ==============================================================================
--- Table: AuditLog (audit_logs)
+-- Table: AuditLog (sapiens.audit_logs)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION audit_logs_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.audit_logs_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -134,21 +134,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS audit_logs_insert_audit ON audit_logs;
-CREATE TRIGGER audit_logs_insert_audit BEFORE INSERT ON audit_logs
-    FOR EACH ROW EXECUTE FUNCTION audit_logs_audit_timestamp();
+DROP TRIGGER IF EXISTS audit_logs_insert_audit ON sapiens.audit_logs;
+CREATE TRIGGER audit_logs_insert_audit BEFORE INSERT ON sapiens.audit_logs
+    FOR EACH ROW EXECUTE FUNCTION sapiens.audit_logs_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS audit_logs_update_audit ON audit_logs;
-CREATE TRIGGER audit_logs_update_audit BEFORE UPDATE ON audit_logs
-    FOR EACH ROW EXECUTE FUNCTION audit_logs_audit_timestamp();
+DROP TRIGGER IF EXISTS audit_logs_update_audit ON sapiens.audit_logs;
+CREATE TRIGGER audit_logs_update_audit BEFORE UPDATE ON sapiens.audit_logs
+    FOR EACH ROW EXECUTE FUNCTION sapiens.audit_logs_audit_timestamp();
 
 -- ==============================================================================
--- Table: BackupCode (backup_codes)
+-- Table: BackupCode (sapiens.backup_codes)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION backup_codes_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.backup_codes_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -161,21 +161,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS backup_codes_insert_audit ON backup_codes;
-CREATE TRIGGER backup_codes_insert_audit BEFORE INSERT ON backup_codes
-    FOR EACH ROW EXECUTE FUNCTION backup_codes_audit_timestamp();
+DROP TRIGGER IF EXISTS backup_codes_insert_audit ON sapiens.backup_codes;
+CREATE TRIGGER backup_codes_insert_audit BEFORE INSERT ON sapiens.backup_codes
+    FOR EACH ROW EXECUTE FUNCTION sapiens.backup_codes_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS backup_codes_update_audit ON backup_codes;
-CREATE TRIGGER backup_codes_update_audit BEFORE UPDATE ON backup_codes
-    FOR EACH ROW EXECUTE FUNCTION backup_codes_audit_timestamp();
+DROP TRIGGER IF EXISTS backup_codes_update_audit ON sapiens.backup_codes;
+CREATE TRIGGER backup_codes_update_audit BEFORE UPDATE ON sapiens.backup_codes
+    FOR EACH ROW EXECUTE FUNCTION sapiens.backup_codes_audit_timestamp();
 
 -- ==============================================================================
--- Table: BulkOperation (bulk_operations)
+-- Table: BulkOperation (sapiens.bulk_operations)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION bulk_operations_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.bulk_operations_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -188,21 +188,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS bulk_operations_insert_audit ON bulk_operations;
-CREATE TRIGGER bulk_operations_insert_audit BEFORE INSERT ON bulk_operations
-    FOR EACH ROW EXECUTE FUNCTION bulk_operations_audit_timestamp();
+DROP TRIGGER IF EXISTS bulk_operations_insert_audit ON sapiens.bulk_operations;
+CREATE TRIGGER bulk_operations_insert_audit BEFORE INSERT ON sapiens.bulk_operations
+    FOR EACH ROW EXECUTE FUNCTION sapiens.bulk_operations_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS bulk_operations_update_audit ON bulk_operations;
-CREATE TRIGGER bulk_operations_update_audit BEFORE UPDATE ON bulk_operations
-    FOR EACH ROW EXECUTE FUNCTION bulk_operations_audit_timestamp();
+DROP TRIGGER IF EXISTS bulk_operations_update_audit ON sapiens.bulk_operations;
+CREATE TRIGGER bulk_operations_update_audit BEFORE UPDATE ON sapiens.bulk_operations
+    FOR EACH ROW EXECUTE FUNCTION sapiens.bulk_operations_audit_timestamp();
 
 -- ==============================================================================
--- Table: BulkOperationResult (bulk_operation_results)
+-- Table: BulkOperationResult (sapiens.bulk_operation_results)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION bulk_operation_results_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.bulk_operation_results_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -215,21 +215,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS bulk_operation_results_insert_audit ON bulk_operation_results;
-CREATE TRIGGER bulk_operation_results_insert_audit BEFORE INSERT ON bulk_operation_results
-    FOR EACH ROW EXECUTE FUNCTION bulk_operation_results_audit_timestamp();
+DROP TRIGGER IF EXISTS bulk_operation_results_insert_audit ON sapiens.bulk_operation_results;
+CREATE TRIGGER bulk_operation_results_insert_audit BEFORE INSERT ON sapiens.bulk_operation_results
+    FOR EACH ROW EXECUTE FUNCTION sapiens.bulk_operation_results_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS bulk_operation_results_update_audit ON bulk_operation_results;
-CREATE TRIGGER bulk_operation_results_update_audit BEFORE UPDATE ON bulk_operation_results
-    FOR EACH ROW EXECUTE FUNCTION bulk_operation_results_audit_timestamp();
+DROP TRIGGER IF EXISTS bulk_operation_results_update_audit ON sapiens.bulk_operation_results;
+CREATE TRIGGER bulk_operation_results_update_audit BEFORE UPDATE ON sapiens.bulk_operation_results
+    FOR EACH ROW EXECUTE FUNCTION sapiens.bulk_operation_results_audit_timestamp();
 
 -- ==============================================================================
--- Table: DataExport (data_exports)
+-- Table: DataExport (sapiens.data_exports)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION data_exports_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.data_exports_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -242,21 +242,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS data_exports_insert_audit ON data_exports;
-CREATE TRIGGER data_exports_insert_audit BEFORE INSERT ON data_exports
-    FOR EACH ROW EXECUTE FUNCTION data_exports_audit_timestamp();
+DROP TRIGGER IF EXISTS data_exports_insert_audit ON sapiens.data_exports;
+CREATE TRIGGER data_exports_insert_audit BEFORE INSERT ON sapiens.data_exports
+    FOR EACH ROW EXECUTE FUNCTION sapiens.data_exports_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS data_exports_update_audit ON data_exports;
-CREATE TRIGGER data_exports_update_audit BEFORE UPDATE ON data_exports
-    FOR EACH ROW EXECUTE FUNCTION data_exports_audit_timestamp();
+DROP TRIGGER IF EXISTS data_exports_update_audit ON sapiens.data_exports;
+CREATE TRIGGER data_exports_update_audit BEFORE UPDATE ON sapiens.data_exports
+    FOR EACH ROW EXECUTE FUNCTION sapiens.data_exports_audit_timestamp();
 
 -- ==============================================================================
--- Table: DeviceTrust (device_trusts)
+-- Table: DeviceTrust (sapiens.device_trusts)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION device_trusts_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.device_trusts_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -269,21 +269,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS device_trusts_insert_audit ON device_trusts;
-CREATE TRIGGER device_trusts_insert_audit BEFORE INSERT ON device_trusts
-    FOR EACH ROW EXECUTE FUNCTION device_trusts_audit_timestamp();
+DROP TRIGGER IF EXISTS device_trusts_insert_audit ON sapiens.device_trusts;
+CREATE TRIGGER device_trusts_insert_audit BEFORE INSERT ON sapiens.device_trusts
+    FOR EACH ROW EXECUTE FUNCTION sapiens.device_trusts_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS device_trusts_update_audit ON device_trusts;
-CREATE TRIGGER device_trusts_update_audit BEFORE UPDATE ON device_trusts
-    FOR EACH ROW EXECUTE FUNCTION device_trusts_audit_timestamp();
+DROP TRIGGER IF EXISTS device_trusts_update_audit ON sapiens.device_trusts;
+CREATE TRIGGER device_trusts_update_audit BEFORE UPDATE ON sapiens.device_trusts
+    FOR EACH ROW EXECUTE FUNCTION sapiens.device_trusts_audit_timestamp();
 
 -- ==============================================================================
--- Table: DirectPermissionGrant (direct_permission_grants)
+-- Table: DirectPermissionGrant (sapiens.direct_permission_grants)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION direct_permission_grants_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.direct_permission_grants_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -296,21 +296,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS direct_permission_grants_insert_audit ON direct_permission_grants;
-CREATE TRIGGER direct_permission_grants_insert_audit BEFORE INSERT ON direct_permission_grants
-    FOR EACH ROW EXECUTE FUNCTION direct_permission_grants_audit_timestamp();
+DROP TRIGGER IF EXISTS direct_permission_grants_insert_audit ON sapiens.direct_permission_grants;
+CREATE TRIGGER direct_permission_grants_insert_audit BEFORE INSERT ON sapiens.direct_permission_grants
+    FOR EACH ROW EXECUTE FUNCTION sapiens.direct_permission_grants_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS direct_permission_grants_update_audit ON direct_permission_grants;
-CREATE TRIGGER direct_permission_grants_update_audit BEFORE UPDATE ON direct_permission_grants
-    FOR EACH ROW EXECUTE FUNCTION direct_permission_grants_audit_timestamp();
+DROP TRIGGER IF EXISTS direct_permission_grants_update_audit ON sapiens.direct_permission_grants;
+CREATE TRIGGER direct_permission_grants_update_audit BEFORE UPDATE ON sapiens.direct_permission_grants
+    FOR EACH ROW EXECUTE FUNCTION sapiens.direct_permission_grants_audit_timestamp();
 
 -- ==============================================================================
--- Table: EffectivePermissionCache (effective_permission_cache)
+-- Table: EffectivePermissionCache (sapiens.effective_permission_cache)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION effective_permission_cache_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.effective_permission_cache_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -323,21 +323,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS effective_permission_cache_insert_audit ON effective_permission_cache;
-CREATE TRIGGER effective_permission_cache_insert_audit BEFORE INSERT ON effective_permission_cache
-    FOR EACH ROW EXECUTE FUNCTION effective_permission_cache_audit_timestamp();
+DROP TRIGGER IF EXISTS effective_permission_cache_insert_audit ON sapiens.effective_permission_cache;
+CREATE TRIGGER effective_permission_cache_insert_audit BEFORE INSERT ON sapiens.effective_permission_cache
+    FOR EACH ROW EXECUTE FUNCTION sapiens.effective_permission_cache_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS effective_permission_cache_update_audit ON effective_permission_cache;
-CREATE TRIGGER effective_permission_cache_update_audit BEFORE UPDATE ON effective_permission_cache
-    FOR EACH ROW EXECUTE FUNCTION effective_permission_cache_audit_timestamp();
+DROP TRIGGER IF EXISTS effective_permission_cache_update_audit ON sapiens.effective_permission_cache;
+CREATE TRIGGER effective_permission_cache_update_audit BEFORE UPDATE ON sapiens.effective_permission_cache
+    FOR EACH ROW EXECUTE FUNCTION sapiens.effective_permission_cache_audit_timestamp();
 
 -- ==============================================================================
--- Table: EmailVerificationToken (email_verification_tokens)
+-- Table: EmailVerificationToken (sapiens.email_verification_tokens)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION email_verification_tokens_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.email_verification_tokens_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -350,21 +350,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS email_verification_tokens_insert_audit ON email_verification_tokens;
-CREATE TRIGGER email_verification_tokens_insert_audit BEFORE INSERT ON email_verification_tokens
-    FOR EACH ROW EXECUTE FUNCTION email_verification_tokens_audit_timestamp();
+DROP TRIGGER IF EXISTS email_verification_tokens_insert_audit ON sapiens.email_verification_tokens;
+CREATE TRIGGER email_verification_tokens_insert_audit BEFORE INSERT ON sapiens.email_verification_tokens
+    FOR EACH ROW EXECUTE FUNCTION sapiens.email_verification_tokens_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS email_verification_tokens_update_audit ON email_verification_tokens;
-CREATE TRIGGER email_verification_tokens_update_audit BEFORE UPDATE ON email_verification_tokens
-    FOR EACH ROW EXECUTE FUNCTION email_verification_tokens_audit_timestamp();
+DROP TRIGGER IF EXISTS email_verification_tokens_update_audit ON sapiens.email_verification_tokens;
+CREATE TRIGGER email_verification_tokens_update_audit BEFORE UPDATE ON sapiens.email_verification_tokens
+    FOR EACH ROW EXECUTE FUNCTION sapiens.email_verification_tokens_audit_timestamp();
 
 -- ==============================================================================
--- Table: ImpersonationSession (impersonation_sessions)
+-- Table: ImpersonationSession (sapiens.impersonation_sessions)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION impersonation_sessions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.impersonation_sessions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -377,21 +377,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS impersonation_sessions_insert_audit ON impersonation_sessions;
-CREATE TRIGGER impersonation_sessions_insert_audit BEFORE INSERT ON impersonation_sessions
-    FOR EACH ROW EXECUTE FUNCTION impersonation_sessions_audit_timestamp();
+DROP TRIGGER IF EXISTS impersonation_sessions_insert_audit ON sapiens.impersonation_sessions;
+CREATE TRIGGER impersonation_sessions_insert_audit BEFORE INSERT ON sapiens.impersonation_sessions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.impersonation_sessions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS impersonation_sessions_update_audit ON impersonation_sessions;
-CREATE TRIGGER impersonation_sessions_update_audit BEFORE UPDATE ON impersonation_sessions
-    FOR EACH ROW EXECUTE FUNCTION impersonation_sessions_audit_timestamp();
+DROP TRIGGER IF EXISTS impersonation_sessions_update_audit ON sapiens.impersonation_sessions;
+CREATE TRIGGER impersonation_sessions_update_audit BEFORE UPDATE ON sapiens.impersonation_sessions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.impersonation_sessions_audit_timestamp();
 
 -- ==============================================================================
--- Table: LDAPDirectory (ldap_directories)
+-- Table: LDAPDirectory (sapiens.ldap_directories)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION ldap_directories_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.ldap_directories_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -404,21 +404,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS ldap_directories_insert_audit ON ldap_directories;
-CREATE TRIGGER ldap_directories_insert_audit BEFORE INSERT ON ldap_directories
-    FOR EACH ROW EXECUTE FUNCTION ldap_directories_audit_timestamp();
+DROP TRIGGER IF EXISTS ldap_directories_insert_audit ON sapiens.ldap_directories;
+CREATE TRIGGER ldap_directories_insert_audit BEFORE INSERT ON sapiens.ldap_directories
+    FOR EACH ROW EXECUTE FUNCTION sapiens.ldap_directories_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS ldap_directories_update_audit ON ldap_directories;
-CREATE TRIGGER ldap_directories_update_audit BEFORE UPDATE ON ldap_directories
-    FOR EACH ROW EXECUTE FUNCTION ldap_directories_audit_timestamp();
+DROP TRIGGER IF EXISTS ldap_directories_update_audit ON sapiens.ldap_directories;
+CREATE TRIGGER ldap_directories_update_audit BEFORE UPDATE ON sapiens.ldap_directories
+    FOR EACH ROW EXECUTE FUNCTION sapiens.ldap_directories_audit_timestamp();
 
 -- ==============================================================================
--- Table: MFABackupCode (mfa_backup_codes)
+-- Table: MFABackupCode (sapiens.mfa_backup_codes)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION mfa_backup_codes_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.mfa_backup_codes_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -431,21 +431,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS mfa_backup_codes_insert_audit ON mfa_backup_codes;
-CREATE TRIGGER mfa_backup_codes_insert_audit BEFORE INSERT ON mfa_backup_codes
-    FOR EACH ROW EXECUTE FUNCTION mfa_backup_codes_audit_timestamp();
+DROP TRIGGER IF EXISTS mfa_backup_codes_insert_audit ON sapiens.mfa_backup_codes;
+CREATE TRIGGER mfa_backup_codes_insert_audit BEFORE INSERT ON sapiens.mfa_backup_codes
+    FOR EACH ROW EXECUTE FUNCTION sapiens.mfa_backup_codes_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS mfa_backup_codes_update_audit ON mfa_backup_codes;
-CREATE TRIGGER mfa_backup_codes_update_audit BEFORE UPDATE ON mfa_backup_codes
-    FOR EACH ROW EXECUTE FUNCTION mfa_backup_codes_audit_timestamp();
+DROP TRIGGER IF EXISTS mfa_backup_codes_update_audit ON sapiens.mfa_backup_codes;
+CREATE TRIGGER mfa_backup_codes_update_audit BEFORE UPDATE ON sapiens.mfa_backup_codes
+    FOR EACH ROW EXECUTE FUNCTION sapiens.mfa_backup_codes_audit_timestamp();
 
 -- ==============================================================================
--- Table: MFADevice (mfa_devices)
+-- Table: MFADevice (sapiens.mfa_devices)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION mfa_devices_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.mfa_devices_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -458,21 +458,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS mfa_devices_insert_audit ON mfa_devices;
-CREATE TRIGGER mfa_devices_insert_audit BEFORE INSERT ON mfa_devices
-    FOR EACH ROW EXECUTE FUNCTION mfa_devices_audit_timestamp();
+DROP TRIGGER IF EXISTS mfa_devices_insert_audit ON sapiens.mfa_devices;
+CREATE TRIGGER mfa_devices_insert_audit BEFORE INSERT ON sapiens.mfa_devices
+    FOR EACH ROW EXECUTE FUNCTION sapiens.mfa_devices_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS mfa_devices_update_audit ON mfa_devices;
-CREATE TRIGGER mfa_devices_update_audit BEFORE UPDATE ON mfa_devices
-    FOR EACH ROW EXECUTE FUNCTION mfa_devices_audit_timestamp();
+DROP TRIGGER IF EXISTS mfa_devices_update_audit ON sapiens.mfa_devices;
+CREATE TRIGGER mfa_devices_update_audit BEFORE UPDATE ON sapiens.mfa_devices
+    FOR EACH ROW EXECUTE FUNCTION sapiens.mfa_devices_audit_timestamp();
 
 -- ==============================================================================
--- Table: MFASession (mfa_sessions)
+-- Table: MFASession (sapiens.mfa_sessions)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION mfa_sessions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.mfa_sessions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -485,21 +485,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS mfa_sessions_insert_audit ON mfa_sessions;
-CREATE TRIGGER mfa_sessions_insert_audit BEFORE INSERT ON mfa_sessions
-    FOR EACH ROW EXECUTE FUNCTION mfa_sessions_audit_timestamp();
+DROP TRIGGER IF EXISTS mfa_sessions_insert_audit ON sapiens.mfa_sessions;
+CREATE TRIGGER mfa_sessions_insert_audit BEFORE INSERT ON sapiens.mfa_sessions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.mfa_sessions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS mfa_sessions_update_audit ON mfa_sessions;
-CREATE TRIGGER mfa_sessions_update_audit BEFORE UPDATE ON mfa_sessions
-    FOR EACH ROW EXECUTE FUNCTION mfa_sessions_audit_timestamp();
+DROP TRIGGER IF EXISTS mfa_sessions_update_audit ON sapiens.mfa_sessions;
+CREATE TRIGGER mfa_sessions_update_audit BEFORE UPDATE ON sapiens.mfa_sessions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.mfa_sessions_audit_timestamp();
 
 -- ==============================================================================
--- Table: Notification (notifications)
+-- Table: Notification (sapiens.notifications)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION notifications_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.notifications_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -512,21 +512,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS notifications_insert_audit ON notifications;
-CREATE TRIGGER notifications_insert_audit BEFORE INSERT ON notifications
-    FOR EACH ROW EXECUTE FUNCTION notifications_audit_timestamp();
+DROP TRIGGER IF EXISTS notifications_insert_audit ON sapiens.notifications;
+CREATE TRIGGER notifications_insert_audit BEFORE INSERT ON sapiens.notifications
+    FOR EACH ROW EXECUTE FUNCTION sapiens.notifications_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS notifications_update_audit ON notifications;
-CREATE TRIGGER notifications_update_audit BEFORE UPDATE ON notifications
-    FOR EACH ROW EXECUTE FUNCTION notifications_audit_timestamp();
+DROP TRIGGER IF EXISTS notifications_update_audit ON sapiens.notifications;
+CREATE TRIGGER notifications_update_audit BEFORE UPDATE ON sapiens.notifications
+    FOR EACH ROW EXECUTE FUNCTION sapiens.notifications_audit_timestamp();
 
 -- ==============================================================================
--- Table: NotificationTemplate (notification_templates)
+-- Table: NotificationTemplate (sapiens.notification_templates)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION notification_templates_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.notification_templates_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -539,21 +539,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS notification_templates_insert_audit ON notification_templates;
-CREATE TRIGGER notification_templates_insert_audit BEFORE INSERT ON notification_templates
-    FOR EACH ROW EXECUTE FUNCTION notification_templates_audit_timestamp();
+DROP TRIGGER IF EXISTS notification_templates_insert_audit ON sapiens.notification_templates;
+CREATE TRIGGER notification_templates_insert_audit BEFORE INSERT ON sapiens.notification_templates
+    FOR EACH ROW EXECUTE FUNCTION sapiens.notification_templates_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS notification_templates_update_audit ON notification_templates;
-CREATE TRIGGER notification_templates_update_audit BEFORE UPDATE ON notification_templates
-    FOR EACH ROW EXECUTE FUNCTION notification_templates_audit_timestamp();
+DROP TRIGGER IF EXISTS notification_templates_update_audit ON sapiens.notification_templates;
+CREATE TRIGGER notification_templates_update_audit BEFORE UPDATE ON sapiens.notification_templates
+    FOR EACH ROW EXECUTE FUNCTION sapiens.notification_templates_audit_timestamp();
 
 -- ==============================================================================
--- Table: NotificationLog (notification_logs)
+-- Table: NotificationLog (sapiens.notification_logs)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION notification_logs_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.notification_logs_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -566,21 +566,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS notification_logs_insert_audit ON notification_logs;
-CREATE TRIGGER notification_logs_insert_audit BEFORE INSERT ON notification_logs
-    FOR EACH ROW EXECUTE FUNCTION notification_logs_audit_timestamp();
+DROP TRIGGER IF EXISTS notification_logs_insert_audit ON sapiens.notification_logs;
+CREATE TRIGGER notification_logs_insert_audit BEFORE INSERT ON sapiens.notification_logs
+    FOR EACH ROW EXECUTE FUNCTION sapiens.notification_logs_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS notification_logs_update_audit ON notification_logs;
-CREATE TRIGGER notification_logs_update_audit BEFORE UPDATE ON notification_logs
-    FOR EACH ROW EXECUTE FUNCTION notification_logs_audit_timestamp();
+DROP TRIGGER IF EXISTS notification_logs_update_audit ON sapiens.notification_logs;
+CREATE TRIGGER notification_logs_update_audit BEFORE UPDATE ON sapiens.notification_logs
+    FOR EACH ROW EXECUTE FUNCTION sapiens.notification_logs_audit_timestamp();
 
 -- ==============================================================================
--- Table: NotificationPreference (sapiens_notification_preferences)
+-- Table: NotificationPreference (sapiens.sapiens_notification_preferences)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION sapiens_notification_preferences_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.sapiens_notification_preferences_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -593,21 +593,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS sapiens_notification_preferences_insert_audit ON sapiens_notification_preferences;
-CREATE TRIGGER sapiens_notification_preferences_insert_audit BEFORE INSERT ON sapiens_notification_preferences
-    FOR EACH ROW EXECUTE FUNCTION sapiens_notification_preferences_audit_timestamp();
+DROP TRIGGER IF EXISTS sapiens_notification_preferences_insert_audit ON sapiens.sapiens_notification_preferences;
+CREATE TRIGGER sapiens_notification_preferences_insert_audit BEFORE INSERT ON sapiens.sapiens_notification_preferences
+    FOR EACH ROW EXECUTE FUNCTION sapiens.sapiens_notification_preferences_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS sapiens_notification_preferences_update_audit ON sapiens_notification_preferences;
-CREATE TRIGGER sapiens_notification_preferences_update_audit BEFORE UPDATE ON sapiens_notification_preferences
-    FOR EACH ROW EXECUTE FUNCTION sapiens_notification_preferences_audit_timestamp();
+DROP TRIGGER IF EXISTS sapiens_notification_preferences_update_audit ON sapiens.sapiens_notification_preferences;
+CREATE TRIGGER sapiens_notification_preferences_update_audit BEFORE UPDATE ON sapiens.sapiens_notification_preferences
+    FOR EACH ROW EXECUTE FUNCTION sapiens.sapiens_notification_preferences_audit_timestamp();
 
 -- ==============================================================================
--- Table: OAuthProvider (oauth_providers)
+-- Table: OAuthProvider (sapiens.oauth_providers)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION oauth_providers_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.oauth_providers_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -620,21 +620,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS oauth_providers_insert_audit ON oauth_providers;
-CREATE TRIGGER oauth_providers_insert_audit BEFORE INSERT ON oauth_providers
-    FOR EACH ROW EXECUTE FUNCTION oauth_providers_audit_timestamp();
+DROP TRIGGER IF EXISTS oauth_providers_insert_audit ON sapiens.oauth_providers;
+CREATE TRIGGER oauth_providers_insert_audit BEFORE INSERT ON sapiens.oauth_providers
+    FOR EACH ROW EXECUTE FUNCTION sapiens.oauth_providers_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS oauth_providers_update_audit ON oauth_providers;
-CREATE TRIGGER oauth_providers_update_audit BEFORE UPDATE ON oauth_providers
-    FOR EACH ROW EXECUTE FUNCTION oauth_providers_audit_timestamp();
+DROP TRIGGER IF EXISTS oauth_providers_update_audit ON sapiens.oauth_providers;
+CREATE TRIGGER oauth_providers_update_audit BEFORE UPDATE ON sapiens.oauth_providers
+    FOR EACH ROW EXECUTE FUNCTION sapiens.oauth_providers_audit_timestamp();
 
 -- ==============================================================================
--- Table: UserOAuthLink (user_oauth_links)
+-- Table: UserOAuthLink (sapiens.user_oauth_links)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION user_oauth_links_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.user_oauth_links_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -647,21 +647,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS user_oauth_links_insert_audit ON user_oauth_links;
-CREATE TRIGGER user_oauth_links_insert_audit BEFORE INSERT ON user_oauth_links
-    FOR EACH ROW EXECUTE FUNCTION user_oauth_links_audit_timestamp();
+DROP TRIGGER IF EXISTS user_oauth_links_insert_audit ON sapiens.user_oauth_links;
+CREATE TRIGGER user_oauth_links_insert_audit BEFORE INSERT ON sapiens.user_oauth_links
+    FOR EACH ROW EXECUTE FUNCTION sapiens.user_oauth_links_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS user_oauth_links_update_audit ON user_oauth_links;
-CREATE TRIGGER user_oauth_links_update_audit BEFORE UPDATE ON user_oauth_links
-    FOR EACH ROW EXECUTE FUNCTION user_oauth_links_audit_timestamp();
+DROP TRIGGER IF EXISTS user_oauth_links_update_audit ON sapiens.user_oauth_links;
+CREATE TRIGGER user_oauth_links_update_audit BEFORE UPDATE ON sapiens.user_oauth_links
+    FOR EACH ROW EXECUTE FUNCTION sapiens.user_oauth_links_audit_timestamp();
 
 -- ==============================================================================
--- Table: OrganizationPermission (organization_permissions)
+-- Table: OrganizationPermission (sapiens.organization_permissions)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION organization_permissions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.organization_permissions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -674,21 +674,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS organization_permissions_insert_audit ON organization_permissions;
-CREATE TRIGGER organization_permissions_insert_audit BEFORE INSERT ON organization_permissions
-    FOR EACH ROW EXECUTE FUNCTION organization_permissions_audit_timestamp();
+DROP TRIGGER IF EXISTS organization_permissions_insert_audit ON sapiens.organization_permissions;
+CREATE TRIGGER organization_permissions_insert_audit BEFORE INSERT ON sapiens.organization_permissions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.organization_permissions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS organization_permissions_update_audit ON organization_permissions;
-CREATE TRIGGER organization_permissions_update_audit BEFORE UPDATE ON organization_permissions
-    FOR EACH ROW EXECUTE FUNCTION organization_permissions_audit_timestamp();
+DROP TRIGGER IF EXISTS organization_permissions_update_audit ON sapiens.organization_permissions;
+CREATE TRIGGER organization_permissions_update_audit BEFORE UPDATE ON sapiens.organization_permissions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.organization_permissions_audit_timestamp();
 
 -- ==============================================================================
--- Table: OrganizationRole (organization_roles)
+-- Table: OrganizationRole (sapiens.organization_roles)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION organization_roles_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.organization_roles_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -701,21 +701,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS organization_roles_insert_audit ON organization_roles;
-CREATE TRIGGER organization_roles_insert_audit BEFORE INSERT ON organization_roles
-    FOR EACH ROW EXECUTE FUNCTION organization_roles_audit_timestamp();
+DROP TRIGGER IF EXISTS organization_roles_insert_audit ON sapiens.organization_roles;
+CREATE TRIGGER organization_roles_insert_audit BEFORE INSERT ON sapiens.organization_roles
+    FOR EACH ROW EXECUTE FUNCTION sapiens.organization_roles_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS organization_roles_update_audit ON organization_roles;
-CREATE TRIGGER organization_roles_update_audit BEFORE UPDATE ON organization_roles
-    FOR EACH ROW EXECUTE FUNCTION organization_roles_audit_timestamp();
+DROP TRIGGER IF EXISTS organization_roles_update_audit ON sapiens.organization_roles;
+CREATE TRIGGER organization_roles_update_audit BEFORE UPDATE ON sapiens.organization_roles
+    FOR EACH ROW EXECUTE FUNCTION sapiens.organization_roles_audit_timestamp();
 
 -- ==============================================================================
--- Table: OrganizationUser (organization_users)
+-- Table: OrganizationUser (sapiens.organization_users)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION organization_users_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.organization_users_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -728,21 +728,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS organization_users_insert_audit ON organization_users;
-CREATE TRIGGER organization_users_insert_audit BEFORE INSERT ON organization_users
-    FOR EACH ROW EXECUTE FUNCTION organization_users_audit_timestamp();
+DROP TRIGGER IF EXISTS organization_users_insert_audit ON sapiens.organization_users;
+CREATE TRIGGER organization_users_insert_audit BEFORE INSERT ON sapiens.organization_users
+    FOR EACH ROW EXECUTE FUNCTION sapiens.organization_users_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS organization_users_update_audit ON organization_users;
-CREATE TRIGGER organization_users_update_audit BEFORE UPDATE ON organization_users
-    FOR EACH ROW EXECUTE FUNCTION organization_users_audit_timestamp();
+DROP TRIGGER IF EXISTS organization_users_update_audit ON sapiens.organization_users;
+CREATE TRIGGER organization_users_update_audit BEFORE UPDATE ON sapiens.organization_users
+    FOR EACH ROW EXECUTE FUNCTION sapiens.organization_users_audit_timestamp();
 
 -- ==============================================================================
--- Table: PasswordCreationContext (password_creation_contexts)
+-- Table: PasswordCreationContext (sapiens.password_creation_contexts)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION password_creation_contexts_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.password_creation_contexts_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -755,21 +755,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS password_creation_contexts_insert_audit ON password_creation_contexts;
-CREATE TRIGGER password_creation_contexts_insert_audit BEFORE INSERT ON password_creation_contexts
-    FOR EACH ROW EXECUTE FUNCTION password_creation_contexts_audit_timestamp();
+DROP TRIGGER IF EXISTS password_creation_contexts_insert_audit ON sapiens.password_creation_contexts;
+CREATE TRIGGER password_creation_contexts_insert_audit BEFORE INSERT ON sapiens.password_creation_contexts
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_creation_contexts_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS password_creation_contexts_update_audit ON password_creation_contexts;
-CREATE TRIGGER password_creation_contexts_update_audit BEFORE UPDATE ON password_creation_contexts
-    FOR EACH ROW EXECUTE FUNCTION password_creation_contexts_audit_timestamp();
+DROP TRIGGER IF EXISTS password_creation_contexts_update_audit ON sapiens.password_creation_contexts;
+CREATE TRIGGER password_creation_contexts_update_audit BEFORE UPDATE ON sapiens.password_creation_contexts
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_creation_contexts_audit_timestamp();
 
 -- ==============================================================================
--- Table: PasswordExpirationSettings (password_expiration_settings)
+-- Table: PasswordExpirationSettings (sapiens.password_expiration_settings)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION password_expiration_settings_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.password_expiration_settings_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -782,21 +782,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS password_expiration_settings_insert_audit ON password_expiration_settings;
-CREATE TRIGGER password_expiration_settings_insert_audit BEFORE INSERT ON password_expiration_settings
-    FOR EACH ROW EXECUTE FUNCTION password_expiration_settings_audit_timestamp();
+DROP TRIGGER IF EXISTS password_expiration_settings_insert_audit ON sapiens.password_expiration_settings;
+CREATE TRIGGER password_expiration_settings_insert_audit BEFORE INSERT ON sapiens.password_expiration_settings
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_expiration_settings_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS password_expiration_settings_update_audit ON password_expiration_settings;
-CREATE TRIGGER password_expiration_settings_update_audit BEFORE UPDATE ON password_expiration_settings
-    FOR EACH ROW EXECUTE FUNCTION password_expiration_settings_audit_timestamp();
+DROP TRIGGER IF EXISTS password_expiration_settings_update_audit ON sapiens.password_expiration_settings;
+CREATE TRIGGER password_expiration_settings_update_audit BEFORE UPDATE ON sapiens.password_expiration_settings
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_expiration_settings_audit_timestamp();
 
 -- ==============================================================================
--- Table: PasswordHistory (password_history)
+-- Table: PasswordHistory (sapiens.password_history)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION password_history_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.password_history_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -809,21 +809,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS password_history_insert_audit ON password_history;
-CREATE TRIGGER password_history_insert_audit BEFORE INSERT ON password_history
-    FOR EACH ROW EXECUTE FUNCTION password_history_audit_timestamp();
+DROP TRIGGER IF EXISTS password_history_insert_audit ON sapiens.password_history;
+CREATE TRIGGER password_history_insert_audit BEFORE INSERT ON sapiens.password_history
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_history_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS password_history_update_audit ON password_history;
-CREATE TRIGGER password_history_update_audit BEFORE UPDATE ON password_history
-    FOR EACH ROW EXECUTE FUNCTION password_history_audit_timestamp();
+DROP TRIGGER IF EXISTS password_history_update_audit ON sapiens.password_history;
+CREATE TRIGGER password_history_update_audit BEFORE UPDATE ON sapiens.password_history
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_history_audit_timestamp();
 
 -- ==============================================================================
--- Table: PasswordHistorySettings (password_history_settings)
+-- Table: PasswordHistorySettings (sapiens.password_history_settings)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION password_history_settings_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.password_history_settings_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -836,21 +836,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS password_history_settings_insert_audit ON password_history_settings;
-CREATE TRIGGER password_history_settings_insert_audit BEFORE INSERT ON password_history_settings
-    FOR EACH ROW EXECUTE FUNCTION password_history_settings_audit_timestamp();
+DROP TRIGGER IF EXISTS password_history_settings_insert_audit ON sapiens.password_history_settings;
+CREATE TRIGGER password_history_settings_insert_audit BEFORE INSERT ON sapiens.password_history_settings
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_history_settings_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS password_history_settings_update_audit ON password_history_settings;
-CREATE TRIGGER password_history_settings_update_audit BEFORE UPDATE ON password_history_settings
-    FOR EACH ROW EXECUTE FUNCTION password_history_settings_audit_timestamp();
+DROP TRIGGER IF EXISTS password_history_settings_update_audit ON sapiens.password_history_settings;
+CREATE TRIGGER password_history_settings_update_audit BEFORE UPDATE ON sapiens.password_history_settings
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_history_settings_audit_timestamp();
 
 -- ==============================================================================
--- Table: PasswordPolicy (password_policies)
+-- Table: PasswordPolicy (sapiens.password_policies)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION password_policies_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.password_policies_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -863,21 +863,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS password_policies_insert_audit ON password_policies;
-CREATE TRIGGER password_policies_insert_audit BEFORE INSERT ON password_policies
-    FOR EACH ROW EXECUTE FUNCTION password_policies_audit_timestamp();
+DROP TRIGGER IF EXISTS password_policies_insert_audit ON sapiens.password_policies;
+CREATE TRIGGER password_policies_insert_audit BEFORE INSERT ON sapiens.password_policies
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_policies_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS password_policies_update_audit ON password_policies;
-CREATE TRIGGER password_policies_update_audit BEFORE UPDATE ON password_policies
-    FOR EACH ROW EXECUTE FUNCTION password_policies_audit_timestamp();
+DROP TRIGGER IF EXISTS password_policies_update_audit ON sapiens.password_policies;
+CREATE TRIGGER password_policies_update_audit BEFORE UPDATE ON sapiens.password_policies
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_policies_audit_timestamp();
 
 -- ==============================================================================
--- Table: PasswordRequirements (password_requirements)
+-- Table: PasswordRequirements (sapiens.password_requirements)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION password_requirements_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.password_requirements_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -890,21 +890,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS password_requirements_insert_audit ON password_requirements;
-CREATE TRIGGER password_requirements_insert_audit BEFORE INSERT ON password_requirements
-    FOR EACH ROW EXECUTE FUNCTION password_requirements_audit_timestamp();
+DROP TRIGGER IF EXISTS password_requirements_insert_audit ON sapiens.password_requirements;
+CREATE TRIGGER password_requirements_insert_audit BEFORE INSERT ON sapiens.password_requirements
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_requirements_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS password_requirements_update_audit ON password_requirements;
-CREATE TRIGGER password_requirements_update_audit BEFORE UPDATE ON password_requirements
-    FOR EACH ROW EXECUTE FUNCTION password_requirements_audit_timestamp();
+DROP TRIGGER IF EXISTS password_requirements_update_audit ON sapiens.password_requirements;
+CREATE TRIGGER password_requirements_update_audit BEFORE UPDATE ON sapiens.password_requirements
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_requirements_audit_timestamp();
 
 -- ==============================================================================
--- Table: PasswordReset (password_resets)
+-- Table: PasswordReset (sapiens.password_resets)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION password_resets_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.password_resets_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -917,21 +917,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS password_resets_insert_audit ON password_resets;
-CREATE TRIGGER password_resets_insert_audit BEFORE INSERT ON password_resets
-    FOR EACH ROW EXECUTE FUNCTION password_resets_audit_timestamp();
+DROP TRIGGER IF EXISTS password_resets_insert_audit ON sapiens.password_resets;
+CREATE TRIGGER password_resets_insert_audit BEFORE INSERT ON sapiens.password_resets
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_resets_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS password_resets_update_audit ON password_resets;
-CREATE TRIGGER password_resets_update_audit BEFORE UPDATE ON password_resets
-    FOR EACH ROW EXECUTE FUNCTION password_resets_audit_timestamp();
+DROP TRIGGER IF EXISTS password_resets_update_audit ON sapiens.password_resets;
+CREATE TRIGGER password_resets_update_audit BEFORE UPDATE ON sapiens.password_resets
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_resets_audit_timestamp();
 
 -- ==============================================================================
--- Table: PasswordResetSecurity (password_reset_security)
+-- Table: PasswordResetSecurity (sapiens.password_reset_security)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION password_reset_security_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.password_reset_security_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -944,21 +944,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS password_reset_security_insert_audit ON password_reset_security;
-CREATE TRIGGER password_reset_security_insert_audit BEFORE INSERT ON password_reset_security
-    FOR EACH ROW EXECUTE FUNCTION password_reset_security_audit_timestamp();
+DROP TRIGGER IF EXISTS password_reset_security_insert_audit ON sapiens.password_reset_security;
+CREATE TRIGGER password_reset_security_insert_audit BEFORE INSERT ON sapiens.password_reset_security
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_reset_security_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS password_reset_security_update_audit ON password_reset_security;
-CREATE TRIGGER password_reset_security_update_audit BEFORE UPDATE ON password_reset_security
-    FOR EACH ROW EXECUTE FUNCTION password_reset_security_audit_timestamp();
+DROP TRIGGER IF EXISTS password_reset_security_update_audit ON sapiens.password_reset_security;
+CREATE TRIGGER password_reset_security_update_audit BEFORE UPDATE ON sapiens.password_reset_security
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_reset_security_audit_timestamp();
 
 -- ==============================================================================
--- Table: PasswordResetToken (password_reset_tokens)
+-- Table: PasswordResetToken (sapiens.password_reset_tokens)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION password_reset_tokens_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.password_reset_tokens_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -971,21 +971,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS password_reset_tokens_insert_audit ON password_reset_tokens;
-CREATE TRIGGER password_reset_tokens_insert_audit BEFORE INSERT ON password_reset_tokens
-    FOR EACH ROW EXECUTE FUNCTION password_reset_tokens_audit_timestamp();
+DROP TRIGGER IF EXISTS password_reset_tokens_insert_audit ON sapiens.password_reset_tokens;
+CREATE TRIGGER password_reset_tokens_insert_audit BEFORE INSERT ON sapiens.password_reset_tokens
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_reset_tokens_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS password_reset_tokens_update_audit ON password_reset_tokens;
-CREATE TRIGGER password_reset_tokens_update_audit BEFORE UPDATE ON password_reset_tokens
-    FOR EACH ROW EXECUTE FUNCTION password_reset_tokens_audit_timestamp();
+DROP TRIGGER IF EXISTS password_reset_tokens_update_audit ON sapiens.password_reset_tokens;
+CREATE TRIGGER password_reset_tokens_update_audit BEFORE UPDATE ON sapiens.password_reset_tokens
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_reset_tokens_audit_timestamp();
 
 -- ==============================================================================
--- Table: PasswordResetVerificationDetails (password_reset_verification_details)
+-- Table: PasswordResetVerificationDetails (sapiens.password_reset_verification_details)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION password_reset_verification_details_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.password_reset_verification_details_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -998,14 +998,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS password_reset_verification_details_insert_audit ON password_reset_verification_details;
-CREATE TRIGGER password_reset_verification_details_insert_audit BEFORE INSERT ON password_reset_verification_details
-    FOR EACH ROW EXECUTE FUNCTION password_reset_verification_details_audit_timestamp();
+DROP TRIGGER IF EXISTS password_reset_verification_details_insert_audit ON sapiens.password_reset_verification_details;
+CREATE TRIGGER password_reset_verification_details_insert_audit BEFORE INSERT ON sapiens.password_reset_verification_details
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_reset_verification_details_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS password_reset_verification_details_update_audit ON password_reset_verification_details;
-CREATE TRIGGER password_reset_verification_details_update_audit BEFORE UPDATE ON password_reset_verification_details
-    FOR EACH ROW EXECUTE FUNCTION password_reset_verification_details_audit_timestamp();
+DROP TRIGGER IF EXISTS password_reset_verification_details_update_audit ON sapiens.password_reset_verification_details;
+CREATE TRIGGER password_reset_verification_details_update_audit BEFORE UPDATE ON sapiens.password_reset_verification_details
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_reset_verification_details_audit_timestamp();
 
 -- ==============================================================================
 -- Table: Permission (permissions)
@@ -1035,11 +1035,11 @@ CREATE TRIGGER permissions_update_audit BEFORE UPDATE ON permissions
     FOR EACH ROW EXECUTE FUNCTION permissions_audit_timestamp();
 
 -- ==============================================================================
--- Table: PermissionConflict (permission_conflicts)
+-- Table: PermissionConflict (sapiens.permission_conflicts)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION permission_conflicts_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.permission_conflicts_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1052,21 +1052,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS permission_conflicts_insert_audit ON permission_conflicts;
-CREATE TRIGGER permission_conflicts_insert_audit BEFORE INSERT ON permission_conflicts
-    FOR EACH ROW EXECUTE FUNCTION permission_conflicts_audit_timestamp();
+DROP TRIGGER IF EXISTS permission_conflicts_insert_audit ON sapiens.permission_conflicts;
+CREATE TRIGGER permission_conflicts_insert_audit BEFORE INSERT ON sapiens.permission_conflicts
+    FOR EACH ROW EXECUTE FUNCTION sapiens.permission_conflicts_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS permission_conflicts_update_audit ON permission_conflicts;
-CREATE TRIGGER permission_conflicts_update_audit BEFORE UPDATE ON permission_conflicts
-    FOR EACH ROW EXECUTE FUNCTION permission_conflicts_audit_timestamp();
+DROP TRIGGER IF EXISTS permission_conflicts_update_audit ON sapiens.permission_conflicts;
+CREATE TRIGGER permission_conflicts_update_audit BEFORE UPDATE ON sapiens.permission_conflicts
+    FOR EACH ROW EXECUTE FUNCTION sapiens.permission_conflicts_audit_timestamp();
 
 -- ==============================================================================
--- Table: ResourcePermission (resource_permissions)
+-- Table: ResourcePermission (sapiens.resource_permissions)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION resource_permissions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.resource_permissions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1079,14 +1079,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS resource_permissions_insert_audit ON resource_permissions;
-CREATE TRIGGER resource_permissions_insert_audit BEFORE INSERT ON resource_permissions
-    FOR EACH ROW EXECUTE FUNCTION resource_permissions_audit_timestamp();
+DROP TRIGGER IF EXISTS resource_permissions_insert_audit ON sapiens.resource_permissions;
+CREATE TRIGGER resource_permissions_insert_audit BEFORE INSERT ON sapiens.resource_permissions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.resource_permissions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS resource_permissions_update_audit ON resource_permissions;
-CREATE TRIGGER resource_permissions_update_audit BEFORE UPDATE ON resource_permissions
-    FOR EACH ROW EXECUTE FUNCTION resource_permissions_audit_timestamp();
+DROP TRIGGER IF EXISTS resource_permissions_update_audit ON sapiens.resource_permissions;
+CREATE TRIGGER resource_permissions_update_audit BEFORE UPDATE ON sapiens.resource_permissions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.resource_permissions_audit_timestamp();
 
 -- ==============================================================================
 -- Table: Role (roles)
@@ -1116,11 +1116,11 @@ CREATE TRIGGER roles_update_audit BEFORE UPDATE ON roles
     FOR EACH ROW EXECUTE FUNCTION roles_audit_timestamp();
 
 -- ==============================================================================
--- Table: RoleAssignment (role_assignments)
+-- Table: RoleAssignment (sapiens.role_assignments)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION role_assignments_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.role_assignments_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1133,14 +1133,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS role_assignments_insert_audit ON role_assignments;
-CREATE TRIGGER role_assignments_insert_audit BEFORE INSERT ON role_assignments
-    FOR EACH ROW EXECUTE FUNCTION role_assignments_audit_timestamp();
+DROP TRIGGER IF EXISTS role_assignments_insert_audit ON sapiens.role_assignments;
+CREATE TRIGGER role_assignments_insert_audit BEFORE INSERT ON sapiens.role_assignments
+    FOR EACH ROW EXECUTE FUNCTION sapiens.role_assignments_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS role_assignments_update_audit ON role_assignments;
-CREATE TRIGGER role_assignments_update_audit BEFORE UPDATE ON role_assignments
-    FOR EACH ROW EXECUTE FUNCTION role_assignments_audit_timestamp();
+DROP TRIGGER IF EXISTS role_assignments_update_audit ON sapiens.role_assignments;
+CREATE TRIGGER role_assignments_update_audit BEFORE UPDATE ON sapiens.role_assignments
+    FOR EACH ROW EXECUTE FUNCTION sapiens.role_assignments_audit_timestamp();
 
 -- ==============================================================================
 -- Table: RolePermission (role_permissions)
@@ -1170,11 +1170,11 @@ CREATE TRIGGER role_permissions_update_audit BEFORE UPDATE ON role_permissions
     FOR EACH ROW EXECUTE FUNCTION role_permissions_audit_timestamp();
 
 -- ==============================================================================
--- Table: SAMLProvider (saml_providers)
+-- Table: SAMLProvider (sapiens.saml_providers)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION saml_providers_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.saml_providers_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1187,21 +1187,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS saml_providers_insert_audit ON saml_providers;
-CREATE TRIGGER saml_providers_insert_audit BEFORE INSERT ON saml_providers
-    FOR EACH ROW EXECUTE FUNCTION saml_providers_audit_timestamp();
+DROP TRIGGER IF EXISTS saml_providers_insert_audit ON sapiens.saml_providers;
+CREATE TRIGGER saml_providers_insert_audit BEFORE INSERT ON sapiens.saml_providers
+    FOR EACH ROW EXECUTE FUNCTION sapiens.saml_providers_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS saml_providers_update_audit ON saml_providers;
-CREATE TRIGGER saml_providers_update_audit BEFORE UPDATE ON saml_providers
-    FOR EACH ROW EXECUTE FUNCTION saml_providers_audit_timestamp();
+DROP TRIGGER IF EXISTS saml_providers_update_audit ON sapiens.saml_providers;
+CREATE TRIGGER saml_providers_update_audit BEFORE UPDATE ON sapiens.saml_providers
+    FOR EACH ROW EXECUTE FUNCTION sapiens.saml_providers_audit_timestamp();
 
 -- ==============================================================================
--- Table: SecurityEvent (security_events)
+-- Table: SecurityEvent (sapiens.security_events)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION security_events_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.security_events_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1214,21 +1214,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS security_events_insert_audit ON security_events;
-CREATE TRIGGER security_events_insert_audit BEFORE INSERT ON security_events
-    FOR EACH ROW EXECUTE FUNCTION security_events_audit_timestamp();
+DROP TRIGGER IF EXISTS security_events_insert_audit ON sapiens.security_events;
+CREATE TRIGGER security_events_insert_audit BEFORE INSERT ON sapiens.security_events
+    FOR EACH ROW EXECUTE FUNCTION sapiens.security_events_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS security_events_update_audit ON security_events;
-CREATE TRIGGER security_events_update_audit BEFORE UPDATE ON security_events
-    FOR EACH ROW EXECUTE FUNCTION security_events_audit_timestamp();
+DROP TRIGGER IF EXISTS security_events_update_audit ON sapiens.security_events;
+CREATE TRIGGER security_events_update_audit BEFORE UPDATE ON sapiens.security_events
+    FOR EACH ROW EXECUTE FUNCTION sapiens.security_events_audit_timestamp();
 
 -- ==============================================================================
--- Table: Session (sessions)
+-- Table: Session (sapiens.sessions)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION sessions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.sessions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1241,21 +1241,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS sessions_insert_audit ON sessions;
-CREATE TRIGGER sessions_insert_audit BEFORE INSERT ON sessions
-    FOR EACH ROW EXECUTE FUNCTION sessions_audit_timestamp();
+DROP TRIGGER IF EXISTS sessions_insert_audit ON sapiens.sessions;
+CREATE TRIGGER sessions_insert_audit BEFORE INSERT ON sapiens.sessions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.sessions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS sessions_update_audit ON sessions;
-CREATE TRIGGER sessions_update_audit BEFORE UPDATE ON sessions
-    FOR EACH ROW EXECUTE FUNCTION sessions_audit_timestamp();
+DROP TRIGGER IF EXISTS sessions_update_audit ON sapiens.sessions;
+CREATE TRIGGER sessions_update_audit BEFORE UPDATE ON sapiens.sessions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.sessions_audit_timestamp();
 
 -- ==============================================================================
--- Table: SessionLimit (session_limits)
+-- Table: SessionLimit (sapiens.session_limits)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION session_limits_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.session_limits_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1268,21 +1268,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS session_limits_insert_audit ON session_limits;
-CREATE TRIGGER session_limits_insert_audit BEFORE INSERT ON session_limits
-    FOR EACH ROW EXECUTE FUNCTION session_limits_audit_timestamp();
+DROP TRIGGER IF EXISTS session_limits_insert_audit ON sapiens.session_limits;
+CREATE TRIGGER session_limits_insert_audit BEFORE INSERT ON sapiens.session_limits
+    FOR EACH ROW EXECUTE FUNCTION sapiens.session_limits_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS session_limits_update_audit ON session_limits;
-CREATE TRIGGER session_limits_update_audit BEFORE UPDATE ON session_limits
-    FOR EACH ROW EXECUTE FUNCTION session_limits_audit_timestamp();
+DROP TRIGGER IF EXISTS session_limits_update_audit ON sapiens.session_limits;
+CREATE TRIGGER session_limits_update_audit BEFORE UPDATE ON sapiens.session_limits
+    FOR EACH ROW EXECUTE FUNCTION sapiens.session_limits_audit_timestamp();
 
 -- ==============================================================================
--- Table: SystemSettings (system_settings)
+-- Table: SystemSettings (sapiens.system_settings)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION system_settings_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.system_settings_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1295,21 +1295,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS system_settings_insert_audit ON system_settings;
-CREATE TRIGGER system_settings_insert_audit BEFORE INSERT ON system_settings
-    FOR EACH ROW EXECUTE FUNCTION system_settings_audit_timestamp();
+DROP TRIGGER IF EXISTS system_settings_insert_audit ON sapiens.system_settings;
+CREATE TRIGGER system_settings_insert_audit BEFORE INSERT ON sapiens.system_settings
+    FOR EACH ROW EXECUTE FUNCTION sapiens.system_settings_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS system_settings_update_audit ON system_settings;
-CREATE TRIGGER system_settings_update_audit BEFORE UPDATE ON system_settings
-    FOR EACH ROW EXECUTE FUNCTION system_settings_audit_timestamp();
+DROP TRIGGER IF EXISTS system_settings_update_audit ON sapiens.system_settings;
+CREATE TRIGGER system_settings_update_audit BEFORE UPDATE ON sapiens.system_settings
+    FOR EACH ROW EXECUTE FUNCTION sapiens.system_settings_audit_timestamp();
 
 -- ==============================================================================
--- Table: TemporaryPermission (temporary_permissions)
+-- Table: TemporaryPermission (sapiens.temporary_permissions)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION temporary_permissions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.temporary_permissions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1322,14 +1322,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS temporary_permissions_insert_audit ON temporary_permissions;
-CREATE TRIGGER temporary_permissions_insert_audit BEFORE INSERT ON temporary_permissions
-    FOR EACH ROW EXECUTE FUNCTION temporary_permissions_audit_timestamp();
+DROP TRIGGER IF EXISTS temporary_permissions_insert_audit ON sapiens.temporary_permissions;
+CREATE TRIGGER temporary_permissions_insert_audit BEFORE INSERT ON sapiens.temporary_permissions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.temporary_permissions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS temporary_permissions_update_audit ON temporary_permissions;
-CREATE TRIGGER temporary_permissions_update_audit BEFORE UPDATE ON temporary_permissions
-    FOR EACH ROW EXECUTE FUNCTION temporary_permissions_audit_timestamp();
+DROP TRIGGER IF EXISTS temporary_permissions_update_audit ON sapiens.temporary_permissions;
+CREATE TRIGGER temporary_permissions_update_audit BEFORE UPDATE ON sapiens.temporary_permissions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.temporary_permissions_audit_timestamp();
 
 -- ==============================================================================
 -- Table: User (users)
@@ -1359,11 +1359,11 @@ CREATE TRIGGER users_update_audit BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION users_audit_timestamp();
 
 -- ==============================================================================
--- Table: Profile (profiles)
+-- Table: Profile (sapiens.profiles)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION profiles_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.profiles_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1376,14 +1376,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS profiles_insert_audit ON profiles;
-CREATE TRIGGER profiles_insert_audit BEFORE INSERT ON profiles
-    FOR EACH ROW EXECUTE FUNCTION profiles_audit_timestamp();
+DROP TRIGGER IF EXISTS profiles_insert_audit ON sapiens.profiles;
+CREATE TRIGGER profiles_insert_audit BEFORE INSERT ON sapiens.profiles
+    FOR EACH ROW EXECUTE FUNCTION sapiens.profiles_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS profiles_update_audit ON profiles;
-CREATE TRIGGER profiles_update_audit BEFORE UPDATE ON profiles
-    FOR EACH ROW EXECUTE FUNCTION profiles_audit_timestamp();
+DROP TRIGGER IF EXISTS profiles_update_audit ON sapiens.profiles;
+CREATE TRIGGER profiles_update_audit BEFORE UPDATE ON sapiens.profiles
+    FOR EACH ROW EXECUTE FUNCTION sapiens.profiles_audit_timestamp();
 
 -- ==============================================================================
 -- Table: UserPermission (user_permissions)
@@ -1440,11 +1440,11 @@ CREATE TRIGGER user_roles_update_audit BEFORE UPDATE ON user_roles
     FOR EACH ROW EXECUTE FUNCTION user_roles_audit_timestamp();
 
 -- ==============================================================================
--- Table: UserSAMLLink (user_saml_links)
+-- Table: UserSAMLLink (sapiens.user_saml_links)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION user_saml_links_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.user_saml_links_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1457,21 +1457,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS user_saml_links_insert_audit ON user_saml_links;
-CREATE TRIGGER user_saml_links_insert_audit BEFORE INSERT ON user_saml_links
-    FOR EACH ROW EXECUTE FUNCTION user_saml_links_audit_timestamp();
+DROP TRIGGER IF EXISTS user_saml_links_insert_audit ON sapiens.user_saml_links;
+CREATE TRIGGER user_saml_links_insert_audit BEFORE INSERT ON sapiens.user_saml_links
+    FOR EACH ROW EXECUTE FUNCTION sapiens.user_saml_links_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS user_saml_links_update_audit ON user_saml_links;
-CREATE TRIGGER user_saml_links_update_audit BEFORE UPDATE ON user_saml_links
-    FOR EACH ROW EXECUTE FUNCTION user_saml_links_audit_timestamp();
+DROP TRIGGER IF EXISTS user_saml_links_update_audit ON sapiens.user_saml_links;
+CREATE TRIGGER user_saml_links_update_audit BEFORE UPDATE ON sapiens.user_saml_links
+    FOR EACH ROW EXECUTE FUNCTION sapiens.user_saml_links_audit_timestamp();
 
 -- ==============================================================================
--- Table: UserSettings (user_settings)
+-- Table: UserSettings (sapiens.user_settings)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION user_settings_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.user_settings_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1484,21 +1484,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS user_settings_insert_audit ON user_settings;
-CREATE TRIGGER user_settings_insert_audit BEFORE INSERT ON user_settings
-    FOR EACH ROW EXECUTE FUNCTION user_settings_audit_timestamp();
+DROP TRIGGER IF EXISTS user_settings_insert_audit ON sapiens.user_settings;
+CREATE TRIGGER user_settings_insert_audit BEFORE INSERT ON sapiens.user_settings
+    FOR EACH ROW EXECUTE FUNCTION sapiens.user_settings_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS user_settings_update_audit ON user_settings;
-CREATE TRIGGER user_settings_update_audit BEFORE UPDATE ON user_settings
-    FOR EACH ROW EXECUTE FUNCTION user_settings_audit_timestamp();
+DROP TRIGGER IF EXISTS user_settings_update_audit ON sapiens.user_settings;
+CREATE TRIGGER user_settings_update_audit BEFORE UPDATE ON sapiens.user_settings
+    FOR EACH ROW EXECUTE FUNCTION sapiens.user_settings_audit_timestamp();
 
 -- ==============================================================================
--- Table: Workflow (workflows)
+-- Table: Workflow (sapiens.workflows)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION workflows_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.workflows_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1511,21 +1511,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS workflows_insert_audit ON workflows;
-CREATE TRIGGER workflows_insert_audit BEFORE INSERT ON workflows
-    FOR EACH ROW EXECUTE FUNCTION workflows_audit_timestamp();
+DROP TRIGGER IF EXISTS workflows_insert_audit ON sapiens.workflows;
+CREATE TRIGGER workflows_insert_audit BEFORE INSERT ON sapiens.workflows
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflows_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS workflows_update_audit ON workflows;
-CREATE TRIGGER workflows_update_audit BEFORE UPDATE ON workflows
-    FOR EACH ROW EXECUTE FUNCTION workflows_audit_timestamp();
+DROP TRIGGER IF EXISTS workflows_update_audit ON sapiens.workflows;
+CREATE TRIGGER workflows_update_audit BEFORE UPDATE ON sapiens.workflows
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflows_audit_timestamp();
 
 -- ==============================================================================
--- Table: WorkflowStep (workflow_steps)
+-- Table: WorkflowStep (sapiens.workflow_steps)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION workflow_steps_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.workflow_steps_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1538,21 +1538,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS workflow_steps_insert_audit ON workflow_steps;
-CREATE TRIGGER workflow_steps_insert_audit BEFORE INSERT ON workflow_steps
-    FOR EACH ROW EXECUTE FUNCTION workflow_steps_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_steps_insert_audit ON sapiens.workflow_steps;
+CREATE TRIGGER workflow_steps_insert_audit BEFORE INSERT ON sapiens.workflow_steps
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_steps_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS workflow_steps_update_audit ON workflow_steps;
-CREATE TRIGGER workflow_steps_update_audit BEFORE UPDATE ON workflow_steps
-    FOR EACH ROW EXECUTE FUNCTION workflow_steps_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_steps_update_audit ON sapiens.workflow_steps;
+CREATE TRIGGER workflow_steps_update_audit BEFORE UPDATE ON sapiens.workflow_steps
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_steps_audit_timestamp();
 
 -- ==============================================================================
--- Table: WorkflowDefinition (workflow_definitions)
+-- Table: WorkflowDefinition (sapiens.workflow_definitions)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION workflow_definitions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.workflow_definitions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1565,21 +1565,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS workflow_definitions_insert_audit ON workflow_definitions;
-CREATE TRIGGER workflow_definitions_insert_audit BEFORE INSERT ON workflow_definitions
-    FOR EACH ROW EXECUTE FUNCTION workflow_definitions_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_definitions_insert_audit ON sapiens.workflow_definitions;
+CREATE TRIGGER workflow_definitions_insert_audit BEFORE INSERT ON sapiens.workflow_definitions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_definitions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS workflow_definitions_update_audit ON workflow_definitions;
-CREATE TRIGGER workflow_definitions_update_audit BEFORE UPDATE ON workflow_definitions
-    FOR EACH ROW EXECUTE FUNCTION workflow_definitions_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_definitions_update_audit ON sapiens.workflow_definitions;
+CREATE TRIGGER workflow_definitions_update_audit BEFORE UPDATE ON sapiens.workflow_definitions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_definitions_audit_timestamp();
 
 -- ==============================================================================
--- Table: WorkflowAction (workflow_actions)
+-- Table: WorkflowAction (sapiens.workflow_actions)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION workflow_actions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.workflow_actions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1592,21 +1592,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS workflow_actions_insert_audit ON workflow_actions;
-CREATE TRIGGER workflow_actions_insert_audit BEFORE INSERT ON workflow_actions
-    FOR EACH ROW EXECUTE FUNCTION workflow_actions_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_actions_insert_audit ON sapiens.workflow_actions;
+CREATE TRIGGER workflow_actions_insert_audit BEFORE INSERT ON sapiens.workflow_actions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_actions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS workflow_actions_update_audit ON workflow_actions;
-CREATE TRIGGER workflow_actions_update_audit BEFORE UPDATE ON workflow_actions
-    FOR EACH ROW EXECUTE FUNCTION workflow_actions_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_actions_update_audit ON sapiens.workflow_actions;
+CREATE TRIGGER workflow_actions_update_audit BEFORE UPDATE ON sapiens.workflow_actions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_actions_audit_timestamp();
 
 -- ==============================================================================
--- Table: WorkflowExecution (workflow_executions)
+-- Table: WorkflowExecution (sapiens.workflow_executions)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION workflow_executions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.workflow_executions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1619,21 +1619,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS workflow_executions_insert_audit ON workflow_executions;
-CREATE TRIGGER workflow_executions_insert_audit BEFORE INSERT ON workflow_executions
-    FOR EACH ROW EXECUTE FUNCTION workflow_executions_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_executions_insert_audit ON sapiens.workflow_executions;
+CREATE TRIGGER workflow_executions_insert_audit BEFORE INSERT ON sapiens.workflow_executions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_executions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS workflow_executions_update_audit ON workflow_executions;
-CREATE TRIGGER workflow_executions_update_audit BEFORE UPDATE ON workflow_executions
-    FOR EACH ROW EXECUTE FUNCTION workflow_executions_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_executions_update_audit ON sapiens.workflow_executions;
+CREATE TRIGGER workflow_executions_update_audit BEFORE UPDATE ON sapiens.workflow_executions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_executions_audit_timestamp();
 
 -- ==============================================================================
--- Table: WorkflowActionExecution (workflow_action_executions)
+-- Table: WorkflowActionExecution (sapiens.workflow_action_executions)
 -- ==============================================================================
 
 -- Function to set metadata timestamps
-CREATE OR REPLACE FUNCTION workflow_action_executions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.workflow_action_executions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -1646,12 +1646,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS workflow_action_executions_insert_audit ON workflow_action_executions;
-CREATE TRIGGER workflow_action_executions_insert_audit BEFORE INSERT ON workflow_action_executions
-    FOR EACH ROW EXECUTE FUNCTION workflow_action_executions_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_action_executions_insert_audit ON sapiens.workflow_action_executions;
+CREATE TRIGGER workflow_action_executions_insert_audit BEFORE INSERT ON sapiens.workflow_action_executions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_action_executions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS workflow_action_executions_update_audit ON workflow_action_executions;
-CREATE TRIGGER workflow_action_executions_update_audit BEFORE UPDATE ON workflow_action_executions
-    FOR EACH ROW EXECUTE FUNCTION workflow_action_executions_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_action_executions_update_audit ON sapiens.workflow_action_executions;
+CREATE TRIGGER workflow_action_executions_update_audit BEFORE UPDATE ON sapiens.workflow_action_executions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_action_executions_audit_timestamp();
 

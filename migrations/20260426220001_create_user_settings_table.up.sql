@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS user_settings (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.user_settings (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     theme theme NOT NULL DEFAULT 'system',
@@ -25,19 +27,19 @@ CREATE TABLE IF NOT EXISTS user_settings (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_user_settings_id ON user_settings (id);
+CREATE INDEX IF NOT EXISTS idx_user_settings_id ON sapiens.user_settings (id);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_user_settings_metadata_gin ON user_settings USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_user_settings_metadata_deleted_at ON user_settings ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_user_settings_metadata_created_at ON user_settings ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_user_settings_metadata_updated_at ON user_settings ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_user_settings_metadata_gin ON sapiens.user_settings USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_user_settings_metadata_deleted_at ON sapiens.user_settings ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_user_settings_metadata_created_at ON sapiens.user_settings ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_user_settings_metadata_updated_at ON sapiens.user_settings ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION user_settings_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.user_settings_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -50,11 +52,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS user_settings_insert_audit ON user_settings;
-CREATE TRIGGER user_settings_insert_audit BEFORE INSERT ON user_settings
-    FOR EACH ROW EXECUTE FUNCTION user_settings_audit_timestamp();
+DROP TRIGGER IF EXISTS user_settings_insert_audit ON sapiens.user_settings;
+CREATE TRIGGER user_settings_insert_audit BEFORE INSERT ON sapiens.user_settings
+    FOR EACH ROW EXECUTE FUNCTION sapiens.user_settings_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS user_settings_update_audit ON user_settings;
-CREATE TRIGGER user_settings_update_audit BEFORE UPDATE ON user_settings
-    FOR EACH ROW EXECUTE FUNCTION user_settings_audit_timestamp();
+DROP TRIGGER IF EXISTS user_settings_update_audit ON sapiens.user_settings;
+CREATE TRIGGER user_settings_update_audit BEFORE UPDATE ON sapiens.user_settings
+    FOR EACH ROW EXECUTE FUNCTION sapiens.user_settings_audit_timestamp();

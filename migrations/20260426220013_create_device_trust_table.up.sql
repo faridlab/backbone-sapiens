@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS device_trusts (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.device_trusts (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     device_fingerprint TEXT NOT NULL,
@@ -39,35 +41,35 @@ CREATE TABLE IF NOT EXISTS device_trusts (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_device_trusts_user_id_is_trusted ON device_trusts (user_id, is_trusted);
+CREATE INDEX IF NOT EXISTS idx_device_trusts_user_id_is_trusted ON sapiens.device_trusts (user_id, is_trusted);
 
-CREATE INDEX IF NOT EXISTS idx_device_trusts_device_fingerprint ON device_trusts (device_fingerprint);
+CREATE INDEX IF NOT EXISTS idx_device_trusts_device_fingerprint ON sapiens.device_trusts (device_fingerprint);
 
-CREATE INDEX IF NOT EXISTS idx_device_trusts_user_id_trust_level ON device_trusts (user_id, trust_level);
+CREATE INDEX IF NOT EXISTS idx_device_trusts_user_id_trust_level ON sapiens.device_trusts (user_id, trust_level);
 
-CREATE INDEX IF NOT EXISTS idx_device_trusts_expires_at ON device_trusts (expires_at);
+CREATE INDEX IF NOT EXISTS idx_device_trusts_expires_at ON sapiens.device_trusts (expires_at);
 
-CREATE INDEX IF NOT EXISTS idx_device_trusts_last_used_at ON device_trusts (last_used_at);
+CREATE INDEX IF NOT EXISTS idx_device_trusts_last_used_at ON sapiens.device_trusts (last_used_at);
 
-CREATE INDEX IF NOT EXISTS idx_device_trusts_risk_score ON device_trusts (risk_score);
+CREATE INDEX IF NOT EXISTS idx_device_trusts_risk_score ON sapiens.device_trusts (risk_score);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_device_trusts_device_fingerprint_(metadata->>'deleted_at') ON device_trusts (device_fingerprint, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_device_trusts_device_fingerprint_(metadata->>'deleted_at') ON sapiens.device_trusts (device_fingerprint, ((metadata->>'deleted_at')));
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_device_trusts_user_id_device_name_(metadata->>'deleted_at') ON device_trusts (user_id, device_name, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_device_trusts_user_id_device_name_(metadata->>'deleted_at') ON sapiens.device_trusts (user_id, device_name, ((metadata->>'deleted_at')));
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_device_trusts_device_fingerprint ON device_trusts (device_fingerprint);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_device_trusts_device_fingerprint ON sapiens.device_trusts (device_fingerprint);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_device_trusts_metadata_gin ON device_trusts USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_device_trusts_metadata_deleted_at ON device_trusts ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_device_trusts_metadata_created_at ON device_trusts ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_device_trusts_metadata_updated_at ON device_trusts ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_device_trusts_metadata_gin ON sapiens.device_trusts USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_device_trusts_metadata_deleted_at ON sapiens.device_trusts ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_device_trusts_metadata_created_at ON sapiens.device_trusts ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_device_trusts_metadata_updated_at ON sapiens.device_trusts ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION device_trusts_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.device_trusts_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -80,14 +82,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS device_trusts_insert_audit ON device_trusts;
-CREATE TRIGGER device_trusts_insert_audit BEFORE INSERT ON device_trusts
-    FOR EACH ROW EXECUTE FUNCTION device_trusts_audit_timestamp();
+DROP TRIGGER IF EXISTS device_trusts_insert_audit ON sapiens.device_trusts;
+CREATE TRIGGER device_trusts_insert_audit BEFORE INSERT ON sapiens.device_trusts
+    FOR EACH ROW EXECUTE FUNCTION sapiens.device_trusts_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS device_trusts_update_audit ON device_trusts;
-CREATE TRIGGER device_trusts_update_audit BEFORE UPDATE ON device_trusts
-    FOR EACH ROW EXECUTE FUNCTION device_trusts_audit_timestamp();
+DROP TRIGGER IF EXISTS device_trusts_update_audit ON sapiens.device_trusts;
+CREATE TRIGGER device_trusts_update_audit BEFORE UPDATE ON sapiens.device_trusts
+    FOR EACH ROW EXECUTE FUNCTION sapiens.device_trusts_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE device_trusts ADD CONSTRAINT fk_device_trusts_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.device_trusts ADD CONSTRAINT fk_device_trusts_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;

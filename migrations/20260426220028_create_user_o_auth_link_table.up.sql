@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS user_oauth_links (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.user_oauth_links (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     oauth_provider_id UUID NOT NULL,
@@ -29,27 +31,27 @@ CREATE TABLE IF NOT EXISTS user_oauth_links (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_user_oauth_links_user_id_oauth_provider_id ON user_oauth_links (user_id, oauth_provider_id);
+CREATE INDEX IF NOT EXISTS idx_user_oauth_links_user_id_oauth_provider_id ON sapiens.user_oauth_links (user_id, oauth_provider_id);
 
-CREATE INDEX IF NOT EXISTS idx_user_oauth_links_provider_user_id_oauth_provider_id ON user_oauth_links (provider_user_id, oauth_provider_id);
+CREATE INDEX IF NOT EXISTS idx_user_oauth_links_provider_user_id_oauth_provider_id ON sapiens.user_oauth_links (provider_user_id, oauth_provider_id);
 
-CREATE INDEX IF NOT EXISTS idx_user_oauth_links_provider_email_oauth_provider_id ON user_oauth_links (provider_email, oauth_provider_id);
+CREATE INDEX IF NOT EXISTS idx_user_oauth_links_provider_email_oauth_provider_id ON sapiens.user_oauth_links (provider_email, oauth_provider_id);
 
-CREATE INDEX IF NOT EXISTS idx_user_oauth_links_is_primary ON user_oauth_links (is_primary);
+CREATE INDEX IF NOT EXISTS idx_user_oauth_links_is_primary ON sapiens.user_oauth_links (is_primary);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_user_oauth_links_provider_user_id_oauth_provider_id_(metadata->>'deleted_at') ON user_oauth_links (provider_user_id, oauth_provider_id, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_oauth_links_provider_user_id_oauth_provider_id_(metadata->>'deleted_at') ON sapiens.user_oauth_links (provider_user_id, oauth_provider_id, ((metadata->>'deleted_at')));
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_user_oauth_links_metadata_gin ON user_oauth_links USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_user_oauth_links_metadata_deleted_at ON user_oauth_links ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_user_oauth_links_metadata_created_at ON user_oauth_links ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_user_oauth_links_metadata_updated_at ON user_oauth_links ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_user_oauth_links_metadata_gin ON sapiens.user_oauth_links USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_user_oauth_links_metadata_deleted_at ON sapiens.user_oauth_links ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_user_oauth_links_metadata_created_at ON sapiens.user_oauth_links ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_user_oauth_links_metadata_updated_at ON sapiens.user_oauth_links ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION user_oauth_links_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.user_oauth_links_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -62,15 +64,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS user_oauth_links_insert_audit ON user_oauth_links;
-CREATE TRIGGER user_oauth_links_insert_audit BEFORE INSERT ON user_oauth_links
-    FOR EACH ROW EXECUTE FUNCTION user_oauth_links_audit_timestamp();
+DROP TRIGGER IF EXISTS user_oauth_links_insert_audit ON sapiens.user_oauth_links;
+CREATE TRIGGER user_oauth_links_insert_audit BEFORE INSERT ON sapiens.user_oauth_links
+    FOR EACH ROW EXECUTE FUNCTION sapiens.user_oauth_links_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS user_oauth_links_update_audit ON user_oauth_links;
-CREATE TRIGGER user_oauth_links_update_audit BEFORE UPDATE ON user_oauth_links
-    FOR EACH ROW EXECUTE FUNCTION user_oauth_links_audit_timestamp();
+DROP TRIGGER IF EXISTS user_oauth_links_update_audit ON sapiens.user_oauth_links;
+CREATE TRIGGER user_oauth_links_update_audit BEFORE UPDATE ON sapiens.user_oauth_links
+    FOR EACH ROW EXECUTE FUNCTION sapiens.user_oauth_links_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE user_oauth_links ADD CONSTRAINT fk_user_oauth_links_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE user_oauth_links ADD CONSTRAINT fk_user_oauth_links_oauth_provider_id FOREIGN KEY (oauth_provider_id) REFERENCES oauth_providers (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.user_oauth_links ADD CONSTRAINT fk_user_oauth_links_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.user_oauth_links ADD CONSTRAINT fk_user_oauth_links_oauth_provider_id FOREIGN KEY (oauth_provider_id) REFERENCES sapiens.oauth_providers (id) ON DELETE CASCADE ON UPDATE CASCADE;

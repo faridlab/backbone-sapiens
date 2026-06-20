@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS workflow_actions (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.workflow_actions (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     workflow_definition_id UUID NOT NULL,
     action_type action_type NOT NULL,
@@ -25,23 +27,23 @@ CREATE TABLE IF NOT EXISTS workflow_actions (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_workflow_actions_workflow_definition_id_step_order ON workflow_actions (workflow_definition_id, step_order);
+CREATE INDEX IF NOT EXISTS idx_workflow_actions_workflow_definition_id_step_order ON sapiens.workflow_actions (workflow_definition_id, step_order);
 
-CREATE INDEX IF NOT EXISTS idx_workflow_actions_action_type ON workflow_actions (action_type);
+CREATE INDEX IF NOT EXISTS idx_workflow_actions_action_type ON sapiens.workflow_actions (action_type);
 
-CREATE INDEX IF NOT EXISTS idx_workflow_actions_is_required ON workflow_actions (is_required);
+CREATE INDEX IF NOT EXISTS idx_workflow_actions_is_required ON sapiens.workflow_actions (is_required);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_workflow_actions_metadata_gin ON workflow_actions USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_workflow_actions_metadata_deleted_at ON workflow_actions ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_workflow_actions_metadata_created_at ON workflow_actions ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_workflow_actions_metadata_updated_at ON workflow_actions ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_workflow_actions_metadata_gin ON sapiens.workflow_actions USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_workflow_actions_metadata_deleted_at ON sapiens.workflow_actions ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_workflow_actions_metadata_created_at ON sapiens.workflow_actions ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_workflow_actions_metadata_updated_at ON sapiens.workflow_actions ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION workflow_actions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.workflow_actions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -54,14 +56,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS workflow_actions_insert_audit ON workflow_actions;
-CREATE TRIGGER workflow_actions_insert_audit BEFORE INSERT ON workflow_actions
-    FOR EACH ROW EXECUTE FUNCTION workflow_actions_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_actions_insert_audit ON sapiens.workflow_actions;
+CREATE TRIGGER workflow_actions_insert_audit BEFORE INSERT ON sapiens.workflow_actions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_actions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS workflow_actions_update_audit ON workflow_actions;
-CREATE TRIGGER workflow_actions_update_audit BEFORE UPDATE ON workflow_actions
-    FOR EACH ROW EXECUTE FUNCTION workflow_actions_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_actions_update_audit ON sapiens.workflow_actions;
+CREATE TRIGGER workflow_actions_update_audit BEFORE UPDATE ON sapiens.workflow_actions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_actions_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE workflow_actions ADD CONSTRAINT fk_workflow_actions_workflow_definition_id FOREIGN KEY (workflow_definition_id) REFERENCES workflow_definitions (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.workflow_actions ADD CONSTRAINT fk_workflow_actions_workflow_definition_id FOREIGN KEY (workflow_definition_id) REFERENCES sapiens.workflow_definitions (id) ON DELETE CASCADE ON UPDATE CASCADE;

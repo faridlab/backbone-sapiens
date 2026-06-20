@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS password_creation_contexts (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.password_creation_contexts (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     created_via password_creation_method NOT NULL,
@@ -21,19 +23,19 @@ CREATE TABLE IF NOT EXISTS password_creation_contexts (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_password_creation_contexts_user_id ON password_creation_contexts (user_id);
+CREATE INDEX IF NOT EXISTS idx_password_creation_contexts_user_id ON sapiens.password_creation_contexts (user_id);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_password_creation_contexts_metadata_gin ON password_creation_contexts USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_password_creation_contexts_metadata_deleted_at ON password_creation_contexts ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_password_creation_contexts_metadata_created_at ON password_creation_contexts ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_password_creation_contexts_metadata_updated_at ON password_creation_contexts ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_password_creation_contexts_metadata_gin ON sapiens.password_creation_contexts USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_password_creation_contexts_metadata_deleted_at ON sapiens.password_creation_contexts ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_password_creation_contexts_metadata_created_at ON sapiens.password_creation_contexts ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_password_creation_contexts_metadata_updated_at ON sapiens.password_creation_contexts ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION password_creation_contexts_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.password_creation_contexts_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -46,11 +48,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS password_creation_contexts_insert_audit ON password_creation_contexts;
-CREATE TRIGGER password_creation_contexts_insert_audit BEFORE INSERT ON password_creation_contexts
-    FOR EACH ROW EXECUTE FUNCTION password_creation_contexts_audit_timestamp();
+DROP TRIGGER IF EXISTS password_creation_contexts_insert_audit ON sapiens.password_creation_contexts;
+CREATE TRIGGER password_creation_contexts_insert_audit BEFORE INSERT ON sapiens.password_creation_contexts
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_creation_contexts_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS password_creation_contexts_update_audit ON password_creation_contexts;
-CREATE TRIGGER password_creation_contexts_update_audit BEFORE UPDATE ON password_creation_contexts
-    FOR EACH ROW EXECUTE FUNCTION password_creation_contexts_audit_timestamp();
+DROP TRIGGER IF EXISTS password_creation_contexts_update_audit ON sapiens.password_creation_contexts;
+CREATE TRIGGER password_creation_contexts_update_audit BEFORE UPDATE ON sapiens.password_creation_contexts
+    FOR EACH ROW EXECUTE FUNCTION sapiens.password_creation_contexts_audit_timestamp();

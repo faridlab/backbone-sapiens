@@ -1,3 +1,3 @@
--- Down: drop organization_permissions table
-DROP TABLE IF EXISTS organization_permissions CASCADE;
-DROP FUNCTION IF EXISTS organization_permissions_audit_timestamp() CASCADE;
+-- Down: drop sapiens.organization_permissions table
+DROP TABLE IF EXISTS sapiens.organization_permissions CASCADE;
+DROP FUNCTION IF EXISTS sapiens.organization_permissions_audit_timestamp() CASCADE;

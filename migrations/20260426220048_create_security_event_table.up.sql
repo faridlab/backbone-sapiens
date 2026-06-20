@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS security_events (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.security_events (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID,
     session_id UUID,
@@ -37,29 +39,29 @@ CREATE TABLE IF NOT EXISTS security_events (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_security_events_user_id_created_at ON security_events (user_id, ((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_security_events_user_id_created_at ON sapiens.security_events (user_id, ((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_security_events_event_type_created_at ON security_events (event_type, ((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_security_events_event_type_created_at ON sapiens.security_events (event_type, ((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_security_events_severity_resolved ON security_events (severity, resolved);
+CREATE INDEX IF NOT EXISTS idx_security_events_severity_resolved ON sapiens.security_events (severity, resolved);
 
-CREATE INDEX IF NOT EXISTS idx_security_events_created_at ON security_events (((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_security_events_created_at ON sapiens.security_events (((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_security_events_ip_address ON security_events (ip_address);
+CREATE INDEX IF NOT EXISTS idx_security_events_ip_address ON sapiens.security_events (ip_address);
 
-CREATE INDEX IF NOT EXISTS idx_security_events_resolved_resolved_at ON security_events (resolved, resolved_at);
+CREATE INDEX IF NOT EXISTS idx_security_events_resolved_resolved_at ON sapiens.security_events (resolved, resolved_at);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_security_events_metadata_gin ON security_events USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_security_events_metadata_deleted_at ON security_events ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_security_events_metadata_created_at ON security_events ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_security_events_metadata_updated_at ON security_events ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_security_events_metadata_gin ON sapiens.security_events USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_security_events_metadata_deleted_at ON sapiens.security_events ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_security_events_metadata_created_at ON sapiens.security_events ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_security_events_metadata_updated_at ON sapiens.security_events ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION security_events_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.security_events_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -72,15 +74,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS security_events_insert_audit ON security_events;
-CREATE TRIGGER security_events_insert_audit BEFORE INSERT ON security_events
-    FOR EACH ROW EXECUTE FUNCTION security_events_audit_timestamp();
+DROP TRIGGER IF EXISTS security_events_insert_audit ON sapiens.security_events;
+CREATE TRIGGER security_events_insert_audit BEFORE INSERT ON sapiens.security_events
+    FOR EACH ROW EXECUTE FUNCTION sapiens.security_events_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS security_events_update_audit ON security_events;
-CREATE TRIGGER security_events_update_audit BEFORE UPDATE ON security_events
-    FOR EACH ROW EXECUTE FUNCTION security_events_audit_timestamp();
+DROP TRIGGER IF EXISTS security_events_update_audit ON sapiens.security_events;
+CREATE TRIGGER security_events_update_audit BEFORE UPDATE ON sapiens.security_events
+    FOR EACH ROW EXECUTE FUNCTION sapiens.security_events_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE security_events ADD CONSTRAINT fk_security_events_user_id FOREIGN KEY (user_id) REFERENCES users (id);
-ALTER TABLE security_events ADD CONSTRAINT fk_security_events_session_id FOREIGN KEY (session_id) REFERENCES sessions (id);
+ALTER TABLE sapiens.security_events ADD CONSTRAINT fk_security_events_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+ALTER TABLE sapiens.security_events ADD CONSTRAINT fk_security_events_session_id FOREIGN KEY (session_id) REFERENCES sapiens.sessions (id);

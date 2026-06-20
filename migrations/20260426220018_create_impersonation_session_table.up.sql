@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS impersonation_sessions (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.impersonation_sessions (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     admin_id UUID NOT NULL,
     target_user_id UUID NOT NULL,
@@ -27,25 +29,25 @@ CREATE TABLE IF NOT EXISTS impersonation_sessions (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_admin_id_started_at ON impersonation_sessions (admin_id, started_at);
+CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_admin_id_started_at ON sapiens.impersonation_sessions (admin_id, started_at);
 
-CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_target_user_id_started_at ON impersonation_sessions (target_user_id, started_at);
+CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_target_user_id_started_at ON sapiens.impersonation_sessions (target_user_id, started_at);
 
-CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_session_id ON impersonation_sessions (session_id);
+CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_session_id ON sapiens.impersonation_sessions (session_id);
 
-CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_ended_at ON impersonation_sessions (ended_at);
+CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_ended_at ON sapiens.impersonation_sessions (ended_at);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_metadata_gin ON impersonation_sessions USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_metadata_deleted_at ON impersonation_sessions ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_metadata_created_at ON impersonation_sessions ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_metadata_updated_at ON impersonation_sessions ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_metadata_gin ON sapiens.impersonation_sessions USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_metadata_deleted_at ON sapiens.impersonation_sessions ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_metadata_created_at ON sapiens.impersonation_sessions ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_impersonation_sessions_metadata_updated_at ON sapiens.impersonation_sessions ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION impersonation_sessions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.impersonation_sessions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -58,16 +60,16 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS impersonation_sessions_insert_audit ON impersonation_sessions;
-CREATE TRIGGER impersonation_sessions_insert_audit BEFORE INSERT ON impersonation_sessions
-    FOR EACH ROW EXECUTE FUNCTION impersonation_sessions_audit_timestamp();
+DROP TRIGGER IF EXISTS impersonation_sessions_insert_audit ON sapiens.impersonation_sessions;
+CREATE TRIGGER impersonation_sessions_insert_audit BEFORE INSERT ON sapiens.impersonation_sessions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.impersonation_sessions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS impersonation_sessions_update_audit ON impersonation_sessions;
-CREATE TRIGGER impersonation_sessions_update_audit BEFORE UPDATE ON impersonation_sessions
-    FOR EACH ROW EXECUTE FUNCTION impersonation_sessions_audit_timestamp();
+DROP TRIGGER IF EXISTS impersonation_sessions_update_audit ON sapiens.impersonation_sessions;
+CREATE TRIGGER impersonation_sessions_update_audit BEFORE UPDATE ON sapiens.impersonation_sessions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.impersonation_sessions_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE impersonation_sessions ADD CONSTRAINT fk_impersonation_sessions_admin_id FOREIGN KEY (admin_id) REFERENCES users (id);
-ALTER TABLE impersonation_sessions ADD CONSTRAINT fk_impersonation_sessions_target_user_id FOREIGN KEY (target_user_id) REFERENCES users (id);
-ALTER TABLE impersonation_sessions ADD CONSTRAINT fk_impersonation_sessions_session_id FOREIGN KEY (session_id) REFERENCES sessions (id);
+ALTER TABLE sapiens.impersonation_sessions ADD CONSTRAINT fk_impersonation_sessions_admin_id FOREIGN KEY (admin_id) REFERENCES users (id);
+ALTER TABLE sapiens.impersonation_sessions ADD CONSTRAINT fk_impersonation_sessions_target_user_id FOREIGN KEY (target_user_id) REFERENCES users (id);
+ALTER TABLE sapiens.impersonation_sessions ADD CONSTRAINT fk_impersonation_sessions_session_id FOREIGN KEY (session_id) REFERENCES sapiens.sessions (id);

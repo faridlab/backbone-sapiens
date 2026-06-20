@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS email_verification_tokens (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.email_verification_tokens (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     token TEXT NOT NULL,
@@ -37,31 +39,31 @@ CREATE TABLE IF NOT EXISTS email_verification_tokens (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_token ON email_verification_tokens (token);
+CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_token ON sapiens.email_verification_tokens (token);
 
-CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_user_id_token_type ON email_verification_tokens (user_id, token_type);
+CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_user_id_token_type ON sapiens.email_verification_tokens (user_id, token_type);
 
-CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_email_token_type ON email_verification_tokens (email, token_type);
+CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_email_token_type ON sapiens.email_verification_tokens (email, token_type);
 
-CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_expires_at ON email_verification_tokens (expires_at);
+CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_expires_at ON sapiens.email_verification_tokens (expires_at);
 
-CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_verified_at ON email_verification_tokens (verified_at);
+CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_verified_at ON sapiens.email_verification_tokens (verified_at);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_email_verification_tokens_user_id_token_type ON email_verification_tokens (user_id, token_type) WHERE verified_at IS NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_email_verification_tokens_user_id_token_type ON sapiens.email_verification_tokens (user_id, token_type) WHERE verified_at IS NULL;
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_email_verification_tokens_token ON email_verification_tokens (token);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_email_verification_tokens_token ON sapiens.email_verification_tokens (token);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_metadata_gin ON email_verification_tokens USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_metadata_deleted_at ON email_verification_tokens ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_metadata_created_at ON email_verification_tokens ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_metadata_updated_at ON email_verification_tokens ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_metadata_gin ON sapiens.email_verification_tokens USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_metadata_deleted_at ON sapiens.email_verification_tokens ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_metadata_created_at ON sapiens.email_verification_tokens ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_metadata_updated_at ON sapiens.email_verification_tokens ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION email_verification_tokens_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.email_verification_tokens_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -74,14 +76,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS email_verification_tokens_insert_audit ON email_verification_tokens;
-CREATE TRIGGER email_verification_tokens_insert_audit BEFORE INSERT ON email_verification_tokens
-    FOR EACH ROW EXECUTE FUNCTION email_verification_tokens_audit_timestamp();
+DROP TRIGGER IF EXISTS email_verification_tokens_insert_audit ON sapiens.email_verification_tokens;
+CREATE TRIGGER email_verification_tokens_insert_audit BEFORE INSERT ON sapiens.email_verification_tokens
+    FOR EACH ROW EXECUTE FUNCTION sapiens.email_verification_tokens_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS email_verification_tokens_update_audit ON email_verification_tokens;
-CREATE TRIGGER email_verification_tokens_update_audit BEFORE UPDATE ON email_verification_tokens
-    FOR EACH ROW EXECUTE FUNCTION email_verification_tokens_audit_timestamp();
+DROP TRIGGER IF EXISTS email_verification_tokens_update_audit ON sapiens.email_verification_tokens;
+CREATE TRIGGER email_verification_tokens_update_audit BEFORE UPDATE ON sapiens.email_verification_tokens
+    FOR EACH ROW EXECUTE FUNCTION sapiens.email_verification_tokens_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE email_verification_tokens ADD CONSTRAINT fk_email_verification_tokens_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.email_verification_tokens ADD CONSTRAINT fk_email_verification_tokens_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;

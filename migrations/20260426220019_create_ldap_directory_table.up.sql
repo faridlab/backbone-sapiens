@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS ldap_directories (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.ldap_directories (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     display_name TEXT NOT NULL,
@@ -33,27 +35,27 @@ CREATE TABLE IF NOT EXISTS ldap_directories (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_ldap_directories_name ON ldap_directories (name);
+CREATE INDEX IF NOT EXISTS idx_ldap_directories_name ON sapiens.ldap_directories (name);
 
-CREATE INDEX IF NOT EXISTS idx_ldap_directories_is_active ON ldap_directories (is_active);
+CREATE INDEX IF NOT EXISTS idx_ldap_directories_is_active ON sapiens.ldap_directories (is_active);
 
-CREATE INDEX IF NOT EXISTS idx_ldap_directories_sync_enabled_last_sync_at ON ldap_directories (sync_enabled, last_sync_at);
+CREATE INDEX IF NOT EXISTS idx_ldap_directories_sync_enabled_last_sync_at ON sapiens.ldap_directories (sync_enabled, last_sync_at);
 
-CREATE INDEX IF NOT EXISTS idx_ldap_directories_status ON ldap_directories (status);
+CREATE INDEX IF NOT EXISTS idx_ldap_directories_status ON sapiens.ldap_directories (status);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_ldap_directories_name ON ldap_directories (name);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_ldap_directories_name ON sapiens.ldap_directories (name);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_ldap_directories_metadata_gin ON ldap_directories USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_ldap_directories_metadata_deleted_at ON ldap_directories ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_ldap_directories_metadata_created_at ON ldap_directories ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_ldap_directories_metadata_updated_at ON ldap_directories ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_ldap_directories_metadata_gin ON sapiens.ldap_directories USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_ldap_directories_metadata_deleted_at ON sapiens.ldap_directories ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_ldap_directories_metadata_created_at ON sapiens.ldap_directories ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_ldap_directories_metadata_updated_at ON sapiens.ldap_directories ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION ldap_directories_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.ldap_directories_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -66,11 +68,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS ldap_directories_insert_audit ON ldap_directories;
-CREATE TRIGGER ldap_directories_insert_audit BEFORE INSERT ON ldap_directories
-    FOR EACH ROW EXECUTE FUNCTION ldap_directories_audit_timestamp();
+DROP TRIGGER IF EXISTS ldap_directories_insert_audit ON sapiens.ldap_directories;
+CREATE TRIGGER ldap_directories_insert_audit BEFORE INSERT ON sapiens.ldap_directories
+    FOR EACH ROW EXECUTE FUNCTION sapiens.ldap_directories_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS ldap_directories_update_audit ON ldap_directories;
-CREATE TRIGGER ldap_directories_update_audit BEFORE UPDATE ON ldap_directories
-    FOR EACH ROW EXECUTE FUNCTION ldap_directories_audit_timestamp();
+DROP TRIGGER IF EXISTS ldap_directories_update_audit ON sapiens.ldap_directories;
+CREATE TRIGGER ldap_directories_update_audit BEFORE UPDATE ON sapiens.ldap_directories
+    FOR EACH ROW EXECUTE FUNCTION sapiens.ldap_directories_audit_timestamp();

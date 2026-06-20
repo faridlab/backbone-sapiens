@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS workflow_steps (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.workflow_steps (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     workflow_id UUID NOT NULL,
     step_number INTEGER NOT NULL,
@@ -39,27 +41,27 @@ CREATE TABLE IF NOT EXISTS workflow_steps (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_workflow_steps_workflow_id_step_number ON workflow_steps (workflow_id, step_number);
+CREATE INDEX IF NOT EXISTS idx_workflow_steps_workflow_id_step_number ON sapiens.workflow_steps (workflow_id, step_number);
 
-CREATE INDEX IF NOT EXISTS idx_workflow_steps_workflow_id_status ON workflow_steps (workflow_id, status);
+CREATE INDEX IF NOT EXISTS idx_workflow_steps_workflow_id_status ON sapiens.workflow_steps (workflow_id, status);
 
-CREATE INDEX IF NOT EXISTS idx_workflow_steps_step_type_status ON workflow_steps (step_type, status);
+CREATE INDEX IF NOT EXISTS idx_workflow_steps_step_type_status ON sapiens.workflow_steps (step_type, status);
 
-CREATE INDEX IF NOT EXISTS idx_workflow_steps_started_at ON workflow_steps (started_at);
+CREATE INDEX IF NOT EXISTS idx_workflow_steps_started_at ON sapiens.workflow_steps (started_at);
 
-CREATE INDEX IF NOT EXISTS idx_workflow_steps_completed_at ON workflow_steps (completed_at);
+CREATE INDEX IF NOT EXISTS idx_workflow_steps_completed_at ON sapiens.workflow_steps (completed_at);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_workflow_steps_metadata_gin ON workflow_steps USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_workflow_steps_metadata_deleted_at ON workflow_steps ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_workflow_steps_metadata_created_at ON workflow_steps ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_workflow_steps_metadata_updated_at ON workflow_steps ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_workflow_steps_metadata_gin ON sapiens.workflow_steps USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_workflow_steps_metadata_deleted_at ON sapiens.workflow_steps ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_workflow_steps_metadata_created_at ON sapiens.workflow_steps ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_workflow_steps_metadata_updated_at ON sapiens.workflow_steps ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION workflow_steps_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.workflow_steps_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -72,14 +74,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS workflow_steps_insert_audit ON workflow_steps;
-CREATE TRIGGER workflow_steps_insert_audit BEFORE INSERT ON workflow_steps
-    FOR EACH ROW EXECUTE FUNCTION workflow_steps_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_steps_insert_audit ON sapiens.workflow_steps;
+CREATE TRIGGER workflow_steps_insert_audit BEFORE INSERT ON sapiens.workflow_steps
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_steps_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS workflow_steps_update_audit ON workflow_steps;
-CREATE TRIGGER workflow_steps_update_audit BEFORE UPDATE ON workflow_steps
-    FOR EACH ROW EXECUTE FUNCTION workflow_steps_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_steps_update_audit ON sapiens.workflow_steps;
+CREATE TRIGGER workflow_steps_update_audit BEFORE UPDATE ON sapiens.workflow_steps
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_steps_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE workflow_steps ADD CONSTRAINT fk_workflow_steps_workflow_id FOREIGN KEY (workflow_id) REFERENCES workflows (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.workflow_steps ADD CONSTRAINT fk_workflow_steps_workflow_id FOREIGN KEY (workflow_id) REFERENCES sapiens.workflows (id) ON DELETE CASCADE ON UPDATE CASCADE;

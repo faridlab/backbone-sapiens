@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS notification_templates (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.notification_templates (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     notification_type notification_type NOT NULL,
@@ -33,27 +35,27 @@ CREATE TABLE IF NOT EXISTS notification_templates (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_notification_templates_notification_type_channel ON notification_templates (notification_type, channel);
+CREATE INDEX IF NOT EXISTS idx_notification_templates_notification_type_channel ON sapiens.notification_templates (notification_type, channel);
 
-CREATE INDEX IF NOT EXISTS idx_notification_templates_is_active ON notification_templates (is_active);
+CREATE INDEX IF NOT EXISTS idx_notification_templates_is_active ON sapiens.notification_templates (is_active);
 
-CREATE INDEX IF NOT EXISTS idx_notification_templates_language ON notification_templates (language);
+CREATE INDEX IF NOT EXISTS idx_notification_templates_language ON sapiens.notification_templates (language);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_templates_name_(metadata->>'deleted_at') ON notification_templates (name, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_templates_name_(metadata->>'deleted_at') ON sapiens.notification_templates (name, ((metadata->>'deleted_at')));
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_templates_name ON notification_templates (name);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_templates_name ON sapiens.notification_templates (name);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_notification_templates_metadata_gin ON notification_templates USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_notification_templates_metadata_deleted_at ON notification_templates ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_notification_templates_metadata_created_at ON notification_templates ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_notification_templates_metadata_updated_at ON notification_templates ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_notification_templates_metadata_gin ON sapiens.notification_templates USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_notification_templates_metadata_deleted_at ON sapiens.notification_templates ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_notification_templates_metadata_created_at ON sapiens.notification_templates ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_notification_templates_metadata_updated_at ON sapiens.notification_templates ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION notification_templates_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.notification_templates_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -66,11 +68,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS notification_templates_insert_audit ON notification_templates;
-CREATE TRIGGER notification_templates_insert_audit BEFORE INSERT ON notification_templates
-    FOR EACH ROW EXECUTE FUNCTION notification_templates_audit_timestamp();
+DROP TRIGGER IF EXISTS notification_templates_insert_audit ON sapiens.notification_templates;
+CREATE TRIGGER notification_templates_insert_audit BEFORE INSERT ON sapiens.notification_templates
+    FOR EACH ROW EXECUTE FUNCTION sapiens.notification_templates_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS notification_templates_update_audit ON notification_templates;
-CREATE TRIGGER notification_templates_update_audit BEFORE UPDATE ON notification_templates
-    FOR EACH ROW EXECUTE FUNCTION notification_templates_audit_timestamp();
+DROP TRIGGER IF EXISTS notification_templates_update_audit ON sapiens.notification_templates;
+CREATE TRIGGER notification_templates_update_audit BEFORE UPDATE ON sapiens.notification_templates
+    FOR EACH ROW EXECUTE FUNCTION sapiens.notification_templates_audit_timestamp();

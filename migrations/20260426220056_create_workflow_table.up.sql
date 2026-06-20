@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS workflows (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.workflows (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     workflow_type workflow_type NOT NULL,
     status workflow_status NOT NULL DEFAULT 'pending',
@@ -42,29 +44,29 @@ CREATE TABLE IF NOT EXISTS workflows (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_workflows_workflow_type_status ON workflows (workflow_type, status);
+CREATE INDEX IF NOT EXISTS idx_workflows_workflow_type_status ON sapiens.workflows (workflow_type, status);
 
-CREATE INDEX IF NOT EXISTS idx_workflows_initiator_id ON workflows (initiator_id);
+CREATE INDEX IF NOT EXISTS idx_workflows_initiator_id ON sapiens.workflows (initiator_id);
 
-CREATE INDEX IF NOT EXISTS idx_workflows_target_user_id ON workflows (target_user_id);
+CREATE INDEX IF NOT EXISTS idx_workflows_target_user_id ON sapiens.workflows (target_user_id);
 
-CREATE INDEX IF NOT EXISTS idx_workflows_status_created_at ON workflows (status, ((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_workflows_status_created_at ON sapiens.workflows (status, ((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_workflows_started_at ON workflows (started_at);
+CREATE INDEX IF NOT EXISTS idx_workflows_started_at ON sapiens.workflows (started_at);
 
-CREATE INDEX IF NOT EXISTS idx_workflows_expires_at ON workflows (expires_at);
+CREATE INDEX IF NOT EXISTS idx_workflows_expires_at ON sapiens.workflows (expires_at);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_workflows_metadata_gin ON workflows USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_workflows_metadata_deleted_at ON workflows ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_workflows_metadata_created_at ON workflows ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_workflows_metadata_updated_at ON workflows ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_workflows_metadata_gin ON sapiens.workflows USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_workflows_metadata_deleted_at ON sapiens.workflows ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_workflows_metadata_created_at ON sapiens.workflows ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_workflows_metadata_updated_at ON sapiens.workflows ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION workflows_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.workflows_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -77,15 +79,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS workflows_insert_audit ON workflows;
-CREATE TRIGGER workflows_insert_audit BEFORE INSERT ON workflows
-    FOR EACH ROW EXECUTE FUNCTION workflows_audit_timestamp();
+DROP TRIGGER IF EXISTS workflows_insert_audit ON sapiens.workflows;
+CREATE TRIGGER workflows_insert_audit BEFORE INSERT ON sapiens.workflows
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflows_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS workflows_update_audit ON workflows;
-CREATE TRIGGER workflows_update_audit BEFORE UPDATE ON workflows
-    FOR EACH ROW EXECUTE FUNCTION workflows_audit_timestamp();
+DROP TRIGGER IF EXISTS workflows_update_audit ON sapiens.workflows;
+CREATE TRIGGER workflows_update_audit BEFORE UPDATE ON sapiens.workflows
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflows_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE workflows ADD CONSTRAINT fk_workflows_initiator_id FOREIGN KEY (initiator_id) REFERENCES users (id);
-ALTER TABLE workflows ADD CONSTRAINT fk_workflows_target_user_id FOREIGN KEY (target_user_id) REFERENCES users (id);
+ALTER TABLE sapiens.workflows ADD CONSTRAINT fk_workflows_initiator_id FOREIGN KEY (initiator_id) REFERENCES users (id);
+ALTER TABLE sapiens.workflows ADD CONSTRAINT fk_workflows_target_user_id FOREIGN KEY (target_user_id) REFERENCES users (id);

@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS profiles (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.profiles (
     user_id UUID NOT NULL DEFAULT gen_random_uuid(),
     first_name TEXT NOT NULL,
     middle_name TEXT,
@@ -24,19 +26,19 @@ CREATE TABLE IF NOT EXISTS profiles (
     PRIMARY KEY (user_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles (user_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON sapiens.profiles (user_id);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_profiles_metadata_gin ON profiles USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_profiles_metadata_deleted_at ON profiles ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_profiles_metadata_created_at ON profiles ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_profiles_metadata_updated_at ON profiles ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_profiles_metadata_gin ON sapiens.profiles USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_profiles_metadata_deleted_at ON sapiens.profiles ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_profiles_metadata_created_at ON sapiens.profiles ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_profiles_metadata_updated_at ON sapiens.profiles ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION profiles_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.profiles_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -49,14 +51,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS profiles_insert_audit ON profiles;
-CREATE TRIGGER profiles_insert_audit BEFORE INSERT ON profiles
-    FOR EACH ROW EXECUTE FUNCTION profiles_audit_timestamp();
+DROP TRIGGER IF EXISTS profiles_insert_audit ON sapiens.profiles;
+CREATE TRIGGER profiles_insert_audit BEFORE INSERT ON sapiens.profiles
+    FOR EACH ROW EXECUTE FUNCTION sapiens.profiles_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS profiles_update_audit ON profiles;
-CREATE TRIGGER profiles_update_audit BEFORE UPDATE ON profiles
-    FOR EACH ROW EXECUTE FUNCTION profiles_audit_timestamp();
+DROP TRIGGER IF EXISTS profiles_update_audit ON sapiens.profiles;
+CREATE TRIGGER profiles_update_audit BEFORE UPDATE ON sapiens.profiles
+    FOR EACH ROW EXECUTE FUNCTION sapiens.profiles_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE profiles ADD CONSTRAINT fk_profiles_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.profiles ADD CONSTRAINT fk_profiles_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;

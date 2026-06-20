@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS bulk_operations (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.bulk_operations (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     operation_type bulk_operation_type NOT NULL,
     status bulk_operation_status NOT NULL DEFAULT 'pending',
@@ -44,29 +46,29 @@ CREATE TABLE IF NOT EXISTS bulk_operations (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_bulk_operations_operation_type_status ON bulk_operations (operation_type, status);
+CREATE INDEX IF NOT EXISTS idx_bulk_operations_operation_type_status ON sapiens.bulk_operations (operation_type, status);
 
-CREATE INDEX IF NOT EXISTS idx_bulk_operations_created_by ON bulk_operations (created_by);
+CREATE INDEX IF NOT EXISTS idx_bulk_operations_created_by ON sapiens.bulk_operations (created_by);
 
-CREATE INDEX IF NOT EXISTS idx_bulk_operations_status ON bulk_operations (status);
+CREATE INDEX IF NOT EXISTS idx_bulk_operations_status ON sapiens.bulk_operations (status);
 
-CREATE INDEX IF NOT EXISTS idx_bulk_operations_created_at ON bulk_operations (((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_bulk_operations_created_at ON sapiens.bulk_operations (((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_bulk_operations_started_at ON bulk_operations (started_at);
+CREATE INDEX IF NOT EXISTS idx_bulk_operations_started_at ON sapiens.bulk_operations (started_at);
 
-CREATE INDEX IF NOT EXISTS idx_bulk_operations_completed_at ON bulk_operations (completed_at);
+CREATE INDEX IF NOT EXISTS idx_bulk_operations_completed_at ON sapiens.bulk_operations (completed_at);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_bulk_operations_metadata_gin ON bulk_operations USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_bulk_operations_metadata_deleted_at ON bulk_operations ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_bulk_operations_metadata_created_at ON bulk_operations ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_bulk_operations_metadata_updated_at ON bulk_operations ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_bulk_operations_metadata_gin ON sapiens.bulk_operations USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_bulk_operations_metadata_deleted_at ON sapiens.bulk_operations ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_bulk_operations_metadata_created_at ON sapiens.bulk_operations ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_bulk_operations_metadata_updated_at ON sapiens.bulk_operations ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION bulk_operations_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.bulk_operations_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -79,11 +81,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS bulk_operations_insert_audit ON bulk_operations;
-CREATE TRIGGER bulk_operations_insert_audit BEFORE INSERT ON bulk_operations
-    FOR EACH ROW EXECUTE FUNCTION bulk_operations_audit_timestamp();
+DROP TRIGGER IF EXISTS bulk_operations_insert_audit ON sapiens.bulk_operations;
+CREATE TRIGGER bulk_operations_insert_audit BEFORE INSERT ON sapiens.bulk_operations
+    FOR EACH ROW EXECUTE FUNCTION sapiens.bulk_operations_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS bulk_operations_update_audit ON bulk_operations;
-CREATE TRIGGER bulk_operations_update_audit BEFORE UPDATE ON bulk_operations
-    FOR EACH ROW EXECUTE FUNCTION bulk_operations_audit_timestamp();
+DROP TRIGGER IF EXISTS bulk_operations_update_audit ON sapiens.bulk_operations;
+CREATE TRIGGER bulk_operations_update_audit BEFORE UPDATE ON sapiens.bulk_operations
+    FOR EACH ROW EXECUTE FUNCTION sapiens.bulk_operations_audit_timestamp();

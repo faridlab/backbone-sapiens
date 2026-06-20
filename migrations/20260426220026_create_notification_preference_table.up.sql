@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS sapiens_notification_preferences (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.sapiens_notification_preferences (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     notification_type TEXT NOT NULL,
@@ -26,23 +28,23 @@ CREATE TABLE IF NOT EXISTS sapiens_notification_preferences (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_sapiens_notification_preferences_user_id ON sapiens_notification_preferences (user_id);
+CREATE INDEX IF NOT EXISTS idx_sapiens_notification_preferences_user_id ON sapiens.sapiens_notification_preferences (user_id);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_sapiens_notification_preferences_user_id_notification_type ON sapiens_notification_preferences (user_id, notification_type);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sapiens_notification_preferences_user_id_notification_type ON sapiens.sapiens_notification_preferences (user_id, notification_type);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_sapiens_notification_preferences_user_id ON sapiens_notification_preferences (user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sapiens_notification_preferences_user_id ON sapiens.sapiens_notification_preferences (user_id);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_sapiens_notification_preferences_metadata_gin ON sapiens_notification_preferences USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_sapiens_notification_preferences_metadata_deleted_at ON sapiens_notification_preferences ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_sapiens_notification_preferences_metadata_created_at ON sapiens_notification_preferences ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_sapiens_notification_preferences_metadata_updated_at ON sapiens_notification_preferences ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_sapiens_notification_preferences_metadata_gin ON sapiens.sapiens_notification_preferences USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_sapiens_notification_preferences_metadata_deleted_at ON sapiens.sapiens_notification_preferences ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_sapiens_notification_preferences_metadata_created_at ON sapiens.sapiens_notification_preferences ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_sapiens_notification_preferences_metadata_updated_at ON sapiens.sapiens_notification_preferences ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION sapiens_notification_preferences_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.sapiens_notification_preferences_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -55,14 +57,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS sapiens_notification_preferences_insert_audit ON sapiens_notification_preferences;
-CREATE TRIGGER sapiens_notification_preferences_insert_audit BEFORE INSERT ON sapiens_notification_preferences
-    FOR EACH ROW EXECUTE FUNCTION sapiens_notification_preferences_audit_timestamp();
+DROP TRIGGER IF EXISTS sapiens_notification_preferences_insert_audit ON sapiens.sapiens_notification_preferences;
+CREATE TRIGGER sapiens_notification_preferences_insert_audit BEFORE INSERT ON sapiens.sapiens_notification_preferences
+    FOR EACH ROW EXECUTE FUNCTION sapiens.sapiens_notification_preferences_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS sapiens_notification_preferences_update_audit ON sapiens_notification_preferences;
-CREATE TRIGGER sapiens_notification_preferences_update_audit BEFORE UPDATE ON sapiens_notification_preferences
-    FOR EACH ROW EXECUTE FUNCTION sapiens_notification_preferences_audit_timestamp();
+DROP TRIGGER IF EXISTS sapiens_notification_preferences_update_audit ON sapiens.sapiens_notification_preferences;
+CREATE TRIGGER sapiens_notification_preferences_update_audit BEFORE UPDATE ON sapiens.sapiens_notification_preferences
+    FOR EACH ROW EXECUTE FUNCTION sapiens.sapiens_notification_preferences_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE sapiens_notification_preferences ADD CONSTRAINT fk_sapiens_notification_preferences_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.sapiens_notification_preferences ADD CONSTRAINT fk_sapiens_notification_preferences_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;

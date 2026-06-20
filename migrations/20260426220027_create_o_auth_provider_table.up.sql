@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS oauth_providers (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.oauth_providers (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     provider_name o_auth_provider_type NOT NULL,
     display_name TEXT NOT NULL,
@@ -26,25 +28,25 @@ CREATE TABLE IF NOT EXISTS oauth_providers (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_oauth_providers_provider_name ON oauth_providers (provider_name);
+CREATE INDEX IF NOT EXISTS idx_oauth_providers_provider_name ON sapiens.oauth_providers (provider_name);
 
-CREATE INDEX IF NOT EXISTS idx_oauth_providers_is_active ON oauth_providers (is_active);
+CREATE INDEX IF NOT EXISTS idx_oauth_providers_is_active ON sapiens.oauth_providers (is_active);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_oauth_providers_provider_name_(metadata->>'deleted_at') ON oauth_providers (provider_name, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_oauth_providers_provider_name_(metadata->>'deleted_at') ON sapiens.oauth_providers (provider_name, ((metadata->>'deleted_at')));
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_oauth_providers_provider_name ON oauth_providers (provider_name);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_oauth_providers_provider_name ON sapiens.oauth_providers (provider_name);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_oauth_providers_metadata_gin ON oauth_providers USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_oauth_providers_metadata_deleted_at ON oauth_providers ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_oauth_providers_metadata_created_at ON oauth_providers ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_oauth_providers_metadata_updated_at ON oauth_providers ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_oauth_providers_metadata_gin ON sapiens.oauth_providers USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_oauth_providers_metadata_deleted_at ON sapiens.oauth_providers ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_oauth_providers_metadata_created_at ON sapiens.oauth_providers ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_oauth_providers_metadata_updated_at ON sapiens.oauth_providers ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION oauth_providers_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.oauth_providers_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -57,11 +59,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS oauth_providers_insert_audit ON oauth_providers;
-CREATE TRIGGER oauth_providers_insert_audit BEFORE INSERT ON oauth_providers
-    FOR EACH ROW EXECUTE FUNCTION oauth_providers_audit_timestamp();
+DROP TRIGGER IF EXISTS oauth_providers_insert_audit ON sapiens.oauth_providers;
+CREATE TRIGGER oauth_providers_insert_audit BEFORE INSERT ON sapiens.oauth_providers
+    FOR EACH ROW EXECUTE FUNCTION sapiens.oauth_providers_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS oauth_providers_update_audit ON oauth_providers;
-CREATE TRIGGER oauth_providers_update_audit BEFORE UPDATE ON oauth_providers
-    FOR EACH ROW EXECUTE FUNCTION oauth_providers_audit_timestamp();
+DROP TRIGGER IF EXISTS oauth_providers_update_audit ON sapiens.oauth_providers;
+CREATE TRIGGER oauth_providers_update_audit BEFORE UPDATE ON sapiens.oauth_providers
+    FOR EACH ROW EXECUTE FUNCTION sapiens.oauth_providers_audit_timestamp();

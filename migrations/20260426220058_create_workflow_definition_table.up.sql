@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS workflow_definitions (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.workflow_definitions (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     workflow_type workflow_type NOT NULL,
@@ -34,27 +36,27 @@ CREATE TABLE IF NOT EXISTS workflow_definitions (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_workflow_definitions_workflow_type ON workflow_definitions (workflow_type);
+CREATE INDEX IF NOT EXISTS idx_workflow_definitions_workflow_type ON sapiens.workflow_definitions (workflow_type);
 
-CREATE INDEX IF NOT EXISTS idx_workflow_definitions_trigger_type ON workflow_definitions (trigger_type);
+CREATE INDEX IF NOT EXISTS idx_workflow_definitions_trigger_type ON sapiens.workflow_definitions (trigger_type);
 
-CREATE INDEX IF NOT EXISTS idx_workflow_definitions_is_active ON workflow_definitions (is_active);
+CREATE INDEX IF NOT EXISTS idx_workflow_definitions_is_active ON sapiens.workflow_definitions (is_active);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_workflow_definitions_name_(metadata->>'deleted_at') ON workflow_definitions (name, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_workflow_definitions_name_(metadata->>'deleted_at') ON sapiens.workflow_definitions (name, ((metadata->>'deleted_at')));
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_workflow_definitions_name ON workflow_definitions (name);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_workflow_definitions_name ON sapiens.workflow_definitions (name);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_workflow_definitions_metadata_gin ON workflow_definitions USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_workflow_definitions_metadata_deleted_at ON workflow_definitions ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_workflow_definitions_metadata_created_at ON workflow_definitions ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_workflow_definitions_metadata_updated_at ON workflow_definitions ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_workflow_definitions_metadata_gin ON sapiens.workflow_definitions USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_workflow_definitions_metadata_deleted_at ON sapiens.workflow_definitions ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_workflow_definitions_metadata_created_at ON sapiens.workflow_definitions ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_workflow_definitions_metadata_updated_at ON sapiens.workflow_definitions ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION workflow_definitions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.workflow_definitions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -67,11 +69,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS workflow_definitions_insert_audit ON workflow_definitions;
-CREATE TRIGGER workflow_definitions_insert_audit BEFORE INSERT ON workflow_definitions
-    FOR EACH ROW EXECUTE FUNCTION workflow_definitions_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_definitions_insert_audit ON sapiens.workflow_definitions;
+CREATE TRIGGER workflow_definitions_insert_audit BEFORE INSERT ON sapiens.workflow_definitions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_definitions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS workflow_definitions_update_audit ON workflow_definitions;
-CREATE TRIGGER workflow_definitions_update_audit BEFORE UPDATE ON workflow_definitions
-    FOR EACH ROW EXECUTE FUNCTION workflow_definitions_audit_timestamp();
+DROP TRIGGER IF EXISTS workflow_definitions_update_audit ON sapiens.workflow_definitions;
+CREATE TRIGGER workflow_definitions_update_audit BEFORE UPDATE ON sapiens.workflow_definitions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.workflow_definitions_audit_timestamp();

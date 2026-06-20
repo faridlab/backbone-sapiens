@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS anonymization_records (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.anonymization_records (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     original_email TEXT NOT NULL,
@@ -34,23 +36,23 @@ CREATE TABLE IF NOT EXISTS anonymization_records (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_anonymization_records_user_id ON anonymization_records (user_id);
+CREATE INDEX IF NOT EXISTS idx_anonymization_records_user_id ON sapiens.anonymization_records (user_id);
 
-CREATE INDEX IF NOT EXISTS idx_anonymization_records_anonymized_by_anonymized_at ON anonymization_records (anonymized_by, anonymized_at);
+CREATE INDEX IF NOT EXISTS idx_anonymization_records_anonymized_by_anonymized_at ON sapiens.anonymization_records (anonymized_by, anonymized_at);
 
-CREATE INDEX IF NOT EXISTS idx_anonymization_records_anonymized_at ON anonymization_records (anonymized_at);
+CREATE INDEX IF NOT EXISTS idx_anonymization_records_anonymized_at ON sapiens.anonymization_records (anonymized_at);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_anonymization_records_metadata_gin ON anonymization_records USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_anonymization_records_metadata_deleted_at ON anonymization_records ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_anonymization_records_metadata_created_at ON anonymization_records ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_anonymization_records_metadata_updated_at ON anonymization_records ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_anonymization_records_metadata_gin ON sapiens.anonymization_records USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_anonymization_records_metadata_deleted_at ON sapiens.anonymization_records ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_anonymization_records_metadata_created_at ON sapiens.anonymization_records ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_anonymization_records_metadata_updated_at ON sapiens.anonymization_records ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION anonymization_records_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.anonymization_records_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -63,14 +65,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS anonymization_records_insert_audit ON anonymization_records;
-CREATE TRIGGER anonymization_records_insert_audit BEFORE INSERT ON anonymization_records
-    FOR EACH ROW EXECUTE FUNCTION anonymization_records_audit_timestamp();
+DROP TRIGGER IF EXISTS anonymization_records_insert_audit ON sapiens.anonymization_records;
+CREATE TRIGGER anonymization_records_insert_audit BEFORE INSERT ON sapiens.anonymization_records
+    FOR EACH ROW EXECUTE FUNCTION sapiens.anonymization_records_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS anonymization_records_update_audit ON anonymization_records;
-CREATE TRIGGER anonymization_records_update_audit BEFORE UPDATE ON anonymization_records
-    FOR EACH ROW EXECUTE FUNCTION anonymization_records_audit_timestamp();
+DROP TRIGGER IF EXISTS anonymization_records_update_audit ON sapiens.anonymization_records;
+CREATE TRIGGER anonymization_records_update_audit BEFORE UPDATE ON sapiens.anonymization_records
+    FOR EACH ROW EXECUTE FUNCTION sapiens.anonymization_records_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE anonymization_records ADD CONSTRAINT fk_anonymization_records_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+ALTER TABLE sapiens.anonymization_records ADD CONSTRAINT fk_anonymization_records_user_id FOREIGN KEY (user_id) REFERENCES users (id);

@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS organization_users (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.organization_users (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL,
     user_id UUID NOT NULL,
@@ -22,25 +24,25 @@ CREATE TABLE IF NOT EXISTS organization_users (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_organization_users_organization_id ON organization_users (organization_id);
+CREATE INDEX IF NOT EXISTS idx_organization_users_organization_id ON sapiens.organization_users (organization_id);
 
-CREATE INDEX IF NOT EXISTS idx_organization_users_user_id ON organization_users (user_id);
+CREATE INDEX IF NOT EXISTS idx_organization_users_user_id ON sapiens.organization_users (user_id);
 
-CREATE INDEX IF NOT EXISTS idx_organization_users_organization_id_user_id ON organization_users (organization_id, user_id);
+CREATE INDEX IF NOT EXISTS idx_organization_users_organization_id_user_id ON sapiens.organization_users (organization_id, user_id);
 
-CREATE INDEX IF NOT EXISTS idx_organization_users_status ON organization_users (status);
+CREATE INDEX IF NOT EXISTS idx_organization_users_status ON sapiens.organization_users (status);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_organization_users_metadata_gin ON organization_users USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_organization_users_metadata_deleted_at ON organization_users ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_organization_users_metadata_created_at ON organization_users ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_organization_users_metadata_updated_at ON organization_users ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_organization_users_metadata_gin ON sapiens.organization_users USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_organization_users_metadata_deleted_at ON sapiens.organization_users ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_organization_users_metadata_created_at ON sapiens.organization_users ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_organization_users_metadata_updated_at ON sapiens.organization_users ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION organization_users_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.organization_users_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -53,15 +55,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS organization_users_insert_audit ON organization_users;
-CREATE TRIGGER organization_users_insert_audit BEFORE INSERT ON organization_users
-    FOR EACH ROW EXECUTE FUNCTION organization_users_audit_timestamp();
+DROP TRIGGER IF EXISTS organization_users_insert_audit ON sapiens.organization_users;
+CREATE TRIGGER organization_users_insert_audit BEFORE INSERT ON sapiens.organization_users
+    FOR EACH ROW EXECUTE FUNCTION sapiens.organization_users_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS organization_users_update_audit ON organization_users;
-CREATE TRIGGER organization_users_update_audit BEFORE UPDATE ON organization_users
-    FOR EACH ROW EXECUTE FUNCTION organization_users_audit_timestamp();
+DROP TRIGGER IF EXISTS organization_users_update_audit ON sapiens.organization_users;
+CREATE TRIGGER organization_users_update_audit BEFORE UPDATE ON sapiens.organization_users
+    FOR EACH ROW EXECUTE FUNCTION sapiens.organization_users_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE organization_users ADD CONSTRAINT fk_organization_users_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE;
-ALTER TABLE organization_users ADD CONSTRAINT fk_organization_users_role_id FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE SET NULL;
+ALTER TABLE sapiens.organization_users ADD CONSTRAINT fk_organization_users_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE;
+ALTER TABLE sapiens.organization_users ADD CONSTRAINT fk_organization_users_role_id FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE SET NULL;

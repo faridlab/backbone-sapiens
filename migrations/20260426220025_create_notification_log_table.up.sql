@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS notification_logs (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.notification_logs (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     notification_id UUID,
     template_id UUID,
@@ -36,25 +38,25 @@ CREATE TABLE IF NOT EXISTS notification_logs (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_notification_logs_status_created_at ON notification_logs (status, ((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_notification_logs_status_created_at ON sapiens.notification_logs (status, ((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_notification_logs_channel_created_at ON notification_logs (channel, ((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_notification_logs_channel_created_at ON sapiens.notification_logs (channel, ((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_notification_logs_recipient_id_created_at ON notification_logs (recipient_id, ((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_notification_logs_recipient_id_created_at ON sapiens.notification_logs (recipient_id, ((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_notification_logs_external_id ON notification_logs (external_id);
+CREATE INDEX IF NOT EXISTS idx_notification_logs_external_id ON sapiens.notification_logs (external_id);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_notification_logs_metadata_gin ON notification_logs USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_notification_logs_metadata_deleted_at ON notification_logs ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_notification_logs_metadata_created_at ON notification_logs ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_notification_logs_metadata_updated_at ON notification_logs ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_notification_logs_metadata_gin ON sapiens.notification_logs USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_notification_logs_metadata_deleted_at ON sapiens.notification_logs ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_notification_logs_metadata_created_at ON sapiens.notification_logs ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_notification_logs_metadata_updated_at ON sapiens.notification_logs ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION notification_logs_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.notification_logs_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -67,16 +69,16 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS notification_logs_insert_audit ON notification_logs;
-CREATE TRIGGER notification_logs_insert_audit BEFORE INSERT ON notification_logs
-    FOR EACH ROW EXECUTE FUNCTION notification_logs_audit_timestamp();
+DROP TRIGGER IF EXISTS notification_logs_insert_audit ON sapiens.notification_logs;
+CREATE TRIGGER notification_logs_insert_audit BEFORE INSERT ON sapiens.notification_logs
+    FOR EACH ROW EXECUTE FUNCTION sapiens.notification_logs_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS notification_logs_update_audit ON notification_logs;
-CREATE TRIGGER notification_logs_update_audit BEFORE UPDATE ON notification_logs
-    FOR EACH ROW EXECUTE FUNCTION notification_logs_audit_timestamp();
+DROP TRIGGER IF EXISTS notification_logs_update_audit ON sapiens.notification_logs;
+CREATE TRIGGER notification_logs_update_audit BEFORE UPDATE ON sapiens.notification_logs
+    FOR EACH ROW EXECUTE FUNCTION sapiens.notification_logs_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE notification_logs ADD CONSTRAINT fk_notification_logs_notification_id FOREIGN KEY (notification_id) REFERENCES notifications (id);
-ALTER TABLE notification_logs ADD CONSTRAINT fk_notification_logs_template_id FOREIGN KEY (template_id) REFERENCES notification_templates (id);
-ALTER TABLE notification_logs ADD CONSTRAINT fk_notification_logs_recipient_id FOREIGN KEY (recipient_id) REFERENCES users (id);
+ALTER TABLE sapiens.notification_logs ADD CONSTRAINT fk_notification_logs_notification_id FOREIGN KEY (notification_id) REFERENCES sapiens.notifications (id);
+ALTER TABLE sapiens.notification_logs ADD CONSTRAINT fk_notification_logs_template_id FOREIGN KEY (template_id) REFERENCES sapiens.notification_templates (id);
+ALTER TABLE sapiens.notification_logs ADD CONSTRAINT fk_notification_logs_recipient_id FOREIGN KEY (recipient_id) REFERENCES users (id);

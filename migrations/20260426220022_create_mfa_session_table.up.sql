@@ -55,7 +55,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS mfa_sessions (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.mfa_sessions (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     device_id UUID NOT NULL,
@@ -108,35 +110,35 @@ CREATE TABLE IF NOT EXISTS mfa_sessions (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_mfa_sessions_user_id_status ON mfa_sessions (user_id, status);
+CREATE INDEX IF NOT EXISTS idx_mfa_sessions_user_id_status ON sapiens.mfa_sessions (user_id, status);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_sessions_device_id_status ON mfa_sessions (device_id, status);
+CREATE INDEX IF NOT EXISTS idx_mfa_sessions_device_id_status ON sapiens.mfa_sessions (device_id, status);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_mfa_sessions_session_token ON mfa_sessions (session_token);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mfa_sessions_session_token ON sapiens.mfa_sessions (session_token);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_mfa_sessions_session_hash ON mfa_sessions (session_hash);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mfa_sessions_session_hash ON sapiens.mfa_sessions (session_hash);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_sessions_mfa_required_status ON mfa_sessions (mfa_required, status);
+CREATE INDEX IF NOT EXISTS idx_mfa_sessions_mfa_required_status ON sapiens.mfa_sessions (mfa_required, status);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_sessions_ip_address_status ON mfa_sessions (ip_address, status);
+CREATE INDEX IF NOT EXISTS idx_mfa_sessions_ip_address_status ON sapiens.mfa_sessions (ip_address, status);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_sessions_expires_at ON mfa_sessions (expires_at);
+CREATE INDEX IF NOT EXISTS idx_mfa_sessions_expires_at ON sapiens.mfa_sessions (expires_at);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_sessions_created_at ON mfa_sessions (((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_mfa_sessions_created_at ON sapiens.mfa_sessions (((metadata->>'created_at')));
 
-CREATE INDEX IF NOT EXISTS idx_mfa_sessions_verification_method ON mfa_sessions (verification_method);
+CREATE INDEX IF NOT EXISTS idx_mfa_sessions_verification_method ON sapiens.mfa_sessions (verification_method);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_mfa_sessions_metadata_gin ON mfa_sessions USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_mfa_sessions_metadata_deleted_at ON mfa_sessions ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_mfa_sessions_metadata_created_at ON mfa_sessions ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_mfa_sessions_metadata_updated_at ON mfa_sessions ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_mfa_sessions_metadata_gin ON sapiens.mfa_sessions USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_mfa_sessions_metadata_deleted_at ON sapiens.mfa_sessions ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_mfa_sessions_metadata_created_at ON sapiens.mfa_sessions ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_mfa_sessions_metadata_updated_at ON sapiens.mfa_sessions ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION mfa_sessions_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.mfa_sessions_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -149,15 +151,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS mfa_sessions_insert_audit ON mfa_sessions;
-CREATE TRIGGER mfa_sessions_insert_audit BEFORE INSERT ON mfa_sessions
-    FOR EACH ROW EXECUTE FUNCTION mfa_sessions_audit_timestamp();
+DROP TRIGGER IF EXISTS mfa_sessions_insert_audit ON sapiens.mfa_sessions;
+CREATE TRIGGER mfa_sessions_insert_audit BEFORE INSERT ON sapiens.mfa_sessions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.mfa_sessions_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS mfa_sessions_update_audit ON mfa_sessions;
-CREATE TRIGGER mfa_sessions_update_audit BEFORE UPDATE ON mfa_sessions
-    FOR EACH ROW EXECUTE FUNCTION mfa_sessions_audit_timestamp();
+DROP TRIGGER IF EXISTS mfa_sessions_update_audit ON sapiens.mfa_sessions;
+CREATE TRIGGER mfa_sessions_update_audit BEFORE UPDATE ON sapiens.mfa_sessions
+    FOR EACH ROW EXECUTE FUNCTION sapiens.mfa_sessions_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE mfa_sessions ADD CONSTRAINT fk_mfa_sessions_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE mfa_sessions ADD CONSTRAINT fk_mfa_sessions_device_id FOREIGN KEY (device_id) REFERENCES mfa_devices (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.mfa_sessions ADD CONSTRAINT fk_mfa_sessions_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.mfa_sessions ADD CONSTRAINT fk_mfa_sessions_device_id FOREIGN KEY (device_id) REFERENCES sapiens.mfa_devices (id) ON DELETE CASCADE ON UPDATE CASCADE;

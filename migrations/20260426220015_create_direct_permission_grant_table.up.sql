@@ -10,7 +10,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS direct_permission_grants (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.direct_permission_grants (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     permission_id UUID NOT NULL,
@@ -31,27 +33,27 @@ CREATE TABLE IF NOT EXISTS direct_permission_grants (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_user_id_status ON direct_permission_grants (user_id, status);
+CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_user_id_status ON sapiens.direct_permission_grants (user_id, status);
 
-CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_permission_id ON direct_permission_grants (permission_id);
+CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_permission_id ON sapiens.direct_permission_grants (permission_id);
 
-CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_granted_by ON direct_permission_grants (granted_by);
+CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_granted_by ON sapiens.direct_permission_grants (granted_by);
 
-CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_status_expires_at ON direct_permission_grants (status, expires_at);
+CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_status_expires_at ON sapiens.direct_permission_grants (status, expires_at);
 
-CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_created_at ON direct_permission_grants (((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_created_at ON sapiens.direct_permission_grants (((metadata->>'created_at')));
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_metadata_gin ON direct_permission_grants USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_metadata_deleted_at ON direct_permission_grants ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_metadata_created_at ON direct_permission_grants ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_metadata_updated_at ON direct_permission_grants ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_metadata_gin ON sapiens.direct_permission_grants USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_metadata_deleted_at ON sapiens.direct_permission_grants ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_metadata_created_at ON sapiens.direct_permission_grants ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_direct_permission_grants_metadata_updated_at ON sapiens.direct_permission_grants ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION direct_permission_grants_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.direct_permission_grants_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -64,15 +66,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS direct_permission_grants_insert_audit ON direct_permission_grants;
-CREATE TRIGGER direct_permission_grants_insert_audit BEFORE INSERT ON direct_permission_grants
-    FOR EACH ROW EXECUTE FUNCTION direct_permission_grants_audit_timestamp();
+DROP TRIGGER IF EXISTS direct_permission_grants_insert_audit ON sapiens.direct_permission_grants;
+CREATE TRIGGER direct_permission_grants_insert_audit BEFORE INSERT ON sapiens.direct_permission_grants
+    FOR EACH ROW EXECUTE FUNCTION sapiens.direct_permission_grants_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS direct_permission_grants_update_audit ON direct_permission_grants;
-CREATE TRIGGER direct_permission_grants_update_audit BEFORE UPDATE ON direct_permission_grants
-    FOR EACH ROW EXECUTE FUNCTION direct_permission_grants_audit_timestamp();
+DROP TRIGGER IF EXISTS direct_permission_grants_update_audit ON sapiens.direct_permission_grants;
+CREATE TRIGGER direct_permission_grants_update_audit BEFORE UPDATE ON sapiens.direct_permission_grants
+    FOR EACH ROW EXECUTE FUNCTION sapiens.direct_permission_grants_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE direct_permission_grants ADD CONSTRAINT fk_direct_permission_grants_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE direct_permission_grants ADD CONSTRAINT fk_direct_permission_grants_permission_id FOREIGN KEY (permission_id) REFERENCES permissions (id);
+ALTER TABLE sapiens.direct_permission_grants ADD CONSTRAINT fk_direct_permission_grants_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.direct_permission_grants ADD CONSTRAINT fk_direct_permission_grants_permission_id FOREIGN KEY (permission_id) REFERENCES permissions (id);

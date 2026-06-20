@@ -19,7 +19,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS permission_conflicts (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.permission_conflicts (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     conflict_type TEXT NOT NULL,
     severity conflict_severity NOT NULL DEFAULT 'medium',
@@ -31,21 +33,21 @@ CREATE TABLE IF NOT EXISTS permission_conflicts (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_permission_conflicts_conflict_type ON permission_conflicts (conflict_type);
+CREATE INDEX IF NOT EXISTS idx_permission_conflicts_conflict_type ON sapiens.permission_conflicts (conflict_type);
 
-CREATE INDEX IF NOT EXISTS idx_permission_conflicts_severity_resolution_status ON permission_conflicts (severity, resolution_status);
+CREATE INDEX IF NOT EXISTS idx_permission_conflicts_severity_resolution_status ON sapiens.permission_conflicts (severity, resolution_status);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_permission_conflicts_metadata_gin ON permission_conflicts USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_permission_conflicts_metadata_deleted_at ON permission_conflicts ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_permission_conflicts_metadata_created_at ON permission_conflicts ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_permission_conflicts_metadata_updated_at ON permission_conflicts ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_permission_conflicts_metadata_gin ON sapiens.permission_conflicts USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_permission_conflicts_metadata_deleted_at ON sapiens.permission_conflicts ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_permission_conflicts_metadata_created_at ON sapiens.permission_conflicts ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_permission_conflicts_metadata_updated_at ON sapiens.permission_conflicts ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION permission_conflicts_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.permission_conflicts_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -58,11 +60,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS permission_conflicts_insert_audit ON permission_conflicts;
-CREATE TRIGGER permission_conflicts_insert_audit BEFORE INSERT ON permission_conflicts
-    FOR EACH ROW EXECUTE FUNCTION permission_conflicts_audit_timestamp();
+DROP TRIGGER IF EXISTS permission_conflicts_insert_audit ON sapiens.permission_conflicts;
+CREATE TRIGGER permission_conflicts_insert_audit BEFORE INSERT ON sapiens.permission_conflicts
+    FOR EACH ROW EXECUTE FUNCTION sapiens.permission_conflicts_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS permission_conflicts_update_audit ON permission_conflicts;
-CREATE TRIGGER permission_conflicts_update_audit BEFORE UPDATE ON permission_conflicts
-    FOR EACH ROW EXECUTE FUNCTION permission_conflicts_audit_timestamp();
+DROP TRIGGER IF EXISTS permission_conflicts_update_audit ON sapiens.permission_conflicts;
+CREATE TRIGGER permission_conflicts_update_audit BEFORE UPDATE ON sapiens.permission_conflicts
+    FOR EACH ROW EXECUTE FUNCTION sapiens.permission_conflicts_audit_timestamp();

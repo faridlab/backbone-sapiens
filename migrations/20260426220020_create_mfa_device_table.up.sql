@@ -28,7 +28,9 @@ BEGIN
 END
 $$;
 
-CREATE TABLE IF NOT EXISTS mfa_devices (
+CREATE SCHEMA IF NOT EXISTS sapiens;
+
+CREATE TABLE IF NOT EXISTS sapiens.mfa_devices (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     device_type mfa_device_type NOT NULL,
@@ -74,31 +76,31 @@ CREATE TABLE IF NOT EXISTS mfa_devices (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_mfa_devices_user_id_status ON mfa_devices (user_id, status);
+CREATE INDEX IF NOT EXISTS idx_mfa_devices_user_id_status ON sapiens.mfa_devices (user_id, status);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_devices_device_type ON mfa_devices (device_type);
+CREATE INDEX IF NOT EXISTS idx_mfa_devices_device_type ON sapiens.mfa_devices (device_type);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_devices_is_primary_status ON mfa_devices (is_primary, status);
+CREATE INDEX IF NOT EXISTS idx_mfa_devices_is_primary_status ON sapiens.mfa_devices (is_primary, status);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_devices_enrolled_at ON mfa_devices (enrolled_at);
+CREATE INDEX IF NOT EXISTS idx_mfa_devices_enrolled_at ON sapiens.mfa_devices (enrolled_at);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_devices_last_used_at ON mfa_devices (last_used_at);
+CREATE INDEX IF NOT EXISTS idx_mfa_devices_last_used_at ON sapiens.mfa_devices (last_used_at);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_devices_is_locked_status ON mfa_devices (is_locked, status);
+CREATE INDEX IF NOT EXISTS idx_mfa_devices_is_locked_status ON sapiens.mfa_devices (is_locked, status);
 
-CREATE INDEX IF NOT EXISTS idx_mfa_devices_risk_score ON mfa_devices (risk_score);
+CREATE INDEX IF NOT EXISTS idx_mfa_devices_risk_score ON sapiens.mfa_devices (risk_score);
 
 -- GIN index for audit metadata JSONB queries
-CREATE INDEX IF NOT EXISTS idx_mfa_devices_metadata_gin ON mfa_devices USING GIN (metadata);
-CREATE INDEX IF NOT EXISTS idx_mfa_devices_metadata_deleted_at ON mfa_devices ((metadata->>'deleted_at'));
-CREATE INDEX IF NOT EXISTS idx_mfa_devices_metadata_created_at ON mfa_devices ((metadata->>'created_at'));
-CREATE INDEX IF NOT EXISTS idx_mfa_devices_metadata_updated_at ON mfa_devices ((metadata->>'updated_at'));
+CREATE INDEX IF NOT EXISTS idx_mfa_devices_metadata_gin ON sapiens.mfa_devices USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_mfa_devices_metadata_deleted_at ON sapiens.mfa_devices ((metadata->>'deleted_at'));
+CREATE INDEX IF NOT EXISTS idx_mfa_devices_metadata_created_at ON sapiens.mfa_devices ((metadata->>'created_at'));
+CREATE INDEX IF NOT EXISTS idx_mfa_devices_metadata_updated_at ON sapiens.mfa_devices ((metadata->>'updated_at'));
 
 -- Triggers for automatic metadata timestamp management
 -- Automatically sets created_at on INSERT and updated_at on UPDATE
 
 -- Function to set metadata->'created_at' on INSERT
-CREATE OR REPLACE FUNCTION mfa_devices_audit_timestamp() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sapiens.mfa_devices_audit_timestamp() RETURNS trigger AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         NEW.metadata = jsonb_set(NEW.metadata::jsonb, '{created_at}', to_jsonb(NOW()));
@@ -111,14 +113,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to set timestamps on INSERT
-DROP TRIGGER IF EXISTS mfa_devices_insert_audit ON mfa_devices;
-CREATE TRIGGER mfa_devices_insert_audit BEFORE INSERT ON mfa_devices
-    FOR EACH ROW EXECUTE FUNCTION mfa_devices_audit_timestamp();
+DROP TRIGGER IF EXISTS mfa_devices_insert_audit ON sapiens.mfa_devices;
+CREATE TRIGGER mfa_devices_insert_audit BEFORE INSERT ON sapiens.mfa_devices
+    FOR EACH ROW EXECUTE FUNCTION sapiens.mfa_devices_audit_timestamp();
 
 -- Trigger to set updated_at on UPDATE
-DROP TRIGGER IF EXISTS mfa_devices_update_audit ON mfa_devices;
-CREATE TRIGGER mfa_devices_update_audit BEFORE UPDATE ON mfa_devices
-    FOR EACH ROW EXECUTE FUNCTION mfa_devices_audit_timestamp();
+DROP TRIGGER IF EXISTS mfa_devices_update_audit ON sapiens.mfa_devices;
+CREATE TRIGGER mfa_devices_update_audit BEFORE UPDATE ON sapiens.mfa_devices
+    FOR EACH ROW EXECUTE FUNCTION sapiens.mfa_devices_audit_timestamp();
 
 -- Inline foreign key constraints (forward + self refs)
-ALTER TABLE mfa_devices ADD CONSTRAINT fk_mfa_devices_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sapiens.mfa_devices ADD CONSTRAINT fk_mfa_devices_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
