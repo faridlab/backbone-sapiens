@@ -3,7 +3,10 @@
 
 models:
   - name: NotificationPreference
-    collection: notification_preferences
+    # Namespaced to avoid colliding with other modules' `notification_preferences`
+    # collection (e.g. backbone-notification's channel/category preferences).
+    # The sapiens module owns its own per-user notification preferences table.
+    collection: sapiens_notification_preferences
     soft_delete: true
 
     fields:
