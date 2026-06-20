@@ -67,7 +67,6 @@ config:
       - graphql
       - grpc
       - proto
-      - openapi
 
 # Import all model files
 imports:
