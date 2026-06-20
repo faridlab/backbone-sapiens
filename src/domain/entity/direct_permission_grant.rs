@@ -54,25 +54,16 @@ pub struct DirectPermissionGrant {
     pub permission_id: Uuid,
     pub granted_by: Uuid,
     pub granted_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub scope: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub conditions: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_used_at: Option<DateTime<Utc>>,
     pub usage_count: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub access_log: Option<serde_json::Value>,
     pub status: DirectPermissionGrantStatus,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub revoked_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub revoked_by: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub revocation_reason: Option<String>,
     #[serde(default)]
     #[sqlx(json)]
@@ -336,6 +327,9 @@ impl backbone_orm::EntityRepoMeta for DirectPermissionGrant {
     }
     fn search_fields() -> &'static [&'static str] {
         &[]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("permission", "permissions", "permissionId"), ("granter", "users", "grantedBy"), ("revoker", "users", "revokedBy")]
     }
 }
 

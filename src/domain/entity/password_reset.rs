@@ -57,24 +57,15 @@ pub struct PasswordReset {
     pub status: PasswordResetStatus,
     pub max_attempts: i32,
     pub attempts_remaining: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_attempt_at: Option<DateTime<Utc>>,
     pub request_metadata: serde_json::Value,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub verification_details_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub completion_details_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub security_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub device_fingerprint: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub ip_address: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_agent: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub verified_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub used_at: Option<DateTime<Utc>>,
     pub expires_at: DateTime<Utc>,
     #[serde(default)]
@@ -353,6 +344,9 @@ impl backbone_orm::EntityRepoMeta for PasswordReset {
     }
     fn search_fields() -> &'static [&'static str] {
         &["token", "token_hash", "email"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("verificationDetails", "password_reset_verification_details", "verificationDetailsId"), ("security", "password_reset_security", "securityId")]
     }
 }
 

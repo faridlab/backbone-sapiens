@@ -5,7 +5,6 @@ use uuid::Uuid;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{SessionLimitStateMachine, SessionLimitState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for SessionLimit
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -53,11 +52,9 @@ pub struct SessionLimit {
     pub id: Uuid,
     pub user_id: Uuid,
     pub max_sessions: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub max_sessions_per_device: Option<i32>,
     pub(crate) enforce_limit: bool,
     pub current_session_count: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_session_revoke_at: Option<DateTime<Utc>>,
     #[serde(default)]
     #[sqlx(json)]
@@ -250,6 +247,9 @@ impl backbone_orm::EntityRepoMeta for SessionLimit {
     }
     fn search_fields() -> &'static [&'static str] {
         &[]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId")]
     }
 }
 

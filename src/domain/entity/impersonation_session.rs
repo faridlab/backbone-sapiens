@@ -7,7 +7,6 @@ use super::ImpersonationSessionStatus;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{ImpersonationSessionStateMachine, ImpersonationSessionState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for ImpersonationSession
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -57,14 +56,11 @@ pub struct ImpersonationSession {
     pub target_user_id: Uuid,
     pub session_id: Uuid,
     pub started_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub ended_at: Option<DateTime<Utc>>,
     pub max_duration_minutes: i32,
     pub reason: String,
     pub actions_performed: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub terminated_by: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub termination_reason: Option<String>,
     pub(crate) status: ImpersonationSessionStatus,
     #[serde(default)]
@@ -292,6 +288,9 @@ impl backbone_orm::EntityRepoMeta for ImpersonationSession {
     }
     fn search_fields() -> &'static [&'static str] {
         &["reason"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("admin", "users", "adminId"), ("targetUser", "users", "targetUserId"), ("session", "sessions", "sessionId"), ("terminator", "users", "terminatedBy")]
     }
 }
 

@@ -7,7 +7,6 @@ use super::UserSAMLLinkStatus;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{UserSAMLLinkStateMachine, UserSAMLLinkState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for UserSAMLLink
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -56,7 +55,6 @@ pub struct UserSAMLLink {
     pub user_id: Uuid,
     pub provider_id: Uuid,
     pub name_id: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub session_index: Option<String>,
     pub first_login_at: DateTime<Utc>,
     pub last_login_at: DateTime<Utc>,
@@ -267,6 +265,9 @@ impl backbone_orm::EntityRepoMeta for UserSAMLLink {
     }
     fn search_fields() -> &'static [&'static str] {
         &["name_id"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("provider", "saml_providers", "providerId")]
     }
 }
 

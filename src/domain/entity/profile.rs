@@ -51,19 +51,12 @@ impl std::ops::Deref for ProfileId {
 pub struct Profile {
     pub user_id: Uuid,
     pub first_name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub middle_name: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_name: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub dob: Option<NaiveDate>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub pob: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub gender: Option<Gender>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub phone_number: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub profile_picture_url: Option<String>,
     #[serde(default)]
     #[sqlx(json)]
@@ -280,6 +273,9 @@ impl backbone_orm::EntityRepoMeta for Profile {
     }
     fn search_fields() -> &'static [&'static str] {
         &["first_name"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId")]
     }
 }
 

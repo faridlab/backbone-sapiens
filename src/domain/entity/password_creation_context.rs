@@ -52,11 +52,8 @@ pub struct PasswordCreationContext {
     pub id: Uuid,
     pub user_id: Uuid,
     pub created_via: PasswordCreationMethod,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub ip_address: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_agent: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
     #[serde(default)]
     #[sqlx(json)]

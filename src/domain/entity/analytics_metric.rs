@@ -54,14 +54,11 @@ pub struct AnalyticsMetric {
     pub metric_name: String,
     pub metric_type: AnalyticsMetricType,
     pub value: f64,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub unit: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub dimensions: Option<serde_json::Value>,
     pub period_start: DateTime<Utc>,
     pub period_end: DateTime<Utc>,
     pub aggregation_level: AggregationLevel,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub organization_id: Option<Uuid>,
     #[serde(default)]
     #[sqlx(json)]

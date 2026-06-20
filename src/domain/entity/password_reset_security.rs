@@ -50,7 +50,6 @@ pub struct PasswordResetSecurity {
     pub id: Uuid,
     pub max_attempts: i32,
     pub attempts_remaining: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_attempt_at: Option<DateTime<Utc>>,
     pub expires_at: DateTime<Utc>,
     pub suspicious_activity: bool,

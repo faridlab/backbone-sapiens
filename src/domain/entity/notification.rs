@@ -57,23 +57,15 @@ pub struct Notification {
     pub channel: NotificationChannel,
     pub title: String,
     pub message: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<serde_json::Value>,
     pub is_read: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub read_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub sent_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub delivered_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<DateTime<Utc>>,
     pub priority: NotificationPriority,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub action_url: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub action_text: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub category: Option<String>,
     #[serde(default)]
     #[sqlx(json)]
@@ -327,6 +319,9 @@ impl backbone_orm::EntityRepoMeta for Notification {
     }
     fn search_fields() -> &'static [&'static str] {
         &["title", "message"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId")]
     }
 }
 

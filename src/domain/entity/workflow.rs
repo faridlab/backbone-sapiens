@@ -54,27 +54,19 @@ pub struct Workflow {
     pub workflow_type: WorkflowType,
     pub status: WorkflowStatus,
     pub initiator_id: Uuid,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub target_user_id: Option<Uuid>,
     pub title: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub context: Option<serde_json::Value>,
     pub current_step: i32,
     pub total_steps: i32,
     pub progress_percentage: f64,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub started_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub completed_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub failed_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<DateTime<Utc>>,
     pub retry_count: i32,
     pub max_retries: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
     #[serde(default)]
     #[sqlx(json)]
@@ -341,6 +333,9 @@ impl backbone_orm::EntityRepoMeta for Workflow {
     }
     fn search_fields() -> &'static [&'static str] {
         &["title"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("initiator", "users", "initiatorId"), ("targetUser", "users", "targetUserId")]
     }
 }
 

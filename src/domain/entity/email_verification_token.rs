@@ -8,7 +8,6 @@ use super::EmailVerificationTokenStatus;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{EmailVerificationTokenStateMachine, EmailVerificationTokenState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for EmailVerificationToken
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -58,17 +57,13 @@ pub struct EmailVerificationToken {
     pub token: String,
     pub email: String,
     pub token_type: EmailVerificationType,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub old_email: Option<String>,
     pub expires_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub verified_at: Option<DateTime<Utc>>,
     pub attempts: i32,
     pub max_attempts: i32,
     pub(crate) status: EmailVerificationTokenStatus,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub ip_address: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_agent: Option<String>,
     #[serde(default)]
     #[sqlx(json)]
@@ -304,6 +299,9 @@ impl backbone_orm::EntityRepoMeta for EmailVerificationToken {
     }
     fn search_fields() -> &'static [&'static str] {
         &["token", "email"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId")]
     }
 }
 

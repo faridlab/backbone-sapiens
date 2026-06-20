@@ -59,22 +59,14 @@ pub struct BulkOperation {
     pub successful_records: i32,
     pub failed_records: i32,
     pub skipped_records: i32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub input_file_path: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub output_file_path: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub error_file_path: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub parameters: Option<serde_json::Value>,
     pub progress_percentage: f64,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub started_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub completed_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub estimated_completion: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
     pub retry_count: i32,
     pub max_retries: i32,
@@ -346,6 +338,9 @@ impl backbone_orm::EntityRepoMeta for BulkOperation {
     }
     fn search_fields() -> &'static [&'static str] {
         &[]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("creator", "users", "createdBy")]
     }
 }
 

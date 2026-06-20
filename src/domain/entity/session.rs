@@ -7,7 +7,6 @@ use super::DeviceType;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{SessionStateMachine, SessionState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for Session
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -56,20 +55,14 @@ pub struct Session {
     pub user_id: Uuid,
     pub token_hash: String,
     pub expires_at: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub extended_at: Option<DateTime<Utc>>,
     pub remember_me: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_activity: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub ip_address: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_agent: Option<String>,
     pub device_type: DeviceType,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub device_fingerprint: Option<String>,
     pub(crate) is_active: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub revoked_at: Option<DateTime<Utc>>,
     #[serde(default)]
     #[sqlx(json)]
@@ -311,6 +304,9 @@ impl backbone_orm::EntityRepoMeta for Session {
     }
     fn search_fields() -> &'static [&'static str] {
         &["token_hash"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId")]
     }
 }
 

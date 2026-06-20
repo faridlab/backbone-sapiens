@@ -53,13 +53,10 @@ pub struct WorkflowDefinition {
     pub id: Uuid,
     pub name: String,
     pub workflow_type: WorkflowType,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub trigger_type: TriggerType,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub trigger_config: Option<serde_json::Value>,
     pub is_active: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub timeout_minutes: Option<i32>,
     pub max_retries: i32,
     pub created_by: Uuid,
@@ -256,6 +253,9 @@ impl backbone_orm::EntityRepoMeta for WorkflowDefinition {
     }
     fn search_fields() -> &'static [&'static str] {
         &["name"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("createdByUser", "users", "createdBy")]
     }
 }
 

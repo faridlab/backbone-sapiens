@@ -58,7 +58,6 @@ pub struct UserSettings {
     pub email_notifications: bool,
     pub sms_notifications: bool,
     pub mfa_enabled: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub custom_settings: Option<serde_json::Value>,
     #[serde(default)]
     #[sqlx(json)]
@@ -244,6 +243,9 @@ impl backbone_orm::EntityRepoMeta for UserSettings {
     }
     fn search_fields() -> &'static [&'static str] {
         &["language", "timezone"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId")]
     }
 }
 

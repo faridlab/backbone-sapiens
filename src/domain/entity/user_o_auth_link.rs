@@ -7,7 +7,6 @@ use super::UserOAuthLinkStatus;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{UserOAuthLinkStateMachine, UserOAuthLinkState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for UserOAuthLink
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -57,18 +56,13 @@ pub struct UserOAuthLink {
     pub oauth_provider_id: Uuid,
     pub provider_user_id: String,
     pub provider_email: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub provider_username: Option<String>,
     pub(crate) is_active: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub access_token: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub refresh_token: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub token_expires_at: Option<DateTime<Utc>>,
     pub is_primary: bool,
     pub link_status: UserOAuthLinkStatus,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_synced: Option<DateTime<Utc>>,
     pub sync_enabled: bool,
     #[serde(default)]
@@ -310,6 +304,9 @@ impl backbone_orm::EntityRepoMeta for UserOAuthLink {
     }
     fn search_fields() -> &'static [&'static str] {
         &["provider_user_id", "provider_email"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("oauthProvider", "oauth_providers", "oauthProviderId")]
     }
 }
 

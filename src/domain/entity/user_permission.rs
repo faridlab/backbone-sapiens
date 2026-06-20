@@ -5,7 +5,6 @@ use uuid::Uuid;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{UserPermissionStateMachine, UserPermissionState, StateMachineError};
-use backbone_core::state_machine::StateMachineBehavior;
 
 /// Strongly-typed ID for UserPermission
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -56,18 +55,12 @@ pub struct UserPermission {
     pub granted_at: DateTime<Utc>,
     pub granted_by: Uuid,
     pub reason: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub resource_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub resource_type: Option<String>,
     pub(crate) is_active: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub revoked_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub revoked_by: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub revoked_reason: Option<String>,
     #[serde(default)]
     #[sqlx(json)]
@@ -309,6 +302,9 @@ impl backbone_orm::EntityRepoMeta for UserPermission {
     }
     fn search_fields() -> &'static [&'static str] {
         &["reason"]
+    }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("user", "users", "userId"), ("permission", "permissions", "permissionId"), ("granter", "users", "grantedBy"), ("revoker", "users", "revokedBy")]
     }
 }
 
