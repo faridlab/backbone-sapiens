@@ -1,6 +1,8 @@
 # RolePermission Entity - Many-to-many junction between Roles and Permissions
 # Source: libs/modules/sapiens/docs/domain.md Section 3.6
 
+schema: ""
+
 models:
   - name: RolePermission
     collection: role_permissions

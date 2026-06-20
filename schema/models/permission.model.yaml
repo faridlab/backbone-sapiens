@@ -33,6 +33,8 @@
 #   5. {action}:{resource} → Exact match
 # ═══════════════════════════════════════════════════════════════════════════════
 
+schema: ""
+
 models:
   - name: Permission
     collection: permissions

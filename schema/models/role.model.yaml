@@ -1,6 +1,8 @@
 # Role Entity - Named collection of permissions for RBAC
 # Source: libs/modules/sapiens/docs/domain.md Section 3.2
 
+schema: ""
+
 models:
   - name: Role
     collection: roles

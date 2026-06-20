@@ -4,6 +4,7 @@
 models:
   - name: User
     collection: users
+    schema: ""
     soft_delete: true
 
     fields:

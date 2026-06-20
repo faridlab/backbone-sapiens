@@ -4,6 +4,7 @@
 
 module: sapiens
 version: 2
+schema: sapiens
 
 # Shared types available to all models in this module
 shared_types:

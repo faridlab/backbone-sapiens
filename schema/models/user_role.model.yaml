@@ -1,6 +1,8 @@
 # UserRole Entity - Many-to-many junction between Users and Roles
 # Source: libs/modules/sapiens/docs/domain.md Section 3.5
 
+schema: ""
+
 models:
   - name: UserRole
     collection: user_roles
