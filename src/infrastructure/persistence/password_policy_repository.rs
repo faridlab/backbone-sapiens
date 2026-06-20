@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::PasswordPolicy;
 
 /// Table name for PasswordPolicy entities
-pub const TABLE_NAME: &str = "password_policies";
+pub const TABLE_NAME: &str = "sapiens.password_policies";
 
 /// Repository for PasswordPolicy entities.
 ///

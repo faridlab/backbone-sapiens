@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::PermissionConflict;
 
 /// Table name for PermissionConflict entities
-pub const TABLE_NAME: &str = "permission_conflicts";
+pub const TABLE_NAME: &str = "sapiens.permission_conflicts";
 
 /// Repository for PermissionConflict entities.
 ///

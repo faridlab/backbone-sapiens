@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::PasswordRequirements;
 
 /// Table name for PasswordRequirements entities
-pub const TABLE_NAME: &str = "password_requirements";
+pub const TABLE_NAME: &str = "sapiens.password_requirements";
 
 /// Repository for PasswordRequirements entities.
 ///

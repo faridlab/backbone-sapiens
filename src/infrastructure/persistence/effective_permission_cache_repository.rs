@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::EffectivePermissionCache;
 
 /// Table name for EffectivePermissionCache entities
-pub const TABLE_NAME: &str = "effective_permission_cache";
+pub const TABLE_NAME: &str = "sapiens.effective_permission_cache";
 
 /// Repository for EffectivePermissionCache entities.
 ///

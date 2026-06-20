@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::SecurityEvent;
 
 /// Table name for SecurityEvent entities
-pub const TABLE_NAME: &str = "security_events";
+pub const TABLE_NAME: &str = "sapiens.security_events";
 
 /// Repository for SecurityEvent entities.
 ///

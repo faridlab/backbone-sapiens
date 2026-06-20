@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::MFADevice;
 
 /// Table name for MFADevice entities
-pub const TABLE_NAME: &str = "mfa_devices";
+pub const TABLE_NAME: &str = "sapiens.mfa_devices";
 
 /// Repository for MFADevice entities.
 ///

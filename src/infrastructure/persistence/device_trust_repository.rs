@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::DeviceTrust;
 
 /// Table name for DeviceTrust entities
-pub const TABLE_NAME: &str = "device_trusts";
+pub const TABLE_NAME: &str = "sapiens.device_trusts";
 
 /// Repository for DeviceTrust entities.
 ///

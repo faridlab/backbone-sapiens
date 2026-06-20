@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::ImpersonationSession;
 
 /// Table name for ImpersonationSession entities
-pub const TABLE_NAME: &str = "impersonation_sessions";
+pub const TABLE_NAME: &str = "sapiens.impersonation_sessions";
 
 /// Repository for ImpersonationSession entities.
 ///

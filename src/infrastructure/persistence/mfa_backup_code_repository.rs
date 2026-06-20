@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::MFABackupCode;
 
 /// Table name for MFABackupCode entities
-pub const TABLE_NAME: &str = "mfa_backup_codes";
+pub const TABLE_NAME: &str = "sapiens.mfa_backup_codes";
 
 /// Repository for MFABackupCode entities.
 ///

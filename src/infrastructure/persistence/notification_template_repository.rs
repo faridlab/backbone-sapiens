@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::NotificationTemplate;
 
 /// Table name for NotificationTemplate entities
-pub const TABLE_NAME: &str = "notification_templates";
+pub const TABLE_NAME: &str = "sapiens.notification_templates";
 
 /// Repository for NotificationTemplate entities.
 ///

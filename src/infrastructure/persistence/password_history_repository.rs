@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::PasswordHistory;
 
 /// Table name for PasswordHistory entities
-pub const TABLE_NAME: &str = "password_history";
+pub const TABLE_NAME: &str = "sapiens.password_history";
 
 /// Repository for PasswordHistory entities.
 ///

@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::AnonymizationRecord;
 
 /// Table name for AnonymizationRecord entities
-pub const TABLE_NAME: &str = "anonymization_records";
+pub const TABLE_NAME: &str = "sapiens.anonymization_records";
 
 /// Repository for AnonymizationRecord entities.
 ///

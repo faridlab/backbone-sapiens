@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::UserSAMLLink;
 
 /// Table name for UserSAMLLink entities
-pub const TABLE_NAME: &str = "user_saml_links";
+pub const TABLE_NAME: &str = "sapiens.user_saml_links";
 
 /// Repository for UserSAMLLink entities.
 ///

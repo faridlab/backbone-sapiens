@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::LDAPDirectory;
 
 /// Table name for LDAPDirectory entities
-pub const TABLE_NAME: &str = "ldap_directories";
+pub const TABLE_NAME: &str = "sapiens.ldap_directories";
 
 /// Repository for LDAPDirectory entities.
 ///

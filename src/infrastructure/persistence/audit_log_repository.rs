@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::AuditLog;
 
 /// Table name for AuditLog entities
-pub const TABLE_NAME: &str = "audit_logs";
+pub const TABLE_NAME: &str = "sapiens.audit_logs";
 
 /// Repository for AuditLog entities.
 ///

@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::BackupCode;
 
 /// Table name for BackupCode entities
-pub const TABLE_NAME: &str = "backup_codes";
+pub const TABLE_NAME: &str = "sapiens.backup_codes";
 
 /// Repository for BackupCode entities.
 ///

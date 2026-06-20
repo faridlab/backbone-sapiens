@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::EmailVerificationToken;
 
 /// Table name for EmailVerificationToken entities
-pub const TABLE_NAME: &str = "email_verification_tokens";
+pub const TABLE_NAME: &str = "sapiens.email_verification_tokens";
 
 /// Repository for EmailVerificationToken entities.
 ///

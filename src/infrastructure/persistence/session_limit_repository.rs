@@ -12,7 +12,7 @@ use uuid::Uuid;
 use crate::domain::entity::SessionLimit;
 
 /// Table name for SessionLimit entities
-pub const TABLE_NAME: &str = "session_limits";
+pub const TABLE_NAME: &str = "sapiens.session_limits";
 
 /// Repository for SessionLimit entities.
 ///

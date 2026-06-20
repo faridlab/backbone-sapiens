@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::{OAuthProvider, OAuthProviderType};
 
 /// Table name for OAuthProvider entities
-pub const TABLE_NAME: &str = "oauth_providers";
+pub const TABLE_NAME: &str = "sapiens.oauth_providers";
 
 /// Repository for OAuthProvider entities.
 ///

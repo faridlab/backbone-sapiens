@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::DirectPermissionGrant;
 
 /// Table name for DirectPermissionGrant entities
-pub const TABLE_NAME: &str = "direct_permission_grants";
+pub const TABLE_NAME: &str = "sapiens.direct_permission_grants";
 
 /// Repository for DirectPermissionGrant entities.
 ///

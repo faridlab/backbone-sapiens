@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::PasswordCreationContext;
 
 /// Table name for PasswordCreationContext entities
-pub const TABLE_NAME: &str = "password_creation_contexts";
+pub const TABLE_NAME: &str = "sapiens.password_creation_contexts";
 
 /// Repository for PasswordCreationContext entities.
 ///

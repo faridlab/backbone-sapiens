@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::AnalyticsEvent;
 
 /// Table name for AnalyticsEvent entities
-pub const TABLE_NAME: &str = "analytics_events";
+pub const TABLE_NAME: &str = "sapiens.analytics_events";
 
 /// Repository for AnalyticsEvent entities.
 ///

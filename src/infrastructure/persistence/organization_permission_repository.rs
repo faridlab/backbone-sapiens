@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::OrganizationPermission;
 
 /// Table name for OrganizationPermission entities
-pub const TABLE_NAME: &str = "organization_permissions";
+pub const TABLE_NAME: &str = "sapiens.organization_permissions";
 
 /// Repository for OrganizationPermission entities.
 ///

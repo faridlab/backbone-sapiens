@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::RoleAssignment;
 
 /// Table name for RoleAssignment entities
-pub const TABLE_NAME: &str = "role_assignments";
+pub const TABLE_NAME: &str = "sapiens.role_assignments";
 
 /// Repository for RoleAssignment entities.
 ///

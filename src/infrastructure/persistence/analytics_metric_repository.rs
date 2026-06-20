@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::AnalyticsMetric;
 
 /// Table name for AnalyticsMetric entities
-pub const TABLE_NAME: &str = "analytics_metrics";
+pub const TABLE_NAME: &str = "sapiens.analytics_metrics";
 
 /// Repository for AnalyticsMetric entities.
 ///

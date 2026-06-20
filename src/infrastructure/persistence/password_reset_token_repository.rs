@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::PasswordResetToken;
 
 /// Table name for PasswordResetToken entities
-pub const TABLE_NAME: &str = "password_reset_tokens";
+pub const TABLE_NAME: &str = "sapiens.password_reset_tokens";
 
 /// Repository for PasswordResetToken entities.
 ///

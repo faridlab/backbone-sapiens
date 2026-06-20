@@ -12,7 +12,7 @@ use uuid::Uuid;
 use crate::domain::entity::NotificationPreference;
 
 /// Table name for NotificationPreference entities
-pub const TABLE_NAME: &str = "sapiens_notification_preferences";
+pub const TABLE_NAME: &str = "sapiens.sapiens_notification_preferences";
 
 /// Repository for NotificationPreference entities.
 ///

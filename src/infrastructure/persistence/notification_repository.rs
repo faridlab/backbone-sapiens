@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::Notification;
 
 /// Table name for Notification entities
-pub const TABLE_NAME: &str = "notifications";
+pub const TABLE_NAME: &str = "sapiens.notifications";
 
 /// Repository for Notification entities.
 ///

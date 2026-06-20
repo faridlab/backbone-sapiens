@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::PasswordExpirationSettings;
 
 /// Table name for PasswordExpirationSettings entities
-pub const TABLE_NAME: &str = "password_expiration_settings";
+pub const TABLE_NAME: &str = "sapiens.password_expiration_settings";
 
 /// Repository for PasswordExpirationSettings entities.
 ///

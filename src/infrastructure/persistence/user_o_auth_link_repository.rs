@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::UserOAuthLink;
 
 /// Table name for UserOAuthLink entities
-pub const TABLE_NAME: &str = "user_oauth_links";
+pub const TABLE_NAME: &str = "sapiens.user_oauth_links";
 
 /// Repository for UserOAuthLink entities.
 ///

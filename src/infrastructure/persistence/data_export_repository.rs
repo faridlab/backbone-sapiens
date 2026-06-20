@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::DataExport;
 
 /// Table name for DataExport entities
-pub const TABLE_NAME: &str = "data_exports";
+pub const TABLE_NAME: &str = "sapiens.data_exports";
 
 /// Repository for DataExport entities.
 ///

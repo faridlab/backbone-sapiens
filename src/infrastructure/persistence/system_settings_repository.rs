@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::SystemSettings;
 
 /// Table name for SystemSettings entities
-pub const TABLE_NAME: &str = "system_settings";
+pub const TABLE_NAME: &str = "sapiens.system_settings";
 
 /// Repository for SystemSettings entities.
 ///

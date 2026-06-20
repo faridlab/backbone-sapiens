@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::PasswordResetVerificationDetails;
 
 /// Table name for PasswordResetVerificationDetails entities
-pub const TABLE_NAME: &str = "password_reset_verification_details";
+pub const TABLE_NAME: &str = "sapiens.password_reset_verification_details";
 
 /// Repository for PasswordResetVerificationDetails entities.
 ///

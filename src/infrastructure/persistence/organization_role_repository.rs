@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::OrganizationRole;
 
 /// Table name for OrganizationRole entities
-pub const TABLE_NAME: &str = "organization_roles";
+pub const TABLE_NAME: &str = "sapiens.organization_roles";
 
 /// Repository for OrganizationRole entities.
 ///

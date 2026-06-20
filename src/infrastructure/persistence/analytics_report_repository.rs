@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::AnalyticsReport;
 
 /// Table name for AnalyticsReport entities
-pub const TABLE_NAME: &str = "analytics_reports";
+pub const TABLE_NAME: &str = "sapiens.analytics_reports";
 
 /// Repository for AnalyticsReport entities.
 ///

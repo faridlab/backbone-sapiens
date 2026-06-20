@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::UserSettings;
 
 /// Table name for UserSettings entities
-pub const TABLE_NAME: &str = "user_settings";
+pub const TABLE_NAME: &str = "sapiens.user_settings";
 
 /// Repository for UserSettings entities.
 ///

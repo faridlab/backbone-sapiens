@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::MFASession;
 
 /// Table name for MFASession entities
-pub const TABLE_NAME: &str = "mfa_sessions";
+pub const TABLE_NAME: &str = "sapiens.mfa_sessions";
 
 /// Repository for MFASession entities.
 ///

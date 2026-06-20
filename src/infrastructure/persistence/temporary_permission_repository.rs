@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::TemporaryPermission;
 
 /// Table name for TemporaryPermission entities
-pub const TABLE_NAME: &str = "temporary_permissions";
+pub const TABLE_NAME: &str = "sapiens.temporary_permissions";
 
 /// Repository for TemporaryPermission entities.
 ///

@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::ResourcePermission;
 
 /// Table name for ResourcePermission entities
-pub const TABLE_NAME: &str = "resource_permissions";
+pub const TABLE_NAME: &str = "sapiens.resource_permissions";
 
 /// Repository for ResourcePermission entities.
 ///

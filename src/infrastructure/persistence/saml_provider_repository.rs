@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::SAMLProvider;
 
 /// Table name for SAMLProvider entities
-pub const TABLE_NAME: &str = "saml_providers";
+pub const TABLE_NAME: &str = "sapiens.saml_providers";
 
 /// Repository for SAMLProvider entities.
 ///

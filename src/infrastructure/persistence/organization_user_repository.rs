@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::OrganizationUser;
 
 /// Table name for OrganizationUser entities
-pub const TABLE_NAME: &str = "organization_users";
+pub const TABLE_NAME: &str = "sapiens.organization_users";
 
 /// Repository for OrganizationUser entities.
 ///

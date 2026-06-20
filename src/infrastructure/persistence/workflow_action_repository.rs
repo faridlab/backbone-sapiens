@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::WorkflowAction;
 
 /// Table name for WorkflowAction entities
-pub const TABLE_NAME: &str = "workflow_actions";
+pub const TABLE_NAME: &str = "sapiens.workflow_actions";
 
 /// Repository for WorkflowAction entities.
 ///

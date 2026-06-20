@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::Profile;
 
 /// Table name for Profile entities
-pub const TABLE_NAME: &str = "profiles";
+pub const TABLE_NAME: &str = "sapiens.profiles";
 
 /// Repository for Profile entities.
 ///

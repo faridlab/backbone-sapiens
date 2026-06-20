@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::Session;
 
 /// Table name for Session entities
-pub const TABLE_NAME: &str = "sessions";
+pub const TABLE_NAME: &str = "sapiens.sessions";
 
 /// Repository for Session entities.
 ///

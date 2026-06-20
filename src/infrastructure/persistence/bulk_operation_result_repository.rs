@@ -11,7 +11,7 @@ use sqlx::PgPool;
 use crate::domain::entity::BulkOperationResult;
 
 /// Table name for BulkOperationResult entities
-pub const TABLE_NAME: &str = "bulk_operation_results";
+pub const TABLE_NAME: &str = "sapiens.bulk_operation_results";
 
 /// Repository for BulkOperationResult entities.
 ///
