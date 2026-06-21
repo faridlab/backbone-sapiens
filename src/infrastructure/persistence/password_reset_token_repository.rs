@@ -64,12 +64,13 @@ impl PasswordResetTokenRepository {
         metadata: &serde_json::Value,
     ) -> Result<PasswordResetToken> {
         let id = Uuid::new_v4();
-        let result = sqlx::query_as::<_, PasswordResetToken>(
-            "INSERT INTO password_reset_tokens \
+        let sql = format!(
+            "INSERT INTO {TABLE_NAME} \
              (id, user_id, token_hash, expires_at, is_used, metadata) \
              VALUES ($1, $2, $3, $4, false, $5) \
-             RETURNING *",
-        )
+             RETURNING *"
+        );
+        let result = sqlx::query_as::<_, PasswordResetToken>(&sql)
         .bind(id)
         .bind(user_id)
         .bind(token_hash)
@@ -82,11 +83,12 @@ impl PasswordResetTokenRepository {
 
     /// Find a valid (unused and not expired) password-reset token by its hash.
     pub async fn find_valid_by_hash(&self, token_hash: &str) -> Result<Option<PasswordResetToken>> {
-        let result = sqlx::query_as::<_, PasswordResetToken>(
-            "SELECT * FROM password_reset_tokens \
+        let sql = format!(
+            "SELECT * FROM {TABLE_NAME} \
              WHERE token_hash = $1 AND is_used = false AND expires_at > NOW() \
-             LIMIT 1",
-        )
+             LIMIT 1"
+        );
+        let result = sqlx::query_as::<_, PasswordResetToken>(&sql)
         .bind(token_hash)
         .fetch_optional(self.pool())
         .await?;

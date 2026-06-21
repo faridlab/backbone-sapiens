@@ -64,12 +64,13 @@ impl SessionRepository {
         metadata: &serde_json::Value,
     ) -> Result<Session> {
         let id = Uuid::new_v4();
-        let result = sqlx::query_as::<_, Session>(
-            "INSERT INTO sessions \
+        let sql = format!(
+            "INSERT INTO {TABLE_NAME} \
              (id, user_id, token_hash, expires_at, remember_me, device_type, is_active, metadata) \
              VALUES ($1, $2, $3, $4, false, 'unknown', true, $5) \
-             RETURNING *",
-        )
+             RETURNING *"
+        );
+        let result = sqlx::query_as::<_, Session>(&sql)
         .bind(id)
         .bind(user_id)
         .bind(token_hash)
@@ -82,10 +83,11 @@ impl SessionRepository {
 
     /// Find an active (non-revoked, non-expired) session by its token hash.
     pub async fn find_active_by_token_hash(&self, token_hash: &str) -> Result<Option<Session>> {
-        let result = sqlx::query_as::<_, Session>(
-            "SELECT * FROM sessions \
-             WHERE token_hash = $1 AND revoked_at IS NULL AND expires_at > NOW()",
-        )
+        let sql = format!(
+            "SELECT * FROM {TABLE_NAME} \
+             WHERE token_hash = $1 AND revoked_at IS NULL AND expires_at > NOW()"
+        );
+        let result = sqlx::query_as::<_, Session>(&sql)
         .bind(token_hash)
         .fetch_optional(self.pool())
         .await?;
@@ -94,7 +96,7 @@ impl SessionRepository {
 
     /// Soft-revoke a session by setting its `revoked_at` timestamp.
     pub async fn revoke_session(&self, session_id: Uuid) -> Result<()> {
-        sqlx::query("UPDATE sessions SET revoked_at = NOW() WHERE id = $1")
+        sqlx::query(&format!("UPDATE {TABLE_NAME} SET revoked_at = NOW() WHERE id = $1"))
             .bind(session_id)
             .execute(self.pool())
             .await?;
@@ -106,7 +108,7 @@ impl SessionRepository {
     /// Returns the number of rows affected.
     pub async fn revoke_all_user_sessions(&self, user_id: Uuid) -> Result<u64> {
         let result =
-            sqlx::query("UPDATE sessions SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL")
+            sqlx::query(&format!("UPDATE {TABLE_NAME} SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL"))
                 .bind(user_id)
                 .execute(self.pool())
                 .await?;

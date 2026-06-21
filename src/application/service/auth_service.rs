@@ -407,7 +407,7 @@ impl AuthService {
         let token_metadata = now_metadata();
 
         sqlx::query(
-            "INSERT INTO email_verification_tokens \
+            "INSERT INTO sapiens.email_verification_tokens \
              (user_id, token, email, token_type, expires_at, status, metadata) \
              VALUES ($1, $2, $3, 'account_creation', $4, 'pending', $5)",
         )
@@ -502,7 +502,7 @@ impl AuthService {
             .map_err(|e| AuthError::Internal(e.into()))?;
 
         sqlx::query(
-            "UPDATE email_verification_tokens \
+            "UPDATE sapiens.email_verification_tokens \
              SET status = 'verified', verified_at = NOW() WHERE id = $1",
         )
         .bind(token_row.id)
@@ -510,7 +510,7 @@ impl AuthService {
         .await
         .map_err(|e| AuthError::Internal(e.into()))?;
 
-        sqlx::query("UPDATE users SET status = 'active', email_verified = true WHERE id = $1")
+        sqlx::query("UPDATE sapiens.users SET status = 'active', email_verified = true WHERE id = $1")
             .bind(token_row.user_id)
             .execute(&mut *tx)
             .await
@@ -625,14 +625,14 @@ impl AuthService {
             .await
             .map_err(|e| AuthError::Internal(e.into()))?;
 
-        sqlx::query("UPDATE sessions SET is_active = false, revoked_at = NOW() WHERE id = $1")
+        sqlx::query("UPDATE sapiens.sessions SET is_active = false, revoked_at = NOW() WHERE id = $1")
             .bind(session.id)
             .execute(&mut *tx)
             .await
             .map_err(|e| AuthError::Internal(e.into()))?;
 
         sqlx::query(
-            "INSERT INTO sessions (user_id, token_hash, expires_at, device_type, is_active, metadata) \
+            "INSERT INTO sapiens.sessions (user_id, token_hash, expires_at, device_type, is_active, metadata) \
              VALUES ($1, $2, $3, 'mobile', true, $4)",
         )
         .bind(user.id)
@@ -748,7 +748,7 @@ impl AuthService {
             .await
             .map_err(|e| AuthError::Internal(e.into()))?;
 
-        sqlx::query("UPDATE users SET password_hash = $1 WHERE id = $2")
+        sqlx::query("UPDATE sapiens.users SET password_hash = $1 WHERE id = $2")
             .bind(&password_hash)
             .bind(token_row.user_id)
             .execute(&mut *tx)
@@ -756,7 +756,7 @@ impl AuthService {
             .map_err(|e| AuthError::Internal(e.into()))?;
 
         sqlx::query(
-            "UPDATE password_reset_tokens SET is_used = true, used_at = NOW() WHERE id = $1",
+            "UPDATE sapiens.password_reset_tokens SET is_used = true, used_at = NOW() WHERE id = $1",
         )
         .bind(token_row.id)
         .execute(&mut *tx)
@@ -764,7 +764,7 @@ impl AuthService {
         .map_err(|e| AuthError::Internal(e.into()))?;
 
         sqlx::query(
-            "UPDATE sessions SET is_active = false, revoked_at = NOW() WHERE user_id = $1",
+            "UPDATE sapiens.sessions SET is_active = false, revoked_at = NOW() WHERE user_id = $1",
         )
         .bind(token_row.user_id)
         .execute(&mut *tx)
@@ -821,7 +821,7 @@ impl AuthService {
             .await
             .map_err(|e| AuthError::Internal(e.into()))?;
 
-        sqlx::query("UPDATE users SET password_hash = $1 WHERE id = $2")
+        sqlx::query("UPDATE sapiens.users SET password_hash = $1 WHERE id = $2")
             .bind(&new_hash)
             .bind(user_id)
             .execute(&mut *tx)
@@ -829,7 +829,7 @@ impl AuthService {
             .map_err(|e| AuthError::Internal(e.into()))?;
 
         sqlx::query(
-            "UPDATE sessions SET is_active = false, revoked_at = NOW() \
+            "UPDATE sapiens.sessions SET is_active = false, revoked_at = NOW() \
              WHERE user_id = $1 AND is_active = true",
         )
         .bind(user_id)
@@ -934,7 +934,7 @@ async fn create_user_in_transaction(
     metadata: &serde_json::Value,
 ) -> Result<Uuid> {
     let query = sqlx::query_scalar::<_, Uuid>(
-        "INSERT INTO users (username, email, password_hash, status, email_verified, metadata) \
+        "INSERT INTO sapiens.users (username, email, password_hash, status, email_verified, metadata) \
          VALUES ($1, $2, $3, 'pending_verification', false, $4) \
          RETURNING id",
     )

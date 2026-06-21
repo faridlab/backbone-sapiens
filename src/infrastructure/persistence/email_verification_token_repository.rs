@@ -65,12 +65,13 @@ impl EmailVerificationTokenRepository {
         metadata: &serde_json::Value,
     ) -> Result<EmailVerificationToken> {
         let id = Uuid::new_v4();
-        let result = sqlx::query_as::<_, EmailVerificationToken>(
-            "INSERT INTO email_verification_tokens \
+        let sql = format!(
+            "INSERT INTO {TABLE_NAME} \
              (id, user_id, token, email, token_type, expires_at, attempts, max_attempts, status, metadata) \
              VALUES ($1, $2, $3, $4, 'account_creation', $5, 0, 5, 'pending', $6) \
-             RETURNING *",
-        )
+             RETURNING *"
+        );
+        let result = sqlx::query_as::<_, EmailVerificationToken>(&sql)
         .bind(id)
         .bind(user_id)
         .bind(token_hash)
@@ -87,12 +88,13 @@ impl EmailVerificationTokenRepository {
         &self,
         email: &str,
     ) -> Result<Option<EmailVerificationToken>> {
-        let result = sqlx::query_as::<_, EmailVerificationToken>(
-            "SELECT * FROM email_verification_tokens \
+        let sql = format!(
+            "SELECT * FROM {TABLE_NAME} \
              WHERE email = $1 AND status = 'pending' \
              ORDER BY (metadata->>'created_at')::timestamptz DESC \
-             LIMIT 1",
-        )
+             LIMIT 1"
+        );
+        let result = sqlx::query_as::<_, EmailVerificationToken>(&sql)
         .bind(email)
         .fetch_optional(self.pool())
         .await?;
@@ -101,9 +103,8 @@ impl EmailVerificationTokenRepository {
 
     /// Update the status of a specific token.
     pub async fn update_token_status(&self, token_id: Uuid, status: &str) -> Result<()> {
-        sqlx::query(
-            "UPDATE email_verification_tokens SET status = $2 WHERE id = $1",
-        )
+        let sql = format!("UPDATE {TABLE_NAME} SET status = $2 WHERE id = $1");
+        sqlx::query(&sql)
         .bind(token_id)
         .bind(status)
         .execute(self.pool())
@@ -113,12 +114,13 @@ impl EmailVerificationTokenRepository {
 
     /// Increment the verification attempt counter for a token and return the new value.
     pub async fn increment_attempts(&self, token_id: Uuid) -> Result<i32> {
-        let row: (i32,) = sqlx::query_as(
-            "UPDATE email_verification_tokens \
+        let sql = format!(
+            "UPDATE {TABLE_NAME} \
              SET attempts = attempts + 1 \
              WHERE id = $1 \
-             RETURNING attempts",
-        )
+             RETURNING attempts"
+        );
+        let row: (i32,) = sqlx::query_as(&sql)
         .bind(token_id)
         .fetch_one(self.pool())
         .await?;
@@ -130,12 +132,13 @@ impl EmailVerificationTokenRepository {
         &self,
         user_id: Uuid,
     ) -> Result<Option<DateTime<Utc>>> {
-        let row: Option<(DateTime<Utc>,)> = sqlx::query_as(
-            "SELECT expires_at FROM email_verification_tokens \
+        let sql = format!(
+            "SELECT expires_at FROM {TABLE_NAME} \
              WHERE user_id = $1 AND status = 'pending' \
              ORDER BY (metadata->>'created_at')::timestamptz DESC \
-             LIMIT 1",
-        )
+             LIMIT 1"
+        );
+        let row: Option<(DateTime<Utc>,)> = sqlx::query_as(&sql)
         .bind(user_id)
         .fetch_optional(self.pool())
         .await?;
@@ -144,10 +147,11 @@ impl EmailVerificationTokenRepository {
 
     /// Revoke all pending tokens for a given user.
     pub async fn revoke_pending_for_user(&self, user_id: Uuid) -> Result<()> {
-        sqlx::query(
-            "UPDATE email_verification_tokens SET status = 'revoked' \
-             WHERE user_id = $1 AND status = 'pending'",
-        )
+        let sql = format!(
+            "UPDATE {TABLE_NAME} SET status = 'revoked' \
+             WHERE user_id = $1 AND status = 'pending'"
+        );
+        sqlx::query(&sql)
         .bind(user_id)
         .execute(self.pool())
         .await?;
