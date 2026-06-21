@@ -510,7 +510,7 @@ impl AuthService {
         .await
         .map_err(|e| AuthError::Internal(e.into()))?;
 
-        sqlx::query("UPDATE sapiens.users SET status = 'active', email_verified = true WHERE id = $1")
+        sqlx::query("UPDATE users SET status = 'active', email_verified = true WHERE id = $1")
             .bind(token_row.user_id)
             .execute(&mut *tx)
             .await
@@ -748,7 +748,7 @@ impl AuthService {
             .await
             .map_err(|e| AuthError::Internal(e.into()))?;
 
-        sqlx::query("UPDATE sapiens.users SET password_hash = $1 WHERE id = $2")
+        sqlx::query("UPDATE users SET password_hash = $1 WHERE id = $2")
             .bind(&password_hash)
             .bind(token_row.user_id)
             .execute(&mut *tx)
@@ -821,7 +821,7 @@ impl AuthService {
             .await
             .map_err(|e| AuthError::Internal(e.into()))?;
 
-        sqlx::query("UPDATE sapiens.users SET password_hash = $1 WHERE id = $2")
+        sqlx::query("UPDATE users SET password_hash = $1 WHERE id = $2")
             .bind(&new_hash)
             .bind(user_id)
             .execute(&mut *tx)
@@ -934,7 +934,7 @@ async fn create_user_in_transaction(
     metadata: &serde_json::Value,
 ) -> Result<Uuid> {
     let query = sqlx::query_scalar::<_, Uuid>(
-        "INSERT INTO sapiens.users (username, email, password_hash, status, email_verified, metadata) \
+        "INSERT INTO users (username, email, password_hash, status, email_verified, metadata) \
          VALUES ($1, $2, $3, 'pending_verification', false, $4) \
          RETURNING id",
     )
