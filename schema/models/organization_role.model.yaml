@@ -1,5 +1,8 @@
 # OrganizationRole Entity - Organization-specific role definitions
 # Source: libs/modules/sapiens/docs/spec-sapiens.md
+#
+# PENDING ADR-0005 DISPOSITION — see organization_user.model.yaml. `Organization` never existed;
+# the tenant is the database (ADR-0005). Repurpose or remove; do not build on it.
 
 models:
   - name: OrganizationRole
@@ -15,8 +18,13 @@ models:
 
       organization_id:
         type: uuid
-        attributes: ["@required", "@foreign_key(corpus.Organization.id)"]
-        description: "Organization ID"
+        # Was @foreign_key(corpus.Organization.id) — a target that never existed (Organization
+        # was "moved to corpus", but corpus was built as a knowledge base). Per ADR-0005 the
+        # tenant is the database, not an Organization entity, so this FK is permanently dangling
+        # and is now excluded rather than asserted. Disposition of this whole subsystem is a
+        # follow-up to ADR-0005; do not build on it.
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Organization ID (pending ADR-0005 disposition; no Organization entity exists)"
 
       name:
         type: string

@@ -1,4 +1,7 @@
 # OrganizationPermission Entity - Organization-level permission grants
+#
+# PENDING ADR-0005 DISPOSITION — see organization_user.model.yaml. `Organization` never existed;
+# the tenant is the database (ADR-0005). Repurpose or remove; do not build on it.
 # Source: libs/modules/sapiens/docs/spec-sapiens.md
 
 models:
@@ -15,8 +18,11 @@ models:
 
       organization_id:
         type: uuid
-        attributes: ["@required", "@foreign_key(corpus.Organization.id)"]
-        description: "Organization ID"
+        # Was @foreign_key(corpus.Organization.id) — a phantom target (see organization_role).
+        # Per ADR-0005 the tenant is the database, not an Organization entity; excluded rather
+        # than asserted. Subsystem disposition is a follow-up to ADR-0005.
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Organization ID (pending ADR-0005 disposition; no Organization entity exists)"
 
       permission_id:
         type: uuid

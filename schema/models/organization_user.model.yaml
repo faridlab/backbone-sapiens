@@ -1,4 +1,10 @@
 # OrganizationUser Entity - Organization membership for users
+#
+# PENDING ADR-0005 DISPOSITION. This model belongs to an Organization-as-tenant subsystem whose
+# tenant entity (`Organization`) was never built. ADR-0005 decides the tenant is the DATABASE, not
+# an Organization row — so `organization_id` here scopes nothing that exists. Its future is a
+# follow-up decision: repurpose as company-membership / RBAC *within* a tenant database, or remove.
+# Do not wire login, provisioning, or the scope claim to this until that decision lands.
 # Source: libs/modules/sapiens/docs/spec-sapiens.md
 
 models:
