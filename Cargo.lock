@@ -323,7 +323,7 @@ dependencies = [
 [[package]]
 name = "backbone-auth"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.1#204ea5db443fead6e4a1ee47d88e890b11faebb4"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.7.1#fd5fa1286eafad62fe55c0bcccb33efde01b389e"
 dependencies = [
  "anyhow",
  "argon2",
@@ -347,7 +347,7 @@ dependencies = [
 [[package]]
 name = "backbone-core"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.1#204ea5db443fead6e4a1ee47d88e890b11faebb4"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.7.1#fd5fa1286eafad62fe55c0bcccb33efde01b389e"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -374,7 +374,7 @@ dependencies = [
 [[package]]
 name = "backbone-email"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.1#204ea5db443fead6e4a1ee47d88e890b11faebb4"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.7.1#fd5fa1286eafad62fe55c0bcccb33efde01b389e"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -393,7 +393,7 @@ dependencies = [
 [[package]]
 name = "backbone-messaging"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.1#204ea5db443fead6e4a1ee47d88e890b11faebb4"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.7.1#fd5fa1286eafad62fe55c0bcccb33efde01b389e"
 dependencies = [
  "async-trait",
  "chrono",
@@ -408,7 +408,7 @@ dependencies = [
 [[package]]
 name = "backbone-orm"
 version = "2.0.0"
-source = "git+https://github.com/faridlab/backbone-framework?tag=v2.6.1#204ea5db443fead6e4a1ee47d88e890b11faebb4"
+source = "git+https://github.com/faridlab/backbone-framework?tag=v2.7.1#fd5fa1286eafad62fe55c0bcccb33efde01b389e"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -420,12 +420,13 @@ dependencies = [
  "sqlx",
  "thiserror 1.0.69",
  "tokio",
+ "tracing",
  "uuid",
 ]
 
 [[package]]
 name = "backbone-sapiens"
-version = "0.1.16"
+version = "0.1.21"
 dependencies = [
  "anyhow",
  "argon2",
