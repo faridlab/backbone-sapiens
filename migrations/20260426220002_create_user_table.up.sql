@@ -30,13 +30,13 @@ CREATE INDEX IF NOT EXISTS idx_users_username ON users (username);
 
 CREATE INDEX IF NOT EXISTS idx_users_status ON users (status);
 
-CREATE INDEX IF NOT EXISTS idx_users_status_(metadata->>'created_at') ON users (status, ((metadata->>'created_at')));
+CREATE INDEX IF NOT EXISTS idx_users_status__metadata_created_at ON users (status, ((metadata->>'created_at')));
 
 CREATE INDEX IF NOT EXISTS idx_users_email_verified ON users (email_verified);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_(metadata->>'deleted_at') ON users (email, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email__metadata_deleted_at ON users (email, ((metadata->>'deleted_at')));
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username_(metadata->>'deleted_at') ON users (username, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username__metadata_deleted_at ON users (username, ((metadata->>'deleted_at')));
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users (username);
 

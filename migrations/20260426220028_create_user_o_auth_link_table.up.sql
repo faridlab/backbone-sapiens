@@ -39,7 +39,7 @@ CREATE INDEX IF NOT EXISTS idx_user_oauth_links_provider_email_oauth_provider_id
 
 CREATE INDEX IF NOT EXISTS idx_user_oauth_links_is_primary ON sapiens.user_oauth_links (is_primary);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_user_oauth_links_provider_user_id_oauth_provider_id_(metadata->>'deleted_at') ON sapiens.user_oauth_links (provider_user_id, oauth_provider_id, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_oauth_links_provider_user_id_oauth_provider_id__metadata_deleted_at ON sapiens.user_oauth_links (provider_user_id, oauth_provider_id, ((metadata->>'deleted_at')));
 
 -- GIN index for audit metadata JSONB queries
 CREATE INDEX IF NOT EXISTS idx_user_oauth_links_metadata_gin ON sapiens.user_oauth_links USING GIN (metadata);

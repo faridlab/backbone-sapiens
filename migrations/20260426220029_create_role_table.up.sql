@@ -14,7 +14,7 @@ CREATE INDEX IF NOT EXISTS idx_roles_name ON roles (name);
 
 CREATE INDEX IF NOT EXISTS idx_roles_is_default ON roles (is_default);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_roles_name_(metadata->>'deleted_at') ON roles (name, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_roles_name__metadata_deleted_at ON roles (name, ((metadata->>'deleted_at')));
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_roles_name ON roles (name);
 

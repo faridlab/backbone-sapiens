@@ -28,7 +28,7 @@ CREATE INDEX IF NOT EXISTS idx_backup_codes_used_at ON sapiens.backup_codes (use
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_backup_codes_user_id_batch_id_code_index ON sapiens.backup_codes (user_id, batch_id, code_index);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_backup_codes_code_hash_(metadata->>'deleted_at') ON sapiens.backup_codes (code_hash, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_backup_codes_code_hash__metadata_deleted_at ON sapiens.backup_codes (code_hash, ((metadata->>'deleted_at')));
 
 -- GIN index for audit metadata JSONB queries
 CREATE INDEX IF NOT EXISTS idx_backup_codes_metadata_gin ON sapiens.backup_codes USING GIN (metadata);

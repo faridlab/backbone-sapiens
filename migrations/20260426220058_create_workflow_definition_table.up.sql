@@ -42,7 +42,7 @@ CREATE INDEX IF NOT EXISTS idx_workflow_definitions_trigger_type ON sapiens.work
 
 CREATE INDEX IF NOT EXISTS idx_workflow_definitions_is_active ON sapiens.workflow_definitions (is_active);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_workflow_definitions_name_(metadata->>'deleted_at') ON sapiens.workflow_definitions (name, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_workflow_definitions_name__metadata_deleted_at ON sapiens.workflow_definitions (name, ((metadata->>'deleted_at')));
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_workflow_definitions_name ON sapiens.workflow_definitions (name);
 

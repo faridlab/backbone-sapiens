@@ -41,7 +41,7 @@ CREATE INDEX IF NOT EXISTS idx_notification_templates_is_active ON sapiens.notif
 
 CREATE INDEX IF NOT EXISTS idx_notification_templates_language ON sapiens.notification_templates (language);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_templates_name_(metadata->>'deleted_at') ON sapiens.notification_templates (name, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_templates_name__metadata_deleted_at ON sapiens.notification_templates (name, ((metadata->>'deleted_at')));
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_templates_name ON sapiens.notification_templates (name);
 

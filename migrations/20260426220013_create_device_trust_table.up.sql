@@ -53,9 +53,9 @@ CREATE INDEX IF NOT EXISTS idx_device_trusts_last_used_at ON sapiens.device_trus
 
 CREATE INDEX IF NOT EXISTS idx_device_trusts_risk_score ON sapiens.device_trusts (risk_score);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_device_trusts_device_fingerprint_(metadata->>'deleted_at') ON sapiens.device_trusts (device_fingerprint, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_device_trusts_device_fingerprint__metadata_deleted_at ON sapiens.device_trusts (device_fingerprint, ((metadata->>'deleted_at')));
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_device_trusts_user_id_device_name_(metadata->>'deleted_at') ON sapiens.device_trusts (user_id, device_name, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_device_trusts_user_id_device_name__metadata_deleted_at ON sapiens.device_trusts (user_id, device_name, ((metadata->>'deleted_at')));
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_device_trusts_device_fingerprint ON sapiens.device_trusts (device_fingerprint);
 

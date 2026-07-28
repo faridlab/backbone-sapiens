@@ -32,7 +32,7 @@ CREATE INDEX IF NOT EXISTS idx_oauth_providers_provider_name ON sapiens.oauth_pr
 
 CREATE INDEX IF NOT EXISTS idx_oauth_providers_is_active ON sapiens.oauth_providers (is_active);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_oauth_providers_provider_name_(metadata->>'deleted_at') ON sapiens.oauth_providers (provider_name, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_oauth_providers_provider_name__metadata_deleted_at ON sapiens.oauth_providers (provider_name, ((metadata->>'deleted_at')));
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_oauth_providers_provider_name ON sapiens.oauth_providers (provider_name);
 

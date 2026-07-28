@@ -17,9 +17,9 @@ CREATE INDEX IF NOT EXISTS idx_permissions_resource ON permissions (resource);
 
 CREATE INDEX IF NOT EXISTS idx_permissions_action ON permissions (action);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_permissions_name_(metadata->>'deleted_at') ON permissions (name, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_permissions_name__metadata_deleted_at ON permissions (name, ((metadata->>'deleted_at')));
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_permissions_resource_action_(metadata->>'deleted_at') ON permissions (resource, action, ((metadata->>'deleted_at')));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_permissions_resource_action__metadata_deleted_at ON permissions (resource, action, ((metadata->>'deleted_at')));
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_permissions_name ON permissions (name);
 
