@@ -67,6 +67,7 @@ pub mod workflow_execution_handler;
 pub mod workflow_action_execution_handler;
 
 // <<< CUSTOM
+pub mod integration_credential_handler;
 // END CUSTOM
 
 // Re-exports
@@ -131,4 +132,5 @@ pub use workflow_action_handler::{create_workflow_action_routes, create_workflow
 pub use workflow_execution_handler::{create_workflow_execution_routes, create_workflow_execution_read_routes, create_workflow_execution_write_routes};
 pub use workflow_action_execution_handler::{create_workflow_action_execution_routes, create_workflow_action_execution_read_routes, create_workflow_action_execution_write_routes};
 // <<< CUSTOM
+pub use integration_credential_handler::create_integration_credential_routes;
 // END CUSTOM

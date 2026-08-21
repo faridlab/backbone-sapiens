@@ -5,6 +5,8 @@
 //! Each entity service is a type alias over `GenericCrudService`.
 
 pub mod error;
+pub mod credential_crypto;
+pub mod integration_credential_service;
 pub use error::{ServiceError, ServiceResult};
 
 pub mod analytics_event_service;

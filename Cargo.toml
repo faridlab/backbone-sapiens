@@ -1,6 +1,6 @@
 [package]
 name = "backbone-sapiens"
-version = "0.1.23"
+version = "0.2.0"
 edition = "2021"
 description = "Sapiens Bounded Context: User Management Module for Backbone Framework"
 
@@ -25,6 +25,12 @@ chrono = { version = "0.4", features = ["serde"] }
 md5 = "0.7"
 rust_decimal = { version = "1.36", features = ["serde"] }
 sha2 = "0.10"
+
+# Credential store envelope encryption (HKDF-SHA256 → AES-256-GCM, zeroize)
+aes-gcm = "0.10"
+hkdf = "0.12"
+base64 = "0.22"
+zeroize = "1"
 
 # Database (PostgreSQL Primary)
 sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json", "migrate", "rust_decimal"] }

@@ -7,6 +7,7 @@
 mod analytics_event_repository;
 mod analytics_metric_repository;
 mod analytics_report_repository;
+mod integration_credential_repository;
 mod anonymization_record_repository;
 mod audit_log_repository;
 mod backup_code_repository;
@@ -79,6 +80,7 @@ pub use analytics_report_repository::AnalyticsReportRepository;
 pub use anonymization_record_repository::AnonymizationRecordRepository;
 pub use audit_log_repository::AuditLogRepository;
 pub use backup_code_repository::BackupCodeRepository;
+pub use integration_credential_repository::{IntegrationCredentialRepository, NewCredentialRow};
 pub use bulk_operation_repository::BulkOperationRepository;
 pub use bulk_operation_result_repository::BulkOperationResultRepository;
 pub use data_export_repository::DataExportRepository;

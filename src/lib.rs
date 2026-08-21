@@ -104,6 +104,12 @@ pub use application::service::WorkflowActionExecutionService;
 // <<< CUSTOM: Re-export auth_service types
 pub use application::service::{AuthService, AuthError, RegisterInput};
 // >>> END CUSTOM
+// <<< CUSTOM: Credential store (verbs only; routes composed by the host behind its own gates)
+pub use application::service::integration_credential_service::{
+    CredentialDescriptor, CredentialStoreError, IntegrationCredentialService,
+};
+pub use application::service::credential_crypto::CryptoError;
+// >>> END CUSTOM
 // Re-exports - Validation
 pub use application::validator::{ValidationError, ValidationResult};
 
@@ -196,6 +202,8 @@ pub struct SapiensModule {
     pub workflow_action_execution_service: Arc<WorkflowActionExecutionService>,
     // <<< CUSTOM: Add auth_service to module
     pub auth_service: Arc<AuthService>,
+    // <<< CUSTOM: Credential store service (verbs only)
+    pub integration_credential_service: Arc<IntegrationCredentialService>,
     // <<< CUSTOM: Integration event publisher for cross-module communication
     pub integration_publisher: Option<Arc<SapiensIntegrationEventPublisher>>,
     // >>> END CUSTOM
@@ -633,6 +641,11 @@ impl SapiensModuleBuilder {
             email,
             db_pool.clone(),
         ));
+        // <<< CUSTOM: Credential store service (verbs only; its routes are NOT
+        // in routes() — the host composes create_integration_credential_routes
+        // behind its own role gate so the credential surface never rides the
+        // CRUD router).
+        let integration_credential_service = Arc::new(IntegrationCredentialService::new(db_pool.clone()));
         // <<< CUSTOM: Create integration event publisher if bus is provided
         let integration_publisher = self.integration_bus.map(|bus| {
             Arc::new(SapiensIntegrationEventPublisher::new(bus))
@@ -703,6 +716,8 @@ impl SapiensModuleBuilder {
             workflow_action_execution_service,
             // <<< CUSTOM: Add auth_service to module
             auth_service,
+            // <<< CUSTOM: Credential store service
+            integration_credential_service,
             // <<< CUSTOM: Integration event publisher
             integration_publisher,
             // >>> END CUSTOM
