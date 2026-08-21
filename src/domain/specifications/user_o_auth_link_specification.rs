@@ -26,7 +26,7 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveUserOAuthLinkSpec;
 // impl Specification<UserOAuthLink> for ActiveUserOAuthLinkSpec {
 //     fn is_satisfied_by(&self, e: &UserOAuthLink) -> bool {
-//         // e.is_active
+//         // e.status
 //         todo!()
 //     }
 // }

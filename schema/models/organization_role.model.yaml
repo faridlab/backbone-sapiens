@@ -40,10 +40,10 @@ models:
         type: json?
         description: "Role permissions"
 
-      is_active:
-        type: bool
-        attributes: ["@default(true)"]
-        description: "Whether role is active"
+      status:
+        type: OrganizationRoleStatus
+        attributes: ["@default(active)"]
+        description: "Role lifecycle; only active roles can be assigned and grant permissions"
 
       metadata:
         type: Metadata
@@ -56,4 +56,14 @@ models:
       - type: index
         fields: [organization_id, name]
       - type: index
-        fields: [is_active]
+        fields: [status]
+
+enums:
+  - name: OrganizationRoleStatus
+    description: "Lifecycle of an organization role"
+    variants:
+      - name: active
+        description: "Role can be assigned and grants its permissions"
+        default: true
+      - name: inactive
+        description: "Role is retired; assignments stop resolving"

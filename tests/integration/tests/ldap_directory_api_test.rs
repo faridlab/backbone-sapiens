@@ -38,7 +38,6 @@ impl TestDataGenerator for LDAPDirectoryTestData {
             "sync_interval_minutes": null,
             "last_sync_at": now,
             "last_sync_result": null,
-            "is_active": true,
             "status": null,
             "metadata": json!({}),
         })
@@ -63,7 +62,6 @@ impl TestDataGenerator for LDAPDirectoryTestData {
             "sync_interval_minutes": null,
             "last_sync_at": now,
             "last_sync_result": null,
-            "is_active": true,
             "status": null,
             "metadata": json!({}),
         })

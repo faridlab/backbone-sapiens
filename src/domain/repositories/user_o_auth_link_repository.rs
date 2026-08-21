@@ -49,18 +49,17 @@ pub struct UserOAuthLinkFilter {
     pub provider_user_id: Option<String>,
     pub provider_email: Option<String>,
     pub provider_username: Option<String>,
-    pub is_active: Option<bool>,
     pub access_token: Option<String>,
     pub refresh_token: Option<String>,
     pub is_primary: Option<bool>,
-    pub link_status: Option<UserOAuthLinkStatus>,
+    pub status: Option<UserOAuthLinkStatus>,
     pub sync_enabled: Option<bool>,
 }
 
 impl UserOAuthLinkFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.user_id.is_some() || self.oauth_provider_id.is_some() || self.provider_user_id.is_some() || self.provider_email.is_some() || self.provider_username.is_some() || self.is_active.is_some() || self.access_token.is_some() || self.refresh_token.is_some() || self.is_primary.is_some() || self.link_status.is_some() || self.sync_enabled.is_some()
+        self.user_id.is_some() || self.oauth_provider_id.is_some() || self.provider_user_id.is_some() || self.provider_email.is_some() || self.provider_username.is_some() || self.access_token.is_some() || self.refresh_token.is_some() || self.is_primary.is_some() || self.status.is_some() || self.sync_enabled.is_some()
     }
 }
 

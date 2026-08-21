@@ -68,10 +68,10 @@ models:
         attributes: ["@max(1000)"]
         description: "Justification for grant"
 
-      is_active:
-        type: bool
-        attributes: ["@default(true)"]
-        description: "Whether permission is active"
+      status:
+        type: OrganizationPermissionStatus
+        attributes: ["@default(active)"]
+        description: "Grant lifecycle; only active grants take effect"
 
       metadata:
         type: Metadata
@@ -100,3 +100,13 @@ models:
         fields: [role_id]
       - type: index
         fields: [expires_at]
+
+enums:
+  - name: OrganizationPermissionStatus
+    description: "Lifecycle of an organization permission grant"
+    variants:
+      - name: active
+        description: "Grant is in force"
+        default: true
+      - name: inactive
+        description: "Grant is withdrawn and no longer authorizes anything"

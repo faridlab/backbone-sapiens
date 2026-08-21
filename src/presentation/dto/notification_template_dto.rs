@@ -20,6 +20,7 @@ use crate::domain::entity::NotificationTemplate;
 use crate::domain::entity::AuditMetadata;
 use crate::domain::entity::NotificationChannel;
 use crate::domain::entity::NotificationType;
+use crate::domain::entity::NotificationTemplateStatus;
 
 // =============================================================================
 // Create DTO
@@ -48,9 +49,8 @@ pub struct CreateNotificationTemplateDto {
     pub message_template: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub variables: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: NotificationTemplateStatus,
     #[cfg_attr(feature = "validation", validate(length(max = 10)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub language: String,
@@ -83,9 +83,8 @@ pub struct UpdateNotificationTemplateDto {
     pub message_template: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub variables: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: NotificationTemplateStatus,
     #[cfg_attr(feature = "validation", validate(length(max = 10)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub language: String,
@@ -120,9 +119,9 @@ pub struct PatchNotificationTemplateDto {
     pub message_template: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub variables: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "is_active")]
-    pub is_active: Option<bool>,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<NotificationTemplateStatus>,
     #[cfg_attr(feature = "validation", validate(length(max = 10)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -132,7 +131,7 @@ pub struct PatchNotificationTemplateDto {
 impl PatchNotificationTemplateDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.name.is_some() || self.notification_type.is_some() || self.channel.is_some() || self.subject_template.is_some() || self.message_template.is_some() || self.variables.is_some() || self.is_active.is_some() || self.language.is_some()
+        self.name.is_some() || self.notification_type.is_some() || self.channel.is_some() || self.subject_template.is_some() || self.message_template.is_some() || self.variables.is_some() || self.status.is_some() || self.language.is_some()
     }
 }
 
@@ -158,8 +157,8 @@ pub struct NotificationTemplateResponseDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub message_template: String,
     pub variables: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: NotificationTemplateStatus,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub language: String,
     pub metadata: AuditMetadata,
@@ -239,7 +238,7 @@ impl From<NotificationTemplate> for NotificationTemplateResponseDto {
             subject_template: entity.subject_template,
             message_template: entity.message_template,
             variables: entity.variables,
-            is_active: entity.is_active,
+            status: entity.status,
             language: entity.language,
             metadata: entity.metadata,
         }
@@ -269,7 +268,7 @@ impl From<CreateNotificationTemplateDto> for NotificationTemplate {
             subject_template: dto.subject_template,
             message_template: dto.message_template,
             variables: dto.variables,
-            is_active: dto.is_active,
+            status: dto.status,
             language: dto.language,
             metadata: AuditMetadata::default(),
         }
@@ -286,7 +285,7 @@ impl From<&NotificationTemplate> for NotificationTemplateResponseDto {
             subject_template: entity.subject_template.clone(),
             message_template: entity.message_template.clone(),
             variables: entity.variables.clone(),
-            is_active: entity.is_active.clone(),
+            status: entity.status.clone(),
             language: entity.language.clone(),
             metadata: entity.metadata.clone(),
         }
@@ -307,7 +306,7 @@ impl backbone_core::ApplyUpdateDto<UpdateNotificationTemplateDto> for Notificati
         self.subject_template = dto.subject_template;
         self.message_template = dto.message_template;
         self.variables = dto.variables;
-        self.is_active = dto.is_active;
+        self.status = dto.status;
         self.language = dto.language;
         Ok(self)
     }

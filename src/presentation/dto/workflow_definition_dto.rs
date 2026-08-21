@@ -20,6 +20,7 @@ use crate::domain::entity::WorkflowDefinition;
 use crate::domain::entity::AuditMetadata;
 use crate::domain::entity::TriggerType;
 use crate::domain::entity::WorkflowType;
+use crate::domain::entity::WorkflowDefinitionStatus;
 
 // =============================================================================
 // Create DTO
@@ -46,9 +47,8 @@ pub struct CreateWorkflowDefinitionDto {
     pub trigger_type: TriggerType,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "trigger_config")]
     pub trigger_config: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: WorkflowDefinitionStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "timeout_minutes")]
     pub timeout_minutes: Option<i32>,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
@@ -84,9 +84,8 @@ pub struct UpdateWorkflowDefinitionDto {
     pub trigger_type: TriggerType,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "trigger_config")]
     pub trigger_config: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: WorkflowDefinitionStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "timeout_minutes")]
     pub timeout_minutes: Option<i32>,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
@@ -123,9 +122,9 @@ pub struct PatchWorkflowDefinitionDto {
     pub trigger_type: Option<TriggerType>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "trigger_config")]
     pub trigger_config: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "is_active")]
-    pub is_active: Option<bool>,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<WorkflowDefinitionStatus>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "timeout_minutes")]
     pub timeout_minutes: Option<i32>,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
@@ -139,7 +138,7 @@ pub struct PatchWorkflowDefinitionDto {
 impl PatchWorkflowDefinitionDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.name.is_some() || self.workflow_type.is_some() || self.description.is_some() || self.trigger_type.is_some() || self.trigger_config.is_some() || self.is_active.is_some() || self.timeout_minutes.is_some() || self.max_retries.is_some() || self.created_by.is_some()
+        self.name.is_some() || self.workflow_type.is_some() || self.description.is_some() || self.trigger_type.is_some() || self.trigger_config.is_some() || self.status.is_some() || self.timeout_minutes.is_some() || self.max_retries.is_some() || self.created_by.is_some()
     }
 }
 
@@ -163,8 +162,8 @@ pub struct WorkflowDefinitionResponseDto {
     pub description: Option<String>,
     pub trigger_type: TriggerType,
     pub trigger_config: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: WorkflowDefinitionStatus,
     pub timeout_minutes: Option<i32>,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     pub max_retries: i32,
@@ -246,7 +245,7 @@ impl From<WorkflowDefinition> for WorkflowDefinitionResponseDto {
             description: entity.description,
             trigger_type: entity.trigger_type,
             trigger_config: entity.trigger_config,
-            is_active: entity.is_active,
+            status: entity.status,
             timeout_minutes: entity.timeout_minutes,
             max_retries: entity.max_retries,
             created_by: entity.created_by,
@@ -277,7 +276,7 @@ impl From<CreateWorkflowDefinitionDto> for WorkflowDefinition {
             description: dto.description,
             trigger_type: dto.trigger_type,
             trigger_config: dto.trigger_config,
-            is_active: dto.is_active,
+            status: dto.status,
             timeout_minutes: dto.timeout_minutes,
             max_retries: dto.max_retries,
             created_by: dto.created_by,
@@ -295,7 +294,7 @@ impl From<&WorkflowDefinition> for WorkflowDefinitionResponseDto {
             description: entity.description.clone(),
             trigger_type: entity.trigger_type.clone(),
             trigger_config: entity.trigger_config.clone(),
-            is_active: entity.is_active.clone(),
+            status: entity.status.clone(),
             timeout_minutes: entity.timeout_minutes.clone(),
             max_retries: entity.max_retries.clone(),
             created_by: entity.created_by.clone(),
@@ -317,7 +316,7 @@ impl backbone_core::ApplyUpdateDto<UpdateWorkflowDefinitionDto> for WorkflowDefi
         self.description = dto.description;
         self.trigger_type = dto.trigger_type;
         self.trigger_config = dto.trigger_config;
-        self.is_active = dto.is_active;
+        self.status = dto.status;
         self.timeout_minutes = dto.timeout_minutes;
         self.max_retries = dto.max_retries;
         self.created_by = dto.created_by;

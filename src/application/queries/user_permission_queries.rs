@@ -9,6 +9,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::entity::UserPermission;
+use crate::domain::entity::UserPermissionStatus;
 use crate::infrastructure::persistence::{UserPermissionRepository, PaginationParams, PaginatedResult, UserPermissionFilter};
 use super::QueryHandler;
 
@@ -72,7 +73,7 @@ pub struct ListUserPermissionQuery {
     pub filter_reason: Option<String>,
     pub filter_resource_id: Option<String>,
     pub filter_resource_type: Option<String>,
-    pub filter_is_active: Option<bool>,
+    pub filter_status: Option<UserPermissionStatus>,
     pub filter_revoked_by: Option<Uuid>,
     pub filter_revoked_reason: Option<String>,
 }
@@ -88,7 +89,7 @@ impl Default for ListUserPermissionQuery {
             filter_reason: None,
             filter_resource_id: None,
             filter_resource_type: None,
-            filter_is_active: None,
+            filter_status: None,
             filter_revoked_by: None,
             filter_revoked_reason: None,
         }
@@ -121,7 +122,7 @@ impl<R: UserPermissionRepository + 'static> QueryHandler<ListUserPermissionQuery
             reason: query.filter_reason.clone(),
             resource_id: query.filter_resource_id.clone(),
             resource_type: query.filter_resource_type.clone(),
-            is_active: query.filter_is_active.clone(),
+            status: query.filter_status.clone(),
             revoked_by: query.filter_revoked_by.clone(),
             revoked_reason: query.filter_revoked_reason.clone(),
             ..Default::default()

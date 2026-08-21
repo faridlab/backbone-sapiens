@@ -67,8 +67,7 @@ pub struct LDAPDirectory {
     pub sync_interval_minutes: Option<i32>,
     pub last_sync_at: Option<DateTime<Utc>>,
     pub last_sync_result: Option<serde_json::Value>,
-    pub is_active: bool,
-    pub(crate) status: LDAPDirectoryStatus,
+    pub status: LDAPDirectoryStatus,
     #[serde(default)]
     #[sqlx(json)]
     pub metadata: AuditMetadata,
@@ -81,7 +80,7 @@ impl LDAPDirectory {
     }
 
     /// Create a new LDAPDirectory with required fields
-    pub fn new(name: String, display_name: String, host: String, port: i32, use_ssl: bool, use_tls: bool, bind_dn: String, bind_password: String, search_base: String, search_filter: String, attribute_mapping: serde_json::Value, sync_enabled: bool, is_active: bool, status: LDAPDirectoryStatus) -> Self {
+    pub fn new(name: String, display_name: String, host: String, port: i32, use_ssl: bool, use_tls: bool, bind_dn: String, bind_password: String, search_base: String, search_filter: String, attribute_mapping: serde_json::Value, sync_enabled: bool, status: LDAPDirectoryStatus) -> Self {
         Self {
             id: Uuid::new_v4(),
             name,
@@ -99,7 +98,6 @@ impl LDAPDirectory {
             sync_interval_minutes: None,
             last_sync_at: None,
             last_sync_result: None,
-            is_active,
             status,
             metadata: AuditMetadata::default(),
         }
@@ -253,8 +251,8 @@ impl LDAPDirectory {
                 "last_sync_result" => {
                     if let Ok(v) = serde_json::from_value(value) { self.last_sync_result = v; }
                 }
-                "is_active" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.is_active = v; }
+                "status" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
                 }
                 _ => {} // ignore unknown fields
             }
@@ -339,7 +337,6 @@ pub struct LDAPDirectoryBuilder {
     sync_interval_minutes: Option<i32>,
     last_sync_at: Option<DateTime<Utc>>,
     last_sync_result: Option<serde_json::Value>,
-    is_active: Option<bool>,
     status: Option<LDAPDirectoryStatus>,
 }
 
@@ -434,12 +431,6 @@ impl LDAPDirectoryBuilder {
         self
     }
 
-    /// Set the is_active field (default: `true`)
-    pub fn is_active(mut self, value: bool) -> Self {
-        self.is_active = Some(value);
-        self
-    }
-
     /// Set the status field (default: `LDAPDirectoryStatus::default()`)
     pub fn status(mut self, value: LDAPDirectoryStatus) -> Self {
         self.status = Some(value);
@@ -474,7 +465,6 @@ impl LDAPDirectoryBuilder {
             sync_interval_minutes: self.sync_interval_minutes,
             last_sync_at: self.last_sync_at,
             last_sync_result: self.last_sync_result,
-            is_active: self.is_active.unwrap_or(true),
             status: self.status.unwrap_or(LDAPDirectoryStatus::default()),
             metadata: AuditMetadata::default(),
         })

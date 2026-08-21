@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::domain::entity::OrganizationRole;
+use crate::domain::entity::OrganizationRoleStatus;
 use crate::infrastructure::persistence::OrganizationRoleRepository;
 use super::CommandHandler;
 
@@ -39,7 +40,7 @@ pub struct CreateOrganizationRoleCommand {
     pub name: String,
     pub description: Option<String>,
     pub permissions: Option<serde_json::Value>,
-    pub is_active: bool,
+    pub status: OrganizationRoleStatus,
     pub metadata: serde_json::Value,
 }
 
@@ -65,7 +66,7 @@ impl<R: OrganizationRoleRepository + 'static> CommandHandler<CreateOrganizationR
             .name(cmd.name)
             .description(cmd.description)
             .permissions(cmd.permissions)
-            .is_active(cmd.is_active)
+            .status(cmd.status)
             .metadata(cmd.metadata)
             .build()?;
 
@@ -85,7 +86,7 @@ pub struct UpdateOrganizationRoleCommand {
     pub name: Option<String>,
     pub description: Option<String>,
     pub permissions: Option<serde_json::Value>,
-    pub is_active: Option<bool>,
+    pub status: Option<OrganizationRoleStatus>,
     pub metadata: Option<serde_json::Value>,
 }
 
@@ -120,8 +121,8 @@ impl<R: OrganizationRoleRepository + 'static> CommandHandler<UpdateOrganizationR
         }
         entity.description = cmd.description;
         entity.permissions = cmd.permissions;
-        if let Some(value) = cmd.is_active {
-            entity.is_active = value;
+        if let Some(value) = cmd.status {
+            entity.status = value;
         }
         if let Some(value) = cmd.metadata {
             entity.metadata = value;

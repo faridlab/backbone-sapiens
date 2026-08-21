@@ -19,6 +19,7 @@ use validator::Validate;
 use crate::domain::entity::OAuthProvider;
 use crate::domain::entity::AuditMetadata;
 use crate::domain::entity::OAuthProviderType;
+use crate::domain::entity::OAuthProviderStatus;
 
 // =============================================================================
 // Create DTO
@@ -62,9 +63,7 @@ pub struct CreateOAuthProviderDto {
     #[cfg_attr(feature = "openapi", schema(example = "https://example.com"))]
     #[serde(alias = "user_info_url")]
     pub user_info_url: String,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    pub status: OAuthProviderStatus,
 }
 
 // =============================================================================
@@ -109,9 +108,7 @@ pub struct UpdateOAuthProviderDto {
     #[cfg_attr(feature = "openapi", schema(example = "https://example.com"))]
     #[serde(alias = "user_info_url")]
     pub user_info_url: String,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    pub status: OAuthProviderStatus,
 }
 
 // =============================================================================
@@ -157,15 +154,14 @@ pub struct PatchOAuthProviderDto {
     #[cfg_attr(feature = "openapi", schema(example = "https://example.com"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "user_info_url")]
     pub user_info_url: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "is_active")]
-    pub is_active: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<OAuthProviderStatus>,
 }
 
 impl PatchOAuthProviderDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.provider_name.is_some() || self.display_name.is_some() || self.client_id.is_some() || self.client_secret.is_some() || self.redirect_uri.is_some() || self.scopes.is_some() || self.authorization_url.is_some() || self.token_url.is_some() || self.user_info_url.is_some() || self.is_active.is_some()
+        self.provider_name.is_some() || self.display_name.is_some() || self.client_id.is_some() || self.client_secret.is_some() || self.redirect_uri.is_some() || self.scopes.is_some() || self.authorization_url.is_some() || self.token_url.is_some() || self.user_info_url.is_some() || self.status.is_some()
     }
 }
 
@@ -199,8 +195,7 @@ pub struct OAuthProviderResponseDto {
     pub token_url: String,
     #[cfg_attr(feature = "openapi", schema(example = "https://example.com"))]
     pub user_info_url: String,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub is_active: bool,
+    pub status: OAuthProviderStatus,
     pub metadata: AuditMetadata,
 }
 
@@ -281,7 +276,7 @@ impl From<OAuthProvider> for OAuthProviderResponseDto {
             authorization_url: entity.authorization_url,
             token_url: entity.token_url,
             user_info_url: entity.user_info_url,
-            is_active: entity.is_active,
+            status: entity.status,
             metadata: entity.metadata,
         }
     }
@@ -313,7 +308,7 @@ impl From<CreateOAuthProviderDto> for OAuthProvider {
             authorization_url: dto.authorization_url,
             token_url: dto.token_url,
             user_info_url: dto.user_info_url,
-            is_active: dto.is_active,
+            status: dto.status,
             metadata: AuditMetadata::default(),
         }
     }
@@ -332,7 +327,7 @@ impl From<&OAuthProvider> for OAuthProviderResponseDto {
             authorization_url: entity.authorization_url.clone(),
             token_url: entity.token_url.clone(),
             user_info_url: entity.user_info_url.clone(),
-            is_active: entity.is_active.clone(),
+            status: entity.status,
             metadata: entity.metadata.clone(),
         }
     }
@@ -355,7 +350,7 @@ impl backbone_core::ApplyUpdateDto<UpdateOAuthProviderDto> for OAuthProvider {
         self.authorization_url = dto.authorization_url;
         self.token_url = dto.token_url;
         self.user_info_url = dto.user_info_url;
-        self.is_active = dto.is_active;
+        self.status = dto.status;
         Ok(self)
     }
 }

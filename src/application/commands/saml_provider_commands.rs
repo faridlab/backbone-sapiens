@@ -45,7 +45,6 @@ pub struct CreateSAMLProviderCommand {
     pub sls_url: Option<String>,
     pub name_id_format: String,
     pub attribute_mapping: serde_json::Value,
-    pub is_active: bool,
     pub status: SAMLProviderStatus,
     pub metadata: serde_json::Value,
 }
@@ -78,7 +77,6 @@ impl<R: SAMLProviderRepository + 'static> CommandHandler<CreateSAMLProviderComma
             .sls_url(cmd.sls_url)
             .name_id_format(cmd.name_id_format)
             .attribute_mapping(cmd.attribute_mapping)
-            .is_active(cmd.is_active)
             .status(cmd.status)
             .metadata(cmd.metadata)
             .build()?;
@@ -105,7 +103,6 @@ pub struct UpdateSAMLProviderCommand {
     pub sls_url: Option<String>,
     pub name_id_format: Option<String>,
     pub attribute_mapping: Option<serde_json::Value>,
-    pub is_active: Option<bool>,
     pub status: Option<SAMLProviderStatus>,
     pub metadata: Option<serde_json::Value>,
 }
@@ -158,9 +155,6 @@ impl<R: SAMLProviderRepository + 'static> CommandHandler<UpdateSAMLProviderComma
         }
         if let Some(value) = cmd.attribute_mapping {
             entity.attribute_mapping = value;
-        }
-        if let Some(value) = cmd.is_active {
-            entity.is_active = value;
         }
         if let Some(value) = cmd.status {
             entity.status = value;

@@ -6,7 +6,7 @@
 //! - Terminate session
 //! - Session expiration
 
-use backbone_sapiens::domain::entity::{Session, User};
+use backbone_sapiens::domain::entity::{Session, User, SessionStatus};
 use backbone_sapiens::domain::value_objects::DeviceFingerprint;
 use backbone_sapiens::domain::services::{
     SessionManagementService, SessionConfig, SessionValidationResult,
@@ -80,7 +80,7 @@ impl TestSessionManagementService {
         if let Some(data) = sessions.get(&session_id) {
             let session = &data.session;
 
-            if !session.is_active {
+            if session.status != SessionStatus::Active {
                 return Ok(SessionValidationResult {
                     valid: false,
                     user_id: data.user_id,
@@ -118,7 +118,7 @@ impl TestSessionManagementService {
         let mut sessions = self.store.sessions.write().await;
 
         if let Some(mut data) = sessions.get_mut(&session_id) {
-            data.session.is_active = false;
+            data.session.status = SessionStatus::Revoked;
             data.session.revoked_at = Some(Utc::now());
             return Ok(true);
         }
@@ -151,7 +151,7 @@ mod create_session_tests {
             .unwrap();
 
         assert_eq!(session.user_id, user_id);
-        assert!(session.is_active);
+        assert!(session.status == SessionStatus::Active);
         assert!(!session.is_expired());
         assert_eq!(session.device_fingerprint(), "fp123");
         assert_eq!(session.ip_address, Some("127.0.0.1".to_string()));
@@ -277,7 +277,7 @@ mod validate_session_tests {
             .unwrap();
 
         // Deactivate session
-        session.is_active = false;
+        session.status = SessionStatus::Revoked;
         service.store.add_session(session, user_id).await;
 
         let result = service.validate_session_internal(session.id).await.unwrap();
@@ -311,7 +311,7 @@ mod terminate_session_tests {
 
         // Verify session is now inactive
         let retrieved = service.get_session_internal(session.id).await.unwrap().unwrap();
-        assert!(!retrieved.is_active);
+        assert!(retrieved.status == SessionStatus::Revoked);
         assert!(retrieved.revoked_at.is_some());
     }
 
@@ -372,7 +372,7 @@ mod session_entity_tests {
 
         // Inactive = not valid
         let mut inactive_session = Session::new(user_id, "fp123".to_string(), false, None, None);
-        inactive_session.is_active = false;
+        inactive_session.status = SessionStatus::Revoked;
         assert!(!inactive_session.is_valid());
     }
 

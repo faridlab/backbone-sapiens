@@ -114,7 +114,6 @@ impl<R: SAMLProviderProjectionRepository> SAMLProviderEventHandler for SAMLProvi
             event.sls_url,
             event.name_id_format,
             event.attribute_mapping,
-            event.is_active,
             event.status,
             event.metadata
         );
@@ -138,7 +137,6 @@ impl<R: SAMLProviderProjectionRepository> SAMLProviderEventHandler for SAMLProvi
             projection.sls_url = event.sls_url;
             projection.name_id_format = event.name_id_format;
             projection.attribute_mapping = event.attribute_mapping;
-            projection.is_active = event.is_active;
             projection.status = event.status;
             projection.metadata = event.metadata;
             // Track the event sequence for this projection

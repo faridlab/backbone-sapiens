@@ -72,7 +72,7 @@ pub struct ListSessionQuery {
     pub filter_user_agent: Option<String>,
     pub filter_device_type: Option<DeviceType>,
     pub filter_device_fingerprint: Option<String>,
-    pub filter_is_active: Option<bool>,
+    pub filter_status: Option<SessionStatus>,
 }
 
 impl Default for ListSessionQuery {
@@ -86,7 +86,7 @@ impl Default for ListSessionQuery {
             filter_user_agent: None,
             filter_device_type: None,
             filter_device_fingerprint: None,
-            filter_is_active: None,
+            filter_status: None,
         }
     }
 }
@@ -117,7 +117,7 @@ impl<R: SessionRepository + 'static> QueryHandler<ListSessionQuery> for ListSess
             user_agent: query.filter_user_agent.clone(),
             device_type: query.filter_device_type.clone(),
             device_fingerprint: query.filter_device_fingerprint.clone(),
-            is_active: query.filter_is_active.clone(),
+            status: query.filter_status.clone(),
             ..Default::default()
         };
 

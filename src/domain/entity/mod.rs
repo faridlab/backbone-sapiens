@@ -134,6 +134,14 @@ pub mod trigger_type;
 pub mod action_type;
 pub mod workflow_execution_status;
 pub mod workflow_action_execution_status;
+pub mod session_status;
+pub mod oauth_provider_status;
+pub mod organization_role_status;
+pub mod organization_permission_status;
+pub mod password_policy_status;
+pub mod user_permission_status;
+pub mod workflow_definition_status;
+pub mod notification_template_status;
 
 // Re-exports
 pub use analytics_event::AnalyticsEvent;
@@ -386,6 +394,14 @@ pub use trigger_type::TriggerType;
 pub use action_type::ActionType;
 pub use workflow_execution_status::WorkflowExecutionStatus;
 pub use workflow_action_execution_status::WorkflowActionExecutionStatus;
+pub use session_status::SessionStatus;
+pub use oauth_provider_status::OAuthProviderStatus;
+pub use organization_role_status::OrganizationRoleStatus;
+pub use organization_permission_status::OrganizationPermissionStatus;
+pub use password_policy_status::PasswordPolicyStatus;
+pub use user_permission_status::UserPermissionStatus;
+pub use workflow_definition_status::WorkflowDefinitionStatus;
+pub use notification_template_status::NotificationTemplateStatus;
 
 // ==========================================================================
 // Entity Trait

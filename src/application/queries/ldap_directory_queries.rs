@@ -76,7 +76,6 @@ pub struct ListLDAPDirectoryQuery {
     pub filter_search_base: Option<String>,
     pub filter_search_filter: Option<String>,
     pub filter_sync_enabled: Option<bool>,
-    pub filter_is_active: Option<bool>,
     pub filter_status: Option<LDAPDirectoryStatus>,
 }
 
@@ -95,7 +94,6 @@ impl Default for ListLDAPDirectoryQuery {
             filter_search_base: None,
             filter_search_filter: None,
             filter_sync_enabled: None,
-            filter_is_active: None,
             filter_status: None,
         }
     }
@@ -131,7 +129,6 @@ impl<R: LDAPDirectoryRepository + 'static> QueryHandler<ListLDAPDirectoryQuery> 
             search_base: query.filter_search_base.clone(),
             search_filter: query.filter_search_filter.clone(),
             sync_enabled: query.filter_sync_enabled.clone(),
-            is_active: query.filter_is_active.clone(),
             status: query.filter_status.clone(),
             ..Default::default()
         };

@@ -119,7 +119,6 @@ impl<R: LDAPDirectoryProjectionRepository> LDAPDirectoryEventHandler for LDAPDir
             event.sync_interval_minutes,
             event.last_sync_at,
             event.last_sync_result,
-            event.is_active,
             event.status,
             event.metadata
         );
@@ -148,7 +147,6 @@ impl<R: LDAPDirectoryProjectionRepository> LDAPDirectoryEventHandler for LDAPDir
             projection.sync_interval_minutes = event.sync_interval_minutes;
             projection.last_sync_at = event.last_sync_at;
             projection.last_sync_result = event.last_sync_result;
-            projection.is_active = event.is_active;
             projection.status = event.status;
             projection.metadata = event.metadata;
             // Track the event sequence for this projection

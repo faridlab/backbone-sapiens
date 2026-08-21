@@ -10,6 +10,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
+use crate::domain::entity::UserPermissionStatus;
+
 // ============================================================================
 // PROJECTION (READ MODEL)
 // ============================================================================
@@ -29,7 +31,7 @@ pub struct UserPermissionProjection {
     pub expires_at: Option<DateTime<Utc>>,
     pub resource_id: Option<String>,
     pub resource_type: Option<String>,
-    pub is_active: bool,
+    pub status: UserPermissionStatus,
     pub revoked_at: Option<DateTime<Utc>>,
     pub revoked_by: Option<Uuid>,
     pub revoked_reason: Option<String>,
@@ -56,7 +58,7 @@ impl UserPermissionProjection {
         expires_at: Option<DateTime<Utc>>,
         resource_id: Option<String>,
         resource_type: Option<String>,
-        is_active: bool,
+        status: UserPermissionStatus,
         revoked_at: Option<DateTime<Utc>>,
         revoked_by: Option<Uuid>,
         revoked_reason: Option<String>,
@@ -72,7 +74,7 @@ impl UserPermissionProjection {
             expires_at,
             resource_id,
             resource_type,
-            is_active,
+            status,
             revoked_at,
             revoked_by,
             revoked_reason,

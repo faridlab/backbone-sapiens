@@ -458,8 +458,8 @@ impl SessionCliHandler {
         println!("{}", format!("  ID: {}", session.id).white());
 
         // Display session status with color coding
-        let status_indicator = if session.is_active { "🟢" } else { "🔴" };
-        let status_text = if session.is_active { "Active" } else { "Inactive" };
+        let status_indicator = if session.status == crate::domain::entity::SessionStatus::Active { "🟢" } else { "🔴" };
+        let status_text = if session.status == crate::domain::entity::SessionStatus::Active { "Active" } else { "Inactive" };
         println!("{}", format!("  Status: {} {}", status_indicator, status_text).white());
 
         // Display timestamps

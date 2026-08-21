@@ -31,7 +31,6 @@ pub struct SAMLProviderProjection {
     pub sls_url: Option<String>,
     pub name_id_format: String,
     pub attribute_mapping: serde_json::Value,
-    pub is_active: bool,
     pub status: SAMLProviderStatus,
     pub metadata: serde_json::Value,
 
@@ -58,7 +57,6 @@ impl SAMLProviderProjection {
         sls_url: Option<String>,
         name_id_format: String,
         attribute_mapping: serde_json::Value,
-        is_active: bool,
         status: SAMLProviderStatus,
         metadata: serde_json::Value
     ) -> Self {
@@ -74,7 +72,6 @@ impl SAMLProviderProjection {
             sls_url,
             name_id_format,
             attribute_mapping,
-            is_active,
             status,
             metadata,
             projection_version: 1,

@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::domain::entity::OrganizationPermission;
+use crate::domain::entity::OrganizationPermissionStatus;
 use crate::infrastructure::persistence::OrganizationPermissionRepository;
 use super::CommandHandler;
 
@@ -45,7 +46,7 @@ pub struct CreateOrganizationPermissionCommand {
     pub granted_at: DateTime<Utc>,
     pub expires_at: Option<DateTime<Utc>>,
     pub reason: Option<String>,
-    pub is_active: bool,
+    pub status: OrganizationPermissionStatus,
     pub metadata: serde_json::Value,
 }
 
@@ -77,7 +78,7 @@ impl<R: OrganizationPermissionRepository + 'static> CommandHandler<CreateOrganiz
             .granted_at(cmd.granted_at)
             .expires_at(cmd.expires_at)
             .reason(cmd.reason)
-            .is_active(cmd.is_active)
+            .status(cmd.status)
             .metadata(cmd.metadata)
             .build()?;
 
@@ -103,7 +104,7 @@ pub struct UpdateOrganizationPermissionCommand {
     pub granted_at: Option<DateTime<Utc>>,
     pub expires_at: Option<DateTime<Utc>>,
     pub reason: Option<String>,
-    pub is_active: Option<bool>,
+    pub status: Option<OrganizationPermissionStatus>,
     pub metadata: Option<serde_json::Value>,
 }
 
@@ -148,8 +149,8 @@ impl<R: OrganizationPermissionRepository + 'static> CommandHandler<UpdateOrganiz
         }
         entity.expires_at = cmd.expires_at;
         entity.reason = cmd.reason;
-        if let Some(value) = cmd.is_active {
-            entity.is_active = value;
+        if let Some(value) = cmd.status {
+            entity.status = value;
         }
         if let Some(value) = cmd.metadata {
             entity.metadata = value;

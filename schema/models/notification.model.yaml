@@ -148,10 +148,11 @@ models:
         type: json?
         description: "Template variable definitions"
 
-      is_active:
-        type: bool
-        attributes: ["@default(true)"]
-        description: "Template active status"
+      # replaces is_active (boolean flipped to lifecycle enum)
+      status:
+        type: NotificationTemplateStatus
+        attributes: ["@default(active)"]
+        description: "Template lifecycle status"
 
       language:
         type: string
@@ -172,7 +173,7 @@ models:
       - type: index
         fields: [notification_type, channel]
       - type: index
-        fields: [is_active]
+        fields: [status]
       - type: index
         fields: [language]
       - type: unique
@@ -331,6 +332,15 @@ enums:
         description: "Delivery failed"
       - name: bounced
         description: "Message bounced"
+
+  - name: NotificationTemplateStatus
+    description: "Lifecycle of a notification template"
+    variants:
+      - name: active
+        default: true
+        description: "Template is enabled and eligible for use"
+      - name: inactive
+        description: "Template is retired and skipped when matching"
 
 hooks:
   # Notification Workflow Hooks

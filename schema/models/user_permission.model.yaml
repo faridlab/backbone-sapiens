@@ -53,10 +53,10 @@ models:
         attributes: ["@max(50)"]
         description: "Type of resource (e.g., project, document)"
 
-      is_active:
-        type: bool
-        attributes: ["@default(true)"]
-        description: "Revocation flag"
+      status:
+        type: UserPermissionStatus
+        attributes: ["@default(active)"]
+        description: "Grant lifecycle; revocation sets this to inactive"
 
       revoked_at: datetime?
 
@@ -94,7 +94,7 @@ models:
       - type: index
         fields: [user_id, permission_id]
       - type: index
-        fields: [user_id, is_active]
+        fields: [user_id, status]
       - type: index
         fields: [expires_at]
       - type: index
@@ -103,4 +103,14 @@ models:
         fields: [resource_id, resource_type]
       - type: unique
         fields: [user_id, permission_id]
-        where: "is_active = TRUE"
+        where: "status = 'active'"
+
+enums:
+  - name: UserPermissionStatus
+    description: "Lifecycle of a direct user permission grant"
+    variants:
+      - name: active
+        description: "Grant is in force"
+        default: true
+      - name: inactive
+        description: "Grant is revoked or expired and no longer authorizes anything"

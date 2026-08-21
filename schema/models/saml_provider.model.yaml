@@ -62,11 +62,6 @@ models:
         attributes: ["@required", "@default({})"]
         description: "Map SAML attrs to user attrs"
 
-      is_active:
-        type: bool
-        attributes: ["@default(true)"]
-        description: "Provider enabled"
-
       status:
         type: SAMLProviderStatus
         attributes: ["@default(draft)"]
@@ -80,8 +75,6 @@ models:
     indexes:
       - type: index
         fields: [name]
-      - type: index
-        fields: [is_active]
       - type: unique
         fields: [entity_id]
       - type: index

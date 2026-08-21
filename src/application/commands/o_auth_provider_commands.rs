@@ -44,7 +44,7 @@ pub struct CreateOAuthProviderCommand {
     pub authorization_url: String,
     pub token_url: String,
     pub user_info_url: String,
-    pub is_active: bool,
+    pub status: OAuthProviderStatus,
     pub metadata: serde_json::Value,
 }
 
@@ -75,7 +75,7 @@ impl<R: OAuthProviderRepository + 'static> CommandHandler<CreateOAuthProviderCom
             .authorization_url(cmd.authorization_url)
             .token_url(cmd.token_url)
             .user_info_url(cmd.user_info_url)
-            .is_active(cmd.is_active)
+            .status(cmd.status)
             .metadata(cmd.metadata)
             .build()?;
 
@@ -100,7 +100,7 @@ pub struct UpdateOAuthProviderCommand {
     pub authorization_url: Option<String>,
     pub token_url: Option<String>,
     pub user_info_url: Option<String>,
-    pub is_active: Option<bool>,
+    pub status: Option<OAuthProviderStatus>,
     pub metadata: Option<serde_json::Value>,
 }
 
@@ -154,8 +154,8 @@ impl<R: OAuthProviderRepository + 'static> CommandHandler<UpdateOAuthProviderCom
         if let Some(value) = cmd.user_info_url {
             entity.user_info_url = value;
         }
-        if let Some(value) = cmd.is_active {
-            entity.is_active = value;
+        if let Some(value) = cmd.status {
+            entity.status = value;
         }
         if let Some(value) = cmd.metadata {
             entity.metadata = value;

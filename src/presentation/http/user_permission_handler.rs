@@ -240,8 +240,10 @@ pub async fn revoke_transition(
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: UserPermissionState = entity.is_active.to_string().parse()
-        .unwrap_or(UserPermissionState::default());
+    let current_state = match entity.status {
+        UserPermissionStatus::Active => UserPermissionState::Active,
+        UserPermissionStatus::Inactive => UserPermissionState::Revoked,
+    };
     let sm = UserPermissionStateMachine::from_state(current_state);
     if !sm.can_transition(UserPermissionTransition::Revoke) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<UserPermissionResponseDto>::error("Transition not allowed from current state")));
@@ -249,7 +251,7 @@ pub async fn revoke_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("is_active".to_string(), serde_json::Value::String("Revoked".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("inactive".to_string()));
 
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
@@ -291,8 +293,10 @@ pub async fn expire_transition(
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: UserPermissionState = entity.is_active.to_string().parse()
-        .unwrap_or(UserPermissionState::default());
+    let current_state = match entity.status {
+        UserPermissionStatus::Active => UserPermissionState::Active,
+        UserPermissionStatus::Inactive => UserPermissionState::Revoked,
+    };
     let sm = UserPermissionStateMachine::from_state(current_state);
     if !sm.can_transition(UserPermissionTransition::Expire) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<UserPermissionResponseDto>::error("Transition not allowed from current state")));
@@ -300,7 +304,7 @@ pub async fn expire_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("is_active".to_string(), serde_json::Value::String("Revoked".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("inactive".to_string()));
 
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {

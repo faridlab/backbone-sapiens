@@ -112,7 +112,7 @@ impl<R: UserPermissionProjectionRepository> UserPermissionEventHandler for UserP
             event.expires_at,
             event.resource_id,
             event.resource_type,
-            event.is_active,
+            event.status,
             event.revoked_at,
             event.revoked_by,
             event.revoked_reason,
@@ -136,7 +136,7 @@ impl<R: UserPermissionProjectionRepository> UserPermissionEventHandler for UserP
             projection.expires_at = event.expires_at;
             projection.resource_id = event.resource_id;
             projection.resource_type = event.resource_type;
-            projection.is_active = event.is_active;
+            projection.status = event.status;
             projection.revoked_at = event.revoked_at;
             projection.revoked_by = event.revoked_by;
             projection.revoked_reason = event.revoked_reason;

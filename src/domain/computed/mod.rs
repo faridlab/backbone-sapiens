@@ -573,7 +573,7 @@ impl HasComputedFields for MFADevice {
         fields.set("display_label", serde_json::json!(format!("{}{}{}{}", self.device_name.as_deref().unwrap_or(""), " (", format!("{:?}", self.device_type), ")")));
 
         // status_display
-        fields.set("status_display", serde_json::json!(!self.is_active));
+        fields.set("status_display", serde_json::json!(self.status != MFADeviceStatus::Active));
 
         fields
     }
@@ -1139,7 +1139,7 @@ impl HasComputedFields for Session {
         fields.set("is_expired", serde_json::json!(self.expires_at <= chrono::Utc::now()));
 
         // is_valid
-        fields.set("is_valid", serde_json::json!(self.is_active && self.expires_at > chrono::Utc::now()));
+        fields.set("is_valid", serde_json::json!(self.status == SessionStatus::Active && self.expires_at > chrono::Utc::now()));
 
         // time_until_expiry
         fields.set("time_until_expiry", serde_json::json!(self.expires_at - chrono::Utc::now()));
@@ -1155,7 +1155,7 @@ impl HasComputedFields for Session {
         fields.set("is_recently_active", serde_json::json!(null));
 
         // status_label
-        fields.set("status_label", serde_json::json!(!self.is_active));
+        fields.set("status_label", serde_json::json!(self.status != SessionStatus::Active));
 
         fields
     }
@@ -1371,7 +1371,7 @@ impl HasComputedFields for UserPermission {
         fields.set("is_expired", serde_json::json!(self.expires_at.is_some() && self.expires_at <= Some(chrono::Utc::now())));
 
         // is_valid
-        fields.set("is_valid", serde_json::json!(self.is_active && self.expires_at.is_none() || self.expires_at > Some(chrono::Utc::now())));
+        fields.set("is_valid", serde_json::json!(self.status == UserPermissionStatus::Active && self.expires_at.is_none() || self.expires_at > Some(chrono::Utc::now())));
 
         // time_until_expiry
         fields.set("time_until_expiry", serde_json::json!(self.expires_at.is_some()));

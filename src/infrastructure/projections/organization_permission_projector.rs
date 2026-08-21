@@ -114,7 +114,7 @@ impl<R: OrganizationPermissionProjectionRepository> OrganizationPermissionEventH
             event.granted_at,
             event.expires_at,
             event.reason,
-            event.is_active,
+            event.status,
             event.metadata
         );
 
@@ -137,7 +137,7 @@ impl<R: OrganizationPermissionProjectionRepository> OrganizationPermissionEventH
             projection.granted_at = event.granted_at;
             projection.expires_at = event.expires_at;
             projection.reason = event.reason;
-            projection.is_active = event.is_active;
+            projection.status = event.status;
             projection.metadata = event.metadata;
             // Track the event sequence for this projection
             projection.apply_event(sequence);

@@ -29,7 +29,7 @@ impl TestDataGenerator for NotificationTemplateTestData {
             "subject_template": null,
             "message_template": null,
             "variables": null,
-            "is_active": true,
+            "status": "active",
             "language": null,
             "metadata": json!({}),
         })
@@ -45,7 +45,7 @@ impl TestDataGenerator for NotificationTemplateTestData {
             "subject_template": null,
             "message_template": null,
             "variables": null,
-            "is_active": true,
+            "status": "active",
             "language": null,
             "metadata": json!({}),
         })

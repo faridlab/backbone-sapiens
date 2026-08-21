@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 use super::AuditMetadata;
+use super::OrganizationRoleStatus;
 
 /// Strongly-typed ID for OrganizationRole
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -52,7 +53,7 @@ pub struct OrganizationRole {
     pub name: String,
     pub description: Option<String>,
     pub permissions: Option<serde_json::Value>,
-    pub is_active: bool,
+    pub status: OrganizationRoleStatus,
     #[serde(default)]
     #[sqlx(json)]
     pub metadata: AuditMetadata,
@@ -65,14 +66,14 @@ impl OrganizationRole {
     }
 
     /// Create a new OrganizationRole with required fields
-    pub fn new(organization_id: Uuid, name: String, is_active: bool) -> Self {
+    pub fn new(organization_id: Uuid, name: String, status: OrganizationRoleStatus) -> Self {
         Self {
             id: Uuid::new_v4(),
             organization_id,
             name,
             description: None,
             permissions: None,
-            is_active,
+            status,
             metadata: AuditMetadata::default(),
         }
     }
@@ -127,6 +128,11 @@ impl OrganizationRole {
         self.metadata.deleted_by.as_ref()
     }
 
+    /// Get the current status
+    pub fn status(&self) -> &OrganizationRoleStatus {
+        &self.status
+    }
+
 
     // ==========================================================
     // Fluent Setters (with_* for optional fields)
@@ -164,8 +170,8 @@ impl OrganizationRole {
                 "permissions" => {
                     if let Ok(v) = serde_json::from_value(value) { self.permissions = v; }
                 }
-                "is_active" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.is_active = v; }
+                "status" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
                 }
                 _ => {} // ignore unknown fields
             }
@@ -222,6 +228,7 @@ impl backbone_orm::EntityRepoMeta for OrganizationRole {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("organization_id".to_string(), "uuid".to_string());
+        m.insert("status".to_string(), "organization_role_status".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -239,7 +246,7 @@ pub struct OrganizationRoleBuilder {
     name: Option<String>,
     description: Option<String>,
     permissions: Option<serde_json::Value>,
-    is_active: Option<bool>,
+    status: Option<OrganizationRoleStatus>,
 }
 
 impl OrganizationRoleBuilder {
@@ -267,9 +274,9 @@ impl OrganizationRoleBuilder {
         self
     }
 
-    /// Set the is_active field (default: `true`)
-    pub fn is_active(mut self, value: bool) -> Self {
-        self.is_active = Some(value);
+    /// Set the status field (default: `OrganizationRoleStatus::default()`)
+    pub fn status(mut self, value: OrganizationRoleStatus) -> Self {
+        self.status = Some(value);
         self
     }
 
@@ -286,7 +293,7 @@ impl OrganizationRoleBuilder {
             name,
             description: self.description,
             permissions: self.permissions,
-            is_active: self.is_active.unwrap_or(true),
+            status: self.status.unwrap_or_default(),
             metadata: AuditMetadata::default(),
         })
     }

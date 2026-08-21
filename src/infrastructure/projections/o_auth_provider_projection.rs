@@ -30,7 +30,7 @@ pub struct OAuthProviderProjection {
     pub authorization_url: String,
     pub token_url: String,
     pub user_info_url: String,
-    pub is_active: bool,
+    pub status: OAuthProviderStatus,
     pub metadata: serde_json::Value,
 
     // Projection metadata
@@ -55,7 +55,7 @@ impl OAuthProviderProjection {
         authorization_url: String,
         token_url: String,
         user_info_url: String,
-        is_active: bool,
+        status: OAuthProviderStatus,
         metadata: serde_json::Value
     ) -> Self {
         Self {
@@ -69,7 +69,7 @@ impl OAuthProviderProjection {
             authorization_url,
             token_url,
             user_info_url,
-            is_active,
+            status,
             metadata,
             projection_version: 1,
             last_event_sequence: 0,

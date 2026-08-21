@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 use super::AuditMetadata;
+use super::UserPermissionStatus;
 
 use crate::domain::state_machine::{UserPermissionStateMachine, UserPermissionState, StateMachineError};
 
@@ -58,7 +59,7 @@ pub struct UserPermission {
     pub expires_at: Option<DateTime<Utc>>,
     pub resource_id: Option<String>,
     pub resource_type: Option<String>,
-    pub(crate) is_active: bool,
+    pub(crate) status: UserPermissionStatus,
     pub revoked_at: Option<DateTime<Utc>>,
     pub revoked_by: Option<Uuid>,
     pub revoked_reason: Option<String>,
@@ -74,7 +75,7 @@ impl UserPermission {
     }
 
     /// Create a new UserPermission with required fields
-    pub fn new(user_id: Uuid, permission_id: Uuid, granted_at: DateTime<Utc>, granted_by: Uuid, reason: String, is_active: bool) -> Self {
+    pub fn new(user_id: Uuid, permission_id: Uuid, granted_at: DateTime<Utc>, granted_by: Uuid, reason: String, status: UserPermissionStatus) -> Self {
         Self {
             id: Uuid::new_v4(),
             user_id,
@@ -85,7 +86,7 @@ impl UserPermission {
             expires_at: None,
             resource_id: None,
             resource_type: None,
-            is_active,
+            status,
             revoked_at: None,
             revoked_by: None,
             revoked_reason: None,
@@ -143,6 +144,11 @@ impl UserPermission {
         self.metadata.deleted_by.as_ref()
     }
 
+    /// Get the current status
+    pub fn status(&self) -> &UserPermissionStatus {
+        &self.status
+    }
+
 
     // ==========================================================
     // Fluent Setters (with_* for optional fields)
@@ -188,16 +194,24 @@ impl UserPermission {
     // State Machine
     // ==========================================================
 
-    /// Transition to a new state via the is_active state machine.
+    /// Transition to a new state via the status state machine.
+    ///
+    /// The workflow states map onto the lifecycle enum as:
+    /// `active -> Active`, `revoked -> Inactive`.
     ///
     /// Returns `Err` if the transition is not permitted from the current state.
-    /// Use this method instead of assigning `self.is_active` directly.
+    /// Use this method instead of assigning `self.status` directly.
     pub fn transition_to(&mut self, new_state: UserPermissionState) -> Result<(), StateMachineError> {
-        let current = self.is_active.to_string().parse::<UserPermissionState>()?;
+        let current = match self.status {
+            UserPermissionStatus::Active => UserPermissionState::Active,
+            UserPermissionStatus::Inactive => UserPermissionState::Revoked,
+        };
         let mut sm = UserPermissionStateMachine::from_state(current);
         sm.transition_to_state(new_state)?;
-        self.is_active = new_state.to_string().parse::<bool>()
-            .map_err(|e| StateMachineError::InvalidState(e.to_string()))?;
+        self.status = match new_state {
+            UserPermissionState::Active => UserPermissionStatus::Active,
+            UserPermissionState::Revoked => UserPermissionStatus::Inactive,
+        };
         Ok(())
     }
 
@@ -241,6 +255,9 @@ impl UserPermission {
                 }
                 "revoked_reason" => {
                     if let Ok(v) = serde_json::from_value(value) { self.revoked_reason = v; }
+                }
+                "status" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
                 }
                 _ => {} // ignore unknown fields
             }
@@ -298,6 +315,7 @@ impl backbone_orm::EntityRepoMeta for UserPermission {
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("permission_id".to_string(), "uuid".to_string());
+        m.insert("status".to_string(), "user_permission_status".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -322,7 +340,7 @@ pub struct UserPermissionBuilder {
     expires_at: Option<DateTime<Utc>>,
     resource_id: Option<String>,
     resource_type: Option<String>,
-    is_active: Option<bool>,
+    status: Option<UserPermissionStatus>,
     revoked_at: Option<DateTime<Utc>>,
     revoked_by: Option<Uuid>,
     revoked_reason: Option<String>,
@@ -377,9 +395,9 @@ impl UserPermissionBuilder {
         self
     }
 
-    /// Set the is_active field (default: `true`)
-    pub fn is_active(mut self, value: bool) -> Self {
-        self.is_active = Some(value);
+    /// Set the status field (default: `UserPermissionStatus::default()`)
+    pub fn status(mut self, value: UserPermissionStatus) -> Self {
+        self.status = Some(value);
         self
     }
 
@@ -420,7 +438,7 @@ impl UserPermissionBuilder {
             expires_at: self.expires_at,
             resource_id: self.resource_id,
             resource_type: self.resource_type,
-            is_active: self.is_active.unwrap_or(true),
+            status: self.status.unwrap_or_default(),
             revoked_at: self.revoked_at,
             revoked_by: self.revoked_by,
             revoked_reason: self.revoked_reason,

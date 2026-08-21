@@ -106,7 +106,7 @@ impl<R: PasswordPolicyProjectionRepository> PasswordPolicyEventHandler for Passw
             event.id,
             event.name,
             event.organization_id,
-            event.is_active,
+            event.status,
             event.password_requirements,
             event.password_history,
             event.reset_settings,
@@ -125,7 +125,7 @@ impl<R: PasswordPolicyProjectionRepository> PasswordPolicyEventHandler for Passw
             // Apply updates from event
             projection.name = event.name;
             projection.organization_id = event.organization_id;
-            projection.is_active = event.is_active;
+            projection.status = event.status;
             projection.password_requirements = event.password_requirements;
             projection.password_history = event.password_history;
             projection.reset_settings = event.reset_settings;

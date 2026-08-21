@@ -85,11 +85,6 @@ models:
         type: json?
         description: "Last sync result details"
 
-      is_active:
-        type: bool
-        attributes: ["@default(true)"]
-        description: "Directory enabled"
-
       status:
         type: LDAPDirectoryStatus
         attributes: ["@default(draft)"]
@@ -103,8 +98,6 @@ models:
     indexes:
       - type: index
         fields: [name]
-      - type: index
-        fields: [is_active]
       - type: index
         fields: [sync_enabled, last_sync_at]
       - type: index

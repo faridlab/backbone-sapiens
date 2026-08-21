@@ -9,7 +9,7 @@ use async_trait::async_trait;
 use anyhow::Result;
 use uuid::Uuid;
 
-use crate::domain::entity::{Session, DeviceType};
+use crate::domain::entity::{Session, DeviceType, SessionStatus};
 
 /// Pagination parameters for list queries
 #[derive(Debug, Clone, Default)]
@@ -50,13 +50,13 @@ pub struct SessionFilter {
     pub user_agent: Option<String>,
     pub device_type: Option<DeviceType>,
     pub device_fingerprint: Option<String>,
-    pub is_active: Option<bool>,
+    pub status: Option<SessionStatus>,
 }
 
 impl SessionFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.user_id.is_some() || self.token_hash.is_some() || self.remember_me.is_some() || self.user_agent.is_some() || self.device_type.is_some() || self.device_fingerprint.is_some() || self.is_active.is_some()
+        self.user_id.is_some() || self.token_hash.is_some() || self.remember_me.is_some() || self.user_agent.is_some() || self.device_type.is_some() || self.device_fingerprint.is_some() || self.status.is_some()
     }
 }
 

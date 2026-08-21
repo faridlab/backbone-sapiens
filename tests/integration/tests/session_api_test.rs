@@ -33,7 +33,7 @@ impl TestDataGenerator for SessionTestData {
             "user_agent": null,
             "device_type": null,
             "device_fingerprint": null,
-            "is_active": true,
+            "status": "active",
             "revoked_at": now,
             "metadata": json!({}),
         })
@@ -53,7 +53,7 @@ impl TestDataGenerator for SessionTestData {
             "user_agent": null,
             "device_type": null,
             "device_fingerprint": null,
-            "is_active": true,
+            "status": "active",
             "revoked_at": now,
             "metadata": json!({}),
         })

@@ -75,7 +75,6 @@ pub struct ListSAMLProviderQuery {
     pub filter_acs_url: Option<String>,
     pub filter_sls_url: Option<String>,
     pub filter_name_id_format: Option<String>,
-    pub filter_is_active: Option<bool>,
     pub filter_status: Option<SAMLProviderStatus>,
 }
 
@@ -93,7 +92,6 @@ impl Default for ListSAMLProviderQuery {
             filter_acs_url: None,
             filter_sls_url: None,
             filter_name_id_format: None,
-            filter_is_active: None,
             filter_status: None,
         }
     }
@@ -128,7 +126,6 @@ impl<R: SAMLProviderRepository + 'static> QueryHandler<ListSAMLProviderQuery> fo
             acs_url: query.filter_acs_url.clone(),
             sls_url: query.filter_sls_url.clone(),
             name_id_format: query.filter_name_id_format.clone(),
-            is_active: query.filter_is_active.clone(),
             status: query.filter_status.clone(),
             ..Default::default()
         };

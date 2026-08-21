@@ -26,7 +26,7 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveSAMLProviderSpec;
 // impl Specification<SAMLProvider> for ActiveSAMLProviderSpec {
 //     fn is_satisfied_by(&self, e: &SAMLProvider) -> bool {
-//         // e.is_active
+//         // e.status
 //         todo!()
 //     }
 // }

@@ -26,7 +26,7 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveOAuthProviderSpec;
 // impl Specification<OAuthProvider> for ActiveOAuthProviderSpec {
 //     fn is_satisfied_by(&self, e: &OAuthProvider) -> bool {
-//         // e.is_active
+//         // e.status
 //         todo!()
 //     }
 // }

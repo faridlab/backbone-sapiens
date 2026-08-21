@@ -26,7 +26,7 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveMFADeviceSpec;
 // impl Specification<MFADevice> for ActiveMFADeviceSpec {
 //     fn is_satisfied_by(&self, e: &MFADevice) -> bool {
-//         // e.is_active
+//         // e.status
 //         todo!()
 //     }
 // }

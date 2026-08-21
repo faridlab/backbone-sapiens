@@ -243,7 +243,7 @@ pub async fn unlink_transition(
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: UserOAuthLinkState = entity.link_status.to_string().parse()
+    let current_state: UserOAuthLinkState = entity.status.to_string().parse()
         .unwrap_or(UserOAuthLinkState::default());
     let sm = UserOAuthLinkStateMachine::from_state(current_state);
     if !sm.can_transition(UserOAuthLinkTransition::Unlink) {
@@ -252,7 +252,7 @@ pub async fn unlink_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("link_status".to_string(), serde_json::Value::String("Unlinked".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("Unlinked".to_string()));
 
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
@@ -293,7 +293,7 @@ pub async fn require_verification_transition(
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: UserOAuthLinkState = entity.link_status.to_string().parse()
+    let current_state: UserOAuthLinkState = entity.status.to_string().parse()
         .unwrap_or(UserOAuthLinkState::default());
     let sm = UserOAuthLinkStateMachine::from_state(current_state);
     if !sm.can_transition(UserOAuthLinkTransition::RequireVerification) {
@@ -302,7 +302,7 @@ pub async fn require_verification_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("link_status".to_string(), serde_json::Value::String("RequiresVerification".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("RequiresVerification".to_string()));
 
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
@@ -343,7 +343,7 @@ pub async fn verify_transition(
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: UserOAuthLinkState = entity.link_status.to_string().parse()
+    let current_state: UserOAuthLinkState = entity.status.to_string().parse()
         .unwrap_or(UserOAuthLinkState::default());
     let sm = UserOAuthLinkStateMachine::from_state(current_state);
     if !sm.can_transition(UserOAuthLinkTransition::Verify) {
@@ -352,7 +352,7 @@ pub async fn verify_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("link_status".to_string(), serde_json::Value::String("Linked".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("Linked".to_string()));
 
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
@@ -393,7 +393,7 @@ pub async fn expire_verification_transition(
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: UserOAuthLinkState = entity.link_status.to_string().parse()
+    let current_state: UserOAuthLinkState = entity.status.to_string().parse()
         .unwrap_or(UserOAuthLinkState::default());
     let sm = UserOAuthLinkStateMachine::from_state(current_state);
     if !sm.can_transition(UserOAuthLinkTransition::ExpireVerification) {
@@ -402,7 +402,7 @@ pub async fn expire_verification_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("link_status".to_string(), serde_json::Value::String("Unlinked".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("Unlinked".to_string()));
 
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {

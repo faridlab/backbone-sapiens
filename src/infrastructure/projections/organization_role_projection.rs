@@ -10,6 +10,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
+use crate::domain::entity::OrganizationRoleStatus;
+
 // ============================================================================
 // PROJECTION (READ MODEL)
 // ============================================================================
@@ -25,7 +27,7 @@ pub struct OrganizationRoleProjection {
     pub name: String,
     pub description: Option<String>,
     pub permissions: Option<serde_json::Value>,
-    pub is_active: bool,
+    pub status: OrganizationRoleStatus,
     pub metadata: serde_json::Value,
 
     // Projection metadata
@@ -45,7 +47,7 @@ impl OrganizationRoleProjection {
         name: String,
         description: Option<String>,
         permissions: Option<serde_json::Value>,
-        is_active: bool,
+        status: OrganizationRoleStatus,
         metadata: serde_json::Value
     ) -> Self {
         Self {
@@ -54,7 +56,7 @@ impl OrganizationRoleProjection {
             name,
             description,
             permissions,
-            is_active,
+            status,
             metadata,
             projection_version: 1,
             last_event_sequence: 0,

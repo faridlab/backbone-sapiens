@@ -57,12 +57,11 @@ pub struct UserOAuthLink {
     pub provider_user_id: String,
     pub provider_email: String,
     pub provider_username: Option<String>,
-    pub(crate) is_active: bool,
     pub access_token: Option<String>,
     pub refresh_token: Option<String>,
     pub token_expires_at: Option<DateTime<Utc>>,
     pub is_primary: bool,
-    pub link_status: UserOAuthLinkStatus,
+    pub status: UserOAuthLinkStatus,
     pub last_synced: Option<DateTime<Utc>>,
     pub sync_enabled: bool,
     #[serde(default)]
@@ -77,7 +76,7 @@ impl UserOAuthLink {
     }
 
     /// Create a new UserOAuthLink with required fields
-    pub fn new(user_id: Uuid, oauth_provider_id: Uuid, provider_user_id: String, provider_email: String, is_active: bool, is_primary: bool, link_status: UserOAuthLinkStatus, sync_enabled: bool) -> Self {
+    pub fn new(user_id: Uuid, oauth_provider_id: Uuid, provider_user_id: String, provider_email: String, is_primary: bool, status: UserOAuthLinkStatus, sync_enabled: bool) -> Self {
         Self {
             id: Uuid::new_v4(),
             user_id,
@@ -85,12 +84,11 @@ impl UserOAuthLink {
             provider_user_id,
             provider_email,
             provider_username: None,
-            is_active,
             access_token: None,
             refresh_token: None,
             token_expires_at: None,
             is_primary,
-            link_status,
+            status,
             last_synced: None,
             sync_enabled,
             metadata: AuditMetadata::default(),
@@ -186,15 +184,15 @@ impl UserOAuthLink {
     // State Machine
     // ==========================================================
 
-    /// Transition to a new state via the is_active state machine.
+    /// Transition to a new state via the status state machine.
     ///
     /// Returns `Err` if the transition is not permitted from the current state.
-    /// Use this method instead of assigning `self.is_active` directly.
+    /// Use this method instead of assigning `self.status` directly.
     pub fn transition_to(&mut self, new_state: UserOAuthLinkState) -> Result<(), StateMachineError> {
-        let current = self.is_active.to_string().parse::<UserOAuthLinkState>()?;
+        let current = self.status.to_string().parse::<UserOAuthLinkState>()?;
         let mut sm = UserOAuthLinkStateMachine::from_state(current);
         sm.transition_to_state(new_state)?;
-        self.is_active = new_state.to_string().parse::<bool>()
+        self.status = new_state.to_string().parse::<UserOAuthLinkStatus>()
             .map_err(|e| StateMachineError::InvalidState(e.to_string()))?;
         Ok(())
     }
@@ -234,8 +232,8 @@ impl UserOAuthLink {
                 "is_primary" => {
                     if let Ok(v) = serde_json::from_value(value) { self.is_primary = v; }
                 }
-                "link_status" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.link_status = v; }
+                "status" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
                 }
                 "last_synced" => {
                     if let Ok(v) = serde_json::from_value(value) { self.last_synced = v; }
@@ -299,7 +297,7 @@ impl backbone_orm::EntityRepoMeta for UserOAuthLink {
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("oauth_provider_id".to_string(), "uuid".to_string());
-        m.insert("link_status".to_string(), "user_o_auth_link_status".to_string());
+        m.insert("status".to_string(), "user_o_auth_link_status".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -321,12 +319,11 @@ pub struct UserOAuthLinkBuilder {
     provider_user_id: Option<String>,
     provider_email: Option<String>,
     provider_username: Option<String>,
-    is_active: Option<bool>,
     access_token: Option<String>,
     refresh_token: Option<String>,
     token_expires_at: Option<DateTime<Utc>>,
     is_primary: Option<bool>,
-    link_status: Option<UserOAuthLinkStatus>,
+    status: Option<UserOAuthLinkStatus>,
     last_synced: Option<DateTime<Utc>>,
     sync_enabled: Option<bool>,
 }
@@ -362,12 +359,6 @@ impl UserOAuthLinkBuilder {
         self
     }
 
-    /// Set the is_active field (default: `true`)
-    pub fn is_active(mut self, value: bool) -> Self {
-        self.is_active = Some(value);
-        self
-    }
-
     /// Set the access_token field (optional)
     pub fn access_token(mut self, value: String) -> Self {
         self.access_token = Some(value);
@@ -392,9 +383,9 @@ impl UserOAuthLinkBuilder {
         self
     }
 
-    /// Set the link_status field (default: `UserOAuthLinkStatus::default()`)
-    pub fn link_status(mut self, value: UserOAuthLinkStatus) -> Self {
-        self.link_status = Some(value);
+    /// Set the status field (default: `UserOAuthLinkStatus::default()`)
+    pub fn status(mut self, value: UserOAuthLinkStatus) -> Self {
+        self.status = Some(value);
         self
     }
 
@@ -426,12 +417,11 @@ impl UserOAuthLinkBuilder {
             provider_user_id,
             provider_email,
             provider_username: self.provider_username,
-            is_active: self.is_active.unwrap_or(true),
             access_token: self.access_token,
             refresh_token: self.refresh_token,
             token_expires_at: self.token_expires_at,
             is_primary: self.is_primary.unwrap_or(false),
-            link_status: self.link_status.unwrap_or(UserOAuthLinkStatus::default()),
+            status: self.status.unwrap_or(UserOAuthLinkStatus::default()),
             last_synced: self.last_synced,
             sync_enabled: self.sync_enabled.unwrap_or(true),
             metadata: AuditMetadata::default(),

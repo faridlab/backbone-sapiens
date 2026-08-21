@@ -9,6 +9,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::entity::WorkflowDefinition;
+use crate::domain::entity::WorkflowDefinitionStatus;
 use crate::infrastructure::persistence::{WorkflowDefinitionRepository, PaginationParams, PaginatedResult, WorkflowDefinitionFilter};
 use super::QueryHandler;
 
@@ -70,7 +71,7 @@ pub struct ListWorkflowDefinitionQuery {
     pub filter_workflow_type: Option<WorkflowType>,
     pub filter_description: Option<String>,
     pub filter_trigger_type: Option<TriggerType>,
-    pub filter_is_active: Option<bool>,
+    pub filter_status: Option<WorkflowDefinitionStatus>,
 }
 
 impl Default for ListWorkflowDefinitionQuery {
@@ -82,7 +83,7 @@ impl Default for ListWorkflowDefinitionQuery {
             filter_workflow_type: None,
             filter_description: None,
             filter_trigger_type: None,
-            filter_is_active: None,
+            filter_status: None,
         }
     }
 }
@@ -111,7 +112,7 @@ impl<R: WorkflowDefinitionRepository + 'static> QueryHandler<ListWorkflowDefinit
             workflow_type: query.filter_workflow_type.clone(),
             description: query.filter_description.clone(),
             trigger_type: query.filter_trigger_type.clone(),
-            is_active: query.filter_is_active.clone(),
+            status: query.filter_status.clone(),
             ..Default::default()
         };
 

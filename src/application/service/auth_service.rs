@@ -625,15 +625,15 @@ impl AuthService {
             .await
             .map_err(|e| AuthError::Internal(e.into()))?;
 
-        sqlx::query("UPDATE sapiens.sessions SET is_active = false, revoked_at = NOW() WHERE id = $1")
+        sqlx::query("UPDATE sapiens.sessions SET status = 'revoked', revoked_at = NOW() WHERE id = $1")
             .bind(session.id)
             .execute(&mut *tx)
             .await
             .map_err(|e| AuthError::Internal(e.into()))?;
 
         sqlx::query(
-            "INSERT INTO sapiens.sessions (user_id, token_hash, expires_at, device_type, is_active, metadata) \
-             VALUES ($1, $2, $3, 'mobile', true, $4)",
+            "INSERT INTO sapiens.sessions (user_id, token_hash, expires_at, device_type, status, metadata) \
+             VALUES ($1, $2, $3, 'mobile', 'active', $4)",
         )
         .bind(user.id)
         .bind(&new_hash)
@@ -764,7 +764,7 @@ impl AuthService {
         .map_err(|e| AuthError::Internal(e.into()))?;
 
         sqlx::query(
-            "UPDATE sapiens.sessions SET is_active = false, revoked_at = NOW() WHERE user_id = $1",
+            "UPDATE sapiens.sessions SET status = 'revoked', revoked_at = NOW() WHERE user_id = $1",
         )
         .bind(token_row.user_id)
         .execute(&mut *tx)
@@ -829,8 +829,8 @@ impl AuthService {
             .map_err(|e| AuthError::Internal(e.into()))?;
 
         sqlx::query(
-            "UPDATE sapiens.sessions SET is_active = false, revoked_at = NOW() \
-             WHERE user_id = $1 AND is_active = true",
+            "UPDATE sapiens.sessions SET status = 'revoked', revoked_at = NOW() \
+             WHERE user_id = $1 AND status = 'active'",
         )
         .bind(user_id)
         .execute(&mut *tx)

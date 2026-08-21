@@ -66,8 +66,8 @@ impl SessionRepository {
         let id = Uuid::new_v4();
         let sql = format!(
             "INSERT INTO {TABLE_NAME} \
-             (id, user_id, token_hash, expires_at, remember_me, device_type, is_active, metadata) \
-             VALUES ($1, $2, $3, $4, false, 'unknown', true, $5) \
+             (id, user_id, token_hash, expires_at, remember_me, device_type, status, metadata) \
+             VALUES ($1, $2, $3, $4, false, 'unknown', 'active', $5) \
              RETURNING *"
         );
         let result = sqlx::query_as::<_, Session>(&sql)
@@ -94,12 +94,14 @@ impl SessionRepository {
         Ok(result)
     }
 
-    /// Soft-revoke a session by setting its `revoked_at` timestamp.
+    /// Soft-revoke a session: stamp `revoked_at` and flip `status` to `revoked`.
     pub async fn revoke_session(&self, session_id: Uuid) -> Result<()> {
-        sqlx::query(&format!("UPDATE {TABLE_NAME} SET revoked_at = NOW() WHERE id = $1"))
-            .bind(session_id)
-            .execute(self.pool())
-            .await?;
+        sqlx::query(&format!(
+            "UPDATE {TABLE_NAME} SET revoked_at = NOW(), status = 'revoked' WHERE id = $1"
+        ))
+        .bind(session_id)
+        .execute(self.pool())
+        .await?;
         Ok(())
     }
 
@@ -108,10 +110,13 @@ impl SessionRepository {
     /// Returns the number of rows affected.
     pub async fn revoke_all_user_sessions(&self, user_id: Uuid) -> Result<u64> {
         let result =
-            sqlx::query(&format!("UPDATE {TABLE_NAME} SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL"))
-                .bind(user_id)
-                .execute(self.pool())
-                .await?;
+            sqlx::query(&format!(
+                "UPDATE {TABLE_NAME} SET revoked_at = NOW(), status = 'revoked' \
+                 WHERE user_id = $1 AND revoked_at IS NULL"
+            ))
+            .bind(user_id)
+            .execute(self.pool())
+            .await?;
         Ok(result.rows_affected())
     }
 }

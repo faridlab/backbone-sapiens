@@ -50,9 +50,6 @@ pub struct CreateUserOAuthLinkDto {
     #[cfg_attr(feature = "validation", validate(length(max = 255)))]
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "provider_username")]
     pub provider_username: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "access_token")]
     pub access_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "refresh_token")]
@@ -62,8 +59,7 @@ pub struct CreateUserOAuthLinkDto {
     #[cfg_attr(feature = "openapi", schema(example = true))]
     #[serde(alias = "is_primary")]
     pub is_primary: bool,
-    #[serde(alias = "link_status")]
-    pub link_status: UserOAuthLinkStatus,
+    pub status: UserOAuthLinkStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "last_synced")]
     pub last_synced: Option<DateTime<Utc>>,
     #[cfg_attr(feature = "openapi", schema(example = true))]
@@ -101,9 +97,6 @@ pub struct UpdateUserOAuthLinkDto {
     #[cfg_attr(feature = "validation", validate(length(max = 255)))]
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "provider_username")]
     pub provider_username: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "access_token")]
     pub access_token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "refresh_token")]
@@ -113,8 +106,7 @@ pub struct UpdateUserOAuthLinkDto {
     #[cfg_attr(feature = "openapi", schema(example = true))]
     #[serde(alias = "is_primary")]
     pub is_primary: bool,
-    #[serde(alias = "link_status")]
-    pub link_status: UserOAuthLinkStatus,
+    pub status: UserOAuthLinkStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "last_synced")]
     pub last_synced: Option<DateTime<Utc>>,
     #[cfg_attr(feature = "openapi", schema(example = true))]
@@ -152,9 +144,6 @@ pub struct PatchUserOAuthLinkDto {
     #[cfg_attr(feature = "validation", validate(length(max = 255)))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "provider_username")]
     pub provider_username: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "is_active")]
-    pub is_active: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "access_token")]
     pub access_token: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "refresh_token")]
@@ -164,8 +153,8 @@ pub struct PatchUserOAuthLinkDto {
     #[cfg_attr(feature = "openapi", schema(example = true))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "is_primary")]
     pub is_primary: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "link_status")]
-    pub link_status: Option<UserOAuthLinkStatus>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<UserOAuthLinkStatus>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "last_synced")]
     pub last_synced: Option<DateTime<Utc>>,
     #[cfg_attr(feature = "openapi", schema(example = true))]
@@ -176,7 +165,7 @@ pub struct PatchUserOAuthLinkDto {
 impl PatchUserOAuthLinkDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.user_id.is_some() || self.oauth_provider_id.is_some() || self.provider_user_id.is_some() || self.provider_email.is_some() || self.provider_username.is_some() || self.is_active.is_some() || self.access_token.is_some() || self.refresh_token.is_some() || self.token_expires_at.is_some() || self.is_primary.is_some() || self.link_status.is_some() || self.last_synced.is_some() || self.sync_enabled.is_some()
+        self.user_id.is_some() || self.oauth_provider_id.is_some() || self.provider_user_id.is_some() || self.provider_email.is_some() || self.provider_username.is_some() || self.access_token.is_some() || self.refresh_token.is_some() || self.token_expires_at.is_some() || self.is_primary.is_some() || self.status.is_some() || self.last_synced.is_some() || self.sync_enabled.is_some()
     }
 }
 
@@ -203,14 +192,12 @@ pub struct UserOAuthLinkResponseDto {
     #[cfg_attr(feature = "openapi", schema(example = "user@example.com"))]
     pub provider_email: String,
     pub provider_username: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub is_active: bool,
     pub access_token: Option<String>,
     pub refresh_token: Option<String>,
     pub token_expires_at: Option<DateTime<Utc>>,
     #[cfg_attr(feature = "openapi", schema(example = true))]
     pub is_primary: bool,
-    pub link_status: UserOAuthLinkStatus,
+    pub status: UserOAuthLinkStatus,
     pub last_synced: Option<DateTime<Utc>>,
     #[cfg_attr(feature = "openapi", schema(example = true))]
     pub sync_enabled: bool,
@@ -290,12 +277,11 @@ impl From<UserOAuthLink> for UserOAuthLinkResponseDto {
             provider_user_id: entity.provider_user_id,
             provider_email: entity.provider_email,
             provider_username: entity.provider_username,
-            is_active: entity.is_active,
             access_token: entity.access_token,
             refresh_token: entity.refresh_token,
             token_expires_at: entity.token_expires_at,
             is_primary: entity.is_primary,
-            link_status: entity.link_status,
+            status: entity.status,
             last_synced: entity.last_synced,
             sync_enabled: entity.sync_enabled,
             metadata: entity.metadata,
@@ -325,12 +311,11 @@ impl From<CreateUserOAuthLinkDto> for UserOAuthLink {
             provider_user_id: dto.provider_user_id,
             provider_email: dto.provider_email,
             provider_username: dto.provider_username,
-            is_active: dto.is_active,
             access_token: dto.access_token,
             refresh_token: dto.refresh_token,
             token_expires_at: dto.token_expires_at,
             is_primary: dto.is_primary,
-            link_status: dto.link_status,
+            status: dto.status,
             last_synced: dto.last_synced,
             sync_enabled: dto.sync_enabled,
             metadata: AuditMetadata::default(),
@@ -347,12 +332,11 @@ impl From<&UserOAuthLink> for UserOAuthLinkResponseDto {
             provider_user_id: entity.provider_user_id.clone(),
             provider_email: entity.provider_email.clone(),
             provider_username: entity.provider_username.clone(),
-            is_active: entity.is_active.clone(),
             access_token: entity.access_token.clone(),
             refresh_token: entity.refresh_token.clone(),
             token_expires_at: entity.token_expires_at.clone(),
             is_primary: entity.is_primary.clone(),
-            link_status: entity.link_status.clone(),
+            status: entity.status.clone(),
             last_synced: entity.last_synced.clone(),
             sync_enabled: entity.sync_enabled.clone(),
             metadata: entity.metadata.clone(),
@@ -373,12 +357,11 @@ impl backbone_core::ApplyUpdateDto<UpdateUserOAuthLinkDto> for UserOAuthLink {
         self.provider_user_id = dto.provider_user_id;
         self.provider_email = dto.provider_email;
         self.provider_username = dto.provider_username;
-        self.is_active = dto.is_active;
         self.access_token = dto.access_token;
         self.refresh_token = dto.refresh_token;
         self.token_expires_at = dto.token_expires_at;
         self.is_primary = dto.is_primary;
-        self.link_status = dto.link_status;
+        self.status = dto.status;
         self.last_synced = dto.last_synced;
         self.sync_enabled = dto.sync_enabled;
         Ok(self)

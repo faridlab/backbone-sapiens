@@ -4,7 +4,7 @@
 //! Focuses on valid state transitions and business rules.
 
 use backbone_sapiens::domain::entity::{
-    User, Session, PasswordReset, PasswordResetStatus, UserStatus,
+    User, Session, PasswordReset, PasswordResetStatus, UserStatus, SessionStatus,
 };
 use chrono::{Utc, Duration};
 use uuid::Uuid;
@@ -179,7 +179,7 @@ mod session_state_machine_tests {
         );
 
         // Initial state: active and valid
-        assert!(session.is_active);
+        assert!(session.status == SessionStatus::Active);
         assert!(session.is_valid());
         assert!(!session.is_expired());
 
@@ -205,7 +205,7 @@ mod session_state_machine_tests {
         assert!(session.is_valid());
 
         // Revoke the session
-        session.is_active = false;
+        session.status = SessionStatus::Revoked;
         session.revoked_at = Some(Utc::now());
 
         // Should no longer be valid
@@ -283,7 +283,7 @@ mod session_state_machine_tests {
 
         // Inactive (revoked) session
         let mut revoked_session = Session::new(user_id, "fp123".to_string(), false, None, None);
-        revoked_session.is_active = false;
+        revoked_session.status = SessionStatus::Revoked;
         assert!(!revoked_session.is_valid());
     }
 }

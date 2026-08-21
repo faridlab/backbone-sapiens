@@ -26,7 +26,7 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveSessionSpec;
 // impl Specification<Session> for ActiveSessionSpec {
 //     fn is_satisfied_by(&self, e: &Session) -> bool {
-//         // e.is_active
+//         // e.status
 //         todo!()
 //     }
 // }

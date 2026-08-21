@@ -8,7 +8,7 @@
 use async_trait::async_trait;
 use anyhow::Result;
 
-use crate::domain::entity::{NotificationTemplate, NotificationChannel, NotificationType};
+use crate::domain::entity::{NotificationTemplate, NotificationChannel, NotificationType, NotificationTemplateStatus};
 
 /// Pagination parameters for list queries
 #[derive(Debug, Clone, Default)]
@@ -48,14 +48,14 @@ pub struct NotificationTemplateFilter {
     pub channel: Option<NotificationChannel>,
     pub subject_template: Option<String>,
     pub message_template: Option<String>,
-    pub is_active: Option<bool>,
+    pub status: Option<NotificationTemplateStatus>,
     pub language: Option<String>,
 }
 
 impl NotificationTemplateFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.name.is_some() || self.notification_type.is_some() || self.channel.is_some() || self.subject_template.is_some() || self.message_template.is_some() || self.is_active.is_some() || self.language.is_some()
+        self.name.is_some() || self.notification_type.is_some() || self.channel.is_some() || self.subject_template.is_some() || self.message_template.is_some() || self.status.is_some() || self.language.is_some()
     }
 }
 

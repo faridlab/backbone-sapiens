@@ -10,6 +10,7 @@ use anyhow::Result;
 use uuid::Uuid;
 
 use crate::domain::entity::UserPermission;
+use crate::domain::entity::UserPermissionStatus;
 
 /// Pagination parameters for list queries
 #[derive(Debug, Clone, Default)]
@@ -50,7 +51,7 @@ pub struct UserPermissionFilter {
     pub reason: Option<String>,
     pub resource_id: Option<String>,
     pub resource_type: Option<String>,
-    pub is_active: Option<bool>,
+    pub status: Option<UserPermissionStatus>,
     pub revoked_by: Option<Uuid>,
     pub revoked_reason: Option<String>,
 }
@@ -58,7 +59,7 @@ pub struct UserPermissionFilter {
 impl UserPermissionFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.user_id.is_some() || self.permission_id.is_some() || self.granted_by.is_some() || self.reason.is_some() || self.resource_id.is_some() || self.resource_type.is_some() || self.is_active.is_some() || self.revoked_by.is_some() || self.revoked_reason.is_some()
+        self.user_id.is_some() || self.permission_id.is_some() || self.granted_by.is_some() || self.reason.is_some() || self.resource_id.is_some() || self.resource_type.is_some() || self.status.is_some() || self.revoked_by.is_some() || self.revoked_reason.is_some()
     }
 }
 

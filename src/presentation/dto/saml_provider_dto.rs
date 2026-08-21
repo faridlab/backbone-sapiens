@@ -66,9 +66,6 @@ pub struct CreateSAMLProviderDto {
     pub name_id_format: String,
     #[serde(alias = "attribute_mapping")]
     pub attribute_mapping: serde_json::Value,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
     pub status: SAMLProviderStatus,
 }
 
@@ -118,9 +115,6 @@ pub struct UpdateSAMLProviderDto {
     pub name_id_format: String,
     #[serde(alias = "attribute_mapping")]
     pub attribute_mapping: serde_json::Value,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
     pub status: SAMLProviderStatus,
 }
 
@@ -172,9 +166,6 @@ pub struct PatchSAMLProviderDto {
     pub name_id_format: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "attribute_mapping")]
     pub attribute_mapping: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "is_active")]
-    pub is_active: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<SAMLProviderStatus>,
 }
@@ -182,7 +173,7 @@ pub struct PatchSAMLProviderDto {
 impl PatchSAMLProviderDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.name.is_some() || self.display_name.is_some() || self.entity_id.is_some() || self.sso_url.is_some() || self.slo_url.is_some() || self.certificate.is_some() || self.acs_url.is_some() || self.sls_url.is_some() || self.name_id_format.is_some() || self.attribute_mapping.is_some() || self.is_active.is_some() || self.status.is_some()
+        self.name.is_some() || self.display_name.is_some() || self.entity_id.is_some() || self.sso_url.is_some() || self.slo_url.is_some() || self.certificate.is_some() || self.acs_url.is_some() || self.sls_url.is_some() || self.name_id_format.is_some() || self.attribute_mapping.is_some() || self.status.is_some()
     }
 }
 
@@ -217,8 +208,6 @@ pub struct SAMLProviderResponseDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub name_id_format: String,
     pub attribute_mapping: serde_json::Value,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub is_active: bool,
     pub status: SAMLProviderStatus,
     pub metadata: AuditMetadata,
 }
@@ -301,7 +290,6 @@ impl From<SAMLProvider> for SAMLProviderResponseDto {
             sls_url: entity.sls_url,
             name_id_format: entity.name_id_format,
             attribute_mapping: entity.attribute_mapping,
-            is_active: entity.is_active,
             status: entity.status,
             metadata: entity.metadata,
         }
@@ -335,7 +323,6 @@ impl From<CreateSAMLProviderDto> for SAMLProvider {
             sls_url: dto.sls_url,
             name_id_format: dto.name_id_format,
             attribute_mapping: dto.attribute_mapping,
-            is_active: dto.is_active,
             status: dto.status,
             metadata: AuditMetadata::default(),
         }
@@ -356,7 +343,6 @@ impl From<&SAMLProvider> for SAMLProviderResponseDto {
             sls_url: entity.sls_url.clone(),
             name_id_format: entity.name_id_format.clone(),
             attribute_mapping: entity.attribute_mapping.clone(),
-            is_active: entity.is_active.clone(),
             status: entity.status.clone(),
             metadata: entity.metadata.clone(),
         }
@@ -381,7 +367,6 @@ impl backbone_core::ApplyUpdateDto<UpdateSAMLProviderDto> for SAMLProvider {
         self.sls_url = dto.sls_url;
         self.name_id_format = dto.name_id_format;
         self.attribute_mapping = dto.attribute_mapping;
-        self.is_active = dto.is_active;
         self.status = dto.status;
         Ok(self)
     }

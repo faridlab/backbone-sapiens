@@ -9,6 +9,7 @@
 use backbone_sapiens::domain::entity::{
     User, Session, UserStatus, DeviceType, PasswordReset, PasswordResetStatus,
     Role, Permission, RolePermission, MFADevice, MFADeviceType, MFADeviceStatus,
+    SessionStatus,
 };
 use backbone_sapiens::domain::value_objects::{Email, DeviceFingerprint};
 use chrono::{Utc, Duration};
@@ -226,7 +227,7 @@ mod session_tests {
 
         assert_eq!(session.user_id, user_id);
         assert_eq!(session.device_type, DeviceType::Web);
-        assert!(session.is_active);
+        assert!(session.status == SessionStatus::Active);
         assert!(session.revoked_at.is_none());
         assert_eq!(session.ip_address, ip_address);
         assert_eq!(session.user_agent, user_agent);
@@ -294,7 +295,7 @@ mod session_tests {
 
         // Revoked = not valid
         let mut revoked_session = session.clone();
-        revoked_session.is_active = false;
+        revoked_session.status = SessionStatus::Revoked;
         assert!(!revoked_session.is_valid());
 
         // Expired = not valid

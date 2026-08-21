@@ -127,9 +127,6 @@ pub struct CreateMFADeviceDto {
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     #[serde(alias = "failed_verifications")]
     pub failed_verifications: i32,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_locked")]
-    pub is_locked: bool,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "locked_at")]
     pub locked_at: Option<DateTime<Utc>>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "locked_until")]
@@ -141,9 +138,6 @@ pub struct CreateMFADeviceDto {
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     #[serde(alias = "risk_score")]
     pub risk_score: i32,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
     pub status: MFADeviceStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "backup_codes_data")]
     pub backup_codes_data: Option<serde_json::Value>,
@@ -254,9 +248,6 @@ pub struct UpdateMFADeviceDto {
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     #[serde(alias = "failed_verifications")]
     pub failed_verifications: i32,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_locked")]
-    pub is_locked: bool,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "locked_at")]
     pub locked_at: Option<DateTime<Utc>>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "locked_until")]
@@ -268,9 +259,6 @@ pub struct UpdateMFADeviceDto {
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     #[serde(alias = "risk_score")]
     pub risk_score: i32,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
     pub status: MFADeviceStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "backup_codes_data")]
     pub backup_codes_data: Option<serde_json::Value>,
@@ -381,9 +369,6 @@ pub struct PatchMFADeviceDto {
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "failed_verifications")]
     pub failed_verifications: Option<i32>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "is_locked")]
-    pub is_locked: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "locked_at")]
     pub locked_at: Option<DateTime<Utc>>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "locked_until")]
@@ -395,9 +380,6 @@ pub struct PatchMFADeviceDto {
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "risk_score")]
     pub risk_score: Option<i32>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "is_active")]
-    pub is_active: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<MFADeviceStatus>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "backup_codes_data")]
@@ -407,7 +389,7 @@ pub struct PatchMFADeviceDto {
 impl PatchMFADeviceDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.user_id.is_some() || self.device_type.is_some() || self.device_name.is_some() || self.phone_number.is_some() || self.email_address.is_some() || self.totp_secret.is_some() || self.secret.is_some() || self.hardware_key_id.is_some() || self.push_token.is_some() || self.device_fingerprint.is_some() || self.manufacturer.is_some() || self.model.is_some() || self.operating_system.is_some() || self.app_version.is_some() || self.is_primary.is_some() || self.is_backup.is_some() || self.requires_verification.is_some() || self.auto_approval_enabled.is_some() || self.trusted_duration_hours.is_some() || self.enrolled_at.is_some() || self.enrolled_by.is_some() || self.enrollment_method.is_some() || self.enrollment_ip.is_some() || self.enrollment_user_agent.is_some() || self.verification_attempts.is_some() || self.backup_codes_generated.is_some() || self.verified_at.is_some() || self.last_used.is_some() || self.last_used_at.is_some() || self.usage_count.is_some() || self.successful_verifications.is_some() || self.failed_verifications.is_some() || self.is_locked.is_some() || self.locked_at.is_some() || self.locked_until.is_some() || self.lock_reason.is_some() || self.risk_score.is_some() || self.is_active.is_some() || self.status.is_some() || self.backup_codes_data.is_some()
+        self.user_id.is_some() || self.device_type.is_some() || self.device_name.is_some() || self.phone_number.is_some() || self.email_address.is_some() || self.totp_secret.is_some() || self.secret.is_some() || self.hardware_key_id.is_some() || self.push_token.is_some() || self.device_fingerprint.is_some() || self.manufacturer.is_some() || self.model.is_some() || self.operating_system.is_some() || self.app_version.is_some() || self.is_primary.is_some() || self.is_backup.is_some() || self.requires_verification.is_some() || self.auto_approval_enabled.is_some() || self.trusted_duration_hours.is_some() || self.enrolled_at.is_some() || self.enrolled_by.is_some() || self.enrollment_method.is_some() || self.enrollment_ip.is_some() || self.enrollment_user_agent.is_some() || self.verification_attempts.is_some() || self.backup_codes_generated.is_some() || self.verified_at.is_some() || self.last_used.is_some() || self.last_used_at.is_some() || self.usage_count.is_some() || self.successful_verifications.is_some() || self.failed_verifications.is_some() || self.locked_at.is_some() || self.locked_until.is_some() || self.lock_reason.is_some() || self.risk_score.is_some() || self.status.is_some() || self.backup_codes_data.is_some()
     }
 }
 
@@ -470,15 +452,11 @@ pub struct MFADeviceResponseDto {
     pub successful_verifications: i32,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     pub failed_verifications: i32,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub is_locked: bool,
     pub locked_at: Option<DateTime<Utc>>,
     pub locked_until: Option<DateTime<Utc>>,
     pub lock_reason: Option<String>,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     pub risk_score: i32,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub is_active: bool,
     pub status: MFADeviceStatus,
     pub backup_codes_data: Option<serde_json::Value>,
     pub metadata: AuditMetadata,
@@ -584,12 +562,10 @@ impl From<MFADevice> for MFADeviceResponseDto {
             usage_count: entity.usage_count,
             successful_verifications: entity.successful_verifications,
             failed_verifications: entity.failed_verifications,
-            is_locked: entity.is_locked,
             locked_at: entity.locked_at,
             locked_until: entity.locked_until,
             lock_reason: entity.lock_reason,
             risk_score: entity.risk_score,
-            is_active: entity.is_active,
             status: entity.status,
             backup_codes_data: entity.backup_codes_data,
             metadata: entity.metadata,
@@ -646,12 +622,10 @@ impl From<CreateMFADeviceDto> for MFADevice {
             usage_count: dto.usage_count,
             successful_verifications: dto.successful_verifications,
             failed_verifications: dto.failed_verifications,
-            is_locked: dto.is_locked,
             locked_at: dto.locked_at,
             locked_until: dto.locked_until,
             lock_reason: dto.lock_reason,
             risk_score: dto.risk_score,
-            is_active: dto.is_active,
             status: dto.status,
             backup_codes_data: dto.backup_codes_data,
             metadata: AuditMetadata::default(),
@@ -695,12 +669,10 @@ impl From<&MFADevice> for MFADeviceResponseDto {
             usage_count: entity.usage_count.clone(),
             successful_verifications: entity.successful_verifications.clone(),
             failed_verifications: entity.failed_verifications.clone(),
-            is_locked: entity.is_locked.clone(),
             locked_at: entity.locked_at.clone(),
             locked_until: entity.locked_until.clone(),
             lock_reason: entity.lock_reason.clone(),
             risk_score: entity.risk_score.clone(),
-            is_active: entity.is_active.clone(),
             status: entity.status.clone(),
             backup_codes_data: entity.backup_codes_data.clone(),
             metadata: entity.metadata.clone(),
@@ -748,12 +720,10 @@ impl backbone_core::ApplyUpdateDto<UpdateMFADeviceDto> for MFADevice {
         self.usage_count = dto.usage_count;
         self.successful_verifications = dto.successful_verifications;
         self.failed_verifications = dto.failed_verifications;
-        self.is_locked = dto.is_locked;
         self.locked_at = dto.locked_at;
         self.locked_until = dto.locked_until;
         self.lock_reason = dto.lock_reason;
         self.risk_score = dto.risk_score;
-        self.is_active = dto.is_active;
         self.status = dto.status;
         self.backup_codes_data = dto.backup_codes_data;
         Ok(self)

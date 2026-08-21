@@ -18,6 +18,7 @@ use validator::Validate;
 
 use crate::domain::entity::OrganizationRole;
 use crate::domain::entity::AuditMetadata;
+use crate::domain::entity::OrganizationRoleStatus;
 
 // =============================================================================
 // Create DTO
@@ -43,9 +44,8 @@ pub struct CreateOrganizationRoleDto {
     pub description: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub permissions: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: OrganizationRoleStatus,
 }
 
 // =============================================================================
@@ -72,9 +72,8 @@ pub struct UpdateOrganizationRoleDto {
     pub description: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub permissions: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: OrganizationRoleStatus,
 }
 
 // =============================================================================
@@ -102,15 +101,15 @@ pub struct PatchOrganizationRoleDto {
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub permissions: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "is_active")]
-    pub is_active: Option<bool>,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<OrganizationRoleStatus>,
 }
 
 impl PatchOrganizationRoleDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.organization_id.is_some() || self.name.is_some() || self.description.is_some() || self.permissions.is_some() || self.is_active.is_some()
+        self.organization_id.is_some() || self.name.is_some() || self.description.is_some() || self.permissions.is_some() || self.status.is_some()
     }
 }
 
@@ -134,8 +133,8 @@ pub struct OrganizationRoleResponseDto {
     pub name: String,
     pub description: Option<String>,
     pub permissions: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: OrganizationRoleStatus,
     pub metadata: AuditMetadata,
 }
 
@@ -211,7 +210,7 @@ impl From<OrganizationRole> for OrganizationRoleResponseDto {
             name: entity.name,
             description: entity.description,
             permissions: entity.permissions,
-            is_active: entity.is_active,
+            status: entity.status,
             metadata: entity.metadata,
         }
     }
@@ -238,7 +237,7 @@ impl From<CreateOrganizationRoleDto> for OrganizationRole {
             name: dto.name,
             description: dto.description,
             permissions: dto.permissions,
-            is_active: dto.is_active,
+            status: dto.status,
             metadata: AuditMetadata::default(),
         }
     }
@@ -252,7 +251,7 @@ impl From<&OrganizationRole> for OrganizationRoleResponseDto {
             name: entity.name.clone(),
             description: entity.description.clone(),
             permissions: entity.permissions.clone(),
-            is_active: entity.is_active.clone(),
+            status: entity.status.clone(),
             metadata: entity.metadata.clone(),
         }
     }
@@ -270,7 +269,7 @@ impl backbone_core::ApplyUpdateDto<UpdateOrganizationRoleDto> for OrganizationRo
         self.name = dto.name;
         self.description = dto.description;
         self.permissions = dto.permissions;
-        self.is_active = dto.is_active;
+        self.status = dto.status;
         Ok(self)
     }
 }

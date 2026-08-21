@@ -33,7 +33,7 @@ impl TestDataGenerator for OrganizationPermissionTestData {
             "granted_at": now,
             "expires_at": now,
             "reason": null,
-            "is_active": true,
+            "status": "active",
             "metadata": json!({}),
         })
     }
@@ -52,7 +52,7 @@ impl TestDataGenerator for OrganizationPermissionTestData {
             "granted_at": now,
             "expires_at": now,
             "reason": null,
-            "is_active": true,
+            "status": "active",
             "metadata": json!({}),
         })
     }

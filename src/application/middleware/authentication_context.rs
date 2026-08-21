@@ -16,6 +16,7 @@ use std::pin::Pin;
 use std::sync::{Arc, OnceLock};
 
 use crate::domain::entity::RoleAssignmentStatus;
+use crate::domain::entity::SessionStatus;
 use crate::domain::repositories::{
     UserRepository,
     SessionRepository, SessionPaginationParams, SessionFilter,
@@ -182,7 +183,7 @@ async fn lookup_active_session(
 ) -> Uuid {
     let filter = SessionFilter {
         user_id: Some(user_id),
-        is_active: Some(true),
+        status: Some(SessionStatus::Active),
         ..Default::default()
     };
     let params = SessionPaginationParams::new(1, 1);

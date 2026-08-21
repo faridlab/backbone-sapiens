@@ -32,7 +32,7 @@ impl TestDataGenerator for OAuthProviderTestData {
             "authorization_url": null,
             "token_url": null,
             "user_info_url": null,
-            "is_active": true,
+            "status": "active",
             "metadata": json!({}),
         })
     }
@@ -50,7 +50,7 @@ impl TestDataGenerator for OAuthProviderTestData {
             "authorization_url": null,
             "token_url": null,
             "user_info_url": null,
-            "is_active": true,
+            "status": "active",
             "metadata": json!({}),
         })
     }

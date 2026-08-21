@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use super::WorkflowType;
 use super::TriggerType;
+use super::WorkflowDefinitionStatus;
 use super::AuditMetadata;
 
 /// Strongly-typed ID for WorkflowDefinition
@@ -56,7 +57,7 @@ pub struct WorkflowDefinition {
     pub description: Option<String>,
     pub trigger_type: TriggerType,
     pub trigger_config: Option<serde_json::Value>,
-    pub is_active: bool,
+    pub status: WorkflowDefinitionStatus,
     pub timeout_minutes: Option<i32>,
     pub max_retries: i32,
     pub created_by: Uuid,
@@ -72,7 +73,7 @@ impl WorkflowDefinition {
     }
 
     /// Create a new WorkflowDefinition with required fields
-    pub fn new(name: String, workflow_type: WorkflowType, trigger_type: TriggerType, is_active: bool, max_retries: i32) -> Self {
+    pub fn new(name: String, workflow_type: WorkflowType, trigger_type: TriggerType, status: WorkflowDefinitionStatus, max_retries: i32) -> Self {
         Self {
             id: Uuid::new_v4(),
             name,
@@ -80,7 +81,7 @@ impl WorkflowDefinition {
             description: None,
             trigger_type,
             trigger_config: None,
-            is_active,
+            status,
             timeout_minutes: None,
             max_retries,
             created_by: Default::default(),
@@ -138,6 +139,11 @@ impl WorkflowDefinition {
         self.metadata.deleted_by.as_ref()
     }
 
+    /// Get the current status
+    pub fn status(&self) -> &WorkflowDefinitionStatus {
+        &self.status
+    }
+
 
     // ==========================================================
     // Fluent Setters (with_* for optional fields)
@@ -184,8 +190,8 @@ impl WorkflowDefinition {
                 "trigger_config" => {
                     if let Ok(v) = serde_json::from_value(value) { self.trigger_config = v; }
                 }
-                "is_active" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.is_active = v; }
+                "status" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
                 }
                 "timeout_minutes" => {
                     if let Ok(v) = serde_json::from_value(value) { self.timeout_minutes = v; }
@@ -249,6 +255,7 @@ impl backbone_orm::EntityRepoMeta for WorkflowDefinition {
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("workflow_type".to_string(), "workflow_type".to_string());
         m.insert("trigger_type".to_string(), "trigger_type".to_string());
+        m.insert("status".to_string(), "workflow_definition_status".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -270,7 +277,7 @@ pub struct WorkflowDefinitionBuilder {
     description: Option<String>,
     trigger_type: Option<TriggerType>,
     trigger_config: Option<serde_json::Value>,
-    is_active: Option<bool>,
+    status: Option<WorkflowDefinitionStatus>,
     timeout_minutes: Option<i32>,
     max_retries: Option<i32>,
 }
@@ -306,9 +313,9 @@ impl WorkflowDefinitionBuilder {
         self
     }
 
-    /// Set the is_active field (default: `true`)
-    pub fn is_active(mut self, value: bool) -> Self {
-        self.is_active = Some(value);
+    /// Set the status field (default: `WorkflowDefinitionStatus::default()`)
+    pub fn status(mut self, value: WorkflowDefinitionStatus) -> Self {
+        self.status = Some(value);
         self
     }
 
@@ -339,7 +346,7 @@ impl WorkflowDefinitionBuilder {
             description: self.description,
             trigger_type,
             trigger_config: self.trigger_config,
-            is_active: self.is_active.unwrap_or(true),
+            status: self.status.unwrap_or_default(),
             timeout_minutes: self.timeout_minutes,
             max_retries: self.max_retries.unwrap_or(3),
             created_by: Default::default(),

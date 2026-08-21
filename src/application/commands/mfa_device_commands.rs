@@ -67,12 +67,10 @@ pub struct CreateMFADeviceCommand {
     pub usage_count: i32,
     pub successful_verifications: i32,
     pub failed_verifications: i32,
-    pub is_locked: bool,
     pub locked_at: Option<DateTime<Utc>>,
     pub locked_until: Option<DateTime<Utc>>,
     pub lock_reason: Option<String>,
     pub risk_score: i32,
-    pub is_active: bool,
     pub status: MFADeviceStatus,
     pub backup_codes_data: Option<serde_json::Value>,
     pub metadata: serde_json::Value,
@@ -128,12 +126,10 @@ impl<R: MFADeviceRepository + 'static> CommandHandler<CreateMFADeviceCommand> fo
             .usage_count(cmd.usage_count)
             .successful_verifications(cmd.successful_verifications)
             .failed_verifications(cmd.failed_verifications)
-            .is_locked(cmd.is_locked)
             .locked_at(cmd.locked_at)
             .locked_until(cmd.locked_until)
             .lock_reason(cmd.lock_reason)
             .risk_score(cmd.risk_score)
-            .is_active(cmd.is_active)
             .status(cmd.status)
             .backup_codes_data(cmd.backup_codes_data)
             .metadata(cmd.metadata)
@@ -183,12 +179,10 @@ pub struct UpdateMFADeviceCommand {
     pub usage_count: Option<i32>,
     pub successful_verifications: Option<i32>,
     pub failed_verifications: Option<i32>,
-    pub is_locked: Option<bool>,
     pub locked_at: Option<DateTime<Utc>>,
     pub locked_until: Option<DateTime<Utc>>,
     pub lock_reason: Option<String>,
     pub risk_score: Option<i32>,
-    pub is_active: Option<bool>,
     pub status: Option<MFADeviceStatus>,
     pub backup_codes_data: Option<serde_json::Value>,
     pub metadata: Option<serde_json::Value>,
@@ -279,17 +273,11 @@ impl<R: MFADeviceRepository + 'static> CommandHandler<UpdateMFADeviceCommand> fo
         if let Some(value) = cmd.failed_verifications {
             entity.failed_verifications = value;
         }
-        if let Some(value) = cmd.is_locked {
-            entity.is_locked = value;
-        }
         entity.locked_at = cmd.locked_at;
         entity.locked_until = cmd.locked_until;
         entity.lock_reason = cmd.lock_reason;
         if let Some(value) = cmd.risk_score {
             entity.risk_score = value;
-        }
-        if let Some(value) = cmd.is_active {
-            entity.is_active = value;
         }
         if let Some(value) = cmd.status {
             entity.status = value;

@@ -59,10 +59,10 @@ models:
         attributes: ["@max(255)"]
         description: "Device fingerprint for trust verification"
 
-      is_active:
-        type: bool
-        attributes: ["@default(true)"]
-        description: "Revocation flag"
+      status:
+        type: SessionStatus
+        attributes: ["@default(active)"]
+        description: "Lifecycle state; mirrors revoked_at (revoked exactly when revoked_at is set)"
 
       revoked_at:
         type: datetime?
@@ -86,7 +86,7 @@ models:
       - type: index
         fields: [token_hash]
       - type: index
-        fields: [user_id, is_active]
+        fields: [user_id, status]
       - type: index
         fields: [user_id, created_at]
       - type: index
@@ -106,3 +106,12 @@ enums:
       - name: unknown
         default: true
         description: "Unknown device type"
+
+  - name: SessionStatus
+    description: "Lifecycle of a session"
+    variants:
+      - name: active
+        default: true
+        description: "Session is live until it expires or is revoked"
+      - name: revoked
+        description: "Session was revoked; revoked_at is always set"

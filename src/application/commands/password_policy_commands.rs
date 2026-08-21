@@ -37,7 +37,7 @@ pub trait PasswordPolicyCommand: Send + Sync {
 pub struct CreatePasswordPolicyCommand {
     pub name: String,
     pub organization_id: Option<Uuid>,
-    pub is_active: bool,
+    pub status: PasswordPolicyStatus,
     pub password_requirements: serde_json::Value,
     pub password_history: serde_json::Value,
     pub reset_settings: serde_json::Value,
@@ -65,7 +65,7 @@ impl<R: PasswordPolicyRepository + 'static> CommandHandler<CreatePasswordPolicyC
             .id(Uuid::new_v4().to_string())
             .name(cmd.name)
             .organization_id(cmd.organization_id)
-            .is_active(cmd.is_active)
+            .status(cmd.status)
             .password_requirements(cmd.password_requirements)
             .password_history(cmd.password_history)
             .reset_settings(cmd.reset_settings)
@@ -87,7 +87,7 @@ pub struct UpdatePasswordPolicyCommand {
     pub id: String,
     pub name: Option<String>,
     pub organization_id: Option<Uuid>,
-    pub is_active: Option<bool>,
+    pub status: Option<PasswordPolicyStatus>,
     pub password_requirements: Option<serde_json::Value>,
     pub password_history: Option<serde_json::Value>,
     pub reset_settings: Option<serde_json::Value>,
@@ -122,8 +122,8 @@ impl<R: PasswordPolicyRepository + 'static> CommandHandler<UpdatePasswordPolicyC
             entity.name = value;
         }
         entity.organization_id = cmd.organization_id;
-        if let Some(value) = cmd.is_active {
-            entity.is_active = value;
+        if let Some(value) = cmd.status {
+            entity.status = value;
         }
         if let Some(value) = cmd.password_requirements {
             entity.password_requirements = value;

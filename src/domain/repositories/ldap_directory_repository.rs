@@ -53,14 +53,13 @@ pub struct LDAPDirectoryFilter {
     pub search_base: Option<String>,
     pub search_filter: Option<String>,
     pub sync_enabled: Option<bool>,
-    pub is_active: Option<bool>,
     pub status: Option<LDAPDirectoryStatus>,
 }
 
 impl LDAPDirectoryFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.name.is_some() || self.display_name.is_some() || self.host.is_some() || self.use_ssl.is_some() || self.use_tls.is_some() || self.bind_dn.is_some() || self.bind_password.is_some() || self.search_base.is_some() || self.search_filter.is_some() || self.sync_enabled.is_some() || self.is_active.is_some() || self.status.is_some()
+        self.name.is_some() || self.display_name.is_some() || self.host.is_some() || self.use_ssl.is_some() || self.use_tls.is_some() || self.bind_dn.is_some() || self.bind_password.is_some() || self.search_base.is_some() || self.search_filter.is_some() || self.sync_enabled.is_some() || self.status.is_some()
     }
 }
 

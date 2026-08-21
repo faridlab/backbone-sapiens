@@ -26,7 +26,7 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveOrganizationRoleSpec;
 // impl Specification<OrganizationRole> for ActiveOrganizationRoleSpec {
 //     fn is_satisfied_by(&self, e: &OrganizationRole) -> bool {
-//         // e.is_active
+//         // e.status == OrganizationRoleStatus::Active
 //         todo!()
 //     }
 // }

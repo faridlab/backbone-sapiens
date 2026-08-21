@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::domain::entity::UserPermission;
+use crate::domain::entity::UserPermissionStatus;
 use crate::infrastructure::persistence::UserPermissionRepository;
 use super::CommandHandler;
 
@@ -43,7 +44,7 @@ pub struct CreateUserPermissionCommand {
     pub expires_at: Option<DateTime<Utc>>,
     pub resource_id: Option<String>,
     pub resource_type: Option<String>,
-    pub is_active: bool,
+    pub status: UserPermissionStatus,
     pub revoked_at: Option<DateTime<Utc>>,
     pub revoked_by: Option<Uuid>,
     pub revoked_reason: Option<String>,
@@ -76,7 +77,7 @@ impl<R: UserPermissionRepository + 'static> CommandHandler<CreateUserPermissionC
             .expires_at(cmd.expires_at)
             .resource_id(cmd.resource_id)
             .resource_type(cmd.resource_type)
-            .is_active(cmd.is_active)
+            .status(cmd.status)
             .revoked_at(cmd.revoked_at)
             .revoked_by(cmd.revoked_by)
             .revoked_reason(cmd.revoked_reason)
@@ -103,7 +104,7 @@ pub struct UpdateUserPermissionCommand {
     pub expires_at: Option<DateTime<Utc>>,
     pub resource_id: Option<String>,
     pub resource_type: Option<String>,
-    pub is_active: Option<bool>,
+    pub status: Option<UserPermissionStatus>,
     pub revoked_at: Option<DateTime<Utc>>,
     pub revoked_by: Option<Uuid>,
     pub revoked_reason: Option<String>,
@@ -151,8 +152,8 @@ impl<R: UserPermissionRepository + 'static> CommandHandler<UpdateUserPermissionC
         entity.expires_at = cmd.expires_at;
         entity.resource_id = cmd.resource_id;
         entity.resource_type = cmd.resource_type;
-        if let Some(value) = cmd.is_active {
-            entity.is_active = value;
+        if let Some(value) = cmd.status {
+            entity.status = value;
         }
         entity.revoked_at = cmd.revoked_at;
         entity.revoked_by = cmd.revoked_by;

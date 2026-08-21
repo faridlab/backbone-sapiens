@@ -27,7 +27,7 @@ impl TestDataGenerator for OrganizationRoleTestData {
             "name": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
             "description": "Test description",
             "permissions": null,
-            "is_active": true,
+            "status": "active",
             "metadata": json!({}),
         })
     }
@@ -40,7 +40,7 @@ impl TestDataGenerator for OrganizationRoleTestData {
             "name": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
             "description": "Test description",
             "permissions": null,
-            "is_active": true,
+            "status": "active",
             "metadata": json!({}),
         })
     }

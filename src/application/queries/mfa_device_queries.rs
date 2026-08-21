@@ -89,9 +89,7 @@ pub struct ListMFADeviceQuery {
     pub filter_enrollment_ip: Option<String>,
     pub filter_enrollment_user_agent: Option<String>,
     pub filter_backup_codes_generated: Option<bool>,
-    pub filter_is_locked: Option<bool>,
     pub filter_lock_reason: Option<String>,
-    pub filter_is_active: Option<bool>,
     pub filter_status: Option<MFADeviceStatus>,
 }
 
@@ -123,9 +121,7 @@ impl Default for ListMFADeviceQuery {
             filter_enrollment_ip: None,
             filter_enrollment_user_agent: None,
             filter_backup_codes_generated: None,
-            filter_is_locked: None,
             filter_lock_reason: None,
-            filter_is_active: None,
             filter_status: None,
         }
     }
@@ -174,9 +170,7 @@ impl<R: MFADeviceRepository + 'static> QueryHandler<ListMFADeviceQuery> for List
             enrollment_ip: query.filter_enrollment_ip.clone(),
             enrollment_user_agent: query.filter_enrollment_user_agent.clone(),
             backup_codes_generated: query.filter_backup_codes_generated.clone(),
-            is_locked: query.filter_is_locked.clone(),
             lock_reason: query.filter_lock_reason.clone(),
-            is_active: query.filter_is_active.clone(),
             status: query.filter_status.clone(),
             ..Default::default()
         };

@@ -9,6 +9,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::entity::OrganizationRole;
+use crate::domain::entity::OrganizationRoleStatus;
 use crate::infrastructure::persistence::{OrganizationRoleRepository, PaginationParams, PaginatedResult, OrganizationRoleFilter};
 use super::QueryHandler;
 
@@ -69,7 +70,7 @@ pub struct ListOrganizationRoleQuery {
     pub filter_organization_id: Option<Uuid>,
     pub filter_name: Option<String>,
     pub filter_description: Option<String>,
-    pub filter_is_active: Option<bool>,
+    pub filter_status: Option<OrganizationRoleStatus>,
 }
 
 impl Default for ListOrganizationRoleQuery {
@@ -80,7 +81,7 @@ impl Default for ListOrganizationRoleQuery {
             filter_organization_id: None,
             filter_name: None,
             filter_description: None,
-            filter_is_active: None,
+            filter_status: None,
         }
     }
 }
@@ -108,7 +109,7 @@ impl<R: OrganizationRoleRepository + 'static> QueryHandler<ListOrganizationRoleQ
             organization_id: query.filter_organization_id.clone(),
             name: query.filter_name.clone(),
             description: query.filter_description.clone(),
-            is_active: query.filter_is_active.clone(),
+            status: query.filter_status.clone(),
             ..Default::default()
         };
 

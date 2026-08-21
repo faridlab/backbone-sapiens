@@ -113,7 +113,7 @@ impl<R: OAuthProviderProjectionRepository> OAuthProviderEventHandler for OAuthPr
             event.authorization_url,
             event.token_url,
             event.user_info_url,
-            event.is_active,
+            event.status,
             event.metadata
         );
 
@@ -135,7 +135,7 @@ impl<R: OAuthProviderProjectionRepository> OAuthProviderEventHandler for OAuthPr
             projection.authorization_url = event.authorization_url;
             projection.token_url = event.token_url;
             projection.user_info_url = event.user_info_url;
-            projection.is_active = event.is_active;
+            projection.status = event.status;
             projection.metadata = event.metadata;
             // Track the event sequence for this projection
             projection.apply_event(sequence);

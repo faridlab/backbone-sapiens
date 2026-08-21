@@ -8,7 +8,7 @@
 use async_trait::async_trait;
 use anyhow::Result;
 
-use crate::domain::entity::{OAuthProvider, OAuthProviderType};
+use crate::domain::entity::{OAuthProvider, OAuthProviderType, OAuthProviderStatus};
 
 /// Pagination parameters for list queries
 #[derive(Debug, Clone, Default)]
@@ -47,13 +47,13 @@ pub struct OAuthProviderFilter {
     pub display_name: Option<String>,
     pub client_id: Option<String>,
     pub client_secret: Option<String>,
-    pub is_active: Option<bool>,
+    pub status: Option<OAuthProviderStatus>,
 }
 
 impl OAuthProviderFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.provider_name.is_some() || self.display_name.is_some() || self.client_id.is_some() || self.client_secret.is_some() || self.is_active.is_some()
+        self.provider_name.is_some() || self.display_name.is_some() || self.client_id.is_some() || self.client_secret.is_some() || self.status.is_some()
     }
 }
 

@@ -71,11 +71,10 @@ pub struct ListUserOAuthLinkQuery {
     pub filter_provider_user_id: Option<String>,
     pub filter_provider_email: Option<String>,
     pub filter_provider_username: Option<String>,
-    pub filter_is_active: Option<bool>,
     pub filter_access_token: Option<String>,
     pub filter_refresh_token: Option<String>,
     pub filter_is_primary: Option<bool>,
-    pub filter_link_status: Option<UserOAuthLinkStatus>,
+    pub filter_status: Option<UserOAuthLinkStatus>,
     pub filter_sync_enabled: Option<bool>,
 }
 
@@ -89,11 +88,10 @@ impl Default for ListUserOAuthLinkQuery {
             filter_provider_user_id: None,
             filter_provider_email: None,
             filter_provider_username: None,
-            filter_is_active: None,
             filter_access_token: None,
             filter_refresh_token: None,
             filter_is_primary: None,
-            filter_link_status: None,
+            filter_status: None,
             filter_sync_enabled: None,
         }
     }
@@ -124,11 +122,10 @@ impl<R: UserOAuthLinkRepository + 'static> QueryHandler<ListUserOAuthLinkQuery> 
             provider_user_id: query.filter_provider_user_id.clone(),
             provider_email: query.filter_provider_email.clone(),
             provider_username: query.filter_provider_username.clone(),
-            is_active: query.filter_is_active.clone(),
             access_token: query.filter_access_token.clone(),
             refresh_token: query.filter_refresh_token.clone(),
             is_primary: query.filter_is_primary.clone(),
-            link_status: query.filter_link_status.clone(),
+            status: query.filter_status.clone(),
             sync_enabled: query.filter_sync_enabled.clone(),
             ..Default::default()
         };

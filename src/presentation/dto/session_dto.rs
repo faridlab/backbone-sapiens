@@ -19,6 +19,7 @@ use validator::Validate;
 use crate::domain::entity::Session;
 use crate::domain::entity::AuditMetadata;
 use crate::domain::entity::DeviceType;
+use crate::domain::entity::SessionStatus;
 
 // =============================================================================
 // Create DTO
@@ -59,9 +60,7 @@ pub struct CreateSessionDto {
     #[cfg_attr(feature = "validation", validate(length(max = 255)))]
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "device_fingerprint")]
     pub device_fingerprint: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    pub status: SessionStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "revoked_at")]
     pub revoked_at: Option<DateTime<Utc>>,
 }
@@ -105,9 +104,7 @@ pub struct UpdateSessionDto {
     #[cfg_attr(feature = "validation", validate(length(max = 255)))]
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "device_fingerprint")]
     pub device_fingerprint: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    pub status: SessionStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "revoked_at")]
     pub revoked_at: Option<DateTime<Utc>>,
 }
@@ -151,9 +148,8 @@ pub struct PatchSessionDto {
     #[cfg_attr(feature = "validation", validate(length(max = 255)))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "device_fingerprint")]
     pub device_fingerprint: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "is_active")]
-    pub is_active: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<SessionStatus>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "revoked_at")]
     pub revoked_at: Option<DateTime<Utc>>,
 }
@@ -161,7 +157,7 @@ pub struct PatchSessionDto {
 impl PatchSessionDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.user_id.is_some() || self.token_hash.is_some() || self.expires_at.is_some() || self.extended_at.is_some() || self.remember_me.is_some() || self.last_activity.is_some() || self.ip_address.is_some() || self.user_agent.is_some() || self.device_type.is_some() || self.device_fingerprint.is_some() || self.is_active.is_some() || self.revoked_at.is_some()
+        self.user_id.is_some() || self.token_hash.is_some() || self.expires_at.is_some() || self.extended_at.is_some() || self.remember_me.is_some() || self.last_activity.is_some() || self.ip_address.is_some() || self.user_agent.is_some() || self.device_type.is_some() || self.device_fingerprint.is_some() || self.status.is_some() || self.revoked_at.is_some()
     }
 }
 
@@ -193,8 +189,7 @@ pub struct SessionResponseDto {
     pub user_agent: Option<String>,
     pub device_type: DeviceType,
     pub device_fingerprint: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub is_active: bool,
+    pub status: SessionStatus,
     pub revoked_at: Option<DateTime<Utc>>,
     pub metadata: AuditMetadata,
 }
@@ -277,7 +272,7 @@ impl From<Session> for SessionResponseDto {
             user_agent: entity.user_agent,
             device_type: entity.device_type,
             device_fingerprint: entity.device_fingerprint,
-            is_active: entity.is_active,
+            status: entity.status,
             revoked_at: entity.revoked_at,
             metadata: entity.metadata,
         }
@@ -299,7 +294,7 @@ impl From<Session> for SessionSummaryDto {
 
 impl From<CreateSessionDto> for Session {
     fn from(dto: CreateSessionDto) -> Self {
-        Self {
+        let mut entity = Self {
             id: Uuid::new_v4(),
             user_id: dto.user_id,
             token_hash: dto.token_hash,
@@ -311,10 +306,12 @@ impl From<CreateSessionDto> for Session {
             user_agent: dto.user_agent,
             device_type: dto.device_type,
             device_fingerprint: dto.device_fingerprint,
-            is_active: dto.is_active,
+            status: dto.status,
             revoked_at: dto.revoked_at,
             metadata: AuditMetadata::default(),
-        }
+        };
+        entity.normalize_revocation_state();
+        entity
     }
 }
 
@@ -332,7 +329,7 @@ impl From<&Session> for SessionResponseDto {
             user_agent: entity.user_agent.clone(),
             device_type: entity.device_type.clone(),
             device_fingerprint: entity.device_fingerprint.clone(),
-            is_active: entity.is_active.clone(),
+            status: entity.status.clone(),
             revoked_at: entity.revoked_at.clone(),
             metadata: entity.metadata.clone(),
         }
@@ -357,8 +354,9 @@ impl backbone_core::ApplyUpdateDto<UpdateSessionDto> for Session {
         self.user_agent = dto.user_agent;
         self.device_type = dto.device_type;
         self.device_fingerprint = dto.device_fingerprint;
-        self.is_active = dto.is_active;
+        self.status = dto.status;
         self.revoked_at = dto.revoked_at;
+        self.normalize_revocation_state();
         Ok(self)
     }
 }

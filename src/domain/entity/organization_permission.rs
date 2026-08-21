@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 use super::AuditMetadata;
+use super::OrganizationPermissionStatus;
 
 /// Strongly-typed ID for OrganizationPermission
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -58,7 +59,7 @@ pub struct OrganizationPermission {
     pub granted_at: DateTime<Utc>,
     pub expires_at: Option<DateTime<Utc>>,
     pub reason: Option<String>,
-    pub is_active: bool,
+    pub status: OrganizationPermissionStatus,
     #[serde(default)]
     #[sqlx(json)]
     pub metadata: AuditMetadata,
@@ -71,7 +72,7 @@ impl OrganizationPermission {
     }
 
     /// Create a new OrganizationPermission with required fields
-    pub fn new(organization_id: Uuid, permission_id: Uuid, granted_by: Uuid, granted_at: DateTime<Utc>, is_active: bool) -> Self {
+    pub fn new(organization_id: Uuid, permission_id: Uuid, granted_by: Uuid, granted_at: DateTime<Utc>, status: OrganizationPermissionStatus) -> Self {
         Self {
             id: Uuid::new_v4(),
             organization_id,
@@ -84,7 +85,7 @@ impl OrganizationPermission {
             granted_at,
             expires_at: None,
             reason: None,
-            is_active,
+            status,
             metadata: AuditMetadata::default(),
         }
     }
@@ -137,6 +138,11 @@ impl OrganizationPermission {
     /// Get who deleted this entity
     pub fn deleted_by(&self) -> Option<&Uuid> {
         self.metadata.deleted_by.as_ref()
+    }
+
+    /// Get the current status
+    pub fn status(&self) -> &OrganizationPermissionStatus {
+        &self.status
     }
 
 
@@ -218,8 +224,8 @@ impl OrganizationPermission {
                 "reason" => {
                     if let Ok(v) = serde_json::from_value(value) { self.reason = v; }
                 }
-                "is_active" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.is_active = v; }
+                "status" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
                 }
                 _ => {} // ignore unknown fields
             }
@@ -279,6 +285,7 @@ impl backbone_orm::EntityRepoMeta for OrganizationPermission {
         m.insert("permission_id".to_string(), "uuid".to_string());
         m.insert("resource_id".to_string(), "uuid".to_string());
         m.insert("role_id".to_string(), "uuid".to_string());
+        m.insert("status".to_string(), "organization_permission_status".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -305,7 +312,7 @@ pub struct OrganizationPermissionBuilder {
     granted_at: Option<DateTime<Utc>>,
     expires_at: Option<DateTime<Utc>>,
     reason: Option<String>,
-    is_active: Option<bool>,
+    status: Option<OrganizationPermissionStatus>,
 }
 
 impl OrganizationPermissionBuilder {
@@ -369,9 +376,9 @@ impl OrganizationPermissionBuilder {
         self
     }
 
-    /// Set the is_active field (default: `true`)
-    pub fn is_active(mut self, value: bool) -> Self {
-        self.is_active = Some(value);
+    /// Set the status field (default: `OrganizationPermissionStatus::default()`)
+    pub fn status(mut self, value: OrganizationPermissionStatus) -> Self {
+        self.status = Some(value);
         self
     }
 
@@ -395,7 +402,7 @@ impl OrganizationPermissionBuilder {
             granted_at: self.granted_at.unwrap_or(Utc::now()),
             expires_at: self.expires_at,
             reason: self.reason,
-            is_active: self.is_active.unwrap_or(true),
+            status: self.status.unwrap_or_default(),
             metadata: AuditMetadata::default(),
         })
     }

@@ -42,7 +42,7 @@ pub struct CreateOAuthProviderRequest {
     pub authorization_url: String,
     pub token_url: String,
     pub user_info_url: String,
-    pub is_active: bool,
+    pub status: String, // snake_case enum: active, inactive
     pub metadata: Value,
 }
 
@@ -60,7 +60,7 @@ impl CreateOAuthProviderRequest {
             authorization_url: "https://example.com/oauth/authorize".to_string(),
             token_url: "https://example.com/oauth/token".to_string(),
             user_info_url: "https://example.com/oauth/userinfo".to_string(),
-            is_active: true,
+            status: "active".to_string(),
             metadata: json!({
                 "created_at": now,
                 "updated_at": now,
@@ -83,9 +83,9 @@ impl CreateOAuthProviderRequest {
         self
     }
 
-    /// Set active status
-    pub fn with_active(mut self, is_active: bool) -> Self {
-        self.is_active = is_active;
+    /// Set lifecycle status
+    pub fn with_status(mut self, status: String) -> Self {
+        self.status = status;
         self
     }
 }
@@ -101,7 +101,7 @@ pub struct UpdateOAuthProviderRequest {
     pub authorization_url: String,
     pub token_url: String,
     pub user_info_url: String,
-    pub is_active: bool,
+    pub status: String,
     pub metadata: Value,
 }
 
@@ -118,7 +118,7 @@ pub struct OAuthProviderResponse {
     pub authorization_url: String,
     pub token_url: String,
     pub user_info_url: String,
-    pub is_active: bool,
+    pub status: String,
     pub metadata: Value,
 }
 
@@ -290,7 +290,7 @@ impl OAuthProviderApiTest {
             authorization_url: "https://accounts.google.com/o/oauth2/v2/auth".to_string(),
             token_url: "https://oauth2.googleapis.com/token".to_string(),
             user_info_url: "https://www.googleapis.com/oauth2/v2/userinfo".to_string(),
-            is_active: false,
+            status: "inactive".to_string(),
             metadata: json!({
                 "created_at": now,
                 "updated_at": now,
@@ -428,7 +428,7 @@ impl OAuthProviderApiTest {
             "authorization_url": "",
             "token_url": "",
             "user_info_url": "",
-            "is_active": true,
+            "status": "active",
             "metadata": {}
         });
 

@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::domain::entity::WorkflowDefinition;
+use crate::domain::entity::WorkflowDefinitionStatus;
 use crate::infrastructure::persistence::WorkflowDefinitionRepository;
 use super::CommandHandler;
 
@@ -40,7 +41,7 @@ pub struct CreateWorkflowDefinitionCommand {
     pub description: Option<String>,
     pub trigger_type: TriggerType,
     pub trigger_config: Option<serde_json::Value>,
-    pub is_active: bool,
+    pub status: WorkflowDefinitionStatus,
     pub timeout_minutes: Option<i32>,
     pub max_retries: i32,
     pub metadata: serde_json::Value,
@@ -69,7 +70,7 @@ impl<R: WorkflowDefinitionRepository + 'static> CommandHandler<CreateWorkflowDef
             .description(cmd.description)
             .trigger_type(cmd.trigger_type)
             .trigger_config(cmd.trigger_config)
-            .is_active(cmd.is_active)
+            .status(cmd.status)
             .timeout_minutes(cmd.timeout_minutes)
             .max_retries(cmd.max_retries)
             .metadata(cmd.metadata)
@@ -92,7 +93,7 @@ pub struct UpdateWorkflowDefinitionCommand {
     pub description: Option<String>,
     pub trigger_type: Option<TriggerType>,
     pub trigger_config: Option<serde_json::Value>,
-    pub is_active: Option<bool>,
+    pub status: Option<WorkflowDefinitionStatus>,
     pub timeout_minutes: Option<i32>,
     pub max_retries: Option<i32>,
     pub metadata: Option<serde_json::Value>,
@@ -132,8 +133,8 @@ impl<R: WorkflowDefinitionRepository + 'static> CommandHandler<UpdateWorkflowDef
             entity.trigger_type = value;
         }
         entity.trigger_config = cmd.trigger_config;
-        if let Some(value) = cmd.is_active {
-            entity.is_active = value;
+        if let Some(value) = cmd.status {
+            entity.status = value;
         }
         entity.timeout_minutes = cmd.timeout_minutes;
         if let Some(value) = cmd.max_retries {

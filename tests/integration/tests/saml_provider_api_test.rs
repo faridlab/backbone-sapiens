@@ -33,7 +33,6 @@ impl TestDataGenerator for SAMLProviderTestData {
             "sls_url": null,
             "name_id_format": null,
             "attribute_mapping": null,
-            "is_active": true,
             "status": null,
             "metadata": json!({}),
         })
@@ -53,7 +52,6 @@ impl TestDataGenerator for SAMLProviderTestData {
             "sls_url": null,
             "name_id_format": null,
             "attribute_mapping": null,
-            "is_active": true,
             "status": null,
             "metadata": json!({}),
         })

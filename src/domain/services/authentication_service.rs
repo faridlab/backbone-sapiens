@@ -281,7 +281,7 @@ impl DefaultAuthenticationService {
         let mut methods = Vec::new();
 
         for device in devices {
-            if !device.is_active || device.is_locked || device.verified_at.is_none() {
+            if device.verified_at.is_none() {
                 continue;
             }
             if device.status != MFADeviceStatus::Active {
@@ -324,7 +324,7 @@ impl DefaultAuthenticationService {
         }
 
         let active_devices: Vec<&MFADevice> = devices.iter()
-            .filter(|d| d.is_active && !d.is_locked && d.verified_at.is_some())
+            .filter(|d| d.verified_at.is_some())
             .filter(|d| d.status == MFADeviceStatus::Active)
             .collect();
 

@@ -16,7 +16,7 @@
 --     user_agent,
 --     device_type,
 --     device_fingerprint,
---     is_active,
+--     status,
 --     revoked_at,
 --     metadata
 -- ) VALUES
@@ -27,9 +27,9 @@
 -- Example: Insert reference data
 -- Uncomment and modify the following:
 
--- INSERT INTO sapiens.sessions (id, code, name, is_active, created_at, updated_at) VALUES
---     (gen_random_uuid(), 'SAMPLE1', 'Sample 1', true, NOW(), NOW()),
---     (gen_random_uuid(), 'SAMPLE2', 'Sample 2', true, NOW(), NOW());
+-- INSERT INTO sapiens.sessions (id, code, name, status, created_at, updated_at) VALUES
+--     (gen_random_uuid(), 'SAMPLE1', 'Sample 1', 'active', NOW(), NOW()),
+--     (gen_random_uuid(), 'SAMPLE2', 'Sample 2', 'active', NOW(), NOW());
 
 -- <<< CUSTOM SEED DATA >>>
 -- Add your custom seed data below

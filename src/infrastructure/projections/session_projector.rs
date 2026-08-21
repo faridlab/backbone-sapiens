@@ -114,7 +114,7 @@ impl<R: SessionProjectionRepository> SessionEventHandler for SessionProjector<R>
             event.user_agent,
             event.device_type,
             event.device_fingerprint,
-            event.is_active,
+            event.status,
             event.revoked_at,
             event.metadata
         );
@@ -138,7 +138,7 @@ impl<R: SessionProjectionRepository> SessionEventHandler for SessionProjector<R>
             projection.user_agent = event.user_agent;
             projection.device_type = event.device_type;
             projection.device_fingerprint = event.device_fingerprint;
-            projection.is_active = event.is_active;
+            projection.status = event.status;
             projection.revoked_at = event.revoked_at;
             projection.metadata = event.metadata;
             // Track the event sequence for this projection

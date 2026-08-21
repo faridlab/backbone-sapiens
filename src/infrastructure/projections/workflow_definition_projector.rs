@@ -109,7 +109,7 @@ impl<R: WorkflowDefinitionProjectionRepository> WorkflowDefinitionEventHandler f
             event.description,
             event.trigger_type,
             event.trigger_config,
-            event.is_active,
+            event.status,
             event.timeout_minutes,
             event.max_retries,
             event.created_by,
@@ -130,7 +130,7 @@ impl<R: WorkflowDefinitionProjectionRepository> WorkflowDefinitionEventHandler f
             projection.description = event.description;
             projection.trigger_type = event.trigger_type;
             projection.trigger_config = event.trigger_config;
-            projection.is_active = event.is_active;
+            projection.status = event.status;
             projection.timeout_minutes = event.timeout_minutes;
             projection.max_retries = event.max_retries;
             projection.created_by = event.created_by;

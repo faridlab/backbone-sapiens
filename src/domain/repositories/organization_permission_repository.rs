@@ -10,6 +10,7 @@ use anyhow::Result;
 use uuid::Uuid;
 
 use crate::domain::entity::OrganizationPermission;
+use crate::domain::entity::OrganizationPermissionStatus;
 
 /// Pagination parameters for list queries
 #[derive(Debug, Clone, Default)]
@@ -52,13 +53,13 @@ pub struct OrganizationPermissionFilter {
     pub role_id: Option<Uuid>,
     pub granted_by: Option<Uuid>,
     pub reason: Option<String>,
-    pub is_active: Option<bool>,
+    pub status: Option<OrganizationPermissionStatus>,
 }
 
 impl OrganizationPermissionFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.organization_id.is_some() || self.permission_id.is_some() || self.permission_name.is_some() || self.resource_id.is_some() || self.resource_type.is_some() || self.role_id.is_some() || self.granted_by.is_some() || self.reason.is_some() || self.is_active.is_some()
+        self.organization_id.is_some() || self.permission_id.is_some() || self.permission_name.is_some() || self.resource_id.is_some() || self.resource_type.is_some() || self.role_id.is_some() || self.granted_by.is_some() || self.reason.is_some() || self.status.is_some()
     }
 }
 

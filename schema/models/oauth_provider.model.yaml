@@ -58,9 +58,9 @@ models:
         attributes: ["@required"]
         description: "Provider user info endpoint"
 
-      is_active:
-        type: bool
-        attributes: ["@default(true)"]
+      status:
+        type: OAuthProviderStatus
+        attributes: ["@default(active)"]
         description: "Provider enabled/disabled"
 
       metadata:
@@ -77,7 +77,7 @@ models:
       - type: index
         fields: [provider_name]
       - type: index
-        fields: [is_active]
+        fields: [status]
       - type: unique
         fields: [provider_name, "(metadata->>'deleted_at')"]
 
@@ -116,11 +116,6 @@ models:
         attributes: ["@max(255)"]
         description: "Username from OAuth provider"
 
-      is_active:
-        type: bool
-        attributes: ["@default(true)"]
-        description: "Whether the OAuth link is active"
-
       access_token:
         type: string?
         attributes: ["@sensitive", "@encrypted"]
@@ -140,7 +135,7 @@ models:
         attributes: ["@default(false)"]
         description: "Primary OAuth account for user"
 
-      link_status:
+      status:
         type: UserOAuthLinkStatus
         attributes: ["@required", "@default(pending_verification)"]
         description: "Current status of OAuth link"
@@ -194,6 +189,15 @@ enums:
         description: "Facebook OAuth"
       - name: apple
         description: "Apple Sign In"
+
+  - name: OAuthProviderStatus
+    description: "Lifecycle of an OAuth provider configuration"
+    variants:
+      - name: active
+        default: true
+        description: "Provider is enabled for login"
+      - name: inactive
+        description: "Provider is disabled; logins via it are refused"
 
   - name: UserOAuthLinkStatus
     variants:

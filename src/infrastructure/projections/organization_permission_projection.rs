@@ -10,6 +10,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
+use crate::domain::entity::OrganizationPermissionStatus;
+
 // ============================================================================
 // PROJECTION (READ MODEL)
 // ============================================================================
@@ -31,7 +33,7 @@ pub struct OrganizationPermissionProjection {
     pub granted_at: DateTime<Utc>,
     pub expires_at: Option<DateTime<Utc>>,
     pub reason: Option<String>,
-    pub is_active: bool,
+    pub status: OrganizationPermissionStatus,
     pub metadata: serde_json::Value,
 
     // Projection metadata
@@ -57,7 +59,7 @@ impl OrganizationPermissionProjection {
         granted_at: DateTime<Utc>,
         expires_at: Option<DateTime<Utc>>,
         reason: Option<String>,
-        is_active: bool,
+        status: OrganizationPermissionStatus,
         metadata: serde_json::Value
     ) -> Self {
         Self {
@@ -72,7 +74,7 @@ impl OrganizationPermissionProjection {
             granted_at,
             expires_at,
             reason,
-            is_active,
+            status,
             metadata,
             projection_version: 1,
             last_event_sequence: 0,

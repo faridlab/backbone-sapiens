@@ -26,7 +26,7 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveLDAPDirectorySpec;
 // impl Specification<LDAPDirectory> for ActiveLDAPDirectorySpec {
 //     fn is_satisfied_by(&self, e: &LDAPDirectory) -> bool {
-//         // e.is_active
+//         // e.status
 //         todo!()
 //     }
 // }

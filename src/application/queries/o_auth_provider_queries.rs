@@ -70,7 +70,7 @@ pub struct ListOAuthProviderQuery {
     pub filter_display_name: Option<String>,
     pub filter_client_id: Option<String>,
     pub filter_client_secret: Option<String>,
-    pub filter_is_active: Option<bool>,
+    pub filter_status: Option<OAuthProviderStatus>,
 }
 
 impl Default for ListOAuthProviderQuery {
@@ -82,7 +82,7 @@ impl Default for ListOAuthProviderQuery {
             filter_display_name: None,
             filter_client_id: None,
             filter_client_secret: None,
-            filter_is_active: None,
+            filter_status: None,
         }
     }
 }
@@ -111,7 +111,7 @@ impl<R: OAuthProviderRepository + 'static> QueryHandler<ListOAuthProviderQuery> 
             display_name: query.filter_display_name.clone(),
             client_id: query.filter_client_id.clone(),
             client_secret: query.filter_client_secret.clone(),
-            is_active: query.filter_is_active.clone(),
+            status: query.filter_status,
             ..Default::default()
         };
 

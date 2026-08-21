@@ -26,7 +26,7 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveUserPermissionSpec;
 // impl Specification<UserPermission> for ActiveUserPermissionSpec {
 //     fn is_satisfied_by(&self, e: &UserPermission) -> bool {
-//         // e.is_active
+//         // e.status == UserPermissionStatus::Active
 //         todo!()
 //     }
 // }

@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::domain::entity::NotificationTemplate;
+use crate::domain::entity::NotificationTemplateStatus;
 use crate::infrastructure::persistence::NotificationTemplateRepository;
 use super::CommandHandler;
 
@@ -41,7 +42,7 @@ pub struct CreateNotificationTemplateCommand {
     pub subject_template: Option<String>,
     pub message_template: String,
     pub variables: Option<serde_json::Value>,
-    pub is_active: bool,
+    pub status: NotificationTemplateStatus,
     pub language: String,
     pub metadata: serde_json::Value,
 }
@@ -70,7 +71,7 @@ impl<R: NotificationTemplateRepository + 'static> CommandHandler<CreateNotificat
             .subject_template(cmd.subject_template)
             .message_template(cmd.message_template)
             .variables(cmd.variables)
-            .is_active(cmd.is_active)
+            .status(cmd.status)
             .language(cmd.language)
             .metadata(cmd.metadata)
             .build()?;
@@ -93,7 +94,7 @@ pub struct UpdateNotificationTemplateCommand {
     pub subject_template: Option<String>,
     pub message_template: Option<String>,
     pub variables: Option<serde_json::Value>,
-    pub is_active: Option<bool>,
+    pub status: Option<NotificationTemplateStatus>,
     pub language: Option<String>,
     pub metadata: Option<serde_json::Value>,
 }
@@ -135,8 +136,8 @@ impl<R: NotificationTemplateRepository + 'static> CommandHandler<UpdateNotificat
             entity.message_template = value;
         }
         entity.variables = cmd.variables;
-        if let Some(value) = cmd.is_active {
-            entity.is_active = value;
+        if let Some(value) = cmd.status {
+            entity.status = value;
         }
         if let Some(value) = cmd.language {
             entity.language = value;

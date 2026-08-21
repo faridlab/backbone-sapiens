@@ -26,7 +26,7 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveWorkflowDefinitionSpec;
 // impl Specification<WorkflowDefinition> for ActiveWorkflowDefinitionSpec {
 //     fn is_satisfied_by(&self, e: &WorkflowDefinition) -> bool {
-//         // e.is_active
+//         // e.status
 //         todo!()
 //     }
 // }

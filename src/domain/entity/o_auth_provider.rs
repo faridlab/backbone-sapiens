@@ -4,6 +4,7 @@ use sqlx::FromRow;
 use uuid::Uuid;
 
 use super::OAuthProviderType;
+use super::OAuthProviderStatus;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{OAuthProviderStateMachine, OAuthProviderState, StateMachineError};
@@ -61,7 +62,7 @@ pub struct OAuthProvider {
     pub authorization_url: String,
     pub token_url: String,
     pub user_info_url: String,
-    pub(crate) is_active: bool,
+    pub status: OAuthProviderStatus,
     #[serde(default)]
     #[sqlx(json)]
     pub metadata: AuditMetadata,
@@ -74,7 +75,7 @@ impl OAuthProvider {
     }
 
     /// Create a new OAuthProvider with required fields
-    pub fn new(provider_name: OAuthProviderType, display_name: String, client_id: String, client_secret: String, redirect_uri: String, scopes: Vec<String>, authorization_url: String, token_url: String, user_info_url: String, is_active: bool) -> Self {
+    pub fn new(provider_name: OAuthProviderType, display_name: String, client_id: String, client_secret: String, redirect_uri: String, scopes: Vec<String>, authorization_url: String, token_url: String, user_info_url: String, status: OAuthProviderStatus) -> Self {
         Self {
             id: Uuid::new_v4(),
             provider_name,
@@ -86,7 +87,7 @@ impl OAuthProvider {
             authorization_url,
             token_url,
             user_info_url,
-            is_active,
+            status,
             metadata: AuditMetadata::default(),
         }
     }
@@ -146,15 +147,15 @@ impl OAuthProvider {
     // State Machine
     // ==========================================================
 
-    /// Transition to a new state via the is_active state machine.
+    /// Transition to a new state via the status state machine.
     ///
     /// Returns `Err` if the transition is not permitted from the current state.
-    /// Use this method instead of assigning `self.is_active` directly.
+    /// Use this method instead of assigning `self.status` directly.
     pub fn transition_to(&mut self, new_state: OAuthProviderState) -> Result<(), StateMachineError> {
-        let current = self.is_active.to_string().parse::<OAuthProviderState>()?;
+        let current = self.status.to_string().parse::<OAuthProviderState>()?;
         let mut sm = OAuthProviderStateMachine::from_state(current);
         sm.transition_to_state(new_state)?;
-        self.is_active = new_state.to_string().parse::<bool>()
+        self.status = new_state.to_string().parse::<OAuthProviderStatus>()
             .map_err(|e| StateMachineError::InvalidState(e.to_string()))?;
         Ok(())
     }
@@ -193,6 +194,9 @@ impl OAuthProvider {
                 }
                 "user_info_url" => {
                     if let Ok(v) = serde_json::from_value(value) { self.user_info_url = v; }
+                }
+                "status" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
                 }
                 _ => {} // ignore unknown fields
             }
@@ -249,6 +253,7 @@ impl backbone_orm::EntityRepoMeta for OAuthProvider {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("provider_name".to_string(), "o_auth_provider_type".to_string());
+        m.insert("status".to_string(), "oauth_provider_status".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -271,7 +276,7 @@ pub struct OAuthProviderBuilder {
     authorization_url: Option<String>,
     token_url: Option<String>,
     user_info_url: Option<String>,
-    is_active: Option<bool>,
+    status: Option<OAuthProviderStatus>,
 }
 
 impl OAuthProviderBuilder {
@@ -329,9 +334,9 @@ impl OAuthProviderBuilder {
         self
     }
 
-    /// Set the is_active field (default: `true`)
-    pub fn is_active(mut self, value: bool) -> Self {
-        self.is_active = Some(value);
+    /// Set the status field (default: `OAuthProviderStatus::default()`)
+    pub fn status(mut self, value: OAuthProviderStatus) -> Self {
+        self.status = Some(value);
         self
     }
 
@@ -360,7 +365,7 @@ impl OAuthProviderBuilder {
             authorization_url,
             token_url,
             user_info_url,
-            is_active: self.is_active.unwrap_or(true),
+            status: self.status.unwrap_or_default(),
             metadata: AuditMetadata::default(),
         })
     }

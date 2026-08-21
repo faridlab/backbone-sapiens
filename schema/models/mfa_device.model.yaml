@@ -174,11 +174,6 @@ models:
         description: "Number of failed verification attempts"
 
       # Security
-      is_locked:
-        type: bool
-        attributes: ["@default(false)"]
-        description: "Whether device is temporarily locked"
-
       locked_at:
         type: datetime?
         description: "When device was locked"
@@ -198,11 +193,6 @@ models:
         description: "Device risk score based on usage patterns"
 
       # Status
-      is_active:
-        type: bool
-        attributes: ["@default(false)"]
-        description: "Whether this device is active (for state machine compatibility)"
-
       status:
         type: MFADeviceStatus
         attributes: ["@default(active)"]
@@ -243,7 +233,7 @@ models:
       - type: index
         fields: [last_used_at]
       - type: index
-        fields: [is_locked, status]
+        fields: [status]
       - type: index
         fields: [risk_score]
 
@@ -283,6 +273,8 @@ enums:
         description: "Device is active and can be used"
       - name: inactive
         description: "Device is inactive"
+      - name: locked
+        description: "Device is temporarily locked"
       - name: suspended
         description: "Device is temporarily suspended"
       - name: compromised

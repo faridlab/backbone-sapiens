@@ -136,12 +136,10 @@ impl<R: MFADeviceProjectionRepository> MFADeviceEventHandler for MFADeviceProjec
             event.usage_count,
             event.successful_verifications,
             event.failed_verifications,
-            event.is_locked,
             event.locked_at,
             event.locked_until,
             event.lock_reason,
             event.risk_score,
-            event.is_active,
             event.status,
             event.backup_codes_data,
             event.metadata
@@ -188,12 +186,10 @@ impl<R: MFADeviceProjectionRepository> MFADeviceEventHandler for MFADeviceProjec
             projection.usage_count = event.usage_count;
             projection.successful_verifications = event.successful_verifications;
             projection.failed_verifications = event.failed_verifications;
-            projection.is_locked = event.is_locked;
             projection.locked_at = event.locked_at;
             projection.locked_until = event.locked_until;
             projection.lock_reason = event.lock_reason;
             projection.risk_score = event.risk_score;
-            projection.is_active = event.is_active;
             projection.status = event.status;
             projection.backup_codes_data = event.backup_codes_data;
             projection.metadata = event.metadata;

@@ -18,6 +18,7 @@ use validator::Validate;
 
 use crate::domain::entity::OrganizationPermission;
 use crate::domain::entity::AuditMetadata;
+use crate::domain::entity::OrganizationPermissionStatus;
 
 // =============================================================================
 // Create DTO
@@ -59,9 +60,8 @@ pub struct CreateOrganizationPermissionDto {
     #[cfg_attr(feature = "validation", validate(length(max = 1000)))]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: OrganizationPermissionStatus,
 }
 
 // =============================================================================
@@ -104,9 +104,8 @@ pub struct UpdateOrganizationPermissionDto {
     #[cfg_attr(feature = "validation", validate(length(max = 1000)))]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: OrganizationPermissionStatus,
 }
 
 // =============================================================================
@@ -149,15 +148,15 @@ pub struct PatchOrganizationPermissionDto {
     #[cfg_attr(feature = "validation", validate(length(max = 1000)))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "is_active")]
-    pub is_active: Option<bool>,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<OrganizationPermissionStatus>,
 }
 
 impl PatchOrganizationPermissionDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.organization_id.is_some() || self.permission_id.is_some() || self.permission_name.is_some() || self.resource_id.is_some() || self.resource_type.is_some() || self.role_id.is_some() || self.granted_by.is_some() || self.granted_at.is_some() || self.expires_at.is_some() || self.reason.is_some() || self.is_active.is_some()
+        self.organization_id.is_some() || self.permission_id.is_some() || self.permission_name.is_some() || self.resource_id.is_some() || self.resource_type.is_some() || self.role_id.is_some() || self.granted_by.is_some() || self.granted_at.is_some() || self.expires_at.is_some() || self.reason.is_some() || self.status.is_some()
     }
 }
 
@@ -189,8 +188,8 @@ pub struct OrganizationPermissionResponseDto {
     pub granted_at: DateTime<Utc>,
     pub expires_at: Option<DateTime<Utc>>,
     pub reason: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: OrganizationPermissionStatus,
     pub metadata: AuditMetadata,
 }
 
@@ -272,7 +271,7 @@ impl From<OrganizationPermission> for OrganizationPermissionResponseDto {
             granted_at: entity.granted_at,
             expires_at: entity.expires_at,
             reason: entity.reason,
-            is_active: entity.is_active,
+            status: entity.status,
             metadata: entity.metadata,
         }
     }
@@ -305,7 +304,7 @@ impl From<CreateOrganizationPermissionDto> for OrganizationPermission {
             granted_at: dto.granted_at,
             expires_at: dto.expires_at,
             reason: dto.reason,
-            is_active: dto.is_active,
+            status: dto.status,
             metadata: AuditMetadata::default(),
         }
     }
@@ -325,7 +324,7 @@ impl From<&OrganizationPermission> for OrganizationPermissionResponseDto {
             granted_at: entity.granted_at.clone(),
             expires_at: entity.expires_at.clone(),
             reason: entity.reason.clone(),
-            is_active: entity.is_active.clone(),
+            status: entity.status.clone(),
             metadata: entity.metadata.clone(),
         }
     }
@@ -349,7 +348,7 @@ impl backbone_core::ApplyUpdateDto<UpdateOrganizationPermissionDto> for Organiza
         self.granted_at = dto.granted_at;
         self.expires_at = dto.expires_at;
         self.reason = dto.reason;
-        self.is_active = dto.is_active;
+        self.status = dto.status;
         Ok(self)
     }
 }

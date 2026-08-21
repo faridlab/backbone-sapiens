@@ -9,6 +9,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::entity::NotificationTemplate;
+use crate::domain::entity::NotificationTemplateStatus;
 use crate::infrastructure::persistence::{NotificationTemplateRepository, PaginationParams, PaginatedResult, NotificationTemplateFilter};
 use super::QueryHandler;
 
@@ -71,7 +72,7 @@ pub struct ListNotificationTemplateQuery {
     pub filter_channel: Option<NotificationChannel>,
     pub filter_subject_template: Option<String>,
     pub filter_message_template: Option<String>,
-    pub filter_is_active: Option<bool>,
+    pub filter_status: Option<NotificationTemplateStatus>,
     pub filter_language: Option<String>,
 }
 
@@ -85,7 +86,7 @@ impl Default for ListNotificationTemplateQuery {
             filter_channel: None,
             filter_subject_template: None,
             filter_message_template: None,
-            filter_is_active: None,
+            filter_status: None,
             filter_language: None,
         }
     }
@@ -116,7 +117,7 @@ impl<R: NotificationTemplateRepository + 'static> QueryHandler<ListNotificationT
             channel: query.filter_channel.clone(),
             subject_template: query.filter_subject_template.clone(),
             message_template: query.filter_message_template.clone(),
-            is_active: query.filter_is_active.clone(),
+            status: query.filter_status.clone(),
             language: query.filter_language.clone(),
             ..Default::default()
         };

@@ -27,7 +27,7 @@ pub struct NotificationTemplateProjection {
     pub subject_template: Option<String>,
     pub message_template: String,
     pub variables: Option<serde_json::Value>,
-    pub is_active: bool,
+    pub status: NotificationTemplateStatus,
     pub language: String,
     pub metadata: serde_json::Value,
 
@@ -50,7 +50,7 @@ impl NotificationTemplateProjection {
         subject_template: Option<String>,
         message_template: String,
         variables: Option<serde_json::Value>,
-        is_active: bool,
+        status: NotificationTemplateStatus,
         language: String,
         metadata: serde_json::Value
     ) -> Self {
@@ -62,7 +62,7 @@ impl NotificationTemplateProjection {
             subject_template,
             message_template,
             variables,
-            is_active,
+            status,
             language,
             metadata,
             projection_version: 1,

@@ -8,7 +8,7 @@
 use async_trait::async_trait;
 use anyhow::Result;
 
-use crate::domain::entity::{WorkflowDefinition, TriggerType, WorkflowType};
+use crate::domain::entity::{WorkflowDefinition, TriggerType, WorkflowType, WorkflowDefinitionStatus};
 
 /// Pagination parameters for list queries
 #[derive(Debug, Clone, Default)]
@@ -47,13 +47,13 @@ pub struct WorkflowDefinitionFilter {
     pub workflow_type: Option<WorkflowType>,
     pub description: Option<String>,
     pub trigger_type: Option<TriggerType>,
-    pub is_active: Option<bool>,
+    pub status: Option<WorkflowDefinitionStatus>,
 }
 
 impl WorkflowDefinitionFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.name.is_some() || self.workflow_type.is_some() || self.description.is_some() || self.trigger_type.is_some() || self.is_active.is_some()
+        self.name.is_some() || self.workflow_type.is_some() || self.description.is_some() || self.trigger_type.is_some() || self.status.is_some()
     }
 }
 

@@ -86,12 +86,10 @@ pub struct MFADevice {
     pub usage_count: i32,
     pub successful_verifications: i32,
     pub failed_verifications: i32,
-    pub is_locked: bool,
     pub locked_at: Option<DateTime<Utc>>,
     pub locked_until: Option<DateTime<Utc>>,
     pub lock_reason: Option<String>,
     pub risk_score: i32,
-    pub(crate) is_active: bool,
     pub status: MFADeviceStatus,
     pub backup_codes_data: Option<serde_json::Value>,
     #[serde(default)]
@@ -106,7 +104,7 @@ impl MFADevice {
     }
 
     /// Create a new MFADevice with required fields
-    pub fn new(user_id: Uuid, device_type: MFADeviceType, is_primary: bool, is_backup: bool, requires_verification: bool, auto_approval_enabled: bool, trusted_duration_hours: i32, enrolled_at: DateTime<Utc>, enrollment_method: EnrollmentMethod, enrollment_ip: String, verification_attempts: i32, backup_codes_generated: bool, usage_count: i32, successful_verifications: i32, failed_verifications: i32, is_locked: bool, risk_score: i32, is_active: bool, status: MFADeviceStatus) -> Self {
+    pub fn new(user_id: Uuid, device_type: MFADeviceType, is_primary: bool, is_backup: bool, requires_verification: bool, auto_approval_enabled: bool, trusted_duration_hours: i32, enrolled_at: DateTime<Utc>, enrollment_method: EnrollmentMethod, enrollment_ip: String, verification_attempts: i32, backup_codes_generated: bool, usage_count: i32, successful_verifications: i32, failed_verifications: i32, risk_score: i32, status: MFADeviceStatus) -> Self {
         Self {
             id: Uuid::new_v4(),
             user_id,
@@ -141,12 +139,10 @@ impl MFADevice {
             usage_count,
             successful_verifications,
             failed_verifications,
-            is_locked,
             locked_at: None,
             locked_until: None,
             lock_reason: None,
             risk_score,
-            is_active,
             status,
             backup_codes_data: None,
             metadata: AuditMetadata::default(),
@@ -343,15 +339,15 @@ impl MFADevice {
     // State Machine
     // ==========================================================
 
-    /// Transition to a new state via the is_active state machine.
+    /// Transition to a new state via the status state machine.
     ///
     /// Returns `Err` if the transition is not permitted from the current state.
-    /// Use this method instead of assigning `self.is_active` directly.
+    /// Use this method instead of assigning `self.status` directly.
     pub fn transition_to(&mut self, new_state: MFADeviceState) -> Result<(), StateMachineError> {
-        let current = self.is_active.to_string().parse::<MFADeviceState>()?;
+        let current = self.status.to_string().parse::<MFADeviceState>()?;
         let mut sm = MFADeviceStateMachine::from_state(current);
         sm.transition_to_state(new_state)?;
-        self.is_active = new_state.to_string().parse::<bool>()
+        self.status = new_state.to_string().parse::<MFADeviceStatus>()
             .map_err(|e| StateMachineError::InvalidState(e.to_string()))?;
         Ok(())
     }
@@ -459,9 +455,6 @@ impl MFADevice {
                 }
                 "failed_verifications" => {
                     if let Ok(v) = serde_json::from_value(value) { self.failed_verifications = v; }
-                }
-                "is_locked" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.is_locked = v; }
                 }
                 "locked_at" => {
                     if let Ok(v) = serde_json::from_value(value) { self.locked_at = v; }
@@ -587,12 +580,10 @@ pub struct MFADeviceBuilder {
     usage_count: Option<i32>,
     successful_verifications: Option<i32>,
     failed_verifications: Option<i32>,
-    is_locked: Option<bool>,
     locked_at: Option<DateTime<Utc>>,
     locked_until: Option<DateTime<Utc>>,
     lock_reason: Option<String>,
     risk_score: Option<i32>,
-    is_active: Option<bool>,
     status: Option<MFADeviceStatus>,
     backup_codes_data: Option<serde_json::Value>,
 }
@@ -790,12 +781,6 @@ impl MFADeviceBuilder {
         self
     }
 
-    /// Set the is_locked field (default: `false`)
-    pub fn is_locked(mut self, value: bool) -> Self {
-        self.is_locked = Some(value);
-        self
-    }
-
     /// Set the locked_at field (optional)
     pub fn locked_at(mut self, value: DateTime<Utc>) -> Self {
         self.locked_at = Some(value);
@@ -817,12 +802,6 @@ impl MFADeviceBuilder {
     /// Set the risk_score field (default: `0`)
     pub fn risk_score(mut self, value: i32) -> Self {
         self.risk_score = Some(value);
-        self
-    }
-
-    /// Set the is_active field (default: `false`)
-    pub fn is_active(mut self, value: bool) -> Self {
-        self.is_active = Some(value);
         self
     }
 
@@ -880,12 +859,10 @@ impl MFADeviceBuilder {
             usage_count: self.usage_count.unwrap_or(0),
             successful_verifications: self.successful_verifications.unwrap_or(0),
             failed_verifications: self.failed_verifications.unwrap_or(0),
-            is_locked: self.is_locked.unwrap_or(false),
             locked_at: self.locked_at,
             locked_until: self.locked_until,
             lock_reason: self.lock_reason,
             risk_score: self.risk_score.unwrap_or(0),
-            is_active: self.is_active.unwrap_or(false),
             status: self.status.unwrap_or(MFADeviceStatus::default()),
             backup_codes_data: self.backup_codes_data,
             metadata: AuditMetadata::default(),

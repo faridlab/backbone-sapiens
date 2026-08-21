@@ -3,6 +3,7 @@
 //! Provides comprehensive MFA functionality including TOTP, SMS, email,
 //! hardware keys, biometrics, and push notifications.
 
+use crate::domain::entity::MFADeviceStatus;
 use crate::domain::services::{EmailService, SecurityMonitoringService, SecurityEvent, SecurityEventType};
 use anyhow::{Result, anyhow};
 use chrono::{DateTime, Utc, Duration};
@@ -21,17 +22,6 @@ pub enum MFADeviceType {
     HardwareKey,
     Biometric,
     PushNotification,
-}
-
-// MFA Device Status
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub enum MFADeviceStatus {
-    Active,
-    Inactive,
-    Suspended,
-    Compromised,
-    Expired,
-    Revoked,
 }
 
 // MFA Verification Method
@@ -65,7 +55,6 @@ pub struct MFADevice {
     pub app_version: Option<String>,
     pub is_primary: bool,
     pub is_backup: bool,
-    pub is_active: bool,
     pub verified_at: Option<DateTime<Utc>>,
     pub last_used: Option<DateTime<Utc>>,
     pub usage_count: i32,

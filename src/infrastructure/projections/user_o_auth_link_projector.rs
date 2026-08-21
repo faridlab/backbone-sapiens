@@ -109,12 +109,11 @@ impl<R: UserOAuthLinkProjectionRepository> UserOAuthLinkEventHandler for UserOAu
             event.provider_user_id,
             event.provider_email,
             event.provider_username,
-            event.is_active,
             event.access_token,
             event.refresh_token,
             event.token_expires_at,
             event.is_primary,
-            event.link_status,
+            event.status,
             event.last_synced,
             event.sync_enabled,
             event.metadata
@@ -134,12 +133,11 @@ impl<R: UserOAuthLinkProjectionRepository> UserOAuthLinkEventHandler for UserOAu
             projection.provider_user_id = event.provider_user_id;
             projection.provider_email = event.provider_email;
             projection.provider_username = event.provider_username;
-            projection.is_active = event.is_active;
             projection.access_token = event.access_token;
             projection.refresh_token = event.refresh_token;
             projection.token_expires_at = event.token_expires_at;
             projection.is_primary = event.is_primary;
-            projection.link_status = event.link_status;
+            projection.status = event.status;
             projection.last_synced = event.last_synced;
             projection.sync_enabled = event.sync_enabled;
             projection.metadata = event.metadata;

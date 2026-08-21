@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 use super::AuditMetadata;
+use super::PasswordPolicyStatus;
 
 /// Strongly-typed ID for PasswordPolicy
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -50,7 +51,7 @@ pub struct PasswordPolicy {
     pub id: Uuid,
     pub name: String,
     pub organization_id: Option<Uuid>,
-    pub is_active: bool,
+    pub status: PasswordPolicyStatus,
     pub password_requirements: serde_json::Value,
     pub password_history: serde_json::Value,
     pub reset_settings: serde_json::Value,
@@ -67,12 +68,12 @@ impl PasswordPolicy {
     }
 
     /// Create a new PasswordPolicy with required fields
-    pub fn new(name: String, is_active: bool, password_requirements: serde_json::Value, password_history: serde_json::Value, reset_settings: serde_json::Value, expiry_settings: serde_json::Value) -> Self {
+    pub fn new(name: String, status: PasswordPolicyStatus, password_requirements: serde_json::Value, password_history: serde_json::Value, reset_settings: serde_json::Value, expiry_settings: serde_json::Value) -> Self {
         Self {
             id: Uuid::new_v4(),
             name,
             organization_id: None,
-            is_active,
+            status,
             password_requirements,
             password_history,
             reset_settings,
@@ -156,8 +157,8 @@ impl PasswordPolicy {
                 "organization_id" => {
                     if let Ok(v) = serde_json::from_value(value) { self.organization_id = v; }
                 }
-                "is_active" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.is_active = v; }
+                "status" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
                 }
                 "password_requirements" => {
                     if let Ok(v) = serde_json::from_value(value) { self.password_requirements = v; }
@@ -226,6 +227,7 @@ impl backbone_orm::EntityRepoMeta for PasswordPolicy {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("organization_id".to_string(), "uuid".to_string());
+        m.insert("status".to_string(), "password_policy_status".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -241,7 +243,7 @@ impl backbone_orm::EntityRepoMeta for PasswordPolicy {
 pub struct PasswordPolicyBuilder {
     name: Option<String>,
     organization_id: Option<Uuid>,
-    is_active: Option<bool>,
+    status: Option<PasswordPolicyStatus>,
     password_requirements: Option<serde_json::Value>,
     password_history: Option<serde_json::Value>,
     reset_settings: Option<serde_json::Value>,
@@ -261,9 +263,9 @@ impl PasswordPolicyBuilder {
         self
     }
 
-    /// Set the is_active field (default: `true`)
-    pub fn is_active(mut self, value: bool) -> Self {
-        self.is_active = Some(value);
+    /// Set the status field (default: `PasswordPolicyStatus::default()`)
+    pub fn status(mut self, value: PasswordPolicyStatus) -> Self {
+        self.status = Some(value);
         self
     }
 
@@ -305,7 +307,7 @@ impl PasswordPolicyBuilder {
             id: Uuid::new_v4(),
             name,
             organization_id: self.organization_id,
-            is_active: self.is_active.unwrap_or(true),
+            status: self.status.unwrap_or_default(),
             password_requirements,
             password_history,
             reset_settings,

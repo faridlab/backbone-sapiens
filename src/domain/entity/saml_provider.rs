@@ -62,8 +62,7 @@ pub struct SAMLProvider {
     pub sls_url: Option<String>,
     pub name_id_format: String,
     pub attribute_mapping: serde_json::Value,
-    pub is_active: bool,
-    pub(crate) status: SAMLProviderStatus,
+    pub status: SAMLProviderStatus,
     #[serde(default)]
     #[sqlx(json)]
     pub metadata: AuditMetadata,
@@ -76,7 +75,7 @@ impl SAMLProvider {
     }
 
     /// Create a new SAMLProvider with required fields
-    pub fn new(name: String, display_name: String, entity_id: String, sso_url: String, certificate: String, acs_url: String, name_id_format: String, attribute_mapping: serde_json::Value, is_active: bool, status: SAMLProviderStatus) -> Self {
+    pub fn new(name: String, display_name: String, entity_id: String, sso_url: String, certificate: String, acs_url: String, name_id_format: String, attribute_mapping: serde_json::Value, status: SAMLProviderStatus) -> Self {
         Self {
             id: Uuid::new_v4(),
             name,
@@ -89,7 +88,6 @@ impl SAMLProvider {
             sls_url: None,
             name_id_format,
             attribute_mapping,
-            is_active,
             status,
             metadata: AuditMetadata::default(),
         }
@@ -222,8 +220,8 @@ impl SAMLProvider {
                 "attribute_mapping" => {
                     if let Ok(v) = serde_json::from_value(value) { self.attribute_mapping = v; }
                 }
-                "is_active" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.is_active = v; }
+                "status" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
                 }
                 _ => {} // ignore unknown fields
             }
@@ -303,7 +301,6 @@ pub struct SAMLProviderBuilder {
     sls_url: Option<String>,
     name_id_format: Option<String>,
     attribute_mapping: Option<serde_json::Value>,
-    is_active: Option<bool>,
     status: Option<SAMLProviderStatus>,
 }
 
@@ -368,12 +365,6 @@ impl SAMLProviderBuilder {
         self
     }
 
-    /// Set the is_active field (default: `true`)
-    pub fn is_active(mut self, value: bool) -> Self {
-        self.is_active = Some(value);
-        self
-    }
-
     /// Set the status field (default: `SAMLProviderStatus::default()`)
     pub fn status(mut self, value: SAMLProviderStatus) -> Self {
         self.status = Some(value);
@@ -403,7 +394,6 @@ impl SAMLProviderBuilder {
             sls_url: self.sls_url,
             name_id_format: self.name_id_format.unwrap_or(Default::default()),
             attribute_mapping: self.attribute_mapping.unwrap_or(Default::default()),
-            is_active: self.is_active.unwrap_or(true),
             status: self.status.unwrap_or(SAMLProviderStatus::default()),
             metadata: AuditMetadata::default(),
         })

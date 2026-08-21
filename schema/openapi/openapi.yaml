@@ -28307,7 +28307,7 @@ components:
         - notification_type
         - channel
         - message_template
-        - is_active
+        - status
         - language
         - metadata
       properties:
@@ -28330,8 +28330,8 @@ components:
         variables:
           nullable: true
           type: object
-        is_active:
-          type: boolean
+        status:
+          type: string
         language:
           type: string
           maxLength: 10
@@ -28358,7 +28358,7 @@ components:
         - notification_type
         - channel
         - message_template
-        - is_active
+        - status
         - language
         - metadata
       properties:
@@ -28378,8 +28378,8 @@ components:
         variables:
           nullable: true
           type: object
-        is_active:
-          type: boolean
+        status:
+          type: string
         language:
           type: string
           maxLength: 10
@@ -28393,7 +28393,7 @@ components:
         - notification_type
         - channel
         - message_template
-        - is_active
+        - status
         - language
         - metadata
       properties:
@@ -28413,8 +28413,8 @@ components:
         variables:
           nullable: true
           type: object
-        is_active:
-          type: boolean
+        status:
+          type: string
         language:
           type: string
           maxLength: 10
@@ -28440,8 +28440,8 @@ components:
         variables:
           nullable: true
           type: object
-        is_active:
-          type: boolean
+        status:
+          type: string
         language:
           type: string
           maxLength: 10
@@ -35297,7 +35297,7 @@ components:
         - name
         - workflow_type
         - trigger_type
-        - is_active
+        - status
         - max_retries
         - created_by
         - metadata
@@ -35319,8 +35319,8 @@ components:
         trigger_config:
           nullable: true
           type: object
-        is_active:
-          type: boolean
+        status:
+          type: string
         timeout_minutes:
           nullable: true
           type: integer
@@ -35353,7 +35353,7 @@ components:
         - name
         - workflow_type
         - trigger_type
-        - is_active
+        - status
         - max_retries
         - created_by
         - metadata
@@ -35372,8 +35372,8 @@ components:
         trigger_config:
           nullable: true
           type: object
-        is_active:
-          type: boolean
+        status:
+          type: string
         timeout_minutes:
           nullable: true
           type: integer
@@ -35393,7 +35393,7 @@ components:
         - name
         - workflow_type
         - trigger_type
-        - is_active
+        - status
         - max_retries
         - created_by
         - metadata
@@ -35412,8 +35412,8 @@ components:
         trigger_config:
           nullable: true
           type: object
-        is_active:
-          type: boolean
+        status:
+          type: string
         timeout_minutes:
           nullable: true
           type: integer
@@ -35444,8 +35444,8 @@ components:
         trigger_config:
           nullable: true
           type: object
-        is_active:
-          type: boolean
+        status:
+          type: string
         timeout_minutes:
           nullable: true
           type: integer

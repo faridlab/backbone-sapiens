@@ -4,6 +4,7 @@ use sqlx::FromRow;
 use uuid::Uuid;
 
 use super::DeviceType;
+use super::SessionStatus;
 use super::AuditMetadata;
 
 use crate::domain::state_machine::{SessionStateMachine, SessionState, StateMachineError};
@@ -62,7 +63,7 @@ pub struct Session {
     pub user_agent: Option<String>,
     pub device_type: DeviceType,
     pub device_fingerprint: Option<String>,
-    pub(crate) is_active: bool,
+    pub status: SessionStatus,
     pub revoked_at: Option<DateTime<Utc>>,
     #[serde(default)]
     #[sqlx(json)]
@@ -76,7 +77,7 @@ impl Session {
     }
 
     /// Create a new Session with required fields
-    pub fn new(user_id: Uuid, token_hash: String, expires_at: DateTime<Utc>, remember_me: bool, device_type: DeviceType, is_active: bool) -> Self {
+    pub fn new(user_id: Uuid, token_hash: String, expires_at: DateTime<Utc>, remember_me: bool, device_type: DeviceType, status: SessionStatus) -> Self {
         Self {
             id: Uuid::new_v4(),
             user_id,
@@ -89,7 +90,7 @@ impl Session {
             user_agent: None,
             device_type,
             device_fingerprint: None,
-            is_active,
+            status,
             revoked_at: None,
             metadata: AuditMetadata::default(),
         }
@@ -180,9 +181,13 @@ impl Session {
         self
     }
 
-    /// Set the revoked_at field (chainable)
+    /// Set the revoked_at field (chainable).
+    ///
+    /// Stamping the timestamp is the mechanism that revokes a session, so this
+    /// also flips `status` to `Revoked` in the same write.
     pub fn with_revoked_at(mut self, value: DateTime<Utc>) -> Self {
         self.revoked_at = Some(value);
+        self.status = SessionStatus::Revoked;
         self
     }
 
@@ -190,16 +195,17 @@ impl Session {
     // State Machine
     // ==========================================================
 
-    /// Transition to a new state via the is_active state machine.
+    /// Transition to a new state via the status state machine.
     ///
     /// Returns `Err` if the transition is not permitted from the current state.
-    /// Use this method instead of assigning `self.is_active` directly.
+    /// Use this method instead of assigning `self.status` directly.
     pub fn transition_to(&mut self, new_state: SessionState) -> Result<(), StateMachineError> {
-        let current = self.is_active.to_string().parse::<SessionState>()?;
+        let current = self.status.to_string().parse::<SessionState>()?;
         let mut sm = SessionStateMachine::from_state(current);
         sm.transition_to_state(new_state)?;
-        self.is_active = new_state.to_string().parse::<bool>()
+        self.status = new_state.to_string().parse::<SessionStatus>()
             .map_err(|e| StateMachineError::InvalidState(e.to_string()))?;
+        self.normalize_revocation_state();
         Ok(())
     }
 
@@ -241,15 +247,38 @@ impl Session {
                 "device_fingerprint" => {
                     if let Ok(v) = serde_json::from_value(value) { self.device_fingerprint = v; }
                 }
+                "status" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
+                }
                 "revoked_at" => {
                     if let Ok(v) = serde_json::from_value(value) { self.revoked_at = v; }
                 }
                 _ => {} // ignore unknown fields
             }
         }
+        self.normalize_revocation_state();
     }
 
     // <<< CUSTOM METHODS START >>>
+    /// Revoke the session: stamp `revoked_at` and flip `status` to `Revoked`.
+    pub fn revoke(&mut self) {
+        self.revoked_at = Some(Utc::now());
+        self.status = SessionStatus::Revoked;
+    }
+
+    /// Keep `status` and `revoked_at` consistent.
+    ///
+    /// `status` mirrors `revoked_at`: a session is `Revoked` exactly when
+    /// `revoked_at` is set, and the every-request read path still validates on
+    /// `revoked_at IS NULL AND expires_at > NOW()`, so the two must never
+    /// disagree. When only one half was assigned, derive the other.
+    pub(crate) fn normalize_revocation_state(&mut self) {
+        if self.revoked_at.is_some() {
+            self.status = SessionStatus::Revoked;
+        } else if self.status == SessionStatus::Revoked {
+            self.revoked_at = Some(Utc::now());
+        }
+    }
     // <<< CUSTOM METHODS END >>>
 }
 
@@ -300,6 +329,7 @@ impl backbone_orm::EntityRepoMeta for Session {
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("device_type".to_string(), "device_type".to_string());
+        m.insert("status".to_string(), "session_status".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -326,7 +356,7 @@ pub struct SessionBuilder {
     user_agent: Option<String>,
     device_type: Option<DeviceType>,
     device_fingerprint: Option<String>,
-    is_active: Option<bool>,
+    status: Option<SessionStatus>,
     revoked_at: Option<DateTime<Utc>>,
 }
 
@@ -391,15 +421,19 @@ impl SessionBuilder {
         self
     }
 
-    /// Set the is_active field (default: `true`)
-    pub fn is_active(mut self, value: bool) -> Self {
-        self.is_active = Some(value);
+    /// Set the status field (default: `SessionStatus::default()`)
+    pub fn status(mut self, value: SessionStatus) -> Self {
+        self.status = Some(value);
         self
     }
 
-    /// Set the revoked_at field (optional)
+    /// Set the revoked_at field (optional).
+    ///
+    /// Stamping the timestamp revokes the session, so `status` flips to
+    /// `Revoked` in the same write.
     pub fn revoked_at(mut self, value: DateTime<Utc>) -> Self {
         self.revoked_at = Some(value);
+        self.status = Some(SessionStatus::Revoked);
         self
     }
 
@@ -423,7 +457,7 @@ impl SessionBuilder {
             user_agent: self.user_agent,
             device_type: self.device_type.unwrap_or(DeviceType::default()),
             device_fingerprint: self.device_fingerprint,
-            is_active: self.is_active.unwrap_or(true),
+            status: self.status.unwrap_or_default(),
             revoked_at: self.revoked_at,
             metadata: AuditMetadata::default(),
         })

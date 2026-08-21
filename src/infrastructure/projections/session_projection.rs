@@ -31,7 +31,7 @@ pub struct SessionProjection {
     pub user_agent: Option<String>,
     pub device_type: DeviceType,
     pub device_fingerprint: Option<String>,
-    pub is_active: bool,
+    pub status: SessionStatus,
     pub revoked_at: Option<DateTime<Utc>>,
     pub metadata: serde_json::Value,
 
@@ -58,7 +58,7 @@ impl SessionProjection {
         user_agent: Option<String>,
         device_type: DeviceType,
         device_fingerprint: Option<String>,
-        is_active: bool,
+        status: SessionStatus,
         revoked_at: Option<DateTime<Utc>>,
         metadata: serde_json::Value
     ) -> Self {
@@ -74,7 +74,7 @@ impl SessionProjection {
             user_agent,
             device_type,
             device_fingerprint,
-            is_active,
+            status,
             revoked_at,
             metadata,
             projection_version: 1,

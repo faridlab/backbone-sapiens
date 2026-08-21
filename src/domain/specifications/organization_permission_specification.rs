@@ -26,7 +26,7 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveOrganizationPermissionSpec;
 // impl Specification<OrganizationPermission> for ActiveOrganizationPermissionSpec {
 //     fn is_satisfied_by(&self, e: &OrganizationPermission) -> bool {
-//         // e.is_active
+//         // e.status == OrganizationPermissionStatus::Active
 //         todo!()
 //     }
 // }

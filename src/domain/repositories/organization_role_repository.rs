@@ -10,6 +10,7 @@ use anyhow::Result;
 use uuid::Uuid;
 
 use crate::domain::entity::OrganizationRole;
+use crate::domain::entity::OrganizationRoleStatus;
 
 /// Pagination parameters for list queries
 #[derive(Debug, Clone, Default)]
@@ -47,13 +48,13 @@ pub struct OrganizationRoleFilter {
     pub organization_id: Option<Uuid>,
     pub name: Option<String>,
     pub description: Option<String>,
-    pub is_active: Option<bool>,
+    pub status: Option<OrganizationRoleStatus>,
 }
 
 impl OrganizationRoleFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.organization_id.is_some() || self.name.is_some() || self.description.is_some() || self.is_active.is_some()
+        self.organization_id.is_some() || self.name.is_some() || self.description.is_some() || self.status.is_some()
     }
 }
 

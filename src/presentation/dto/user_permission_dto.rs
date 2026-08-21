@@ -18,6 +18,7 @@ use validator::Validate;
 
 use crate::domain::entity::UserPermission;
 use crate::domain::entity::AuditMetadata;
+use crate::domain::entity::UserPermissionStatus;
 
 // =============================================================================
 // Create DTO
@@ -55,9 +56,8 @@ pub struct CreateUserPermissionDto {
     #[cfg_attr(feature = "validation", validate(length(max = 50)))]
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "resource_type")]
     pub resource_type: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: UserPermissionStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "revoked_at")]
     pub revoked_at: Option<DateTime<Utc>>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "revoked_by")]
@@ -103,9 +103,8 @@ pub struct UpdateUserPermissionDto {
     #[cfg_attr(feature = "validation", validate(length(max = 50)))]
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "resource_type")]
     pub resource_type: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: UserPermissionStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "revoked_at")]
     pub revoked_at: Option<DateTime<Utc>>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "revoked_by")]
@@ -153,8 +152,8 @@ pub struct PatchUserPermissionDto {
     #[serde(skip_serializing_if = "Option::is_none", alias = "resource_type")]
     pub resource_type: Option<String>,
     #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "is_active")]
-    pub is_active: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<UserPermissionStatus>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "revoked_at")]
     pub revoked_at: Option<DateTime<Utc>>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "revoked_by")]
@@ -167,7 +166,7 @@ pub struct PatchUserPermissionDto {
 impl PatchUserPermissionDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.user_id.is_some() || self.permission_id.is_some() || self.granted_at.is_some() || self.granted_by.is_some() || self.reason.is_some() || self.expires_at.is_some() || self.resource_id.is_some() || self.resource_type.is_some() || self.is_active.is_some() || self.revoked_at.is_some() || self.revoked_by.is_some() || self.revoked_reason.is_some()
+        self.user_id.is_some() || self.permission_id.is_some() || self.granted_at.is_some() || self.granted_by.is_some() || self.reason.is_some() || self.expires_at.is_some() || self.resource_id.is_some() || self.resource_type.is_some() || self.status.is_some() || self.revoked_at.is_some() || self.revoked_by.is_some() || self.revoked_reason.is_some()
     }
 }
 
@@ -198,8 +197,8 @@ pub struct UserPermissionResponseDto {
     pub expires_at: Option<DateTime<Utc>>,
     pub resource_id: Option<String>,
     pub resource_type: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub is_active: bool,
+    #[cfg_attr(feature = "openapi", schema(example = "active"))]
+    pub status: UserPermissionStatus,
     pub revoked_at: Option<DateTime<Utc>>,
     pub revoked_by: Option<Uuid>,
     pub revoked_reason: Option<String>,
@@ -282,7 +281,7 @@ impl From<UserPermission> for UserPermissionResponseDto {
             expires_at: entity.expires_at,
             resource_id: entity.resource_id,
             resource_type: entity.resource_type,
-            is_active: entity.is_active,
+            status: entity.status,
             revoked_at: entity.revoked_at,
             revoked_by: entity.revoked_by,
             revoked_reason: entity.revoked_reason,
@@ -316,7 +315,7 @@ impl From<CreateUserPermissionDto> for UserPermission {
             expires_at: dto.expires_at,
             resource_id: dto.resource_id,
             resource_type: dto.resource_type,
-            is_active: dto.is_active,
+            status: dto.status,
             revoked_at: dto.revoked_at,
             revoked_by: dto.revoked_by,
             revoked_reason: dto.revoked_reason,
@@ -337,7 +336,7 @@ impl From<&UserPermission> for UserPermissionResponseDto {
             expires_at: entity.expires_at.clone(),
             resource_id: entity.resource_id.clone(),
             resource_type: entity.resource_type.clone(),
-            is_active: entity.is_active.clone(),
+            status: entity.status.clone(),
             revoked_at: entity.revoked_at.clone(),
             revoked_by: entity.revoked_by.clone(),
             revoked_reason: entity.revoked_reason.clone(),
@@ -362,7 +361,7 @@ impl backbone_core::ApplyUpdateDto<UpdateUserPermissionDto> for UserPermission {
         self.expires_at = dto.expires_at;
         self.resource_id = dto.resource_id;
         self.resource_type = dto.resource_type;
-        self.is_active = dto.is_active;
+        self.status = dto.status;
         self.revoked_at = dto.revoked_at;
         self.revoked_by = dto.revoked_by;
         self.revoked_reason = dto.revoked_reason;

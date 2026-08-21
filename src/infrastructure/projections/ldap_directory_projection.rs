@@ -36,7 +36,6 @@ pub struct LDAPDirectoryProjection {
     pub sync_interval_minutes: Option<i32>,
     pub last_sync_at: Option<DateTime<Utc>>,
     pub last_sync_result: Option<serde_json::Value>,
-    pub is_active: bool,
     pub status: LDAPDirectoryStatus,
     pub metadata: serde_json::Value,
 
@@ -68,7 +67,6 @@ impl LDAPDirectoryProjection {
         sync_interval_minutes: Option<i32>,
         last_sync_at: Option<DateTime<Utc>>,
         last_sync_result: Option<serde_json::Value>,
-        is_active: bool,
         status: LDAPDirectoryStatus,
         metadata: serde_json::Value
     ) -> Self {
@@ -89,7 +87,6 @@ impl LDAPDirectoryProjection {
             sync_interval_minutes,
             last_sync_at,
             last_sync_result,
-            is_active,
             status,
             metadata,
             projection_version: 1,

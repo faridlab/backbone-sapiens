@@ -9,6 +9,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::entity::OrganizationPermission;
+use crate::domain::entity::OrganizationPermissionStatus;
 use crate::infrastructure::persistence::{OrganizationPermissionRepository, PaginationParams, PaginatedResult, OrganizationPermissionFilter};
 use super::QueryHandler;
 
@@ -74,7 +75,7 @@ pub struct ListOrganizationPermissionQuery {
     pub filter_role_id: Option<Uuid>,
     pub filter_granted_by: Option<Uuid>,
     pub filter_reason: Option<String>,
-    pub filter_is_active: Option<bool>,
+    pub filter_status: Option<OrganizationPermissionStatus>,
 }
 
 impl Default for ListOrganizationPermissionQuery {
@@ -90,7 +91,7 @@ impl Default for ListOrganizationPermissionQuery {
             filter_role_id: None,
             filter_granted_by: None,
             filter_reason: None,
-            filter_is_active: None,
+            filter_status: None,
         }
     }
 }
@@ -123,7 +124,7 @@ impl<R: OrganizationPermissionRepository + 'static> QueryHandler<ListOrganizatio
             role_id: query.filter_role_id.clone(),
             granted_by: query.filter_granted_by.clone(),
             reason: query.filter_reason.clone(),
-            is_active: query.filter_is_active.clone(),
+            status: query.filter_status.clone(),
             ..Default::default()
         };
 

@@ -45,7 +45,7 @@ pub struct CreateSessionCommand {
     pub user_agent: Option<String>,
     pub device_type: DeviceType,
     pub device_fingerprint: Option<String>,
-    pub is_active: bool,
+    pub status: SessionStatus,
     pub revoked_at: Option<DateTime<Utc>>,
     pub metadata: serde_json::Value,
 }
@@ -78,7 +78,7 @@ impl<R: SessionRepository + 'static> CommandHandler<CreateSessionCommand> for Cr
             .user_agent(cmd.user_agent)
             .device_type(cmd.device_type)
             .device_fingerprint(cmd.device_fingerprint)
-            .is_active(cmd.is_active)
+            .status(cmd.status)
             .revoked_at(cmd.revoked_at)
             .metadata(cmd.metadata)
             .build()?;
@@ -105,7 +105,7 @@ pub struct UpdateSessionCommand {
     pub user_agent: Option<String>,
     pub device_type: Option<DeviceType>,
     pub device_fingerprint: Option<String>,
-    pub is_active: Option<bool>,
+    pub status: Option<SessionStatus>,
     pub revoked_at: Option<DateTime<Utc>>,
     pub metadata: Option<serde_json::Value>,
 }
@@ -153,8 +153,8 @@ impl<R: SessionRepository + 'static> CommandHandler<UpdateSessionCommand> for Up
             entity.device_type = value;
         }
         entity.device_fingerprint = cmd.device_fingerprint;
-        if let Some(value) = cmd.is_active {
-            entity.is_active = value;
+        if let Some(value) = cmd.status {
+            entity.status = value;
         }
         entity.revoked_at = cmd.revoked_at;
         if let Some(value) = cmd.metadata {

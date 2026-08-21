@@ -7,7 +7,7 @@
 //! 4. User receives tokens
 //! 5. User can access protected resources
 
-use backbone_sapiens::domain::entity::{User, Session, UserStatus};
+use backbone_sapiens::domain::entity::{User, Session, UserStatus, SessionStatus};
 use backbone_sapiens::domain::value_objects::{Email, DeviceFingerprint};
 use uuid::Uuid;
 use chrono::{Utc, Duration};
@@ -54,7 +54,7 @@ mod standard_login_flow {
 
         // Verify session created
         assert_eq!(session.user_id, user.id);
-        assert!(session.is_active);
+        assert!(session.status == SessionStatus::Active);
         assert!(!session.is_expired());
 
         // Step 5: User logged in successfully
@@ -339,14 +339,14 @@ mod session_management_flow {
         );
 
         // Session is initially active
-        assert!(session.is_active);
+        assert!(session.status == SessionStatus::Active);
 
         // Logout (terminate session)
-        session.is_active = false;
+        session.status = SessionStatus::Revoked;
         session.revoked_at = Some(Utc::now());
 
         // Session should no longer be valid
-        assert!(!session.is_active);
+        assert!(session.status == SessionStatus::Revoked);
         assert!(session.revoked_at.is_some());
         assert!(!session.is_valid());
     }

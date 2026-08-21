@@ -50,7 +50,6 @@ pub struct CreateLDAPDirectoryCommand {
     pub sync_interval_minutes: Option<i32>,
     pub last_sync_at: Option<DateTime<Utc>>,
     pub last_sync_result: Option<serde_json::Value>,
-    pub is_active: bool,
     pub status: LDAPDirectoryStatus,
     pub metadata: serde_json::Value,
 }
@@ -88,7 +87,6 @@ impl<R: LDAPDirectoryRepository + 'static> CommandHandler<CreateLDAPDirectoryCom
             .sync_interval_minutes(cmd.sync_interval_minutes)
             .last_sync_at(cmd.last_sync_at)
             .last_sync_result(cmd.last_sync_result)
-            .is_active(cmd.is_active)
             .status(cmd.status)
             .metadata(cmd.metadata)
             .build()?;
@@ -120,7 +118,6 @@ pub struct UpdateLDAPDirectoryCommand {
     pub sync_interval_minutes: Option<i32>,
     pub last_sync_at: Option<DateTime<Utc>>,
     pub last_sync_result: Option<serde_json::Value>,
-    pub is_active: Option<bool>,
     pub status: Option<LDAPDirectoryStatus>,
     pub metadata: Option<serde_json::Value>,
 }
@@ -187,9 +184,6 @@ impl<R: LDAPDirectoryRepository + 'static> CommandHandler<UpdateLDAPDirectoryCom
         entity.sync_interval_minutes = cmd.sync_interval_minutes;
         entity.last_sync_at = cmd.last_sync_at;
         entity.last_sync_result = cmd.last_sync_result;
-        if let Some(value) = cmd.is_active {
-            entity.is_active = value;
-        }
         if let Some(value) = cmd.status {
             entity.status = value;
         }

@@ -15,7 +15,7 @@
 --     authorization_url,
 --     token_url,
 --     user_info_url,
---     is_active,
+--     status,
 --     metadata
 -- ) VALUES
 -- (
@@ -25,9 +25,9 @@
 -- Example: Insert reference data
 -- Uncomment and modify the following:
 
--- INSERT INTO sapiens.oauth_providers (id, code, name, is_active, created_at, updated_at) VALUES
---     (gen_random_uuid(), 'SAMPLE1', 'Sample 1', true, NOW(), NOW()),
---     (gen_random_uuid(), 'SAMPLE2', 'Sample 2', true, NOW(), NOW());
+-- INSERT INTO sapiens.oauth_providers (id, code, name, status, created_at, updated_at) VALUES
+--     (gen_random_uuid(), 'SAMPLE1', 'Sample 1', 'active', NOW(), NOW()),
+--     (gen_random_uuid(), 'SAMPLE2', 'Sample 2', 'active', NOW(), NOW());
 
 -- <<< CUSTOM SEED DATA >>>
 -- Add your custom seed data below

@@ -52,14 +52,13 @@ pub struct SAMLProviderFilter {
     pub acs_url: Option<String>,
     pub sls_url: Option<String>,
     pub name_id_format: Option<String>,
-    pub is_active: Option<bool>,
     pub status: Option<SAMLProviderStatus>,
 }
 
 impl SAMLProviderFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.name.is_some() || self.display_name.is_some() || self.entity_id.is_some() || self.sso_url.is_some() || self.slo_url.is_some() || self.certificate.is_some() || self.acs_url.is_some() || self.sls_url.is_some() || self.name_id_format.is_some() || self.is_active.is_some() || self.status.is_some()
+        self.name.is_some() || self.display_name.is_some() || self.entity_id.is_some() || self.sso_url.is_some() || self.slo_url.is_some() || self.certificate.is_some() || self.acs_url.is_some() || self.sls_url.is_some() || self.name_id_format.is_some() || self.status.is_some()
     }
 }
 

@@ -67,16 +67,14 @@ pub struct MFADeviceFilter {
     pub enrollment_ip: Option<String>,
     pub enrollment_user_agent: Option<String>,
     pub backup_codes_generated: Option<bool>,
-    pub is_locked: Option<bool>,
     pub lock_reason: Option<String>,
-    pub is_active: Option<bool>,
     pub status: Option<MFADeviceStatus>,
 }
 
 impl MFADeviceFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.user_id.is_some() || self.device_type.is_some() || self.device_name.is_some() || self.phone_number.is_some() || self.email_address.is_some() || self.totp_secret.is_some() || self.secret.is_some() || self.hardware_key_id.is_some() || self.push_token.is_some() || self.device_fingerprint.is_some() || self.manufacturer.is_some() || self.model.is_some() || self.operating_system.is_some() || self.app_version.is_some() || self.is_primary.is_some() || self.is_backup.is_some() || self.requires_verification.is_some() || self.auto_approval_enabled.is_some() || self.enrolled_by.is_some() || self.enrollment_method.is_some() || self.enrollment_ip.is_some() || self.enrollment_user_agent.is_some() || self.backup_codes_generated.is_some() || self.is_locked.is_some() || self.lock_reason.is_some() || self.is_active.is_some() || self.status.is_some()
+        self.user_id.is_some() || self.device_type.is_some() || self.device_name.is_some() || self.phone_number.is_some() || self.email_address.is_some() || self.totp_secret.is_some() || self.secret.is_some() || self.hardware_key_id.is_some() || self.push_token.is_some() || self.device_fingerprint.is_some() || self.manufacturer.is_some() || self.model.is_some() || self.operating_system.is_some() || self.app_version.is_some() || self.is_primary.is_some() || self.is_backup.is_some() || self.requires_verification.is_some() || self.auto_approval_enabled.is_some() || self.enrolled_by.is_some() || self.enrollment_method.is_some() || self.enrollment_ip.is_some() || self.enrollment_user_agent.is_some() || self.backup_codes_generated.is_some() || self.lock_reason.is_some() || self.status.is_some()
     }
 }
 

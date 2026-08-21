@@ -11,6 +11,7 @@ use utoipa::ToSchema;
 pub enum MFADeviceStatus {
     Active,
     Inactive,
+    Locked,
     Suspended,
     Compromised,
     Expired,
@@ -22,6 +23,7 @@ impl std::fmt::Display for MFADeviceStatus {
         match self {
             Self::Active => write!(f, "active"),
             Self::Inactive => write!(f, "inactive"),
+            Self::Locked => write!(f, "locked"),
             Self::Suspended => write!(f, "suspended"),
             Self::Compromised => write!(f, "compromised"),
             Self::Expired => write!(f, "expired"),
@@ -37,6 +39,7 @@ impl FromStr for MFADeviceStatus {
         match s.to_lowercase().as_str() {
             "active" => Ok(Self::Active),
             "inactive" => Ok(Self::Inactive),
+            "locked" => Ok(Self::Locked),
             "suspended" => Ok(Self::Suspended),
             "compromised" => Ok(Self::Compromised),
             "expired" => Ok(Self::Expired),

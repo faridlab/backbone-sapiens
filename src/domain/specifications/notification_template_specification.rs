@@ -26,7 +26,7 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveNotificationTemplateSpec;
 // impl Specification<NotificationTemplate> for ActiveNotificationTemplateSpec {
 //     fn is_satisfied_by(&self, e: &NotificationTemplate) -> bool {
-//         // e.is_active
+//         // e.status
 //         todo!()
 //     }
 // }

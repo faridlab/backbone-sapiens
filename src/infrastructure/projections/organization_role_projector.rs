@@ -108,7 +108,7 @@ impl<R: OrganizationRoleProjectionRepository> OrganizationRoleEventHandler for O
             event.name,
             event.description,
             event.permissions,
-            event.is_active,
+            event.status,
             event.metadata
         );
 
@@ -125,7 +125,7 @@ impl<R: OrganizationRoleProjectionRepository> OrganizationRoleEventHandler for O
             projection.name = event.name;
             projection.description = event.description;
             projection.permissions = event.permissions;
-            projection.is_active = event.is_active;
+            projection.status = event.status;
             projection.metadata = event.metadata;
             // Track the event sequence for this projection
             projection.apply_event(sequence);

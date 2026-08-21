@@ -18,6 +18,7 @@ use validator::Validate;
 
 use crate::domain::entity::PasswordPolicy;
 use crate::domain::entity::AuditMetadata;
+use crate::domain::entity::PasswordPolicyStatus;
 
 // =============================================================================
 // Create DTO
@@ -37,9 +38,7 @@ pub struct CreatePasswordPolicyDto {
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "organization_id")]
     pub organization_id: Option<Uuid>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    pub status: PasswordPolicyStatus,
     #[serde(alias = "password_requirements")]
     pub password_requirements: serde_json::Value,
     #[serde(alias = "password_history")]
@@ -68,9 +67,7 @@ pub struct UpdatePasswordPolicyDto {
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "organization_id")]
     pub organization_id: Option<Uuid>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    pub status: PasswordPolicyStatus,
     #[serde(alias = "password_requirements")]
     pub password_requirements: serde_json::Value,
     #[serde(alias = "password_history")]
@@ -100,9 +97,8 @@ pub struct PatchPasswordPolicyDto {
     pub name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "organization_id")]
     pub organization_id: Option<Uuid>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "is_active")]
-    pub is_active: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<PasswordPolicyStatus>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "password_requirements")]
     pub password_requirements: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "password_history")]
@@ -116,7 +112,7 @@ pub struct PatchPasswordPolicyDto {
 impl PatchPasswordPolicyDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.name.is_some() || self.organization_id.is_some() || self.is_active.is_some() || self.password_requirements.is_some() || self.password_history.is_some() || self.reset_settings.is_some() || self.expiry_settings.is_some()
+        self.name.is_some() || self.organization_id.is_some() || self.status.is_some() || self.password_requirements.is_some() || self.password_history.is_some() || self.reset_settings.is_some() || self.expiry_settings.is_some()
     }
 }
 
@@ -137,8 +133,7 @@ pub struct PasswordPolicyResponseDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub name: String,
     pub organization_id: Option<Uuid>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub is_active: bool,
+    pub status: PasswordPolicyStatus,
     pub password_requirements: serde_json::Value,
     pub password_history: serde_json::Value,
     pub reset_settings: serde_json::Value,
@@ -202,7 +197,7 @@ pub struct PasswordPolicySummaryDto {
     pub id: Uuid,
     pub name: String,
     pub organization_id: Option<Uuid>,
-    pub is_active: bool,
+    pub status: PasswordPolicyStatus,
     pub created_at: Option<DateTime<Utc>>,
 }
 
@@ -216,7 +211,7 @@ impl From<PasswordPolicy> for PasswordPolicyResponseDto {
             id: entity.id,
             name: entity.name,
             organization_id: entity.organization_id,
-            is_active: entity.is_active,
+            status: entity.status,
             password_requirements: entity.password_requirements,
             password_history: entity.password_history,
             reset_settings: entity.reset_settings,
@@ -233,7 +228,7 @@ impl From<PasswordPolicy> for PasswordPolicySummaryDto {
             id: entity.id,
             name: entity.name,
             organization_id: entity.organization_id,
-            is_active: entity.is_active,
+            status: entity.status,
             created_at,
         }
     }
@@ -245,7 +240,7 @@ impl From<CreatePasswordPolicyDto> for PasswordPolicy {
             id: Uuid::new_v4(),
             name: dto.name,
             organization_id: dto.organization_id,
-            is_active: dto.is_active,
+            status: dto.status,
             password_requirements: dto.password_requirements,
             password_history: dto.password_history,
             reset_settings: dto.reset_settings,
@@ -261,7 +256,7 @@ impl From<&PasswordPolicy> for PasswordPolicyResponseDto {
             id: entity.id.clone(),
             name: entity.name.clone(),
             organization_id: entity.organization_id.clone(),
-            is_active: entity.is_active.clone(),
+            status: entity.status,
             password_requirements: entity.password_requirements.clone(),
             password_history: entity.password_history.clone(),
             reset_settings: entity.reset_settings.clone(),
@@ -281,7 +276,7 @@ impl backbone_core::ApplyUpdateDto<UpdatePasswordPolicyDto> for PasswordPolicy {
     fn apply_update(mut self, dto: UpdatePasswordPolicyDto) -> backbone_core::ServiceResult<Self> {
         self.name = dto.name;
         self.organization_id = dto.organization_id;
-        self.is_active = dto.is_active;
+        self.status = dto.status;
         self.password_requirements = dto.password_requirements;
         self.password_history = dto.password_history;
         self.reset_settings = dto.reset_settings;

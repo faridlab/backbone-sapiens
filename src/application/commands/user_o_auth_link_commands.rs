@@ -40,12 +40,11 @@ pub struct CreateUserOAuthLinkCommand {
     pub provider_user_id: String,
     pub provider_email: String,
     pub provider_username: Option<String>,
-    pub is_active: bool,
     pub access_token: Option<String>,
     pub refresh_token: Option<String>,
     pub token_expires_at: Option<DateTime<Utc>>,
     pub is_primary: bool,
-    pub link_status: UserOAuthLinkStatus,
+    pub status: UserOAuthLinkStatus,
     pub last_synced: Option<DateTime<Utc>>,
     pub sync_enabled: bool,
     pub metadata: serde_json::Value,
@@ -74,12 +73,11 @@ impl<R: UserOAuthLinkRepository + 'static> CommandHandler<CreateUserOAuthLinkCom
             .provider_user_id(cmd.provider_user_id)
             .provider_email(cmd.provider_email)
             .provider_username(cmd.provider_username)
-            .is_active(cmd.is_active)
             .access_token(cmd.access_token)
             .refresh_token(cmd.refresh_token)
             .token_expires_at(cmd.token_expires_at)
             .is_primary(cmd.is_primary)
-            .link_status(cmd.link_status)
+            .status(cmd.status)
             .last_synced(cmd.last_synced)
             .sync_enabled(cmd.sync_enabled)
             .metadata(cmd.metadata)
@@ -102,12 +100,11 @@ pub struct UpdateUserOAuthLinkCommand {
     pub provider_user_id: Option<String>,
     pub provider_email: Option<String>,
     pub provider_username: Option<String>,
-    pub is_active: Option<bool>,
     pub access_token: Option<String>,
     pub refresh_token: Option<String>,
     pub token_expires_at: Option<DateTime<Utc>>,
     pub is_primary: Option<bool>,
-    pub link_status: Option<UserOAuthLinkStatus>,
+    pub status: Option<UserOAuthLinkStatus>,
     pub last_synced: Option<DateTime<Utc>>,
     pub sync_enabled: Option<bool>,
     pub metadata: Option<serde_json::Value>,
@@ -149,17 +146,14 @@ impl<R: UserOAuthLinkRepository + 'static> CommandHandler<UpdateUserOAuthLinkCom
             entity.provider_email = value;
         }
         entity.provider_username = cmd.provider_username;
-        if let Some(value) = cmd.is_active {
-            entity.is_active = value;
-        }
         entity.access_token = cmd.access_token;
         entity.refresh_token = cmd.refresh_token;
         entity.token_expires_at = cmd.token_expires_at;
         if let Some(value) = cmd.is_primary {
             entity.is_primary = value;
         }
-        if let Some(value) = cmd.link_status {
-            entity.link_status = value;
+        if let Some(value) = cmd.status {
+            entity.status = value;
         }
         entity.last_synced = cmd.last_synced;
         if let Some(value) = cmd.sync_enabled {

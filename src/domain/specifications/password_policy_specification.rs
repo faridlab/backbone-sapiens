@@ -26,7 +26,7 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActivePasswordPolicySpec;
 // impl Specification<PasswordPolicy> for ActivePasswordPolicySpec {
 //     fn is_satisfied_by(&self, e: &PasswordPolicy) -> bool {
-//         // e.is_active
+//         // e.status
 //         todo!()
 //     }
 // }

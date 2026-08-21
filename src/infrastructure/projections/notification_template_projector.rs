@@ -110,7 +110,7 @@ impl<R: NotificationTemplateProjectionRepository> NotificationTemplateEventHandl
             event.subject_template,
             event.message_template,
             event.variables,
-            event.is_active,
+            event.status,
             event.language,
             event.metadata
         );
@@ -130,7 +130,7 @@ impl<R: NotificationTemplateProjectionRepository> NotificationTemplateEventHandl
             projection.subject_template = event.subject_template;
             projection.message_template = event.message_template;
             projection.variables = event.variables;
-            projection.is_active = event.is_active;
+            projection.status = event.status;
             projection.language = event.language;
             projection.metadata = event.metadata;
             // Track the event sequence for this projection

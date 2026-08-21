@@ -79,9 +79,6 @@ pub struct CreateLDAPDirectoryDto {
     pub last_sync_at: Option<DateTime<Utc>>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "last_sync_result")]
     pub last_sync_result: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
     pub status: LDAPDirectoryStatus,
 }
 
@@ -144,9 +141,6 @@ pub struct UpdateLDAPDirectoryDto {
     pub last_sync_at: Option<DateTime<Utc>>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "last_sync_result")]
     pub last_sync_result: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
     pub status: LDAPDirectoryStatus,
 }
 
@@ -212,9 +206,6 @@ pub struct PatchLDAPDirectoryDto {
     pub last_sync_at: Option<DateTime<Utc>>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "last_sync_result")]
     pub last_sync_result: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "is_active")]
-    pub is_active: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<LDAPDirectoryStatus>,
 }
@@ -222,7 +213,7 @@ pub struct PatchLDAPDirectoryDto {
 impl PatchLDAPDirectoryDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.name.is_some() || self.display_name.is_some() || self.host.is_some() || self.port.is_some() || self.use_ssl.is_some() || self.use_tls.is_some() || self.bind_dn.is_some() || self.bind_password.is_some() || self.search_base.is_some() || self.search_filter.is_some() || self.attribute_mapping.is_some() || self.sync_enabled.is_some() || self.sync_interval_minutes.is_some() || self.last_sync_at.is_some() || self.last_sync_result.is_some() || self.is_active.is_some() || self.status.is_some()
+        self.name.is_some() || self.display_name.is_some() || self.host.is_some() || self.port.is_some() || self.use_ssl.is_some() || self.use_tls.is_some() || self.bind_dn.is_some() || self.bind_password.is_some() || self.search_base.is_some() || self.search_filter.is_some() || self.attribute_mapping.is_some() || self.sync_enabled.is_some() || self.sync_interval_minutes.is_some() || self.last_sync_at.is_some() || self.last_sync_result.is_some() || self.status.is_some()
     }
 }
 
@@ -266,8 +257,6 @@ pub struct LDAPDirectoryResponseDto {
     pub sync_interval_minutes: Option<i32>,
     pub last_sync_at: Option<DateTime<Utc>>,
     pub last_sync_result: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub is_active: bool,
     pub status: LDAPDirectoryStatus,
     pub metadata: AuditMetadata,
 }
@@ -355,7 +344,6 @@ impl From<LDAPDirectory> for LDAPDirectoryResponseDto {
             sync_interval_minutes: entity.sync_interval_minutes,
             last_sync_at: entity.last_sync_at,
             last_sync_result: entity.last_sync_result,
-            is_active: entity.is_active,
             status: entity.status,
             metadata: entity.metadata,
         }
@@ -394,7 +382,6 @@ impl From<CreateLDAPDirectoryDto> for LDAPDirectory {
             sync_interval_minutes: dto.sync_interval_minutes,
             last_sync_at: dto.last_sync_at,
             last_sync_result: dto.last_sync_result,
-            is_active: dto.is_active,
             status: dto.status,
             metadata: AuditMetadata::default(),
         }
@@ -420,7 +407,6 @@ impl From<&LDAPDirectory> for LDAPDirectoryResponseDto {
             sync_interval_minutes: entity.sync_interval_minutes.clone(),
             last_sync_at: entity.last_sync_at.clone(),
             last_sync_result: entity.last_sync_result.clone(),
-            is_active: entity.is_active.clone(),
             status: entity.status.clone(),
             metadata: entity.metadata.clone(),
         }
@@ -450,7 +436,6 @@ impl backbone_core::ApplyUpdateDto<UpdateLDAPDirectoryDto> for LDAPDirectory {
         self.sync_interval_minutes = dto.sync_interval_minutes;
         self.last_sync_at = dto.last_sync_at;
         self.last_sync_result = dto.last_sync_result;
-        self.is_active = dto.is_active;
         self.status = dto.status;
         Ok(self)
     }
