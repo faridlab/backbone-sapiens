@@ -1,6 +1,8 @@
 //! Test Module
 //!
 //! Entry point for all Sapiens authentication tests.
+#![recursion_limit = "1024"]
+
 
 // Integration test modules
 pub mod integration;

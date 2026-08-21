@@ -1,6 +1,8 @@
 //! Test Utilities
 //!
 //! Common utilities and helper functions for authentication tests.
+#![recursion_limit = "1024"]
+
 
 use serde_json::{json, Value};
 use uuid::Uuid;
