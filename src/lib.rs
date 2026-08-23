@@ -238,8 +238,6 @@ impl SapiensModule {
             create_mfa_backup_code_routes,
             create_mfa_device_routes,
             create_mfa_session_routes,
-            create_notification_routes,
-            create_notification_template_routes,
             create_notification_log_routes,
             create_notification_preference_routes,
             create_o_auth_provider_routes,
@@ -301,8 +299,14 @@ impl SapiensModule {
             .merge(create_mfa_backup_code_routes(self.mfa_backup_code_service.clone()))
             .merge(create_mfa_device_routes(self.mfa_device_service.clone()))
             .merge(create_mfa_session_routes(self.mfa_session_service.clone()))
-            .merge(create_notification_routes(self.notification_service.clone()))
-            .merge(create_notification_template_routes(self.notification_template_service.clone()))
+            // Notification and notification_template CRUD routes are owned by
+            // the backbone-notification module (/notifications,
+            // /notification_templates). Registering them here as well would
+            // double-register those bases and panic the router at boot when
+            // both modules are composed into one service, so this module
+            // deliberately leaves them unmounted. The notification_log and
+            // notification_preference bases have no counterpart in
+            // backbone-notification and stay mounted here.
             .merge(create_notification_log_routes(self.notification_log_service.clone()))
             .merge(create_notification_preference_routes(self.notification_preference_service.clone()))
             .merge(create_o_auth_provider_routes(self.o_auth_provider_service.clone()))

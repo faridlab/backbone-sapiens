@@ -11,7 +11,7 @@ use crate::integration::tests::{
     UserRoleApiTest, UserPermissionApiTest, RolePermissionApiTest,
     AuditLogApiTest, MfaDeviceApiTest, PasswordResetTokenApiTest,
     UserSettingsApiTest, SystemSettingsApiTest,
-    AnalyticsEventApiTest, OAuthProviderApiTest, NotificationApiTest, WorkflowApiTest,
+    AnalyticsEventApiTest, OAuthProviderApiTest, WorkflowApiTest,
     V2ApiTest,
 };
 
@@ -290,17 +290,6 @@ impl TestRegistry {
             },
         );
 
-        // Notification API tests
-        registry.register(
-            "sapiens.api.notifications",
-            TestRegistration {
-                config: TestConfig::new_api("Notification", "notification_api_test", "Notification CRUD API tests")
-                    .with_type(TestType::Integration)
-                    .with_expected_endpoints(15), // Notifications have additional endpoints
-                factory: || Box::new(NotificationApiTest::new()),
-            },
-        );
-
         // Workflow API tests
         registry.register(
             "sapiens.api.workflows",
@@ -563,14 +552,13 @@ mod tests {
         // Operations & Analytics
         assert!(registry.get("sapiens.api.analytics_events").is_some());
         assert!(registry.get("sapiens.api.oauth_providers").is_some());
-        assert!(registry.get("sapiens.api.notifications").is_some());
         assert!(registry.get("sapiens.api.workflows").is_some());
     }
 
     #[test]
     fn test_entity_count() {
         let registry = TestRegistry::with_defaults();
-        assert_eq!(registry.entity_count(), 17); // 17 test suites (all entities enabled including V2)
+        assert_eq!(registry.entity_count(), 16); // 16 test suites (all entities enabled including V2)
     }
 
     #[test]

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-08-23
+
+### Fixed
+- Stop mounting the `/notifications` and `/notification_templates` CRUD
+  routers in `SapiensModule::routes()`. Those route bases are owned by the
+  `backbone-notification` module; registering them from both modules
+  double-registers the bases and panics the router at boot whenever both are
+  composed into one service. The notification and notification_template
+  entities, services, and per-entity handler functions remain available for
+  hosts that want them; the `/notification_logs` and
+  `/notification_preferences` routers are unaffected and stay mounted.
+
 ## [0.1.7] - 2026-05-17
 
 ### Changed

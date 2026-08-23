@@ -263,34 +263,6 @@ async fn test_mfa_session_api() {
 }
 
 #[tokio::test]
-async fn test_notification_api() {
-    let mut test = NotificationApiTest::new();
-    let results = test.run_all().await;
-
-    let failed: Vec<_> = results.iter().filter(|r| !r.success).collect();
-    if !failed.is_empty() {
-        for f in &failed {
-            eprintln!("FAILED: {} - {}", f.test_name, f.details);
-        }
-        panic!("{} tests failed", failed.len());
-    }
-}
-
-#[tokio::test]
-async fn test_notification_template_api() {
-    let mut test = NotificationTemplateApiTest::new();
-    let results = test.run_all().await;
-
-    let failed: Vec<_> = results.iter().filter(|r| !r.success).collect();
-    if !failed.is_empty() {
-        for f in &failed {
-            eprintln!("FAILED: {} - {}", f.test_name, f.details);
-        }
-        panic!("{} tests failed", failed.len());
-    }
-}
-
-#[tokio::test]
 async fn test_notification_log_api() {
     let mut test = NotificationLogApiTest::new();
     let results = test.run_all().await;
