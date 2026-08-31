@@ -59,6 +59,7 @@ pub mod session_limit_service;
 pub mod system_settings_service;
 pub mod temporary_permission_service;
 pub mod user_service;
+pub mod internal_user;
 pub mod profile_service;
 pub mod user_permission_service;
 pub mod user_role_service;
@@ -142,4 +143,7 @@ pub use auth_service::{
     AuthService, AuthError, RegisterInput, LoginResult, RegisterResult,
     VerifyEmailResult, UserProfile,
 };
+// <<< CUSTOM: Internal-user predicate (ACTIVE organization_users membership) —
+// the definition downstream UserCreated consumers apply.
+pub use internal_user::{internal_user_ids, is_internal_user};
 // >>> END CUSTOM

@@ -1701,6 +1701,55 @@ Related Entities: User, Permission, TemporaryPermission, AuditLog, Notification
 | `username` | string | User's username |
 | `occurred_at` | timestamp | Event timestamp |
 
+#### Delivery contract (implemented behavior)
+
+The wire event is `UserDomainEvent::Created { user_id: String, occurred_at: DateTime<Utc> }`
+(serde tag `event_type` = `"Created"`; `DomainEvent::event_type()` = `"UserCreated"`). The
+payload fields above describe the semantic contract; the serialized form carries
+`user_id`/`occurred_at` only.
+
+**Producing paths** — every path that commits a new user row emits the event:
+
+| Path | Staging discipline |
+|------|--------------------|
+| Self-registration (`AuthService::register`) | Staged INSIDE the registration transaction (`stage_user_created_event`), atomic with the user row; in-process publish fires after commit |
+| Admin/CRUD create (`POST /users`, `/users/bulk`, `/users/upsert` via `GenericCrudService`) | Staged post-commit by `UserCreatedOutboxPublisher` (the only hook the generic service exposes; `bulk_create`/`upsert` delegate to `create`, so one publisher covers all three) — one transaction later than registration, identical outbox row |
+
+**Durable leg**: one row in `sapiens.outbox_events` per event — `event_type='UserCreated'`,
+`aggregate_type='User'`, `aggregate_id=<user uuid>`, `payload` = the serialized domain event,
+`company_id = 00000000-0000-0000-0000-000000000000` (nil sentinel: users are platform-level
+and have no company dimension — consumers must key on event type + aggregate id, never
+`company_id`). The host relay drains this schema; a host deployment must include `"sapiens"`
+in its outbox schema list for the relay to pick these rows up.
+
+**Immediate leg**: the same event is published on the module's typed in-process bus, where
+the registered `SapiensIntegrationEventPublisher` translator re-emits it as the cross-module
+integration event `sapiens.user.created` (source context `sapiens`) on the integration bus.
+The module build wires both legs when the host supplies an integration bus via
+`with_integration_bus`. **When no bus is wired the in-process publish is silently dropped**
+(the publisher and `AuthService::publish_event` both ignore the absent bus) — the outbox row
+still lands and the relay still delivers it; only immediate delivery is lost.
+
+**Re-fire idempotency**: one committed live user row produces at most one event. A create
+that fails validation or repository insert never fires the hook. A re-fired admin create
+for an email that already has a LIVE user row is suppressed by the publisher (no outbox
+row, no in-process publish), because the `users` table's soft-delete-aware email index
+(`UNIQUE (email, (metadata->>'deleted_at'))`) does not actually refuse live duplicates —
+Postgres treats the NULL `deleted_at` as distinct. Creating an email whose live rows were
+all soft-deleted is a genuinely new account and publishes normally. The durable fix is a
+partial unique index (`UNIQUE (email) WHERE metadata->>'deleted_at' IS NULL`) on the schema;
+until it lands the publisher-side guard is the guarantee. Self-registration refuses
+duplicate emails in application code before any insert (`email_exists` pre-check).
+
+**Internal-user definition**: an *internal user* is a user with an ACTIVE
+`organization_users` membership — a row in `sapiens.organization_users` with
+`status = 'active'` AND `metadata->>'deleted_at' IS NULL`. The predicate is exported as
+`backbone_sapiens::is_internal_user(pool, user_id)` (and the batch form
+`internal_user_ids(pool, &[ids])`) for consumption at event-consumption time. The event
+payload deliberately does NOT carry an `is_internal` flag: membership is point-in-time
+state that can change after the event fires, so consumers must query the predicate when
+they process the event (or its replayed outbox row), not trust a value frozen at creation.
+
 ### Event: `UserLoggedInEvent`
 
 **Description**: Published when user successfully logs in

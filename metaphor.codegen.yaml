@@ -17,6 +17,10 @@ user_owned:
   # Whole hand-grown source tree (see rationale above).
   - "src/**"
 
+  # Hand-written outbox/inbox tables (not schema-derived — the transactional
+  # outbox this module's UserCreated staging writes into).
+  - "migrations/*sapiens_outbox*"
+
   # Hand-written tests and module documentation.
   - "tests/**"
   - "docs/**"

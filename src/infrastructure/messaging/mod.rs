@@ -39,10 +39,15 @@ use crate::domain::entity::UserDomainEvent;
 // Sub-modules
 pub mod integration_events;
 pub mod event_translator;
+pub mod user_created_outbox;
 
 // Re-export integration event types
 pub use integration_events::*;
 pub use event_translator::SapiensIntegrationEventPublisher;
+pub use user_created_outbox::{
+    stage_user_created_event, UserCreatedOutboxPublisher, SAPIENS_OUTBOX_SCHEMA,
+    SAPIENS_PLATFORM_COMPANY_ID,
+};
 
 // Re-export backbone-messaging types for UserDomainEvent
 pub use backbone_messaging::{

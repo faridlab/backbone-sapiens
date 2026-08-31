@@ -109,6 +109,14 @@ pub use application::service::integration_credential_service::{
     CredentialDescriptor, CredentialStoreError, IntegrationCredentialService,
 };
 pub use application::service::credential_crypto::CryptoError;
+// <<< CUSTOM: Internal-user predicate (ACTIVE organization_users membership) — the
+// definition UserCreated consumers apply at consumption time.
+pub use application::service::{internal_user_ids, is_internal_user};
+// <<< CUSTOM: UserCreated outbox staging seam + publisher
+pub use infrastructure::messaging::user_created_outbox::{
+    stage_user_created_event, UserCreatedOutboxPublisher, SAPIENS_OUTBOX_SCHEMA,
+    SAPIENS_PLATFORM_COMPANY_ID,
+};
 // >>> END CUSTOM
 // Re-exports - Validation
 pub use application::validator::{ValidationError, ValidationResult};
@@ -126,6 +134,7 @@ use sqlx::PgPool;
 // <<< CUSTOM: Import integration event publisher
 use crate::infrastructure::messaging::SapiensIntegrationEventPublisher;
 use crate::infrastructure::messaging::IntegrationEventBus;
+use crate::infrastructure::messaging::EventBus as UserDomainEventBus;
 // >>> END CUSTOM
 /// Sapiens module configuration
 ///
@@ -206,6 +215,11 @@ pub struct SapiensModule {
     pub integration_credential_service: Arc<IntegrationCredentialService>,
     // <<< CUSTOM: Integration event publisher for cross-module communication
     pub integration_publisher: Option<Arc<SapiensIntegrationEventPublisher>>,
+    // <<< CUSTOM: The typed in-process UserDomainEvent bus. Constructed (and the
+    // integration translator registered on it) when the builder is given an
+    // integration bus; `None` when the module is built without one, in which case
+    // in-process publishes are silently dropped and only the outbox rows remain.
+    pub user_domain_event_bus: Option<Arc<UserDomainEventBus>>,
     // >>> END CUSTOM
 }
 
@@ -584,9 +598,37 @@ impl SapiensModuleBuilder {
         let temporary_permission_repository = Arc::new(TemporaryPermissionRepository::new(db_pool.clone()));
         let temporary_permission_service = Arc::new(TemporaryPermissionService::with_repository(temporary_permission_repository.clone()));
 
+        // <<< CUSTOM: Typed UserDomainEvent bus — the three-step wiring documented on
+        // SapiensIntegrationEventPublisher (src/infrastructure/messaging/event_translator.rs):
+        // construct the typed bus, register the translator on it, publish domain events
+        // on it. Done here (not in the builder setter) so the host-facing
+        // `with_integration_bus` surface stays unchanged: supplying the integration bus
+        // is all a host does; the module wires its own typed bus above it.
+        // `register_handler` is async but only takes an in-memory write lock that is
+        // uncontended at construction time, so driving it to completion inline cannot
+        // suspend and is safe inside a synchronous builder.
+        let user_domain_event_bus: Option<Arc<UserDomainEventBus>> = self.integration_bus
+            .as_ref()
+            .map(|integration_bus| {
+                let domain_bus = Arc::new(
+                    crate::infrastructure::messaging::create_sapiens_event_bus(),
+                );
+                let translator = Arc::new(SapiensIntegrationEventPublisher::new(integration_bus.clone()));
+                futures::executor::block_on(domain_bus.register_handler(translator));
+                domain_bus
+            });
+
         // User service
         let user_repository = Arc::new(UserRepository::new(db_pool.clone()));
-        let user_service = Arc::new(UserService::with_repository(user_repository.clone()));
+        // The event publisher stages a durable UserCreated outbox row for every user the
+        // CRUD router creates (create/bulk_create/upsert all funnel through create) and
+        // mirrors it onto the typed bus when one is wired.
+        let user_service = Arc::new(
+            UserService::with_repository(user_repository.clone()).with_event_publisher(Arc::new(
+                UserCreatedOutboxPublisher::new(db_pool.clone(), user_domain_event_bus.clone()),
+            )),
+        );
+        // >>> END CUSTOM
 
         // Profile service
         let profile_repository = Arc::new(ProfileRepository::new(db_pool.clone()));
@@ -644,7 +686,8 @@ impl SapiensModuleBuilder {
             jwt,
             email,
             db_pool.clone(),
-        ));
+        )
+        .with_domain_event_bus(user_domain_event_bus.clone()));
         // <<< CUSTOM: Credential store service (verbs only; its routes are NOT
         // in routes() — the host composes create_integration_credential_routes
         // behind its own role gate so the credential surface never rides the
@@ -724,6 +767,9 @@ impl SapiensModuleBuilder {
             integration_credential_service,
             // <<< CUSTOM: Integration event publisher
             integration_publisher,
+            // <<< CUSTOM: Typed UserDomainEvent bus (None when built without an
+            // integration bus — in-process publishes then drop silently)
+            user_domain_event_bus,
             // >>> END CUSTOM
         })
     }

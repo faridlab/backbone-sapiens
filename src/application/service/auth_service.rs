@@ -14,10 +14,12 @@ use sqlx::PgPool;
 use tracing::{error, info, warn};
 use uuid::Uuid;
 
-use crate::domain::entity::UserStatus;
+use crate::domain::entity::{UserDomainEvent, UserStatus};
 use crate::infrastructure::auth::crypto;
 use crate::infrastructure::auth::email::AuthEmailService;
 use crate::infrastructure::auth::jwt::JwtService;
+use crate::infrastructure::messaging::user_created_outbox::stage_user_created_event;
+use crate::infrastructure::messaging::EventBus as UserDomainEventBus;
 use crate::infrastructure::persistence::{
     EmailVerificationTokenRepository, PasswordResetTokenRepository, SessionRepository,
     UserRepository,
@@ -243,6 +245,10 @@ pub struct AuthService {
     jwt: Arc<JwtService>,
     email: Arc<AuthEmailService>,
     db_pool: PgPool,
+    /// Optional typed in-process bus for immediate `UserDomainEvent` delivery.
+    /// When `None`, in-process publishes are silently dropped (the outbox row is
+    /// still staged — the relay delivers it).
+    domain_event_bus: Option<Arc<UserDomainEventBus>>,
 }
 
 impl AuthService {
@@ -263,6 +269,22 @@ impl AuthService {
             jwt,
             email,
             db_pool,
+            domain_event_bus: None,
+        }
+    }
+
+    /// Attach the typed in-process user-event bus (builder style, additive).
+    pub fn with_domain_event_bus(mut self, bus: Option<Arc<UserDomainEventBus>>) -> Self {
+        self.domain_event_bus = bus;
+        self
+    }
+
+    /// Publish a user domain event on the in-process bus (fire-and-forget).
+    /// If no event bus is configured, the event is silently dropped — identical
+    /// semantics to the domain layer's `DefaultAuthenticationService::publish_event`.
+    async fn publish_event(&self, event: UserDomainEvent) {
+        if let Some(bus) = &self.domain_event_bus {
+            let _ = bus.publish(event).await;
         }
     }
 
@@ -372,8 +394,9 @@ impl AuthService {
 
         // Build metadata WITHOUT first_name and last_name
         let metadata = now_metadata();
+        let registered_at = Utc::now();
 
-        // Transaction: user + verification token
+        // Transaction: user + verification token + UserCreated outbox row
         let mut tx = self
             .db_pool
             .begin()
@@ -423,9 +446,28 @@ impl AuthService {
             AuthError::Internal(e.into())
         })?;
 
+        // Stage the UserCreated domain event in the SAME transaction as the user row and
+        // the verification token, so the registration and its event commit atomically — a
+        // crash between commit and delivery cannot drop the event, and a rolled-back
+        // registration never emits one. The relay drains the outbox row at-least-once.
+        stage_user_created_event(&mut *tx, user_id, registered_at)
+            .await
+            .map_err(|e| {
+                error!("Failed to stage UserCreated outbox event: {}", e);
+                AuthError::Internal(e.into())
+            })?;
+
         tx.commit()
             .await
             .map_err(|e| AuthError::Internal(e.into()))?;
+
+        // Publish user created event (post-commit, in-process convenience delivery;
+        // silently dropped when no bus is wired — the outbox row is the durable record)
+        self.publish_event(UserDomainEvent::Created {
+            user_id: user_id.to_string(),
+            occurred_at: registered_at,
+        })
+        .await;
 
         // Send email (outside transaction)
         self.email
