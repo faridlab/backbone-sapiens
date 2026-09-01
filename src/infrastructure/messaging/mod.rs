@@ -40,13 +40,18 @@ use crate::domain::entity::UserDomainEvent;
 pub mod integration_events;
 pub mod event_translator;
 pub mod user_created_outbox;
+pub mod user_lifecycle_outbox;
 
 // Re-export integration event types
 pub use integration_events::*;
 pub use event_translator::SapiensIntegrationEventPublisher;
 pub use user_created_outbox::{
-    stage_user_created_event, UserCreatedOutboxPublisher, SAPIENS_OUTBOX_SCHEMA,
-    SAPIENS_PLATFORM_COMPANY_ID,
+    stage_user_created_event, UserCreatedOutboxPublisher, UserLifecycleOutboxPublisher,
+    SAPIENS_OUTBOX_SCHEMA, SAPIENS_PLATFORM_COMPANY_ID,
+};
+pub use user_lifecycle_outbox::{
+    stage_user_deactivated_event, stage_user_anonymized_event, stage_user_deleted_event,
+    AnonymizationRecordOutboxPublisher, UserDeactivationLifecycle,
 };
 
 // Re-export backbone-messaging types for UserDomainEvent

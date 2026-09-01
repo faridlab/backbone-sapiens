@@ -55,7 +55,8 @@ impl SessionRepository {
     /// Insert a new authentication session row and return the created session.
     ///
     /// Arguments: `user_id`, `token_hash` (hashed refresh token), `expires_at`,
-    /// and raw `metadata` JSON value.
+    /// and raw `metadata` JSON value. `last_activity` starts at NOW() — the
+    /// idle-timeout posture keys on it.
     pub async fn create_auth_session(
         &self,
         user_id: Uuid,
@@ -66,8 +67,8 @@ impl SessionRepository {
         let id = Uuid::new_v4();
         let sql = format!(
             "INSERT INTO {TABLE_NAME} \
-             (id, user_id, token_hash, expires_at, remember_me, device_type, status, metadata) \
-             VALUES ($1, $2, $3, $4, false, 'unknown', 'active', $5) \
+             (id, user_id, token_hash, expires_at, remember_me, device_type, status, last_activity, metadata) \
+             VALUES ($1, $2, $3, $4, false, 'unknown', 'active', NOW(), $5) \
              RETURNING *"
         );
         let result = sqlx::query_as::<_, Session>(&sql)

@@ -68,6 +68,11 @@ pub mod workflow_action_execution_handler;
 
 // <<< CUSTOM
 pub mod integration_credential_handler;
+// <<< CUSTOM: The gated public auth router. EXPORTED ONLY — deliberately NOT
+// part of any create_*_routes composer the module's routes() mounts; hosts
+// that want the public auth forms mount it themselves (see the file's
+// mounting-contract docs).
+pub mod public_auth_routes;
 // END CUSTOM
 
 // Re-exports
@@ -133,4 +138,6 @@ pub use workflow_execution_handler::{create_workflow_execution_routes, create_wo
 pub use workflow_action_execution_handler::{create_workflow_action_execution_routes, create_workflow_action_execution_read_routes, create_workflow_action_execution_write_routes};
 // <<< CUSTOM
 pub use integration_credential_handler::create_integration_credential_routes;
+// <<< CUSTOM: Gated public auth router export (mounting is a host decision)
+pub use public_auth_routes::{create_public_auth_routes, PublicAuthState};
 // END CUSTOM

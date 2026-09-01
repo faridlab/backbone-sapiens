@@ -61,6 +61,14 @@ pub enum UserDomainEvent {
         occurred_at: DateTime<Utc>,
     },
 
+    /// User's data was anonymized (GDPR erasure). Terminal for the identity:
+    /// downstream consumers must treat every credential, session and
+    /// membership for this user as dead.
+    Anonymized {
+        user_id: String,
+        occurred_at: DateTime<Utc>,
+    },
+
     // ── Authentication ─────────────────────────────────────────────
 
     /// User successfully logged in
@@ -152,6 +160,7 @@ impl DomainEvent for UserDomainEvent {
             Self::Suspended { .. } => "UserSuspended",
             Self::Deleted { .. } => "UserDeleted",
             Self::Restored { .. } => "UserRestored",
+            Self::Anonymized { .. } => "UserAnonymized",
             Self::LoggedIn { .. } => "UserLoggedIn",
             Self::LoginFailed { .. } => "UserLoginFailed",
             Self::LoggedOut { .. } => "UserLoggedOut",
@@ -184,7 +193,8 @@ impl DomainEvent for UserDomainEvent {
             | Self::MfaEnabled { user_id, .. }
             | Self::MfaDisabled { user_id, .. }
             | Self::AccountLocked { user_id, .. }
-            | Self::AccountUnlocked { user_id, .. } => user_id,
+            | Self::AccountUnlocked { user_id, .. }
+            | Self::Anonymized { user_id, .. } => user_id,
         }
     }
 
@@ -206,7 +216,8 @@ impl DomainEvent for UserDomainEvent {
             | Self::MfaEnabled { occurred_at, .. }
             | Self::MfaDisabled { occurred_at, .. }
             | Self::AccountLocked { occurred_at, .. }
-            | Self::AccountUnlocked { occurred_at, .. } => *occurred_at,
+            | Self::AccountUnlocked { occurred_at, .. }
+            | Self::Anonymized { occurred_at, .. } => *occurred_at,
         }
     }
 }

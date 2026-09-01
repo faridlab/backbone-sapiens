@@ -1360,6 +1360,15 @@ pub struct UserDeletedEvent {
     pub occurred_at: DateTime<Utc>,
 }
 
+/// Event published when a User is anonymized (GDPR erasure). Terminal for the
+/// identity: consumers revoke every credential, session, membership and portal
+/// access keyed on the user.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UserAnonymizedEvent {
+    pub id: UserId,
+    pub occurred_at: DateTime<Utc>,
+}
+
 // ============================================================================
 // PROFILE EVENTS
 // ============================================================================
@@ -1815,6 +1824,7 @@ pub enum SapiensEvent {
     UserCreated(UserCreatedEvent),
     UserUpdated(UserUpdatedEvent),
     UserDeleted(UserDeletedEvent),
+    UserAnonymized(UserAnonymizedEvent),
     ProfileCreated(ProfileCreatedEvent),
     ProfileUpdated(ProfileUpdatedEvent),
     ProfileDeleted(ProfileDeletedEvent),

@@ -89,7 +89,8 @@ pub async fn stage_user_created_event(
     Ok(())
 }
 
-/// Publishes `UserCreated` for every NEW user the CRUD service creates.
+/// Publishes `UserCreated` for every NEW user the CRUD service creates, and
+/// `UserDeleted` when one is soft-deleted.
 ///
 /// Attached to the `UserService` (`GenericCrudService<User, _>`) via
 /// `with_event_publisher` in the module build. `GenericCrudService::create` fires
@@ -97,6 +98,8 @@ pub async fn stage_user_created_event(
 /// and `upsert` both delegate to `create`, so every creation path through the CRUD router
 /// lands here once. A create that fails (validation error) never fires the hook: one
 /// committed user row ⇒ at most one outbox row, one in-process publish.
+/// `GenericCrudService::soft_delete` fires `CrudEvent::SoftDeleted` exactly once
+/// per soft-deleted row; the same outbox contract carries `UserDeleted`.
 ///
 /// ## Re-fire idempotency
 ///
@@ -113,9 +116,10 @@ pub async fn stage_user_created_event(
 /// (`UNIQUE (email) WHERE metadata->>'deleted_at' IS NULL`); this guard is the
 /// publish-seam half of the guarantee until then.
 ///
-/// Non-`Created` variants are ignored (`Ok(())`) — this publisher owns only the
-/// user-creation contract.
-pub struct UserCreatedOutboxPublisher {
+/// Other variants are ignored (`Ok(())`) — this publisher owns the user
+/// creation and soft-delete contracts; deactivation and anonymization are
+/// owned by [`super::user_lifecycle_outbox`].
+pub struct UserLifecycleOutboxPublisher {
     pool: sqlx::PgPool,
     /// Optional typed in-process bus for immediate delivery. When `None` the in-process
     /// publish is silently dropped; the outbox row is still staged and the host relay
@@ -123,7 +127,11 @@ pub struct UserCreatedOutboxPublisher {
     domain_event_bus: Option<Arc<EventBus>>,
 }
 
-impl UserCreatedOutboxPublisher {
+/// Historical name for [`UserLifecycleOutboxPublisher`] (it grew the
+/// soft-delete contract later); kept as an alias so existing imports resolve.
+pub type UserCreatedOutboxPublisher = UserLifecycleOutboxPublisher;
+
+impl UserLifecycleOutboxPublisher {
     pub fn new(pool: sqlx::PgPool, domain_event_bus: Option<Arc<EventBus>>) -> Self {
         Self {
             pool,
@@ -163,39 +171,66 @@ impl UserCreatedOutboxPublisher {
 }
 
 #[async_trait::async_trait]
-impl CrudEventPublisher<User> for UserCreatedOutboxPublisher {
+impl CrudEventPublisher<User> for UserLifecycleOutboxPublisher {
     async fn publish(&self, event: CrudEvent<User>) -> Result<(), EventError> {
-        let entity = match event {
-            CrudEvent::Created { entity, .. } => entity,
-            // BulkCreated never reaches a GenericCrudService publisher (bulk_create loops
-            // create()), and the other lifecycle events are out of this contract's scope.
-            _ => return Ok(()),
-        };
+        match event {
+            CrudEvent::Created { entity, .. } => {
+                if self.duplicates_live_email(&entity).await {
+                    return Ok(());
+                }
 
-        if self.duplicates_live_email(&entity).await {
-            return Ok(());
+                let occurred_at = Utc::now();
+                let mut tx = self
+                    .pool
+                    .begin()
+                    .await
+                    .map_err(|e| EventError::PublishError(format!("outbox tx begin: {e}")))?;
+                stage_user_created_event(&mut tx, entity.id, occurred_at)
+                    .await
+                    .map_err(|e| EventError::PublishError(format!("UserCreated stage: {e}")))?;
+                tx.commit()
+                    .await
+                    .map_err(|e| EventError::PublishError(format!("outbox tx commit: {e}")))?;
+
+                self.publish_in_process(UserDomainEvent::Created {
+                    user_id: entity.id.to_string(),
+                    occurred_at,
+                })
+                .await;
+
+                Ok(())
+            }
+            CrudEvent::SoftDeleted { entity, .. } => {
+                // Soft-delete is the archive trigger downstream subscriptions
+                // revoke on; same outbox contract, one row, one publish.
+                let occurred_at = Utc::now();
+                let mut tx = self
+                    .pool
+                    .begin()
+                    .await
+                    .map_err(|e| EventError::PublishError(format!("outbox tx begin: {e}")))?;
+                super::user_lifecycle_outbox::stage_user_deleted_event(
+                    &mut tx, entity.id, occurred_at,
+                )
+                .await
+                .map_err(|e| EventError::PublishError(format!("UserDeleted stage: {e}")))?;
+                tx.commit()
+                    .await
+                    .map_err(|e| EventError::PublishError(format!("outbox tx commit: {e}")))?;
+
+                self.publish_in_process(UserDomainEvent::Deleted {
+                    user_id: entity.id.to_string(),
+                    occurred_at,
+                })
+                .await;
+
+                Ok(())
+            }
+            // BulkCreated never reaches a GenericCrudService publisher
+            // (bulk_create loops create()); the remaining variants belong to
+            // other contracts.
+            _ => Ok(()),
         }
-
-        let occurred_at = Utc::now();
-        let mut tx = self
-            .pool
-            .begin()
-            .await
-            .map_err(|e| EventError::PublishError(format!("outbox tx begin: {e}")))?;
-        stage_user_created_event(&mut tx, entity.id, occurred_at)
-            .await
-            .map_err(|e| EventError::PublishError(format!("UserCreated stage: {e}")))?;
-        tx.commit()
-            .await
-            .map_err(|e| EventError::PublishError(format!("outbox tx commit: {e}")))?;
-
-        self.publish_in_process(UserDomainEvent::Created {
-            user_id: entity.id.to_string(),
-            occurred_at,
-        })
-        .await;
-
-        Ok(())
     }
 }
 

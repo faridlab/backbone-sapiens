@@ -114,8 +114,18 @@ pub use application::service::credential_crypto::CryptoError;
 pub use application::service::{internal_user_ids, is_internal_user};
 // <<< CUSTOM: UserCreated outbox staging seam + publisher
 pub use infrastructure::messaging::user_created_outbox::{
-    stage_user_created_event, UserCreatedOutboxPublisher, SAPIENS_OUTBOX_SCHEMA,
-    SAPIENS_PLATFORM_COMPANY_ID,
+    stage_user_created_event, UserCreatedOutboxPublisher, UserLifecycleOutboxPublisher,
+    SAPIENS_OUTBOX_SCHEMA, SAPIENS_PLATFORM_COMPANY_ID,
+};
+// <<< CUSTOM: Auth hardening surfaces — the signup kill-switch policy, the
+// durable public-form throttler, and the scoped expiring trusted-device keys
+// (the gated public auth router in presentation::http composes these; none of
+// them mount through SapiensModule::routes()).
+pub use application::service::{SignupPolicyService, AuthThrottleService, DeviceTrustKeyService};
+// <<< CUSTOM: Lifecycle outbox staging seams (deactivate / anonymize / delete)
+pub use infrastructure::messaging::user_lifecycle_outbox::{
+    stage_user_anonymized_event, stage_user_deactivated_event, stage_user_deleted_event,
+    AnonymizationRecordOutboxPublisher, UserDeactivationLifecycle,
 };
 // >>> END CUSTOM
 // Re-exports - Validation
@@ -211,6 +221,13 @@ pub struct SapiensModule {
     pub workflow_action_execution_service: Arc<WorkflowActionExecutionService>,
     // <<< CUSTOM: Add auth_service to module
     pub auth_service: Arc<AuthService>,
+    // <<< CUSTOM: Auth hardening services (public-form surface). These back the
+    // gated public auth router (presentation::http::public_auth_routes) — they
+    // are fields here so a host mounting that router gets them pre-wired, but
+    // no route using them is mounted by SapiensModule::routes().
+    pub signup_policy_service: Arc<SignupPolicyService>,
+    pub auth_throttle_service: Arc<AuthThrottleService>,
+    pub device_trust_key_service: Arc<DeviceTrustKeyService>,
     // <<< CUSTOM: Credential store service (verbs only)
     pub integration_credential_service: Arc<IntegrationCredentialService>,
     // <<< CUSTOM: Integration event publisher for cross-module communication
@@ -402,6 +419,26 @@ impl SapiensModuleBuilder {
         let db_pool = self.db_pool
             .ok_or_else(|| anyhow::anyhow!("Database pool not configured"))?;
 
+        // <<< CUSTOM: Typed UserDomainEvent bus — the three-step wiring documented on
+        // SapiensIntegrationEventPublisher (src/infrastructure/messaging/event_translator.rs):
+        // construct the typed bus, register the translator on it, publish domain events
+        // on it. Done here (not in the builder setter) so the host-facing
+        // `with_integration_bus` surface stays unchanged: supplying the integration bus
+        // is all a host does; the module wires its own typed bus above it.
+        // `register_handler` is async but only takes an in-memory write lock that is
+        // uncontended at construction time, so driving it to completion inline cannot
+        // suspend and is safe inside a synchronous builder.
+        let user_domain_event_bus: Option<Arc<UserDomainEventBus>> = self.integration_bus
+            .as_ref()
+            .map(|integration_bus| {
+                let domain_bus = Arc::new(
+                    crate::infrastructure::messaging::create_sapiens_event_bus(),
+                );
+                let translator = Arc::new(SapiensIntegrationEventPublisher::new(integration_bus.clone()));
+                futures::executor::block_on(domain_bus.register_handler(translator));
+                domain_bus
+            });
+
         // AnalyticsEvent service
         let analytics_event_repository = Arc::new(AnalyticsEventRepository::new(db_pool.clone()));
         let analytics_event_service = Arc::new(AnalyticsEventService::with_repository(analytics_event_repository.clone()));
@@ -416,7 +453,17 @@ impl SapiensModuleBuilder {
 
         // AnonymizationRecord service
         let anonymization_record_repository = Arc::new(AnonymizationRecordRepository::new(db_pool.clone()));
-        let anonymization_record_service = Arc::new(AnonymizationRecordService::with_repository(anonymization_record_repository.clone()));
+        // Creating an anonymization record IS the GDPR-erasure write: the
+        // publisher stages a durable UserAnonymized outbox row for it so
+        // downstream subscriptions (portal access revocation, token rotation)
+        // fire on the erasure moment itself.
+        let anonymization_record_service = Arc::new(
+            AnonymizationRecordService::with_repository(anonymization_record_repository.clone())
+                .with_event_publisher(Arc::new(AnonymizationRecordOutboxPublisher::new(
+                    db_pool.clone(),
+                    user_domain_event_bus.clone(),
+                ))),
+        );
 
         // AuditLog service
         let audit_log_repository = Arc::new(AuditLogRepository::new(db_pool.clone()));
@@ -598,36 +645,29 @@ impl SapiensModuleBuilder {
         let temporary_permission_repository = Arc::new(TemporaryPermissionRepository::new(db_pool.clone()));
         let temporary_permission_service = Arc::new(TemporaryPermissionService::with_repository(temporary_permission_repository.clone()));
 
-        // <<< CUSTOM: Typed UserDomainEvent bus — the three-step wiring documented on
-        // SapiensIntegrationEventPublisher (src/infrastructure/messaging/event_translator.rs):
-        // construct the typed bus, register the translator on it, publish domain events
-        // on it. Done here (not in the builder setter) so the host-facing
-        // `with_integration_bus` surface stays unchanged: supplying the integration bus
-        // is all a host does; the module wires its own typed bus above it.
-        // `register_handler` is async but only takes an in-memory write lock that is
-        // uncontended at construction time, so driving it to completion inline cannot
-        // suspend and is safe inside a synchronous builder.
-        let user_domain_event_bus: Option<Arc<UserDomainEventBus>> = self.integration_bus
-            .as_ref()
-            .map(|integration_bus| {
-                let domain_bus = Arc::new(
-                    crate::infrastructure::messaging::create_sapiens_event_bus(),
-                );
-                let translator = Arc::new(SapiensIntegrationEventPublisher::new(integration_bus.clone()));
-                futures::executor::block_on(domain_bus.register_handler(translator));
-                domain_bus
-            });
-
+        // <<< CUSTOM: Typed UserDomainEvent bus — see the top of build(); the
+        // binding is constructed before the first service that consumes it.
+        //
         // User service
         let user_repository = Arc::new(UserRepository::new(db_pool.clone()));
         // The event publisher stages a durable UserCreated outbox row for every user the
-        // CRUD router creates (create/bulk_create/upsert all funnel through create) and
-        // mirrors it onto the typed bus when one is wired.
-        let user_service = Arc::new(
-            UserService::with_repository(user_repository.clone()).with_event_publisher(Arc::new(
-                UserCreatedOutboxPublisher::new(db_pool.clone(), user_domain_event_bus.clone()),
+        // CRUD router creates (create/bulk_create/upsert all funnel through create), a
+        // UserDeleted row for every soft-delete, and mirrors them onto the typed bus
+        // when one is wired. The lifecycle hook stages UserDeactivated on the first
+        // transition of a user's status to Inactive (the mounted PATCH /users/:id and
+        // the POST /users/:id/transitions/deactivate verb both flow through
+        // update/partial_update, so both land in the hook).
+        let user_service = Arc::new(UserService::new(
+            user_repository.clone(),
+            Arc::new(UserDeactivationLifecycle::new(
+                db_pool.clone(),
+                user_domain_event_bus.clone(),
             )),
-        );
+            Arc::new(UserLifecycleOutboxPublisher::new(
+                db_pool.clone(),
+                user_domain_event_bus.clone(),
+            )),
+        ));
         // >>> END CUSTOM
 
         // Profile service
@@ -688,6 +728,14 @@ impl SapiensModuleBuilder {
             db_pool.clone(),
         )
         .with_domain_event_bus(user_domain_event_bus.clone()));
+        // <<< CUSTOM: Auth hardening services — the signup kill-switch policy,
+        // the durable public-form throttler, and the trusted-device keys. All
+        // three back the gated public auth router; a host that does not mount
+        // that router simply never reaches them.
+        let signup_policy_service = Arc::new(SignupPolicyService::new(db_pool.clone()));
+        let auth_throttle_service = Arc::new(AuthThrottleService::new(db_pool.clone()));
+        let device_trust_key_service = Arc::new(DeviceTrustKeyService::new(db_pool.clone()));
+        // >>> END CUSTOM
         // <<< CUSTOM: Credential store service (verbs only; its routes are NOT
         // in routes() — the host composes create_integration_credential_routes
         // behind its own role gate so the credential surface never rides the
@@ -763,6 +811,10 @@ impl SapiensModuleBuilder {
             workflow_action_execution_service,
             // <<< CUSTOM: Add auth_service to module
             auth_service,
+            // <<< CUSTOM: Auth hardening services (public-form surface)
+            signup_policy_service,
+            auth_throttle_service,
+            device_trust_key_service,
             // <<< CUSTOM: Credential store service
             integration_credential_service,
             // <<< CUSTOM: Integration event publisher

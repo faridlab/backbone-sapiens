@@ -21,6 +21,11 @@ user_owned:
   # outbox this module's UserCreated staging writes into).
   - "migrations/*sapiens_outbox*"
 
+  # Hand-written auth hardening tables (not schema-derived — the signup
+  # kill-switch policy, the durable public-form throttle buckets, and the
+  # scoped expiring trusted-device keys).
+  - "migrations/*auth_public_form_hardening*"
+
   # Hand-written tests and module documentation.
   - "tests/**"
   - "docs/**"

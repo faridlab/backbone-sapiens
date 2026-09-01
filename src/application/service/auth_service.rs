@@ -68,6 +68,50 @@ pub struct RegisterInput {
     pub username: Option<String>,
 }
 
+/// Outcome of a registration attempt through the PUBLIC form.
+///
+/// Deliberately carries no user id, no created/not-created flag, nothing that
+/// would let the caller distinguish "the address was newly registered" from
+/// "the address already existed": both look identical. This is the only
+/// registration surface any public HTTP handler may expose — the raw
+/// [`AuthService::register`] keeps its truthful result for internal callers
+/// (admin paths, tests) that never render it to an anonymous requester.
+#[derive(Debug, PartialEq, Eq)]
+pub struct PublicFormAccepted;
+
+/// The active account a refresh token belongs to (see
+/// [`AuthService::resolve_refresh_token_owner`]).
+#[derive(Debug)]
+pub struct RefreshTokenOwner {
+    pub session_id: Uuid,
+    pub user_id: Uuid,
+    pub email: String,
+}
+
+// ── Session timeout posture (declared) ─────────────────────────────────────
+
+/// Declared session timeout postures, on the last-activity basis.
+///
+/// - `absolute` — the hard cap on a session's total lifetime (the `expires_at`
+///   stamped at login/refresh). Unchanged from the historical 30 days, now
+///   declared instead of implicit.
+/// - `idle` — how long a session may go unused. Enforced at token refresh
+///   against the session's `last_activity` (falling back to creation time for
+///   rows predating activity tracking): a refresh token unused for this long
+///   is refused and its session revoked, even if not yet absolutely expired.
+pub struct SessionTimeoutPolicy {
+    pub absolute: Duration,
+    pub idle: Duration,
+}
+
+/// The declared posture. Change it here and the behavior follows everywhere;
+/// do not sprinkle literals.
+pub const SESSION_TIMEOUT_POLICY: SessionTimeoutPolicy = SessionTimeoutPolicy {
+    absolute: Duration::days(30),
+    idle: Duration::days(7),
+};
+
+
 // ── Auth Error ──────────────────────────────────────────────────────────────
 
 /// Auth-specific error type — mapped to HTTP status codes by the presentation layer.
@@ -200,6 +244,18 @@ fn now_metadata() -> serde_json::Value {
     })
 }
 
+/// A password hash of the same format as real ones, used ONLY to equalize the
+/// cost of the login/register replies for identities that do not exist: an
+/// attacker measuring response time must not learn whether an account exists.
+/// Verified against, never matched.
+fn dummy_password_hash() -> &'static str {
+    static DUMMY: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    DUMMY.get_or_init(|| {
+        crypto::hash_password("timing-equalization-placeholder")
+            .unwrap_or_else(|_| "argon2-placeholder".to_string())
+    })
+}
+
 /// Convert user entity + roles + metadata to UserProfile
 fn user_to_profile(
     user: &crate::domain::entity::User,
@@ -291,12 +347,21 @@ impl AuthService {
     // ── Login ───────────────────────────────────────────────────────────────
 
     pub async fn login(&self, email: &str, password: &str) -> Result<LoginResult, AuthError> {
-        let user = self
+        let user = match self
             .user_repo
             .find_by_email_for_auth(email)
             .await
             .map_err(|e| AuthError::Internal(e))?
-            .ok_or(AuthError::InvalidCredentials)?;
+        {
+            Some(user) => user,
+            None => {
+                // Unknown identity: burn the same argon2 verification cost a
+                // real lookup would spend, so the refusal is timing-identical
+                // to a wrong-password refusal for a real account.
+                let _ = crypto::verify_password(password, dummy_password_hash());
+                return Err(AuthError::InvalidCredentials);
+            }
+        };
 
         // Check account lock
         if let Some(locked_until) = user.locked_until {
@@ -480,6 +545,50 @@ impl AuthService {
         })
     }
 
+    // ── Register (public form) ─────────────────────────────────────────────
+
+    /// Registration through the public form: the de-oracled surface.
+    ///
+    /// Returns the SAME [`PublicFormAccepted`] outcome whether the address was
+    /// newly registered or already existed. Duplicate addresses additionally
+    /// burn the same password-hash cost a real registration would, so the
+    /// reply is timing-equalized too. Only input-SHAPE problems (malformed
+    /// address, weak password, terms not accepted) are refused — those depend
+    /// on the submission, not on whether an identity exists, so they reveal
+    /// nothing about the account table.
+    ///
+    /// Email delivery follows the same posture as `forgot_password` /
+    /// `resend_verification`: an already-registered address gets no second
+    /// email from this path, but the caller cannot tell.
+    pub async fn register_via_public_form(
+        &self,
+        input: RegisterInput,
+    ) -> Result<PublicFormAccepted, AuthError> {
+        validate_registration_input(&input)?;
+
+        if self
+            .user_repo
+            .email_exists(&input.email)
+            .await
+            .unwrap_or(false)
+        {
+            // Existing identity: equalize the cost of the reply, then answer
+            // exactly as a successful registration would.
+            let _ = crypto::hash_password(&input.password);
+            return Ok(PublicFormAccepted);
+        }
+
+        match self.register(input).await {
+            Ok(_) => Ok(PublicFormAccepted),
+            // The race window between the pre-check and the insert lands here:
+            // a duplicate constraint violation is indistinguishable from
+            // success on this surface, on purpose.
+            Err(AuthError::Conflict(_)) => Ok(PublicFormAccepted),
+            Err(e) => Err(e),
+        }
+    }
+
+
     // ── Verify Email ────────────────────────────────────────────────────────
 
     pub async fn verify_email(
@@ -492,9 +601,12 @@ impl AuthService {
             .find_pending_by_email(email)
             .await
             .map_err(|e| AuthError::Internal(e))?
-            .ok_or_else(|| {
-                AuthError::NotFound("No pending verification found for this email".into())
-            })?;
+            // Unknown address and wrong code are the SAME failure on this
+            // surface: a probe must not learn that an address has a pending
+            // verification. (Expired / capped tokens below still say so — a
+            // requester who can hit those states already holds a real code's
+            // context, and the operational message matters to them.)
+            .ok_or_else(|| AuthError::Validation("Invalid verification code".into()))?;
 
         // Check expiry
         if token_row.expires_at < Utc::now() {
@@ -647,6 +759,23 @@ impl AuthService {
             return Err(AuthError::Validation("Refresh token expired".into()));
         }
 
+        // Idle posture (SESSION_TIMEOUT_POLICY.idle): a refresh token unused
+        // for the declared window is dead even if not yet absolutely expired.
+        // `last_activity` is the basis; rows predating activity tracking fall
+        // back to their creation timestamp.
+        let last_active = session
+            .last_activity
+            .or(session.metadata.created_at)
+            .unwrap_or_else(Utc::now);
+        if Utc::now() - last_active > SESSION_TIMEOUT_POLICY.idle {
+            if let Err(e) = self.session_repo.revoke_session(session.id).await {
+                warn!("Failed to revoke idle-expired session {}: {}", session.id, e);
+            }
+            return Err(AuthError::Validation(
+                "Session expired due to inactivity".into(),
+            ));
+        }
+
         // Get user
         let user = self
             .user_repo
@@ -674,8 +803,9 @@ impl AuthService {
             .map_err(|e| AuthError::Internal(e.into()))?;
 
         sqlx::query(
-            "INSERT INTO sapiens.sessions (user_id, token_hash, expires_at, device_type, status, metadata) \
-             VALUES ($1, $2, $3, 'mobile', 'active', $4)",
+            "INSERT INTO sapiens.sessions \
+             (user_id, token_hash, expires_at, device_type, status, last_activity, metadata) \
+             VALUES ($1, $2, $3, 'mobile', 'active', NOW(), $4)",
         )
         .bind(user.id)
         .bind(&new_hash)
@@ -714,6 +844,57 @@ impl AuthService {
 
         info!("User {} logged out, {} sessions revoked", user_id, count);
         Ok(count)
+    }
+
+    /// Resolve the active session a refresh token belongs to, for callers that
+    /// keep exactly one session alive across a password change.
+    ///
+    /// Returns `None` for anything other than an ACTIVE session OWNED BY
+    /// `user_id` — an unknown, revoked, expired, or someone else's token keeps
+    /// nothing. Read-only: unlike [`AuthService::refresh_token`] this never
+    /// rotates the token it looked at.
+    pub async fn session_id_for_refresh_token(
+        &self,
+        user_id: Uuid,
+        token: &str,
+    ) -> Option<Uuid> {
+        let hash = crypto::hash_token(token);
+        let session = self
+            .session_repo
+            .find_active_by_token_hash(&hash)
+            .await
+            .ok()??;
+        (session.user_id == user_id).then_some(session.id)
+    }
+
+    /// The owning account of an active refresh token, without rotating
+    /// anything. The gated public auth router uses this to identify the
+    /// requester of a password change: the presented refresh token names the
+    /// ONE session that survives it.
+    ///
+    /// Returns `None` for unknown, revoked or expired tokens — an unauthenticated
+    /// caller learns nothing about which token shapes exist.
+    pub async fn resolve_refresh_token_owner(
+        &self,
+        token: &str,
+    ) -> Option<RefreshTokenOwner> {
+        let hash = crypto::hash_token(token);
+        let session = self
+            .session_repo
+            .find_active_by_token_hash(&hash)
+            .await
+            .ok()??;
+        let user = self
+            .user_repo
+            .find_by_id(&session.user_id.to_string())
+            .await
+            .ok()
+            .flatten()?;
+        Some(RefreshTokenOwner {
+            session_id: session.id,
+            user_id: session.user_id,
+            email: user.email,
+        })
     }
 
     // ── Forgot Password ─────────────────────────────────────────────────────
@@ -813,6 +994,16 @@ impl AuthService {
         .await
         .map_err(|e| AuthError::Internal(e.into()))?;
 
+        // A password reset also kills every trusted-device key for the account.
+        sqlx::query(
+            "UPDATE sapiens.device_trust_keys SET revoked_at = NOW() \
+             WHERE user_id = $1 AND revoked_at IS NULL",
+        )
+        .bind(token_row.user_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| AuthError::Internal(e.into()))?;
+
         tx.commit()
             .await
             .map_err(|e| AuthError::Internal(e.into()))?;
@@ -829,6 +1020,13 @@ impl AuthService {
 
     // ── Change Password (protected) ─────────────────────────────────────────
 
+    /// Change the password of the authenticated user.
+    ///
+    /// Revokes every OTHER active session (`keep_session` survives — the
+    /// device that just proved the OLD password keeps its own session) and
+    /// every outstanding trusted-device key: a password rotation kills all
+    /// remembered devices, not just the one that asked. Pass `None` to revoke
+    /// all sessions including the caller's (the reset-password posture).
     pub async fn change_password(
         &self,
         user_id: Uuid,
@@ -836,6 +1034,7 @@ impl AuthService {
         current_password: &str,
         new_password: &str,
         confirm_password: &str,
+        keep_session: Option<Uuid>,
     ) -> Result<(), AuthError> {
         validate_new_password(new_password, confirm_password)?;
 
@@ -856,7 +1055,10 @@ impl AuthService {
 
         let new_hash = crypto::hash_password(new_password).map_err(|e| AuthError::Internal(e))?;
 
-        // Transaction: update password + invalidate sessions
+        // Transaction: update password + invalidate other sessions + revoke
+        // trusted-device keys. All three land atomically — a password change
+        // can never commit with a remembered device or a stolen session still
+        // alive.
         let mut tx = self
             .db_pool
             .begin()
@@ -872,7 +1074,17 @@ impl AuthService {
 
         sqlx::query(
             "UPDATE sapiens.sessions SET status = 'revoked', revoked_at = NOW() \
-             WHERE user_id = $1 AND status = 'active'",
+             WHERE user_id = $1 AND status = 'active' AND id <> $2",
+        )
+        .bind(user_id)
+        .bind(keep_session.unwrap_or(Uuid::nil()))
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| AuthError::Internal(e.into()))?;
+
+        sqlx::query(
+            "UPDATE sapiens.device_trust_keys SET revoked_at = NOW() \
+             WHERE user_id = $1 AND revoked_at IS NULL",
         )
         .bind(user_id)
         .execute(&mut *tx)

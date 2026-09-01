@@ -73,6 +73,12 @@ pub mod workflow_execution_service;
 pub mod workflow_action_execution_service;
 
 // <<< CUSTOM
+// Hand-written auth hardening services: the signup kill-switch policy (with
+// the invitation revocation list), the durable public-form throttler, and the
+// scoped expiring trusted-device keys.
+pub mod signup_policy;
+pub mod auth_throttle;
+pub mod device_trust_key_service;
 // END CUSTOM
 
 pub use analytics_event_service::AnalyticsEventService;
@@ -141,7 +147,18 @@ mod auth_service;
 // <<< CUSTOM: Re-export auth_service types
 pub use auth_service::{
     AuthService, AuthError, RegisterInput, LoginResult, RegisterResult,
-    VerifyEmailResult, UserProfile,
+    VerifyEmailResult, UserProfile, PublicFormAccepted, RefreshTokenOwner,
+    SessionTimeoutPolicy, SESSION_TIMEOUT_POLICY,
+};
+pub use signup_policy::{
+    SignupMode, SignupPolicyService, VerifiedInvitation, InvitationVerifier,
+};
+pub use auth_throttle::{
+    AuthThrottleService, ThrottleDecision, ThrottleLimit, ThrottleScope,
+};
+pub use device_trust_key_service::{
+    DeviceTrustKeyService, IssuedTrustKey, TrustedDevice, MFA_SESSION_TIMEOUT,
+    SCOPE_MFA_STEP_UP,
 };
 // <<< CUSTOM: Internal-user predicate (ACTIVE organization_users membership) —
 // the definition downstream UserCreated consumers apply.

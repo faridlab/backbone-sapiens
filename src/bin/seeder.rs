@@ -84,8 +84,10 @@ async fn main() -> Result<()> {
         .find(|a| !a.starts_with("-"))
         .map(|s| s.as_str());
 
+    // Propagated rather than panicked so the binary exits through main's
+    // Result with the same message and a conventional failure exit code.
     let database_url = env::var("DATABASE_URL")
-        .expect("DATABASE_URL must be set");
+        .map_err(|_| anyhow::anyhow!("DATABASE_URL must be set"))?;
 
     println!("Connecting to database...");
 

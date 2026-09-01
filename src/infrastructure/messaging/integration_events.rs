@@ -327,6 +327,43 @@ impl IntegrationEvent for UserDeletedIntegrationEvent {
     }
 }
 
+/// User was anonymized (GDPR erasure)
+///
+/// Published when a user's data is anonymized. Terminal for the identity:
+/// consumers must revoke every credential, session, membership and portal
+/// access keyed on this user, and rotate anything derived from their tokens.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct UserAnonymizedIntegrationEvent {
+    /// User ID
+    pub user_id: String,
+    /// When the anonymization occurred
+    pub occurred_at: DateTime<Utc>,
+    /// Correlation ID
+    pub correlation_id: Option<String>,
+}
+
+impl IntegrationEvent for UserAnonymizedIntegrationEvent {
+    fn event_type(&self) -> &'static str {
+        "sapiens.user.anonymized"
+    }
+
+    fn source_context(&self) -> &'static str {
+        "sapiens"
+    }
+
+    fn aggregate_id(&self) -> &str {
+        &self.user_id
+    }
+
+    fn occurred_at(&self) -> DateTime<Utc> {
+        self.occurred_at
+    }
+
+    fn correlation_id(&self) -> Option<&str> {
+        self.correlation_id.as_deref()
+    }
+}
+
 /// User account was locked
 ///
 /// Published when a user account is locked (e.g., too many failed login attempts).

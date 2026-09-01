@@ -40,6 +40,8 @@ pub enum CryptoError {
     Authentication,
     #[error("ciphertext is malformed: {0}")]
     Malformed(&'static str),
+    #[error("HKDF-SHA256 key derivation failed for key id {0}")]
+    Kdf(String),
 }
 
 /// The scope triple bound as authenticated associated data. Serialization is
@@ -58,17 +60,19 @@ impl CredentialScope {
     }
 }
 
-fn derive_kek(master_key: &[u8], key_id: &str) -> [u8; KEY_LEN] {
+fn derive_kek(master_key: &[u8], key_id: &str) -> Result<[u8; KEY_LEN], CryptoError> {
     let hk = Hkdf::<Sha256>::new(Some(KEK_SALT), master_key);
     let mut okm = [0u8; KEY_LEN];
+    // HKDF-SHA256 with a 32-byte output cannot fail in practice, but a panic
+    // on a crypto path is never acceptable — the error propagates instead.
     hk.expand(key_id.as_bytes(), &mut okm)
-        .expect("HKDF-SHA256 with a 32-byte output cannot fail");
-    okm
+        .map_err(|_| CryptoError::Kdf(key_id.to_string()))?;
+    Ok(okm)
 }
 
-fn cipher_for(master_key: &[u8], key_id: &str) -> Aes256Gcm {
-    let kek = derive_kek(master_key, key_id);
-    Aes256Gcm::new(Key::<Aes256Gcm>::from_slice(&kek))
+fn cipher_for(master_key: &[u8], key_id: &str) -> Result<Aes256Gcm, CryptoError> {
+    let kek = derive_kek(master_key, key_id)?;
+    Ok(Aes256Gcm::new(Key::<Aes256Gcm>::from_slice(&kek)))
 }
 
 /// Read the master key from the environment. `Err` means "fail closed".
@@ -100,7 +104,7 @@ pub fn seal(master_key: &[u8], scope: &CredentialScope, secret: &[u8]) -> Result
         msg: secret,
         aad: &scope.aad(),
     };
-    let sealed = cipher_for(master_key, CURRENT_KEY_ID)
+    let sealed = cipher_for(master_key, CURRENT_KEY_ID)?
         .encrypt(Nonce::from_slice(&nonce_bytes), payload)
         .map_err(|_| CryptoError::Authentication)?;
 
@@ -131,7 +135,7 @@ pub fn open(
         msg: sealed,
         aad: &scope.aad(),
     };
-    let opened = cipher_for(master_key, key_id)
+    let opened = cipher_for(master_key, key_id)?
         .decrypt(Nonce::from_slice(nonce_bytes), payload)
         .map_err(|_| CryptoError::Authentication)?;
 

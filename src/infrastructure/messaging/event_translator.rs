@@ -236,6 +236,28 @@ impl SapiensIntegrationEventPublisher {
         self.integration_bus.publish(event).await
     }
 
+    /// Translate and publish a UserAnonymized event
+    async fn publish_user_anonymized(
+        &self,
+        user_id: &str,
+        correlation_id: Option<String>,
+        occurred_at: chrono::DateTime<Utc>,
+    ) -> Result<(), EventError> {
+        let event = UserAnonymizedIntegrationEvent {
+            user_id: user_id.to_string(),
+            occurred_at,
+            correlation_id,
+        };
+
+        debug!(
+            user_id = %user_id,
+            event_type = %event.event_type(),
+            "Publishing UserAnonymized integration event"
+        );
+
+        self.integration_bus.publish(event).await
+    }
+
     /// Translate and publish a UserAccountLocked event
     async fn publish_account_locked(
         &self,
@@ -295,6 +317,9 @@ impl EventHandler<UserDomainEvent> for SapiensIntegrationEventPublisher {
             }
             UserDomainEvent::Deleted { user_id, occurred_at } => {
                 self.publish_user_deleted(user_id, correlation_id, *occurred_at).await?;
+            }
+            UserDomainEvent::Anonymized { user_id, occurred_at } => {
+                self.publish_user_anonymized(user_id, correlation_id, *occurred_at).await?;
             }
             UserDomainEvent::AccountLocked { user_id, reason, locked_until, occurred_at } => {
                 self.publish_account_locked(user_id, reason, *locked_until, correlation_id, *occurred_at).await?;
