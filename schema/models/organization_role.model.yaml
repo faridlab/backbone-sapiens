@@ -1,8 +1,12 @@
 # OrganizationRole Entity - Organization-specific role definitions
 # Source: libs/modules/sapiens/docs/spec-sapiens.md
 #
-# PENDING ADR-0005 DISPOSITION — see organization_user.model.yaml. `Organization` never existed;
-# the tenant is the database (ADR-0005). Repurpose or remove; do not build on it.
+# DISPOSITION RESOLVED by ADR-0027/0028 (was pending ADR-0005): the tenant is the DATABASE, and
+# a tenant's RBAC lives whole inside it. This model is a role defined for one node of the
+# tenant's org tree — during the re-key transition `organization_id` holds a company id, which
+# the UUID-stable spine guarantees is a valid `organization.org_units` node. The column re-keys
+# to `org_unit_id` with the all-modules company_id sweep, making branch-scoped roles
+# expressible.
 
 models:
   - name: OrganizationRole
@@ -19,12 +23,12 @@ models:
       organization_id:
         type: uuid
         # Was @foreign_key(corpus.Organization.id) — a target that never existed (Organization
-        # was "moved to corpus", but corpus was built as a knowledge base). Per ADR-0005 the
-        # tenant is the database, not an Organization entity, so this FK is permanently dangling
-        # and is now excluded rather than asserted. Disposition of this whole subsystem is a
-        # follow-up to ADR-0005; do not build on it.
+        # was "moved to corpus", but corpus was built as a knowledge base). Per ADR-0027/0028
+        # the org tree replaces the Organization entity: during the re-key transition this holds
+        # a company id, which the UUID-stable spine guarantees is a valid
+        # organization.org_units node. Re-keys to org_unit_id with the all-modules sweep.
         attributes: ["@required", "@exclude_from_foreign_key_check"]
-        description: "Organization ID (pending ADR-0005 disposition; no Organization entity exists)"
+        description: "Org unit this role is defined for (re-keys to org_unit_id with the company_id sweep)"
 
       name:
         type: string
