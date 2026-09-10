@@ -6,7 +6,6 @@
 
 -- INSERT INTO sapiens.integration_credentials (
 --     id,
---     company_id,
 --     provider,
 --     account_ref,
 --     purpose,

@@ -1,10 +1,19 @@
 //! The credential store's verb surface (ADR-0024, minimal build).
 //!
 //! `issue` / `read_secret` / `rotate` / `revoke` / `describe` — no CRUD, no
-//! delete, no secret in any response. Every verb runs inside
-//! `with_company_scope(Some(company_id))` and on one transaction per verb, so
-//! the strict RLS fence holds and multi-statement verbs (rotate: insert new +
-//! CAS-revoke old) commit atomically.
+//! delete, no secret in any response. Every verb runs on one transaction per
+//! verb, so multi-statement verbs (rotate: insert new + CAS-revoke old) commit
+//! atomically.
+//!
+//! Tenancy (ADR-0029): the store carries no tenant key of its own. Each verb
+//! relays the request's AMBIENT org scope
+//! (`backbone_orm::org_scope::current_org_scope` → `bind_org_scope_on`) onto
+//! its transaction, so the COMPOSING service's decorator fence applies and
+//! writes ride the caller's scope; unfenced deployments run plain. Callers
+//! outside a request scope (a background seam, a job) get an unfenced
+//! transaction — under a decorated deployment that sees zero rows (fail-closed
+//! via RLS), so scoped callers must run inside the composer's org request
+//! scope.
 //!
 //! Fail-closed posture: with `CREDENTIAL_MASTER_KEY` unset the entire surface
 //! refuses (issue cannot seal, read cannot open) rather than degrading to
@@ -105,12 +114,23 @@ impl IntegrationCredentialService {
         Self { pool, repository }
     }
 
+    /// Begin the verb's transaction with the ambient org scope relayed onto it
+    /// (ADR-0029): under a composing service's org request scope the decorator
+    /// fence applies and inserts land on the acting unit; unfenced deployments
+    /// run plain. Relay-only — the module never invents a scope.
+    async fn scoped_tx(&self) -> Result<sqlx::Transaction<'_, sqlx::Postgres>, CredentialStoreError> {
+        let mut tx = self.pool.begin().await?;
+        if let Some(scope) = backbone_orm::org_scope::current_org_scope() {
+            backbone_orm::org_scope::bind_org_scope_on(&mut tx, &scope).await?;
+        }
+        Ok(tx)
+    }
+
     /// Issue the FIRST active credential for a scope (or re-issue after
     /// revocation). Seals the secret under the current KEK generation with the
     /// scope bound as AAD.
     pub async fn issue(
         &self,
-        company_id: Uuid,
         provider: &str,
         account_ref: &str,
         purpose: CredentialPurpose,
@@ -123,16 +143,11 @@ impl IntegrationCredentialService {
             credential_crypto::master_key_from_env().map_err(|_| CredentialStoreError::MissingMasterKey)?;
         let ciphertext = seal_for(&master_key, provider, account_ref, &purpose, secret.as_bytes())?;
 
-        backbone_orm::company_scope::with_company_scope(Some(company_id), async {
-            let mut tx = self.pool.begin().await?;
-            backbone_orm::company_scope::bind_company_on(&mut tx, company_id).await?;
-
-            let result = self
-                .issue_on_tx(&mut tx, company_id, provider, account_ref, purpose, ciphertext, expires_at)
-                .await;
-            finish(tx, result).await
-        })
-        .await
+        let mut tx = self.scoped_tx().await?;
+        let result = self
+            .issue_on_tx(&mut tx, provider, account_ref, purpose, ciphertext, expires_at)
+            .await;
+        finish(tx, result).await
     }
 
     /// The access-controlled read port: the ONLY path that opens a secret.
@@ -142,7 +157,6 @@ impl IntegrationCredentialService {
     /// provider API clients) — never an HTTP response.
     pub async fn read_secret(
         &self,
-        company_id: Uuid,
         provider: &str,
         account_ref: &str,
         purpose: CredentialPurpose,
@@ -150,62 +164,57 @@ impl IntegrationCredentialService {
         let master_key =
             credential_crypto::master_key_from_env().map_err(|_| CredentialStoreError::MissingMasterKey)?;
 
-        backbone_orm::company_scope::with_company_scope(Some(company_id), async {
-            let mut tx = self.pool.begin().await?;
-            backbone_orm::company_scope::bind_company_on(&mut tx, company_id).await?;
-
-            let found = self
+        let mut tx = self.scoped_tx().await?;
+        let found = self
+            .repository
+            .find_active_by_scope_on(&mut tx, provider, account_ref, purpose)
+            .await;
+        let result = match found {
+            Err(e) => Err(e.into()),
+            // Honest error: never issued, or already terminal.
+            Ok(None) => match self
                 .repository
-                .find_active_by_scope_on(&mut tx, provider, account_ref, purpose)
-                .await;
-            let result = match found {
+                .find_any_by_scope_on(&mut tx, provider, account_ref, purpose)
+                .await
+            {
                 Err(e) => Err(e.into()),
-                // Honest error: never issued, or already terminal.
-                Ok(None) => match self
+                Ok(Some(row)) => Err(CredentialStoreError::NotActive(row.status)),
+                Ok(None) => Err(CredentialStoreError::NotFound),
+            },
+            // Lazy expiry drift: the first read past expires_at flips the
+            // row terminal, COMMITS the flip, then refuses the secret.
+            // Commit-then-refuse is deliberate — routing this through
+            // `finish` would roll the CAS back with the error, resurrecting
+            // the drift for every future read; the flip must persist even
+            // though this read refuses.
+            Ok(Some(row)) if row.effective_status(Utc::now()) == CredentialStatus::Expired => {
+                return match self
                     .repository
-                    .find_any_by_scope_on(&mut tx, provider, account_ref, purpose)
+                    .cas_status_on(&mut tx, row.id, CredentialStatus::Active, CredentialStatus::Expired)
                     .await
                 {
-                    Err(e) => Err(e.into()),
-                    Ok(Some(row)) => Err(CredentialStoreError::NotActive(row.status)),
-                    Ok(None) => Err(CredentialStoreError::NotFound),
-                },
-                // Lazy expiry drift: the first read past expires_at flips the
-                // row terminal, COMMITS the flip, then refuses the secret.
-                // Commit-then-refuse is deliberate — routing this through
-                // `finish` would roll the CAS back with the error, resurrecting
-                // the drift for every future read; the flip must persist even
-                // though this read refuses.
-                Ok(Some(row)) if row.effective_status(Utc::now()) == CredentialStatus::Expired => {
-                    return match self
-                        .repository
-                        .cas_status_on(&mut tx, row.id, CredentialStatus::Active, CredentialStatus::Expired)
-                        .await
-                    {
-                        Err(e) => {
-                            let _ = tx.rollback().await;
-                            Err(e.into())
-                        }
-                        Ok(_) => match tx.commit().await {
-                            Err(e) => Err(CredentialStoreError::from(e)),
-                            Ok(()) => Err(CredentialStoreError::Expired),
-                        },
-                    };
-                }
-                Ok(Some(row)) => {
-                    let secret = open_for(&master_key, &row, purpose);
-                    match secret {
-                        Err(e) => Err(e),
-                        Ok(secret) => match self.repository.touch_last_used_on(&mut tx, row.id).await {
-                            Err(e) => Err(e.into()),
-                            Ok(()) => Ok(secret),
-                        },
+                    Err(e) => {
+                        let _ = tx.rollback().await;
+                        Err(e.into())
                     }
+                    Ok(_) => match tx.commit().await {
+                        Err(e) => Err(CredentialStoreError::from(e)),
+                        Ok(()) => Err(CredentialStoreError::Expired),
+                    },
+                };
+            }
+            Ok(Some(row)) => {
+                let secret = open_for(&master_key, &row, purpose);
+                match secret {
+                    Err(e) => Err(e),
+                    Ok(secret) => match self.repository.touch_last_used_on(&mut tx, row.id).await {
+                        Err(e) => Err(e.into()),
+                        Ok(()) => Ok(secret),
+                    },
                 }
-            };
-            finish(tx, result).await
-        })
-        .await
+            }
+        };
+        finish(tx, result).await
     }
 
     /// Replace the active credential atomically: the successor is inserted and
@@ -214,7 +223,6 @@ impl IntegrationCredentialService {
     /// zero actives on a failure.
     pub async fn rotate(
         &self,
-        company_id: Uuid,
         provider: &str,
         account_ref: &str,
         purpose: CredentialPurpose,
@@ -227,87 +235,64 @@ impl IntegrationCredentialService {
             credential_crypto::master_key_from_env().map_err(|_| CredentialStoreError::MissingMasterKey)?;
         let ciphertext = seal_for(&master_key, provider, account_ref, &purpose, new_secret.as_bytes())?;
 
-        backbone_orm::company_scope::with_company_scope(Some(company_id), async {
-            let mut tx = self.pool.begin().await?;
-            backbone_orm::company_scope::bind_company_on(&mut tx, company_id).await?;
-
-            let result = self
-                .rotate_on_tx(&mut tx, company_id, provider, account_ref, purpose, ciphertext, expires_at)
-                .await;
-            finish(tx, result).await
-        })
-        .await
+        let mut tx = self.scoped_tx().await?;
+        let result = self
+            .rotate_on_tx(&mut tx, provider, account_ref, purpose, ciphertext, expires_at)
+            .await;
+        finish(tx, result).await
     }
 
     /// Withdraw a credential by id. Revoking a non-active credential is a
     /// no-op success (idempotent), matching operator intent.
-    pub async fn revoke(&self, company_id: Uuid, credential_id: Uuid) -> Result<(), CredentialStoreError> {
-        backbone_orm::company_scope::with_company_scope(Some(company_id), async {
-            let mut tx = self.pool.begin().await?;
-            backbone_orm::company_scope::bind_company_on(&mut tx, company_id).await?;
-
-            let result = self.revoke_on_tx(&mut tx, credential_id).await;
-            finish(tx, result).await
-        })
-        .await
+    pub async fn revoke(&self, credential_id: Uuid) -> Result<(), CredentialStoreError> {
+        let mut tx = self.scoped_tx().await?;
+        let result = self.revoke_on_tx(&mut tx, credential_id).await;
+        finish(tx, result).await
     }
 
     /// Metadata-only listing of a scope's credential lineage. Never exposes
     /// ciphertext.
     pub async fn describe(
         &self,
-        company_id: Uuid,
         provider: &str,
         account_ref: &str,
     ) -> Result<Vec<CredentialDescriptor>, CredentialStoreError> {
-        backbone_orm::company_scope::with_company_scope(Some(company_id), async {
-            let mut tx = self.pool.begin().await?;
-            backbone_orm::company_scope::bind_company_on(&mut tx, company_id).await?;
-
-            let rows = sqlx::query_as::<_, IntegrationCredential>(
-                r#"SELECT id, company_id, provider, account_ref, purpose, key_id, ciphertext,
-                          status, expires_at, rotated_from, last_used_at, metadata
-                     FROM sapiens.integration_credentials
-                    WHERE company_id = NULLIF(current_setting('app.company_id', true), '')::uuid
-                      AND provider = $1 AND account_ref = $2
-                    ORDER BY (metadata->>'created_at') DESC NULLS LAST"#,
-            )
-            .bind(provider)
-            .bind(account_ref)
-            .fetch_all(&mut *tx)
-            .await
-            .map_err(CredentialStoreError::Database);
-            finish(tx, rows).await
-        })
+        let mut tx = self.scoped_tx().await?;
+        let rows = sqlx::query_as::<_, IntegrationCredential>(
+            r#"SELECT id, provider, account_ref, purpose, key_id, ciphertext,
+                      status, expires_at, rotated_from, last_used_at, metadata
+                 FROM sapiens.integration_credentials
+                WHERE provider = $1 AND account_ref = $2
+                ORDER BY (metadata->>'created_at') DESC NULLS LAST"#,
+        )
+        .bind(provider)
+        .bind(account_ref)
+        .fetch_all(&mut *tx)
         .await
-        .map(|rows| {
-            let now = Utc::now();
-            rows.iter().map(|r| CredentialDescriptor::from_row(r, now)).collect()
-        })
+        .map_err(CredentialStoreError::Database);
+        finish(tx, rows).await
+            .map(|rows| {
+                let now = Utc::now();
+                rows.iter().map(|r| CredentialDescriptor::from_row(r, now)).collect()
+            })
     }
 
     /// Metadata-only fetch of one credential by id (the rotate-by-id route
     /// resolves the scope triple through this). Never exposes ciphertext.
     pub async fn describe_by_id(
         &self,
-        company_id: Uuid,
         credential_id: Uuid,
     ) -> Result<Option<CredentialDescriptor>, CredentialStoreError> {
-        backbone_orm::company_scope::with_company_scope(Some(company_id), async {
-            let mut tx = self.pool.begin().await?;
-            backbone_orm::company_scope::bind_company_on(&mut tx, company_id).await?;
-
-            let result = match self.repository.find_by_id_on(&mut tx, credential_id).await {
-                Err(e) => Err(e.into()),
-                Ok(None) => Ok(None),
-                Ok(Some(row)) => {
-                    let now = Utc::now();
-                    Ok(Some(CredentialDescriptor::from_row(&row, now)))
-                }
-            };
-            finish(tx, result).await
-        })
-        .await
+        let mut tx = self.scoped_tx().await?;
+        let result = match self.repository.find_by_id_on(&mut tx, credential_id).await {
+            Err(e) => Err(e.into()),
+            Ok(None) => Ok(None),
+            Ok(Some(row)) => {
+                let now = Utc::now();
+                Ok(Some(CredentialDescriptor::from_row(&row, now)))
+            }
+        };
+        finish(tx, result).await
     }
 
     // ── transaction bodies ────────────────────────────────────────────────────
@@ -315,7 +300,6 @@ impl IntegrationCredentialService {
     async fn issue_on_tx(
         &self,
         tx: &mut sqlx::PgConnection,
-        company_id: Uuid,
         provider: &str,
         account_ref: &str,
         purpose: CredentialPurpose,
@@ -334,7 +318,6 @@ impl IntegrationCredentialService {
         }
 
         let row = NewCredentialRow {
-            company_id,
             provider: provider.to_string(),
             account_ref: account_ref.to_string(),
             purpose,
@@ -361,7 +344,6 @@ impl IntegrationCredentialService {
     async fn rotate_on_tx(
         &self,
         tx: &mut sqlx::PgConnection,
-        company_id: Uuid,
         provider: &str,
         account_ref: &str,
         purpose: CredentialPurpose,
@@ -387,7 +369,6 @@ impl IntegrationCredentialService {
         }
 
         let row = NewCredentialRow {
-            company_id,
             provider: provider.to_string(),
             account_ref: account_ref.to_string(),
             purpose,

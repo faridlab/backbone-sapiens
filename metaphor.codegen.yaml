@@ -36,6 +36,13 @@ user_owned:
   # scoped expiring trusted-device keys).
   - "migrations/*auth_public_form_hardening*"
 
+  # Hand-written tenancy strip on integration_credentials (ADR-0029): drops the
+  # company-leading indexes, the company RLS policy, and the company_id column;
+  # the module is tenant-agnostic and the composing service's decorator owns org
+  # scoping. The generator-emitted create files stay as history so fresh
+  # databases replay create-then-strip and converge.
+  - "migrations/*strip_tenancy*"
+
   # Hand-written tests and module documentation.
   - "tests/**"
   - "docs/**"

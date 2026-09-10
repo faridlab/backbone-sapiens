@@ -39,6 +39,8 @@ tags:
     description: EmailVerificationToken management endpoints
   - name: ImpersonationSessions
     description: ImpersonationSession management endpoints
+  - name: IntegrationCredentials
+    description: IntegrationCredential management endpoints
   - name: LDAPDirectories
     description: LDAPDirectory management endpoints
   - name: MFABackupCodes
@@ -5245,6 +5247,372 @@ paths:
         - ImpersonationSessions
       summary: Bulk permanently-delete ImpersonationSessions from trash by ids (atomic)
       operationId: bulkPermanentDeleteImpersonationSessions
+      requestBody:
+        $ref: '#/components/requestBodies/BatchIds'
+      responses:
+        '200':
+          description: Permanently deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  permanently_deleted: { type: integer }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/integration_credentials:
+    get:
+      tags:
+        - IntegrationCredentials
+      summary: List IntegrationCredentials
+      description: Get a paginated list of IntegrationCredentials with optional filtering and sorting
+      operationId: listIntegrationCredentials
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+        - $ref: '#/components/parameters/SortByParam'
+        - $ref: '#/components/parameters/SortOrderParam'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationCredentialList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - IntegrationCredentials
+      summary: Create IntegrationCredential
+      description: Create a new IntegrationCredential
+      operationId: createIntegrationCredential
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIntegrationCredentialRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationCredential'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/integration_credentials/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdParam'
+
+    get:
+      tags:
+        - IntegrationCredentials
+      summary: Get IntegrationCredential by ID
+      operationId: getIntegrationCredential
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationCredential'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - IntegrationCredentials
+      summary: Update IntegrationCredential (full)
+      operationId: updateIntegrationCredential
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateIntegrationCredentialRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationCredential'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags:
+        - IntegrationCredentials
+      summary: Update IntegrationCredential (partial)
+      operationId: patchIntegrationCredential
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchIntegrationCredentialRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationCredential'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - IntegrationCredentials
+      summary: Delete IntegrationCredential (soft)
+      operationId: deleteIntegrationCredential
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/integration_credentials/bulk:
+    post:
+      tags:
+        - IntegrationCredentials
+      summary: Bulk create IntegrationCredentials
+      operationId: bulkCreateIntegrationCredentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreateIntegrationCredentialRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IntegrationCredential'
+    put:
+      tags:
+        - IntegrationCredentials
+      summary: Bulk update IntegrationCredentials (full, atomic)
+      operationId: bulkUpdateIntegrationCredentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                allOf:
+                  - type: object
+                    required: [id]
+                    properties:
+                      id:
+                        type: string
+                  - $ref: '#/components/schemas/UpdateIntegrationCredentialRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationCredentialBulkResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    patch:
+      tags:
+        - IntegrationCredentials
+      summary: Bulk partial-update IntegrationCredentials (atomic)
+      operationId: bulkPatchIntegrationCredentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required: [ids, patch]
+                  properties:
+                    ids:
+                      type: array
+                      items: { type: string }
+                    patch:
+                      type: object
+                      additionalProperties: true
+                - type: object
+                  required: [items]
+                  properties:
+                    items:
+                      type: array
+                      items:
+                        type: object
+                        required: [id, patch]
+                        properties:
+                          id: { type: string }
+                          patch: { type: object, additionalProperties: true }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationCredentialBulkResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/integration_credentials/upsert:
+    post:
+      tags:
+        - IntegrationCredentials
+      summary: Upsert IntegrationCredential
+      operationId: upsertIntegrationCredential
+      parameters:
+        - name: key_field
+          in: query
+          schema:
+            type: string
+        - name: key_value
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateIntegrationCredentialRequest'
+      responses:
+        '200':
+          description: Upserted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationCredential'
+
+  /api/v1/integration_credentials/trash:
+    get:
+      tags:
+        - IntegrationCredentials
+      summary: List deleted IntegrationCredentials
+      operationId: listDeletedIntegrationCredentials
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationCredentialList'
+
+  /api/v1/integration_credentials/{id}/restore:
+    parameters:
+      - $ref: '#/components/parameters/IdParam'
+    post:
+      tags:
+        - IntegrationCredentials
+      summary: Restore deleted IntegrationCredential
+      operationId: restoreIntegrationCredential
+      responses:
+        '200':
+          description: Restored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationCredential'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/integration_credentials/empty:
+    delete:
+      tags:
+        - IntegrationCredentials
+      summary: Empty trash for IntegrationCredentials
+      operationId: emptyTrashIntegrationCredentials
+      responses:
+        '200':
+          description: Trash emptied
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted_count:
+                    type: integer
+
+  /api/v1/integration_credentials/delete/bulk:
+    post:
+      tags:
+        - IntegrationCredentials
+      summary: Bulk soft-delete IntegrationCredentials by ids (atomic)
+      operationId: bulkDeleteIntegrationCredentials
+      requestBody:
+        $ref: '#/components/requestBodies/BatchIds'
+      responses:
+        '200':
+          description: Soft-deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  soft_deleted: { type: integer }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/integration_credentials/restore/bulk:
+    post:
+      tags:
+        - IntegrationCredentials
+      summary: Bulk restore IntegrationCredentials by ids (atomic)
+      operationId: bulkRestoreIntegrationCredentials
+      requestBody:
+        $ref: '#/components/requestBodies/BatchIds'
+      responses:
+        '200':
+          description: Restored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationCredentialBulkResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/integration_credentials/restore/all:
+    post:
+      tags:
+        - IntegrationCredentials
+      summary: Restore all soft-deleted IntegrationCredentials
+      operationId: restoreAllIntegrationCredentials
+      responses:
+        '200':
+          description: Restored
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  restored: { type: integer }
+
+  /api/v1/integration_credentials/trash/bulk:
+    delete:
+      tags:
+        - IntegrationCredentials
+      summary: Bulk permanently-delete IntegrationCredentials from trash by ids (atomic)
+      operationId: bulkPermanentDeleteIntegrationCredentials
       requestBody:
         $ref: '#/components/requestBodies/BatchIds'
       responses:
@@ -22683,6 +23051,7 @@ components:
         - period_start
         - period_end
         - aggregation_level
+        - org_unit_id
         - metadata
       properties:
         id:
@@ -22711,8 +23080,7 @@ components:
           format: date-time
         aggregation_level:
           type: string
-        organization_id:
-          nullable: true
+        org_unit_id:
           type: string
           format: uuid
         metadata:
@@ -22740,6 +23108,7 @@ components:
         - period_start
         - period_end
         - aggregation_level
+        - org_unit_id
         - metadata
       properties:
         metric_name:
@@ -22765,8 +23134,7 @@ components:
           format: date-time
         aggregation_level:
           type: string
-        organization_id:
-          nullable: true
+        org_unit_id:
           type: string
           format: uuid
         metadata:
@@ -22781,6 +23149,7 @@ components:
         - period_start
         - period_end
         - aggregation_level
+        - org_unit_id
         - metadata
       properties:
         metric_name:
@@ -22806,8 +23175,7 @@ components:
           format: date-time
         aggregation_level:
           type: string
-        organization_id:
-          nullable: true
+        org_unit_id:
           type: string
           format: uuid
         metadata:
@@ -22839,8 +23207,7 @@ components:
           format: date-time
         aggregation_level:
           type: string
-        organization_id:
-          nullable: true
+        org_unit_id:
           type: string
           format: uuid
         metadata:
@@ -25614,6 +25981,189 @@ components:
         meta:
           $ref: '#/components/schemas/PaginationMeta'
 
+    IntegrationCredential:
+      type: object
+      required:
+        - id
+        - provider
+        - account_ref
+        - purpose
+        - key_id
+        - ciphertext
+        - status
+        - metadata
+      properties:
+        id:
+          type: string
+          format: uuid
+        provider:
+          type: string
+          maxLength: 60
+        account_ref:
+          type: string
+          maxLength: 120
+        purpose:
+          type: string
+        key_id:
+          type: string
+          maxLength: 60
+        ciphertext:
+          type: string
+        status:
+          type: string
+        expires_at:
+          nullable: true
+          type: string
+          format: date-time
+        rotated_from:
+          nullable: true
+          type: string
+          format: uuid
+        last_used_at:
+          nullable: true
+          type: string
+          format: date-time
+        metadata:
+          type: object
+
+    IntegrationCredentialBulkResult:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntegrationCredential'
+        total: { type: integer }
+        failed: { type: integer }
+        errors:
+          type: array
+          items: { type: string }
+
+    CreateIntegrationCredentialRequest:
+      type: object
+      required:
+        - provider
+        - account_ref
+        - purpose
+        - key_id
+        - ciphertext
+        - status
+        - metadata
+      properties:
+        provider:
+          type: string
+          maxLength: 60
+        account_ref:
+          type: string
+          maxLength: 120
+        purpose:
+          type: string
+        key_id:
+          type: string
+          maxLength: 60
+        ciphertext:
+          type: string
+        status:
+          type: string
+        expires_at:
+          nullable: true
+          type: string
+          format: date-time
+        rotated_from:
+          nullable: true
+          type: string
+          format: uuid
+        last_used_at:
+          nullable: true
+          type: string
+          format: date-time
+        metadata:
+          type: object
+
+    UpdateIntegrationCredentialRequest:
+      type: object
+      required:
+        - provider
+        - account_ref
+        - purpose
+        - key_id
+        - ciphertext
+        - status
+        - metadata
+      properties:
+        provider:
+          type: string
+          maxLength: 60
+        account_ref:
+          type: string
+          maxLength: 120
+        purpose:
+          type: string
+        key_id:
+          type: string
+          maxLength: 60
+        ciphertext:
+          type: string
+        status:
+          type: string
+        expires_at:
+          nullable: true
+          type: string
+          format: date-time
+        rotated_from:
+          nullable: true
+          type: string
+          format: uuid
+        last_used_at:
+          nullable: true
+          type: string
+          format: date-time
+        metadata:
+          type: object
+
+    PatchIntegrationCredentialRequest:
+      type: object
+      properties:
+        provider:
+          type: string
+          maxLength: 60
+        account_ref:
+          type: string
+          maxLength: 120
+        purpose:
+          type: string
+        key_id:
+          type: string
+          maxLength: 60
+        ciphertext:
+          type: string
+        status:
+          type: string
+        expires_at:
+          nullable: true
+          type: string
+          format: date-time
+        rotated_from:
+          nullable: true
+          type: string
+          format: uuid
+        last_used_at:
+          nullable: true
+          type: string
+          format: date-time
+        metadata:
+          type: object
+
+    IntegrationCredentialList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntegrationCredential'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
     LDAPDirectory:
       type: object
       required:
@@ -25630,7 +26180,6 @@ components:
         - search_filter
         - attribute_mapping
         - sync_enabled
-        - is_active
         - status
         - metadata
       properties:
@@ -25682,8 +26231,6 @@ components:
         last_sync_result:
           nullable: true
           type: object
-        is_active:
-          type: boolean
         status:
           type: string
         metadata:
@@ -25717,7 +26264,6 @@ components:
         - search_filter
         - attribute_mapping
         - sync_enabled
-        - is_active
         - status
         - metadata
       properties:
@@ -25766,8 +26312,6 @@ components:
         last_sync_result:
           nullable: true
           type: object
-        is_active:
-          type: boolean
         status:
           type: string
         metadata:
@@ -25788,7 +26332,6 @@ components:
         - search_filter
         - attribute_mapping
         - sync_enabled
-        - is_active
         - status
         - metadata
       properties:
@@ -25837,8 +26380,6 @@ components:
         last_sync_result:
           nullable: true
           type: object
-        is_active:
-          type: boolean
         status:
           type: string
         metadata:
@@ -25892,8 +26433,6 @@ components:
         last_sync_result:
           nullable: true
           type: object
-        is_active:
-          type: boolean
         status:
           type: string
         metadata:
@@ -26603,9 +27142,7 @@ components:
         - usage_count
         - successful_verifications
         - failed_verifications
-        - is_locked
         - risk_score
-        - is_active
         - status
         - metadata
       properties:
@@ -26720,8 +27257,6 @@ components:
         failed_verifications:
           type: integer
           format: int32
-        is_locked:
-          type: boolean
         locked_at:
           nullable: true
           type: string
@@ -26739,8 +27274,6 @@ components:
           format: int32
           minimum: 0
           maximum: 100
-        is_active:
-          type: boolean
         status:
           type: string
         backup_codes_data:
@@ -26780,9 +27313,7 @@ components:
         - usage_count
         - successful_verifications
         - failed_verifications
-        - is_locked
         - risk_score
-        - is_active
         - status
         - metadata
       properties:
@@ -26894,8 +27425,6 @@ components:
         failed_verifications:
           type: integer
           format: int32
-        is_locked:
-          type: boolean
         locked_at:
           nullable: true
           type: string
@@ -26913,8 +27442,6 @@ components:
           format: int32
           minimum: 0
           maximum: 100
-        is_active:
-          type: boolean
         status:
           type: string
         backup_codes_data:
@@ -26941,9 +27468,7 @@ components:
         - usage_count
         - successful_verifications
         - failed_verifications
-        - is_locked
         - risk_score
-        - is_active
         - status
         - metadata
       properties:
@@ -27055,8 +27580,6 @@ components:
         failed_verifications:
           type: integer
           format: int32
-        is_locked:
-          type: boolean
         locked_at:
           nullable: true
           type: string
@@ -27074,8 +27597,6 @@ components:
           format: int32
           minimum: 0
           maximum: 100
-        is_active:
-          type: boolean
         status:
           type: string
         backup_codes_data:
@@ -27195,8 +27716,6 @@ components:
         failed_verifications:
           type: integer
           format: int32
-        is_locked:
-          type: boolean
         locked_at:
           nullable: true
           type: string
@@ -27214,8 +27733,6 @@ components:
           format: int32
           minimum: 0
           maximum: 100
-        is_active:
-          type: boolean
         status:
           type: string
         backup_codes_data:
@@ -28882,7 +29399,7 @@ components:
         - authorization_url
         - token_url
         - user_info_url
-        - is_active
+        - status
         - metadata
       properties:
         id:
@@ -28911,8 +29428,8 @@ components:
         user_info_url:
           type: string
           format: uri
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
@@ -28941,7 +29458,7 @@ components:
         - authorization_url
         - token_url
         - user_info_url
-        - is_active
+        - status
         - metadata
       properties:
         provider_name:
@@ -28967,8 +29484,8 @@ components:
         user_info_url:
           type: string
           format: uri
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
@@ -28984,7 +29501,7 @@ components:
         - authorization_url
         - token_url
         - user_info_url
-        - is_active
+        - status
         - metadata
       properties:
         provider_name:
@@ -29010,8 +29527,8 @@ components:
         user_info_url:
           type: string
           format: uri
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
@@ -29041,8 +29558,8 @@ components:
         user_info_url:
           type: string
           format: uri
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
@@ -29064,9 +29581,8 @@ components:
         - oauth_provider_id
         - provider_user_id
         - provider_email
-        - is_active
         - is_primary
-        - link_status
+        - status
         - sync_enabled
         - metadata
       properties:
@@ -29089,8 +29605,6 @@ components:
           nullable: true
           type: string
           maxLength: 255
-        is_active:
-          type: boolean
         access_token:
           nullable: true
           type: string
@@ -29103,7 +29617,7 @@ components:
           format: date-time
         is_primary:
           type: boolean
-        link_status:
+        status:
           type: string
         last_synced:
           nullable: true
@@ -29134,9 +29648,8 @@ components:
         - oauth_provider_id
         - provider_user_id
         - provider_email
-        - is_active
         - is_primary
-        - link_status
+        - status
         - sync_enabled
         - metadata
       properties:
@@ -29156,8 +29669,6 @@ components:
           nullable: true
           type: string
           maxLength: 255
-        is_active:
-          type: boolean
         access_token:
           nullable: true
           type: string
@@ -29170,7 +29681,7 @@ components:
           format: date-time
         is_primary:
           type: boolean
-        link_status:
+        status:
           type: string
         last_synced:
           nullable: true
@@ -29188,9 +29699,8 @@ components:
         - oauth_provider_id
         - provider_user_id
         - provider_email
-        - is_active
         - is_primary
-        - link_status
+        - status
         - sync_enabled
         - metadata
       properties:
@@ -29210,8 +29720,6 @@ components:
           nullable: true
           type: string
           maxLength: 255
-        is_active:
-          type: boolean
         access_token:
           nullable: true
           type: string
@@ -29224,7 +29732,7 @@ components:
           format: date-time
         is_primary:
           type: boolean
-        link_status:
+        status:
           type: string
         last_synced:
           nullable: true
@@ -29254,8 +29762,6 @@ components:
           nullable: true
           type: string
           maxLength: 255
-        is_active:
-          type: boolean
         access_token:
           nullable: true
           type: string
@@ -29268,7 +29774,7 @@ components:
           format: date-time
         is_primary:
           type: boolean
-        link_status:
+        status:
           type: string
         last_synced:
           nullable: true
@@ -29293,17 +29799,17 @@ components:
       type: object
       required:
         - id
-        - organization_id
+        - org_unit_id
         - permission_id
         - granted_by
         - granted_at
-        - is_active
+        - status
         - metadata
       properties:
         id:
           type: string
           format: uuid
-        organization_id:
+        org_unit_id:
           type: string
           format: uuid
         permission_id:
@@ -29339,8 +29845,8 @@ components:
           nullable: true
           type: string
           maxLength: 1000
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
@@ -29360,14 +29866,14 @@ components:
     CreateOrganizationPermissionRequest:
       type: object
       required:
-        - organization_id
+        - org_unit_id
         - permission_id
         - granted_by
         - granted_at
-        - is_active
+        - status
         - metadata
       properties:
-        organization_id:
+        org_unit_id:
           type: string
           format: uuid
         permission_id:
@@ -29403,22 +29909,22 @@ components:
           nullable: true
           type: string
           maxLength: 1000
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
     UpdateOrganizationPermissionRequest:
       type: object
       required:
-        - organization_id
+        - org_unit_id
         - permission_id
         - granted_by
         - granted_at
-        - is_active
+        - status
         - metadata
       properties:
-        organization_id:
+        org_unit_id:
           type: string
           format: uuid
         permission_id:
@@ -29454,15 +29960,15 @@ components:
           nullable: true
           type: string
           maxLength: 1000
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
     PatchOrganizationPermissionRequest:
       type: object
       properties:
-        organization_id:
+        org_unit_id:
           type: string
           format: uuid
         permission_id:
@@ -29498,8 +30004,8 @@ components:
           nullable: true
           type: string
           maxLength: 1000
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
@@ -29517,15 +30023,15 @@ components:
       type: object
       required:
         - id
-        - organization_id
+        - org_unit_id
         - name
-        - is_active
+        - status
         - metadata
       properties:
         id:
           type: string
           format: uuid
-        organization_id:
+        org_unit_id:
           type: string
           format: uuid
         name:
@@ -29538,8 +30044,8 @@ components:
         permissions:
           nullable: true
           type: object
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
@@ -29559,12 +30065,12 @@ components:
     CreateOrganizationRoleRequest:
       type: object
       required:
-        - organization_id
+        - org_unit_id
         - name
-        - is_active
+        - status
         - metadata
       properties:
-        organization_id:
+        org_unit_id:
           type: string
           format: uuid
         name:
@@ -29577,20 +30083,20 @@ components:
         permissions:
           nullable: true
           type: object
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
     UpdateOrganizationRoleRequest:
       type: object
       required:
-        - organization_id
+        - org_unit_id
         - name
-        - is_active
+        - status
         - metadata
       properties:
-        organization_id:
+        org_unit_id:
           type: string
           format: uuid
         name:
@@ -29603,15 +30109,15 @@ components:
         permissions:
           nullable: true
           type: object
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
     PatchOrganizationRoleRequest:
       type: object
       properties:
-        organization_id:
+        org_unit_id:
           type: string
           format: uuid
         name:
@@ -29624,8 +30130,8 @@ components:
         permissions:
           nullable: true
           type: object
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
@@ -29643,7 +30149,7 @@ components:
       type: object
       required:
         - id
-        - organization_id
+        - org_unit_id
         - user_id
         - status
         - joined_at
@@ -29652,7 +30158,7 @@ components:
         id:
           type: string
           format: uuid
-        organization_id:
+        org_unit_id:
           type: string
           format: uuid
         user_id:
@@ -29690,13 +30196,13 @@ components:
     CreateOrganizationUserRequest:
       type: object
       required:
-        - organization_id
+        - org_unit_id
         - user_id
         - status
         - joined_at
         - metadata
       properties:
-        organization_id:
+        org_unit_id:
           type: string
           format: uuid
         user_id:
@@ -29721,13 +30227,13 @@ components:
     UpdateOrganizationUserRequest:
       type: object
       required:
-        - organization_id
+        - org_unit_id
         - user_id
         - status
         - joined_at
         - metadata
       properties:
-        organization_id:
+        org_unit_id:
           type: string
           format: uuid
         user_id:
@@ -29752,7 +30258,7 @@ components:
     PatchOrganizationUserRequest:
       type: object
       properties:
-        organization_id:
+        org_unit_id:
           type: string
           format: uuid
         user_id:
@@ -30309,7 +30815,8 @@ components:
       required:
         - id
         - name
-        - is_active
+        - org_unit_id
+        - status
         - password_requirements
         - password_history
         - reset_settings
@@ -30322,12 +30829,11 @@ components:
         name:
           type: string
           maxLength: 100
-        organization_id:
-          nullable: true
+        org_unit_id:
           type: string
           format: uuid
-        is_active:
-          type: boolean
+        status:
+          type: string
         password_requirements:
           type: object
         password_history:
@@ -30356,7 +30862,8 @@ components:
       type: object
       required:
         - name
-        - is_active
+        - org_unit_id
+        - status
         - password_requirements
         - password_history
         - reset_settings
@@ -30366,12 +30873,11 @@ components:
         name:
           type: string
           maxLength: 100
-        organization_id:
-          nullable: true
+        org_unit_id:
           type: string
           format: uuid
-        is_active:
-          type: boolean
+        status:
+          type: string
         password_requirements:
           type: object
         password_history:
@@ -30387,7 +30893,8 @@ components:
       type: object
       required:
         - name
-        - is_active
+        - org_unit_id
+        - status
         - password_requirements
         - password_history
         - reset_settings
@@ -30397,12 +30904,11 @@ components:
         name:
           type: string
           maxLength: 100
-        organization_id:
-          nullable: true
+        org_unit_id:
           type: string
           format: uuid
-        is_active:
-          type: boolean
+        status:
+          type: string
         password_requirements:
           type: object
         password_history:
@@ -30420,12 +30926,11 @@ components:
         name:
           type: string
           maxLength: 100
-        organization_id:
-          nullable: true
+        org_unit_id:
           type: string
           format: uuid
-        is_active:
-          type: boolean
+        status:
+          type: string
         password_requirements:
           type: object
         password_history:
@@ -32528,7 +33033,6 @@ components:
         - acs_url
         - name_id_format
         - attribute_mapping
-        - is_active
         - status
         - metadata
       properties:
@@ -32565,8 +33069,6 @@ components:
           maxLength: 500
         attribute_mapping:
           type: object
-        is_active:
-          type: boolean
         status:
           type: string
         metadata:
@@ -32596,7 +33098,6 @@ components:
         - acs_url
         - name_id_format
         - attribute_mapping
-        - is_active
         - status
         - metadata
       properties:
@@ -32630,8 +33131,6 @@ components:
           maxLength: 500
         attribute_mapping:
           type: object
-        is_active:
-          type: boolean
         status:
           type: string
         metadata:
@@ -32648,7 +33147,6 @@ components:
         - acs_url
         - name_id_format
         - attribute_mapping
-        - is_active
         - status
         - metadata
       properties:
@@ -32682,8 +33180,6 @@ components:
           maxLength: 500
         attribute_mapping:
           type: object
-        is_active:
-          type: boolean
         status:
           type: string
         metadata:
@@ -32722,8 +33218,6 @@ components:
           maxLength: 500
         attribute_mapping:
           type: object
-        is_active:
-          type: boolean
         status:
           type: string
         metadata:
@@ -32978,7 +33472,7 @@ components:
         - expires_at
         - remember_me
         - device_type
-        - is_active
+        - status
         - metadata
       properties:
         id:
@@ -33015,8 +33509,8 @@ components:
           nullable: true
           type: string
           maxLength: 255
-        is_active:
-          type: boolean
+        status:
+          type: string
         revoked_at:
           nullable: true
           type: string
@@ -33045,7 +33539,7 @@ components:
         - expires_at
         - remember_me
         - device_type
-        - is_active
+        - status
         - metadata
       properties:
         user_id:
@@ -33079,8 +33573,8 @@ components:
           nullable: true
           type: string
           maxLength: 255
-        is_active:
-          type: boolean
+        status:
+          type: string
         revoked_at:
           nullable: true
           type: string
@@ -33096,7 +33590,7 @@ components:
         - expires_at
         - remember_me
         - device_type
-        - is_active
+        - status
         - metadata
       properties:
         user_id:
@@ -33130,8 +33624,8 @@ components:
           nullable: true
           type: string
           maxLength: 255
-        is_active:
-          type: boolean
+        status:
+          type: string
         revoked_at:
           nullable: true
           type: string
@@ -33173,8 +33667,8 @@ components:
           nullable: true
           type: string
           maxLength: 255
-        is_active:
-          type: boolean
+        status:
+          type: string
         revoked_at:
           nullable: true
           type: string
@@ -34029,7 +34523,7 @@ components:
         - granted_at
         - granted_by
         - reason
-        - is_active
+        - status
         - metadata
       properties:
         id:
@@ -34063,8 +34557,8 @@ components:
           nullable: true
           type: string
           maxLength: 50
-        is_active:
-          type: boolean
+        status:
+          type: string
         revoked_at:
           nullable: true
           type: string
@@ -34101,7 +34595,7 @@ components:
         - granted_at
         - granted_by
         - reason
-        - is_active
+        - status
         - metadata
       properties:
         user_id:
@@ -34132,8 +34626,8 @@ components:
           nullable: true
           type: string
           maxLength: 50
-        is_active:
-          type: boolean
+        status:
+          type: string
         revoked_at:
           nullable: true
           type: string
@@ -34157,7 +34651,7 @@ components:
         - granted_at
         - granted_by
         - reason
-        - is_active
+        - status
         - metadata
       properties:
         user_id:
@@ -34188,8 +34682,8 @@ components:
           nullable: true
           type: string
           maxLength: 50
-        is_active:
-          type: boolean
+        status:
+          type: string
         revoked_at:
           nullable: true
           type: string
@@ -34236,8 +34730,8 @@ components:
           nullable: true
           type: string
           maxLength: 50
-        is_active:
-          type: boolean
+        status:
+          type: string
         revoked_at:
           nullable: true
           type: string

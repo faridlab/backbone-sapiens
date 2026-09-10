@@ -10,10 +10,12 @@ use super::{AuditMetadata, CredentialPurpose, CredentialStatus};
 /// and must never be serialized into an HTTP response — responses carry
 /// [`crate::application::service::integration_credential_service::CredentialDescriptor`]
 /// (metadata only).
+///
+/// Tenancy: none, by design (ADR-0029) — the struct mirrors the tenant-agnostic
+/// table; org scoping is installed by the composing service's decorator.
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct IntegrationCredential {
     pub id: Uuid,
-    pub company_id: Uuid,
     pub provider: String,
     pub account_ref: String,
     pub purpose: CredentialPurpose,

@@ -10,8 +10,9 @@
 //!
 //! There is deliberately NO route that returns a secret: `read_secret` is an
 //! in-process port for seams (webhook verification, provider API clients).
-//! The company comes from the request scope the host's identity middleware
-//! binds (`with_company_scope`); a missing scope is 401 — fail-closed.
+//! Tenancy (ADR-0029): the routes must be mounted inside the host's org
+//! request scope — the ambient org scope (`backbone_orm::org_scope`) is the
+//! request identity these verbs ride, and a missing scope is 401 — fail-closed.
 
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
@@ -71,11 +72,16 @@ fn error_response(err: CredentialStoreError) -> Response {
     (error_status(&err), err.to_string()).into_response()
 }
 
-/// The request-scoped company, or 401 when the host mounted these routes
-/// without an identity scope (a configuration error — fail closed).
-fn current_company_or_401() -> Result<Uuid, Response> {
-    backbone_orm::company_scope::current_company()
-        .ok_or((StatusCode::UNAUTHORIZED, "no company scope on request").into_response())
+/// Refuse the request when no ambient org scope is bound — the host mounted
+/// these routes without its org identity middleware (a configuration error —
+/// fail closed). The verbs relay the scope themselves; the gate only decides
+/// whether the request may proceed.
+fn require_org_scope() -> Result<(), Response> {
+    if backbone_orm::org_scope::current_org_scope().is_some() {
+        Ok(())
+    } else {
+        Err((StatusCode::UNAUTHORIZED, "no org scope on request").into_response())
+    }
 }
 
 /// Issue the first active credential for a scope.
@@ -83,14 +89,13 @@ pub async fn issue_credential(
     State(state): State<IntegrationCredentialAppState>,
     Json(body): Json<IssueRequest>,
 ) -> Response {
-    let company = match current_company_or_401() {
-        Ok(c) => c,
-        Err(resp) => return resp,
-    };
+    if let Err(resp) = require_org_scope() {
+        return resp;
+    }
     let secret = Zeroizing::new(body.secret);
     match state
         .service
-        .issue(company, &body.provider, &body.account_ref, body.purpose, secret, body.expires_at)
+        .issue(&body.provider, &body.account_ref, body.purpose, secret, body.expires_at)
         .await
     {
         Ok(descriptor) => (StatusCode::CREATED, Json(descriptor)).into_response(),
@@ -103,11 +108,10 @@ pub async fn describe_credentials(
     State(state): State<IntegrationCredentialAppState>,
     Query(query): Query<DescribeQuery>,
 ) -> Response {
-    let company = match current_company_or_401() {
-        Ok(c) => c,
-        Err(resp) => return resp,
-    };
-    match state.service.describe(company, &query.provider, &query.account_ref).await {
+    if let Err(resp) = require_org_scope() {
+        return resp;
+    }
+    match state.service.describe(&query.provider, &query.account_ref).await {
         Ok(descriptors) => (StatusCode::OK, Json(descriptors)).into_response(),
         Err(err) => error_response(err),
     }
@@ -119,13 +123,12 @@ pub async fn rotate_credential(
     Path(credential_id): Path<Uuid>,
     Json(body): Json<RotateRequest>,
 ) -> Response {
-    let company = match current_company_or_401() {
-        Ok(c) => c,
-        Err(resp) => return resp,
-    };
+    if let Err(resp) = require_org_scope() {
+        return resp;
+    }
     // The id pins the lineage; provider/account_ref/purpose come from the
     // row being replaced.
-    let scope = match state.service.describe_by_id(company, credential_id).await {
+    let scope = match state.service.describe_by_id(credential_id).await {
         Ok(Some(d)) => (d.provider, d.account_ref, d.purpose),
         Ok(None) => return error_response(CredentialStoreError::NotFound),
         Err(err) => return error_response(err),
@@ -133,7 +136,7 @@ pub async fn rotate_credential(
     let secret = Zeroizing::new(body.secret);
     match state
         .service
-        .rotate(company, &scope.0, &scope.1, scope.2, secret, body.expires_at)
+        .rotate(&scope.0, &scope.1, scope.2, secret, body.expires_at)
         .await
     {
         Ok(descriptor) => (StatusCode::OK, Json(descriptor)).into_response(),
@@ -146,18 +149,17 @@ pub async fn revoke_credential(
     State(state): State<IntegrationCredentialAppState>,
     Path(credential_id): Path<Uuid>,
 ) -> Response {
-    let company = match current_company_or_401() {
-        Ok(c) => c,
-        Err(resp) => return resp,
-    };
-    match state.service.revoke(company, credential_id).await {
+    if let Err(resp) = require_org_scope() {
+        return resp;
+    }
+    match state.service.revoke(credential_id).await {
         Ok(()) => StatusCode::NO_CONTENT.into_response(),
         Err(err) => error_response(err),
     }
 }
 
 /// Verb routes for the credential store. The host mounts these behind its own
-/// role gate + company identity (they are NOT merged into the module's CRUD
+/// role gate + org request scope (they are NOT merged into the module's CRUD
 /// router).
 pub fn create_integration_credential_routes(service: Arc<IntegrationCredentialService>) -> axum::Router {
     let state = IntegrationCredentialAppState { service };

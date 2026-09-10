@@ -68,3 +68,6 @@
 - organization_role_seed
 - organization_user_seed
 - password_policy_seed
+
+# Newly added seeds (preserve manual order above):
+- integration_credential_seed
