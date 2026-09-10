@@ -24,7 +24,7 @@ impl TestDataGenerator for PasswordPolicyTestData {
         json!({
             "id": Uuid::new_v4().to_string(),
             "name": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
-            "organization_id": null,
+            "org_unit_id": null,
             "status": "active",
             "password_requirements": null,
             "password_history": null,
@@ -39,7 +39,7 @@ impl TestDataGenerator for PasswordPolicyTestData {
         json!({
             "id": id,
             "name": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
-            "organization_id": null,
+            "org_unit_id": null,
             "status": "active",
             "password_requirements": null,
             "password_history": null,

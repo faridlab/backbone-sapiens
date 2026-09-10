@@ -23,7 +23,7 @@ impl TestDataGenerator for OrganizationPermissionTestData {
         let now = Utc::now().to_rfc3339();
         json!({
             "id": Uuid::new_v4().to_string(),
-            "organization_id": null,
+            "org_unit_id": null,
             "permission_id": null,
             "permission_name": null,
             "resource_id": null,
@@ -42,7 +42,7 @@ impl TestDataGenerator for OrganizationPermissionTestData {
         let now = Utc::now().to_rfc3339();
         json!({
             "id": id,
-            "organization_id": null,
+            "org_unit_id": null,
             "permission_id": null,
             "permission_name": null,
             "resource_id": null,

@@ -14,7 +14,7 @@
 --     period_start,
 --     period_end,
 --     aggregation_level,
---     organization_id,
+--     org_unit_id,
 --     metadata
 -- ) VALUES
 -- (

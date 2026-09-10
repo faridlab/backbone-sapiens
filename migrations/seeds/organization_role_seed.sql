@@ -6,7 +6,7 @@
 
 -- INSERT INTO sapiens.organization_roles (
 --     id,
---     organization_id,
+--     org_unit_id,
 --     name,
 --     description,
 --     permissions,

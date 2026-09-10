@@ -7,7 +7,7 @@
 -- INSERT INTO sapiens.password_policies (
 --     id,
 --     name,
---     organization_id,
+--     org_unit_id,
 --     status,
 --     password_requirements,
 --     password_history,

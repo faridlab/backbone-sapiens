@@ -31,7 +31,7 @@ impl TestDataGenerator for AnalyticsMetricTestData {
             "period_start": null,
             "period_end": null,
             "aggregation_level": null,
-            "organization_id": null,
+            "org_unit_id": null,
             "metadata": json!({}),
         })
     }
@@ -48,7 +48,7 @@ impl TestDataGenerator for AnalyticsMetricTestData {
             "period_start": null,
             "period_end": null,
             "aggregation_level": null,
-            "organization_id": null,
+            "org_unit_id": null,
             "metadata": json!({}),
         })
     }
