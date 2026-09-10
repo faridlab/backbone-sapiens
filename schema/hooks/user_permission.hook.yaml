@@ -8,7 +8,7 @@ model: user_permission.model.yaml
 # PRIORITY 1: State Machine - Grant Lifecycle
 # =============================================================================
 states:
-  field: is_active
+  field: status
 
   values:
     active:
@@ -16,7 +16,7 @@ states:
       on_enter:
         - "log(user_permission.granted, { user_id: user_id, permission_id: permission_id, granted_by: granted_by, expires_at: expires_at })"
 
-    revoked:
+    inactive:
       final: true
       on_enter:
         - "set: revoked_at = now()"
@@ -25,14 +25,14 @@ states:
   transitions:
     revoke:
       from: active
-      to: revoked
+      to: inactive
       roles: [admin, super_admin]
       condition: "revoked_reason != null && revoked_reason.length >= 10"
       message: "Revocation reason is required (min 10 characters)"
 
     expire:
       from: active
-      to: revoked
+      to: inactive
       roles: [system]
       condition: "expires_at != null && expires_at <= now()"
 

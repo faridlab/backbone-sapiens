@@ -8,43 +8,26 @@ model: mfa_device.model.yaml
 # PRIORITY 1: State Machine - Device Lifecycle
 # =============================================================================
 states:
-  field: is_active
-  # Note: This is a composite state based on is_active and verified_at
+  field: status
 
   values:
-    pending:
+    active:
       initial: true
       on_enter:
         - "log(mfa.device_enrolled, { user_id: user_id, device_type: device_type })"
 
-    active:
-      on_enter:
-        - "set: verified_at = now()"
-        - "send_email(mfa_device_activated, user.email)"
-        - "log(mfa.device_activated, { user_id: user_id, device_type: device_type })"
-
-    disabled:
+    inactive:
       final: true
       on_enter:
         - "send_email(mfa_device_disabled, user.email)"
         - "log(mfa.device_disabled, { user_id: user_id, device_type: device_type })"
 
   transitions:
-    verify:
-      from: pending
-      to: active
-      roles: [owner, system]
-      condition: "$context.otp_valid == true"
-      message: "Valid OTP required to verify device"
-
+    # Device verification is a field update (verified_at), not a status change:
+    # a fresh device is active the moment it is enrolled.
     disable:
       from: active
-      to: disabled
-      roles: [owner, admin]
-
-    cancel:
-      from: pending
-      to: disabled
+      to: inactive
       roles: [owner, admin]
 
 # =============================================================================

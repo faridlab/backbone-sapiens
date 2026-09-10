@@ -8,7 +8,7 @@ model: session.model.yaml
 # PRIORITY 1: State Machine - Session Lifecycle
 # =============================================================================
 states:
-  field: is_active
+  field: status
 
   values:
     active:
@@ -59,7 +59,7 @@ rules:
 
   no_modify_revoked:
     when: [update]
-    condition: "$old.is_active == true || $field == 'is_active'"
+    condition: "$old.status == 'active' || $field == 'status'"
     message: "Cannot modify revoked session"
     code: SESSION_REVOKED
 
@@ -118,11 +118,11 @@ triggers:
     # Activity tracking - update silently (no log spam)
     actions: []
 
-  after_update_is_active:
+  after_update_status:
     actions:
-      - "log(session.status_changed, { session_id: id, is_active: is_active })"
+      - "log(session.status_changed, { session_id: id, status: status })"
       - "emit: SessionRevokedEvent(session_id: id, user_id: user_id)"
-    if: "is_active == false"
+    if: "status == 'revoked'"
 
   scheduled_expire:
     schedule: "every 1.hour"

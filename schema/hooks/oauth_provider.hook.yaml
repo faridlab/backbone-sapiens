@@ -8,7 +8,7 @@ model: OAuthProvider
 # PRIORITY 1: State Machine - OAuth Provider Configuration
 # =============================================================================
 states:
-  field: is_active
+  field: status
 
   values:
     active:
@@ -17,28 +17,14 @@ states:
         - "log(oauth_provider.activated, { provider_name: provider_name })"
 
     inactive:
+      final: true
       on_enter:
         - "log(oauth_provider.deactivated, { provider_name: provider_name })"
 
-    maintenance:
-      final: true
-      on_enter:
-        - "log(oauth_provider.maintenance, { provider_name: provider_name })"
-
   transitions:
-    activate:
-      from: [inactive, maintenance]
-      to: active
-      roles: [admin]
-
     deactivate:
-      from: [active, maintenance]
+      from: [active]
       to: inactive
-      roles: [admin]
-
-    maintenance:
-      from: [active, inactive]
-      to: maintenance
       roles: [admin]
 
 # =============================================================================

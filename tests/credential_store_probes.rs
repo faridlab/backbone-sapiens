@@ -309,6 +309,7 @@ async fn csp7_rls_cross_company_read_invisible() {
 
     // Fence level: as a NON-SUPERUSER role, the strict policy shows company A's
     // row only when app.company_id is A — and zero rows when unset.
+    sqlx::query("DROP OWNED BY csp_fence_probe").execute(&pool).await.ok();
     sqlx::query("DROP ROLE IF EXISTS csp_fence_probe").execute(&pool).await.ok();
     sqlx::query("CREATE ROLE csp_fence_probe NOLOGIN").execute(&pool).await.unwrap();
     sqlx::query("GRANT USAGE ON SCHEMA sapiens TO csp_fence_probe").execute(&pool).await.unwrap();

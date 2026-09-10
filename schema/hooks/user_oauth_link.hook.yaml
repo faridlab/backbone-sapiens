@@ -8,50 +8,45 @@ model: UserOAuthLink
 # PRIORITY 1: State Machine - OAuth Link Lifecycle
 # =============================================================================
 states:
-  field: is_active
+  field: status
 
   values:
-    linked:
+    pending_verification:
       initial: true
+      on_enter:
+        - "send_email(oauth_verification, user.email)"
+        - "schedule_job(expire_verification, run_at: now() + 24.hours)"
+        - "log(oauth_link.verification_required, { user_id: user_id, provider: oauth_provider.provider_name })"
+
+    active:
       on_enter:
         - "sync_oauth_profile()"
         - "log(oauth_link.linked, { user_id: user_id, provider: oauth_provider.provider_name, provider_user_id: provider_user_id })"
         - "emit: OAuthLinkCreatedEvent(link_id: id, user_id: user_id, provider: oauth_provider.provider_name, provider_user_id: provider_user_id })"
 
-    unlinked:
+    revoked:
       final: true
       on_enter:
         - "revoke_oauth_tokens()"
         - "log(oauth_link.unlinked, { user_id: user_id, provider: oauth_provider.provider_name, provider_user_id: provider_user_id, reason: $context.reason })"
         - "emit: OAuthLinkDeletedEvent(link_id: id, user_id: user_id, provider: oauth_provider.provider_name, provider_user_id: provider_user_id })"
 
-    requires_verification:
-      on_enter:
-        - "send_email(oauth_verification, user.email)"
-        - "schedule_job(expire_verification, run_at: now() + 24.hours)"
-        - "log(oauth_link.verification_required, { user_id: user_id, provider: oauth_provider.provider_name })"
-
   transitions:
     unlink:
-      from: [linked, requires_verification]
-      to: unlinked
+      from: [active, pending_verification]
+      to: revoked
       condition: "$actor.id == user_id || $actor.has_role('admin')"
       message: "You can only unlink your own OAuth accounts"
 
-    require_verification:
-      from: linked
-      to: requires_verification
-      condition: "$context.verification_required == true"
-
     verify:
-      from: requires_verification
-      to: linked
+      from: pending_verification
+      to: active
       condition: "$context.verification_valid && oauth_link_verification_token_valid($context.token)"
       message: "Invalid or expired verification token"
 
     expire_verification:
-      from: requires_verification
-      to: unlinked
+      from: pending_verification
+      to: revoked
       condition: "verification_expiry < now()"
       message: "OAuth linking verification expired"
 
