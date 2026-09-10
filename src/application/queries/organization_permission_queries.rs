@@ -67,7 +67,7 @@ impl<R: OrganizationPermissionRepository + 'static> QueryHandler<GetOrganization
 pub struct ListOrganizationPermissionQuery {
     pub page: u32,
     pub per_page: u32,
-    pub filter_organization_id: Option<Uuid>,
+    pub filter_org_unit_id: Option<Uuid>,
     pub filter_permission_id: Option<Uuid>,
     pub filter_permission_name: Option<String>,
     pub filter_resource_id: Option<Uuid>,
@@ -83,7 +83,7 @@ impl Default for ListOrganizationPermissionQuery {
         Self {
             page: 1,
             per_page: 20,
-            filter_organization_id: None,
+            filter_org_unit_id: None,
             filter_permission_id: None,
             filter_permission_name: None,
             filter_resource_id: None,
@@ -116,7 +116,7 @@ impl<R: OrganizationPermissionRepository + 'static> QueryHandler<ListOrganizatio
 
         // Build filter from query parameters
         let filters = OrganizationPermissionFilter {
-            organization_id: query.filter_organization_id.clone(),
+            org_unit_id: query.filter_org_unit_id.clone(),
             permission_id: query.filter_permission_id.clone(),
             permission_name: query.filter_permission_name.clone(),
             resource_id: query.filter_resource_id.clone(),

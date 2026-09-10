@@ -152,7 +152,7 @@ mod user_tests {
 
         assert_eq!(user.first_name(), Some("John".to_string()));
         assert_eq!(user.last_name(), Some("Doe".to_string()));
-        assert!(user.organization_id().is_none());
+        assert!(user.org_unit_id().is_none());
     }
 
     /// Test user password change timestamp

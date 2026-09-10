@@ -53,8 +53,49 @@ async fn pool() -> PgPool {
     PgPool::connect(&url).await.expect("connect DB")
 }
 
-async fn outbox_rows(pool: &PgPool, aggregate_id: Uuid) -> i64 {
-    let n: i64 = sqlx::query_scalar(
+/// Seed the org spine nodes a membership row must name (the kind guard rejects
+/// ids that are not organization.org_units nodes): one root plus a company
+/// node under it. Fixed ids + ON CONFLICT keep the fixture re-runnable across
+/// suite runs against the same database.
+async fn seed_org_nodes(pool: &PgPool) -> Uuid {
+    let fixed_root: Uuid = "00000000-0000-4000-8000-000000000101".parse().unwrap();
+    let company: Uuid = "00000000-0000-4000-8000-000000000102".parse().unwrap();
+    // Exactly one root may exist per database (partial unique on kind); adopt
+    // whichever root is already there instead of inserting a second one.
+    let root: Option<Uuid> = sqlx::query_scalar(
+        "SELECT id FROM organization.org_units WHERE kind = 'root' LIMIT 1",
+    )
+    .fetch_optional(pool)
+    .await
+    .expect("find root org node");
+    let root = match root {
+        Some(r) => r,
+        None => {
+            sqlx::query(
+                "INSERT INTO organization.org_units (id, kind, parent_id, name, metadata) \
+                 VALUES ($1, 'root', NULL, 'user-created probe root', '{}'::jsonb)",
+            )
+            .bind(fixed_root)
+            .execute(pool)
+            .await
+            .expect("seed root org node");
+            fixed_root
+        }
+    };
+    sqlx::query(
+        "INSERT INTO organization.org_units (id, kind, parent_id, name, metadata) \
+         VALUES ($1, 'company', $2, 'user-created probe company', '{}'::jsonb) \
+         ON CONFLICT (id) DO NOTHING",
+    )
+    .bind(company)
+    .bind(root)
+    .execute(pool)
+    .await
+    .expect("seed company org node");
+    company
+}
+
+async fn outbox_rows(pool: &PgPool, aggregate_id: Uuid) -> i64 {    let n: i64 = sqlx::query_scalar(
         "SELECT count(*) FROM sapiens.outbox_events \
          WHERE aggregate_id = $1 AND event_type = 'UserCreated'",
     )
@@ -300,11 +341,12 @@ async fn ucp5_internal_user_definition() {
     );
 
     // A non-active membership does not make the user internal.
+    let org_node = seed_org_nodes(&pool).await;
     sqlx::query(
-        "INSERT INTO sapiens.organization_users (organization_id, user_id, status) \
+        "INSERT INTO sapiens.organization_users (org_unit_id, user_id, status) \
          VALUES ($1, $2, 'inactive')",
     )
-    .bind(Uuid::new_v4())
+    .bind(org_node)
     .bind(user.id)
     .execute(&pool)
     .await
@@ -316,10 +358,10 @@ async fn ucp5_internal_user_definition() {
 
     // An ACTIVE membership is the definition of internal.
     sqlx::query(
-        "INSERT INTO sapiens.organization_users (organization_id, user_id, status) \
+        "INSERT INTO sapiens.organization_users (org_unit_id, user_id, status) \
          VALUES ($1, $2, 'active')",
     )
-    .bind(Uuid::new_v4())
+    .bind(org_node)
     .bind(user.id)
     .execute(&pool)
     .await

@@ -36,7 +36,7 @@ pub trait OrganizationRoleCommand: Send + Sync {
 /// Command to create a new organization_role
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateOrganizationRoleCommand {
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     pub name: String,
     pub description: Option<String>,
     pub permissions: Option<serde_json::Value>,
@@ -62,7 +62,7 @@ impl<R: OrganizationRoleRepository + 'static> CommandHandler<CreateOrganizationR
     async fn handle(&self, cmd: CreateOrganizationRoleCommand) -> Result<Self::Output> {
         let entity = OrganizationRole::builder()
             .id(Uuid::new_v4().to_string())
-            .organization_id(cmd.organization_id)
+            .org_unit_id(cmd.org_unit_id)
             .name(cmd.name)
             .description(cmd.description)
             .permissions(cmd.permissions)
@@ -82,7 +82,7 @@ impl<R: OrganizationRoleRepository + 'static> CommandHandler<CreateOrganizationR
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UpdateOrganizationRoleCommand {
     pub id: String,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub name: Option<String>,
     pub description: Option<String>,
     pub permissions: Option<serde_json::Value>,
@@ -113,8 +113,8 @@ impl<R: OrganizationRoleRepository + 'static> CommandHandler<UpdateOrganizationR
         };
 
         // Apply updates
-        if let Some(value) = cmd.organization_id {
-            entity.organization_id = value;
+        if let Some(value) = cmd.org_unit_id {
+            entity.org_unit_id = value;
         }
         if let Some(value) = cmd.name {
             entity.name = value;

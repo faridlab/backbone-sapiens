@@ -45,7 +45,7 @@ pub struct OrganizationPermissionPaginatedResult {
 /// Filter parameters for list queries
 #[derive(Debug, Clone, Default)]
 pub struct OrganizationPermissionFilter {
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub permission_id: Option<Uuid>,
     pub permission_name: Option<String>,
     pub resource_id: Option<Uuid>,
@@ -59,7 +59,7 @@ pub struct OrganizationPermissionFilter {
 impl OrganizationPermissionFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.organization_id.is_some() || self.permission_id.is_some() || self.permission_name.is_some() || self.resource_id.is_some() || self.resource_type.is_some() || self.role_id.is_some() || self.granted_by.is_some() || self.reason.is_some() || self.status.is_some()
+        self.org_unit_id.is_some() || self.permission_id.is_some() || self.permission_name.is_some() || self.resource_id.is_some() || self.resource_type.is_some() || self.role_id.is_some() || self.granted_by.is_some() || self.reason.is_some() || self.status.is_some()
     }
 }
 

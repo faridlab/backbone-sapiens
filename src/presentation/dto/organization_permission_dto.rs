@@ -34,8 +34,8 @@ use crate::domain::entity::OrganizationPermissionStatus;
 #[serde(rename_all = "camelCase")]
 pub struct CreateOrganizationPermissionDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "organization_id")]
-    pub organization_id: Uuid,
+    #[serde(alias = "org_unit_id")]
+    pub org_unit_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "permission_id")]
     pub permission_id: Uuid,
@@ -78,8 +78,8 @@ pub struct CreateOrganizationPermissionDto {
 #[serde(rename_all = "camelCase")]
 pub struct UpdateOrganizationPermissionDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "organization_id")]
-    pub organization_id: Uuid,
+    #[serde(alias = "org_unit_id")]
+    pub org_unit_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "permission_id")]
     pub permission_id: Uuid,
@@ -122,8 +122,8 @@ pub struct UpdateOrganizationPermissionDto {
 #[serde(rename_all = "camelCase")]
 pub struct PatchOrganizationPermissionDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "organization_id")]
-    pub organization_id: Option<Uuid>,
+    #[serde(skip_serializing_if = "Option::is_none", alias = "org_unit_id")]
+    pub org_unit_id: Option<Uuid>,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "permission_id")]
     pub permission_id: Option<Uuid>,
@@ -156,7 +156,7 @@ pub struct PatchOrganizationPermissionDto {
 impl PatchOrganizationPermissionDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.organization_id.is_some() || self.permission_id.is_some() || self.permission_name.is_some() || self.resource_id.is_some() || self.resource_type.is_some() || self.role_id.is_some() || self.granted_by.is_some() || self.granted_at.is_some() || self.expires_at.is_some() || self.reason.is_some() || self.status.is_some()
+        self.org_unit_id.is_some() || self.permission_id.is_some() || self.permission_name.is_some() || self.resource_id.is_some() || self.resource_type.is_some() || self.role_id.is_some() || self.granted_by.is_some() || self.granted_at.is_some() || self.expires_at.is_some() || self.reason.is_some() || self.status.is_some()
     }
 }
 
@@ -175,7 +175,7 @@ pub struct OrganizationPermissionResponseDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub permission_id: Uuid,
     pub permission_name: Option<String>,
@@ -247,7 +247,7 @@ impl OrganizationPermissionListResponseDto {
 #[serde(rename_all = "camelCase")]
 pub struct OrganizationPermissionSummaryDto {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     pub permission_id: Uuid,
     pub permission_name: Option<String>,
     pub created_at: Option<DateTime<Utc>>,
@@ -261,7 +261,7 @@ impl From<OrganizationPermission> for OrganizationPermissionResponseDto {
     fn from(entity: OrganizationPermission) -> Self {
         Self {
             id: entity.id,
-            organization_id: entity.organization_id,
+            org_unit_id: entity.org_unit_id,
             permission_id: entity.permission_id,
             permission_name: entity.permission_name,
             resource_id: entity.resource_id,
@@ -282,7 +282,7 @@ impl From<OrganizationPermission> for OrganizationPermissionSummaryDto {
         let created_at = backbone_core::PersistentEntity::created_at(&entity);
         Self {
             id: entity.id,
-            organization_id: entity.organization_id,
+            org_unit_id: entity.org_unit_id,
             permission_id: entity.permission_id,
             permission_name: entity.permission_name,
             created_at,
@@ -294,7 +294,7 @@ impl From<CreateOrganizationPermissionDto> for OrganizationPermission {
     fn from(dto: CreateOrganizationPermissionDto) -> Self {
         Self {
             id: Uuid::new_v4(),
-            organization_id: dto.organization_id,
+            org_unit_id: dto.org_unit_id,
             permission_id: dto.permission_id,
             permission_name: dto.permission_name,
             resource_id: dto.resource_id,
@@ -314,7 +314,7 @@ impl From<&OrganizationPermission> for OrganizationPermissionResponseDto {
     fn from(entity: &OrganizationPermission) -> Self {
         Self {
             id: entity.id.clone(),
-            organization_id: entity.organization_id.clone(),
+            org_unit_id: entity.org_unit_id.clone(),
             permission_id: entity.permission_id.clone(),
             permission_name: entity.permission_name.clone(),
             resource_id: entity.resource_id.clone(),
@@ -338,7 +338,7 @@ impl backbone_core::FromCreateDto<CreateOrganizationPermissionDto> for Organizat
 
 impl backbone_core::ApplyUpdateDto<UpdateOrganizationPermissionDto> for OrganizationPermission {
     fn apply_update(mut self, dto: UpdateOrganizationPermissionDto) -> backbone_core::ServiceResult<Self> {
-        self.organization_id = dto.organization_id;
+        self.org_unit_id = dto.org_unit_id;
         self.permission_id = dto.permission_id;
         self.permission_name = dto.permission_name;
         self.resource_id = dto.resource_id;

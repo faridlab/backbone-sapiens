@@ -34,8 +34,8 @@ use crate::domain::entity::OrganizationMembershipStatus;
 #[serde(rename_all = "camelCase")]
 pub struct CreateOrganizationUserDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "organization_id")]
-    pub organization_id: Uuid,
+    #[serde(alias = "org_unit_id")]
+    pub org_unit_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "user_id")]
     pub user_id: Uuid,
@@ -63,8 +63,8 @@ pub struct CreateOrganizationUserDto {
 #[serde(rename_all = "camelCase")]
 pub struct UpdateOrganizationUserDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "organization_id")]
-    pub organization_id: Uuid,
+    #[serde(alias = "org_unit_id")]
+    pub org_unit_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "user_id")]
     pub user_id: Uuid,
@@ -92,8 +92,8 @@ pub struct UpdateOrganizationUserDto {
 #[serde(rename_all = "camelCase")]
 pub struct PatchOrganizationUserDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "organization_id")]
-    pub organization_id: Option<Uuid>,
+    #[serde(skip_serializing_if = "Option::is_none", alias = "org_unit_id")]
+    pub org_unit_id: Option<Uuid>,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "user_id")]
     pub user_id: Option<Uuid>,
@@ -111,7 +111,7 @@ pub struct PatchOrganizationUserDto {
 impl PatchOrganizationUserDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.organization_id.is_some() || self.user_id.is_some() || self.role_id.is_some() || self.status.is_some() || self.joined_at.is_some() || self.left_at.is_some()
+        self.org_unit_id.is_some() || self.user_id.is_some() || self.role_id.is_some() || self.status.is_some() || self.joined_at.is_some() || self.left_at.is_some()
     }
 }
 
@@ -130,7 +130,7 @@ pub struct OrganizationUserResponseDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub user_id: Uuid,
     pub role_id: Option<Uuid>,
@@ -195,7 +195,7 @@ impl OrganizationUserListResponseDto {
 #[serde(rename_all = "camelCase")]
 pub struct OrganizationUserSummaryDto {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     pub user_id: Uuid,
     pub role_id: Option<Uuid>,
     pub created_at: Option<DateTime<Utc>>,
@@ -209,7 +209,7 @@ impl From<OrganizationUser> for OrganizationUserResponseDto {
     fn from(entity: OrganizationUser) -> Self {
         Self {
             id: entity.id,
-            organization_id: entity.organization_id,
+            org_unit_id: entity.org_unit_id,
             user_id: entity.user_id,
             role_id: entity.role_id,
             status: entity.status,
@@ -225,7 +225,7 @@ impl From<OrganizationUser> for OrganizationUserSummaryDto {
         let created_at = backbone_core::PersistentEntity::created_at(&entity);
         Self {
             id: entity.id,
-            organization_id: entity.organization_id,
+            org_unit_id: entity.org_unit_id,
             user_id: entity.user_id,
             role_id: entity.role_id,
             created_at,
@@ -237,7 +237,7 @@ impl From<CreateOrganizationUserDto> for OrganizationUser {
     fn from(dto: CreateOrganizationUserDto) -> Self {
         Self {
             id: Uuid::new_v4(),
-            organization_id: dto.organization_id,
+            org_unit_id: dto.org_unit_id,
             user_id: dto.user_id,
             role_id: dto.role_id,
             status: dto.status,
@@ -252,7 +252,7 @@ impl From<&OrganizationUser> for OrganizationUserResponseDto {
     fn from(entity: &OrganizationUser) -> Self {
         Self {
             id: entity.id.clone(),
-            organization_id: entity.organization_id.clone(),
+            org_unit_id: entity.org_unit_id.clone(),
             user_id: entity.user_id.clone(),
             role_id: entity.role_id.clone(),
             status: entity.status.clone(),
@@ -271,7 +271,7 @@ impl backbone_core::FromCreateDto<CreateOrganizationUserDto> for OrganizationUse
 
 impl backbone_core::ApplyUpdateDto<UpdateOrganizationUserDto> for OrganizationUser {
     fn apply_update(mut self, dto: UpdateOrganizationUserDto) -> backbone_core::ServiceResult<Self> {
-        self.organization_id = dto.organization_id;
+        self.org_unit_id = dto.org_unit_id;
         self.user_id = dto.user_id;
         self.role_id = dto.role_id;
         self.status = dto.status;

@@ -67,7 +67,7 @@ impl<R: OrganizationRoleRepository + 'static> QueryHandler<GetOrganizationRoleBy
 pub struct ListOrganizationRoleQuery {
     pub page: u32,
     pub per_page: u32,
-    pub filter_organization_id: Option<Uuid>,
+    pub filter_org_unit_id: Option<Uuid>,
     pub filter_name: Option<String>,
     pub filter_description: Option<String>,
     pub filter_status: Option<OrganizationRoleStatus>,
@@ -78,7 +78,7 @@ impl Default for ListOrganizationRoleQuery {
         Self {
             page: 1,
             per_page: 20,
-            filter_organization_id: None,
+            filter_org_unit_id: None,
             filter_name: None,
             filter_description: None,
             filter_status: None,
@@ -106,7 +106,7 @@ impl<R: OrganizationRoleRepository + 'static> QueryHandler<ListOrganizationRoleQ
 
         // Build filter from query parameters
         let filters = OrganizationRoleFilter {
-            organization_id: query.filter_organization_id.clone(),
+            org_unit_id: query.filter_org_unit_id.clone(),
             name: query.filter_name.clone(),
             description: query.filter_description.clone(),
             status: query.filter_status.clone(),

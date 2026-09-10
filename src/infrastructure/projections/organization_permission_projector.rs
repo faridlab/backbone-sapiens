@@ -104,7 +104,7 @@ impl<R: OrganizationPermissionProjectionRepository> OrganizationPermissionEventH
     async fn on_created(&self, event: OrganizationPermissionCreatedEvent, sequence: i64) -> Result<()> {
         let mut projection = OrganizationPermissionProjection::new(
             event.id,
-            event.organization_id,
+            event.org_unit_id,
             event.permission_id,
             event.permission_name,
             event.resource_id,
@@ -127,7 +127,7 @@ impl<R: OrganizationPermissionProjectionRepository> OrganizationPermissionEventH
     async fn on_updated(&self, event: OrganizationPermissionUpdatedEvent, sequence: i64) -> Result<()> {
         if let Some(mut projection) = self.repository.find_by_id(event.id).await? {
             // Apply updates from event
-            projection.organization_id = event.organization_id;
+            projection.org_unit_id = event.org_unit_id;
             projection.permission_id = event.permission_id;
             projection.permission_name = event.permission_name;
             projection.resource_id = event.resource_id;

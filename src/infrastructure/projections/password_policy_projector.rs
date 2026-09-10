@@ -105,7 +105,7 @@ impl<R: PasswordPolicyProjectionRepository> PasswordPolicyEventHandler for Passw
         let mut projection = PasswordPolicyProjection::new(
             event.id,
             event.name,
-            event.organization_id,
+            event.org_unit_id,
             event.status,
             event.password_requirements,
             event.password_history,
@@ -124,7 +124,7 @@ impl<R: PasswordPolicyProjectionRepository> PasswordPolicyEventHandler for Passw
         if let Some(mut projection) = self.repository.find_by_id(event.id).await? {
             // Apply updates from event
             projection.name = event.name;
-            projection.organization_id = event.organization_id;
+            projection.org_unit_id = event.org_unit_id;
             projection.status = event.status;
             projection.password_requirements = event.password_requirements;
             projection.password_history = event.password_history;

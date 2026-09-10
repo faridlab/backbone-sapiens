@@ -6,6 +6,12 @@ module: sapiens
 version: 2
 schema: sapiens
 
+# The membership axis is native org data (ADR-0028): organization_users/_roles/
+# _permissions key organization.org_units nodes directly, so the module declares
+# the org fence itself — this is not tenancy decoration (ADR-0029 leaves that to
+# the composing service); it is the spine's own membership schema.
+org_fence: strict
+
 # Shared types available to all models in this module
 shared_types:
   # Common audit fields for all entities

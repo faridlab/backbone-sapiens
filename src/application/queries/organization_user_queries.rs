@@ -66,7 +66,7 @@ impl<R: OrganizationUserRepository + 'static> QueryHandler<GetOrganizationUserBy
 pub struct ListOrganizationUserQuery {
     pub page: u32,
     pub per_page: u32,
-    pub filter_organization_id: Option<Uuid>,
+    pub filter_org_unit_id: Option<Uuid>,
     pub filter_user_id: Option<Uuid>,
     pub filter_role_id: Option<Uuid>,
     pub filter_status: Option<OrganizationMembershipStatus>,
@@ -77,7 +77,7 @@ impl Default for ListOrganizationUserQuery {
         Self {
             page: 1,
             per_page: 20,
-            filter_organization_id: None,
+            filter_org_unit_id: None,
             filter_user_id: None,
             filter_role_id: None,
             filter_status: None,
@@ -105,7 +105,7 @@ impl<R: OrganizationUserRepository + 'static> QueryHandler<ListOrganizationUserQ
 
         // Build filter from query parameters
         let filters = OrganizationUserFilter {
-            organization_id: query.filter_organization_id.clone(),
+            org_unit_id: query.filter_org_unit_id.clone(),
             user_id: query.filter_user_id.clone(),
             role_id: query.filter_role_id.clone(),
             status: query.filter_status.clone(),

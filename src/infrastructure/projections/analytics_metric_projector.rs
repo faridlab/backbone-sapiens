@@ -112,7 +112,7 @@ impl<R: AnalyticsMetricProjectionRepository> AnalyticsMetricEventHandler for Ana
             event.period_start,
             event.period_end,
             event.aggregation_level,
-            event.organization_id,
+            event.org_unit_id,
             event.metadata
         );
 
@@ -133,7 +133,7 @@ impl<R: AnalyticsMetricProjectionRepository> AnalyticsMetricEventHandler for Ana
             projection.period_start = event.period_start;
             projection.period_end = event.period_end;
             projection.aggregation_level = event.aggregation_level;
-            projection.organization_id = event.organization_id;
+            projection.org_unit_id = event.org_unit_id;
             projection.metadata = event.metadata;
             // Track the event sequence for this projection
             projection.apply_event(sequence);

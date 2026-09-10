@@ -35,7 +35,7 @@ pub trait OrganizationUserCommand: Send + Sync {
 /// Command to create a new organization_user
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateOrganizationUserCommand {
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     pub user_id: Uuid,
     pub role_id: Option<Uuid>,
     pub status: OrganizationMembershipStatus,
@@ -62,7 +62,7 @@ impl<R: OrganizationUserRepository + 'static> CommandHandler<CreateOrganizationU
     async fn handle(&self, cmd: CreateOrganizationUserCommand) -> Result<Self::Output> {
         let entity = OrganizationUser::builder()
             .id(Uuid::new_v4().to_string())
-            .organization_id(cmd.organization_id)
+            .org_unit_id(cmd.org_unit_id)
             .user_id(cmd.user_id)
             .role_id(cmd.role_id)
             .status(cmd.status)
@@ -83,7 +83,7 @@ impl<R: OrganizationUserRepository + 'static> CommandHandler<CreateOrganizationU
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UpdateOrganizationUserCommand {
     pub id: String,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub user_id: Option<Uuid>,
     pub role_id: Option<Uuid>,
     pub status: Option<OrganizationMembershipStatus>,
@@ -115,8 +115,8 @@ impl<R: OrganizationUserRepository + 'static> CommandHandler<UpdateOrganizationU
         };
 
         // Apply updates
-        if let Some(value) = cmd.organization_id {
-            entity.organization_id = value;
+        if let Some(value) = cmd.org_unit_id {
+            entity.org_unit_id = value;
         }
         if let Some(value) = cmd.user_id {
             entity.user_id = value;

@@ -55,8 +55,8 @@ pub struct CreateAnalyticsMetricDto {
     pub period_end: DateTime<Utc>,
     #[serde(alias = "aggregation_level")]
     pub aggregation_level: AggregationLevel,
-    #[serde(default, skip_serializing_if = "Option::is_none", alias = "organization_id")]
-    pub organization_id: Option<Uuid>,
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "org_unit_id")]
+    pub org_unit_id: Option<Uuid>,
 }
 
 // =============================================================================
@@ -93,8 +93,8 @@ pub struct UpdateAnalyticsMetricDto {
     pub period_end: DateTime<Utc>,
     #[serde(alias = "aggregation_level")]
     pub aggregation_level: AggregationLevel,
-    #[serde(default, skip_serializing_if = "Option::is_none", alias = "organization_id")]
-    pub organization_id: Option<Uuid>,
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "org_unit_id")]
+    pub org_unit_id: Option<Uuid>,
 }
 
 // =============================================================================
@@ -132,14 +132,14 @@ pub struct PatchAnalyticsMetricDto {
     pub period_end: Option<DateTime<Utc>>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "aggregation_level")]
     pub aggregation_level: Option<AggregationLevel>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "organization_id")]
-    pub organization_id: Option<Uuid>,
+    #[serde(skip_serializing_if = "Option::is_none", alias = "org_unit_id")]
+    pub org_unit_id: Option<Uuid>,
 }
 
 impl PatchAnalyticsMetricDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.metric_name.is_some() || self.metric_type.is_some() || self.value.is_some() || self.unit.is_some() || self.dimensions.is_some() || self.period_start.is_some() || self.period_end.is_some() || self.aggregation_level.is_some() || self.organization_id.is_some()
+        self.metric_name.is_some() || self.metric_type.is_some() || self.value.is_some() || self.unit.is_some() || self.dimensions.is_some() || self.period_start.is_some() || self.period_end.is_some() || self.aggregation_level.is_some() || self.org_unit_id.is_some()
     }
 }
 
@@ -169,7 +169,7 @@ pub struct AnalyticsMetricResponseDto {
     #[cfg_attr(feature = "openapi", schema(example = "2024-01-01T00:00:00Z"))]
     pub period_end: DateTime<Utc>,
     pub aggregation_level: AggregationLevel,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub metadata: AuditMetadata,
 }
 
@@ -249,7 +249,7 @@ impl From<AnalyticsMetric> for AnalyticsMetricResponseDto {
             period_start: entity.period_start,
             period_end: entity.period_end,
             aggregation_level: entity.aggregation_level,
-            organization_id: entity.organization_id,
+            org_unit_id: entity.org_unit_id,
             metadata: entity.metadata,
         }
     }
@@ -280,7 +280,7 @@ impl From<CreateAnalyticsMetricDto> for AnalyticsMetric {
             period_start: dto.period_start,
             period_end: dto.period_end,
             aggregation_level: dto.aggregation_level,
-            organization_id: dto.organization_id,
+            org_unit_id: dto.org_unit_id,
             metadata: AuditMetadata::default(),
         }
     }
@@ -298,7 +298,7 @@ impl From<&AnalyticsMetric> for AnalyticsMetricResponseDto {
             period_start: entity.period_start.clone(),
             period_end: entity.period_end.clone(),
             aggregation_level: entity.aggregation_level.clone(),
-            organization_id: entity.organization_id.clone(),
+            org_unit_id: entity.org_unit_id.clone(),
             metadata: entity.metadata.clone(),
         }
     }
@@ -320,7 +320,7 @@ impl backbone_core::ApplyUpdateDto<UpdateAnalyticsMetricDto> for AnalyticsMetric
         self.period_start = dto.period_start;
         self.period_end = dto.period_end;
         self.aggregation_level = dto.aggregation_level;
-        self.organization_id = dto.organization_id;
+        self.org_unit_id = dto.org_unit_id;
         Ok(self)
     }
 }

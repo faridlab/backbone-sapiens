@@ -49,7 +49,7 @@ impl std::ops::Deref for OrganizationRoleId {
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct OrganizationRole {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     pub name: String,
     pub description: Option<String>,
     pub permissions: Option<serde_json::Value>,
@@ -66,10 +66,10 @@ impl OrganizationRole {
     }
 
     /// Create a new OrganizationRole with required fields
-    pub fn new(organization_id: Uuid, name: String, status: OrganizationRoleStatus) -> Self {
+    pub fn new(org_unit_id: Uuid, name: String, status: OrganizationRoleStatus) -> Self {
         Self {
             id: Uuid::new_v4(),
-            organization_id,
+            org_unit_id,
             name,
             description: None,
             permissions: None,
@@ -158,8 +158,8 @@ impl OrganizationRole {
     pub fn apply_patch(&mut self, fields: std::collections::HashMap<String, serde_json::Value>) {
         for (key, value) in fields {
             match key.as_str() {
-                "organization_id" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.organization_id = v; }
+                "org_unit_id" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.org_unit_id = v; }
                 }
                 "name" => {
                     if let Ok(v) = serde_json::from_value(value) { self.name = v; }
@@ -227,7 +227,7 @@ impl backbone_orm::EntityRepoMeta for OrganizationRole {
     fn column_types() -> std::collections::HashMap<String, String> {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
-        m.insert("organization_id".to_string(), "uuid".to_string());
+        m.insert("org_unit_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "organization_role_status".to_string());
         m
     }
@@ -242,7 +242,7 @@ impl backbone_orm::EntityRepoMeta for OrganizationRole {
 /// System fields (id, metadata, timestamps) are auto-initialized.
 #[derive(Debug, Clone, Default)]
 pub struct OrganizationRoleBuilder {
-    organization_id: Option<Uuid>,
+    org_unit_id: Option<Uuid>,
     name: Option<String>,
     description: Option<String>,
     permissions: Option<serde_json::Value>,
@@ -250,9 +250,9 @@ pub struct OrganizationRoleBuilder {
 }
 
 impl OrganizationRoleBuilder {
-    /// Set the organization_id field (required)
-    pub fn organization_id(mut self, value: Uuid) -> Self {
-        self.organization_id = Some(value);
+    /// Set the org_unit_id field (required)
+    pub fn org_unit_id(mut self, value: Uuid) -> Self {
+        self.org_unit_id = Some(value);
         self
     }
 
@@ -284,12 +284,12 @@ impl OrganizationRoleBuilder {
     ///
     /// Returns Err if any required field without a default is missing.
     pub fn build(self) -> Result<OrganizationRole, String> {
-        let organization_id = self.organization_id.ok_or_else(|| "organization_id is required".to_string())?;
+        let org_unit_id = self.org_unit_id.ok_or_else(|| "org_unit_id is required".to_string())?;
         let name = self.name.ok_or_else(|| "name is required".to_string())?;
 
         Ok(OrganizationRole {
             id: Uuid::new_v4(),
-            organization_id,
+            org_unit_id,
             name,
             description: self.description,
             permissions: self.permissions,

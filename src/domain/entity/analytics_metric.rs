@@ -59,7 +59,7 @@ pub struct AnalyticsMetric {
     pub period_start: DateTime<Utc>,
     pub period_end: DateTime<Utc>,
     pub aggregation_level: AggregationLevel,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     #[serde(default)]
     #[sqlx(json)]
     pub metadata: AuditMetadata,
@@ -83,7 +83,7 @@ impl AnalyticsMetric {
             period_start,
             period_end,
             aggregation_level,
-            organization_id: None,
+            org_unit_id: None,
             metadata: AuditMetadata::default(),
         }
     }
@@ -155,9 +155,9 @@ impl AnalyticsMetric {
         self
     }
 
-    /// Set the organization_id field (chainable)
-    pub fn with_organization_id(mut self, value: Uuid) -> Self {
-        self.organization_id = Some(value);
+    /// Set the org_unit_id field (chainable)
+    pub fn with_org_unit_id(mut self, value: Uuid) -> Self {
+        self.org_unit_id = Some(value);
         self
     }
 
@@ -193,8 +193,8 @@ impl AnalyticsMetric {
                 "aggregation_level" => {
                     if let Ok(v) = serde_json::from_value(value) { self.aggregation_level = v; }
                 }
-                "organization_id" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.organization_id = v; }
+                "org_unit_id" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.org_unit_id = v; }
                 }
                 _ => {} // ignore unknown fields
             }
@@ -250,7 +250,7 @@ impl backbone_orm::EntityRepoMeta for AnalyticsMetric {
     fn column_types() -> std::collections::HashMap<String, String> {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
-        m.insert("organization_id".to_string(), "uuid".to_string());
+        m.insert("org_unit_id".to_string(), "uuid".to_string());
         m.insert("metric_type".to_string(), "analytics_metric_type".to_string());
         m.insert("aggregation_level".to_string(), "aggregation_level".to_string());
         m
@@ -274,7 +274,7 @@ pub struct AnalyticsMetricBuilder {
     period_start: Option<DateTime<Utc>>,
     period_end: Option<DateTime<Utc>>,
     aggregation_level: Option<AggregationLevel>,
-    organization_id: Option<Uuid>,
+    org_unit_id: Option<Uuid>,
 }
 
 impl AnalyticsMetricBuilder {
@@ -326,9 +326,9 @@ impl AnalyticsMetricBuilder {
         self
     }
 
-    /// Set the organization_id field (optional)
-    pub fn organization_id(mut self, value: Uuid) -> Self {
-        self.organization_id = Some(value);
+    /// Set the org_unit_id field (optional)
+    pub fn org_unit_id(mut self, value: Uuid) -> Self {
+        self.org_unit_id = Some(value);
         self
     }
 
@@ -353,7 +353,7 @@ impl AnalyticsMetricBuilder {
             period_start,
             period_end,
             aggregation_level,
-            organization_id: self.organization_id,
+            org_unit_id: self.org_unit_id,
             metadata: AuditMetadata::default(),
         })
     }

@@ -50,7 +50,7 @@ impl std::ops::Deref for PasswordPolicyId {
 pub struct PasswordPolicy {
     pub id: Uuid,
     pub name: String,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub status: PasswordPolicyStatus,
     pub password_requirements: serde_json::Value,
     pub password_history: serde_json::Value,
@@ -72,7 +72,7 @@ impl PasswordPolicy {
         Self {
             id: Uuid::new_v4(),
             name,
-            organization_id: None,
+            org_unit_id: None,
             status,
             password_requirements,
             password_history,
@@ -137,9 +137,9 @@ impl PasswordPolicy {
     // Fluent Setters (with_* for optional fields)
     // ==========================================================
 
-    /// Set the organization_id field (chainable)
-    pub fn with_organization_id(mut self, value: Uuid) -> Self {
-        self.organization_id = Some(value);
+    /// Set the org_unit_id field (chainable)
+    pub fn with_org_unit_id(mut self, value: Uuid) -> Self {
+        self.org_unit_id = Some(value);
         self
     }
 
@@ -154,8 +154,8 @@ impl PasswordPolicy {
                 "name" => {
                     if let Ok(v) = serde_json::from_value(value) { self.name = v; }
                 }
-                "organization_id" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.organization_id = v; }
+                "org_unit_id" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.org_unit_id = v; }
                 }
                 "status" => {
                     if let Ok(v) = serde_json::from_value(value) { self.status = v; }
@@ -226,7 +226,7 @@ impl backbone_orm::EntityRepoMeta for PasswordPolicy {
     fn column_types() -> std::collections::HashMap<String, String> {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
-        m.insert("organization_id".to_string(), "uuid".to_string());
+        m.insert("org_unit_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "password_policy_status".to_string());
         m
     }
@@ -242,7 +242,7 @@ impl backbone_orm::EntityRepoMeta for PasswordPolicy {
 #[derive(Debug, Clone, Default)]
 pub struct PasswordPolicyBuilder {
     name: Option<String>,
-    organization_id: Option<Uuid>,
+    org_unit_id: Option<Uuid>,
     status: Option<PasswordPolicyStatus>,
     password_requirements: Option<serde_json::Value>,
     password_history: Option<serde_json::Value>,
@@ -257,9 +257,9 @@ impl PasswordPolicyBuilder {
         self
     }
 
-    /// Set the organization_id field (optional)
-    pub fn organization_id(mut self, value: Uuid) -> Self {
-        self.organization_id = Some(value);
+    /// Set the org_unit_id field (optional)
+    pub fn org_unit_id(mut self, value: Uuid) -> Self {
+        self.org_unit_id = Some(value);
         self
     }
 
@@ -306,7 +306,7 @@ impl PasswordPolicyBuilder {
         Ok(PasswordPolicy {
             id: Uuid::new_v4(),
             name,
-            organization_id: self.organization_id,
+            org_unit_id: self.org_unit_id,
             status: self.status.unwrap_or_default(),
             password_requirements,
             password_history,

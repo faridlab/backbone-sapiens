@@ -44,7 +44,7 @@ pub struct OrganizationUserPaginatedResult {
 /// Filter parameters for list queries
 #[derive(Debug, Clone, Default)]
 pub struct OrganizationUserFilter {
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub user_id: Option<Uuid>,
     pub role_id: Option<Uuid>,
     pub status: Option<OrganizationMembershipStatus>,
@@ -53,7 +53,7 @@ pub struct OrganizationUserFilter {
 impl OrganizationUserFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.organization_id.is_some() || self.user_id.is_some() || self.role_id.is_some() || self.status.is_some()
+        self.org_unit_id.is_some() || self.user_id.is_some() || self.role_id.is_some() || self.status.is_some()
     }
 }
 

@@ -36,7 +36,7 @@ pub trait OrganizationPermissionCommand: Send + Sync {
 /// Command to create a new organization_permission
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateOrganizationPermissionCommand {
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     pub permission_id: Uuid,
     pub permission_name: Option<String>,
     pub resource_id: Option<Uuid>,
@@ -68,7 +68,7 @@ impl<R: OrganizationPermissionRepository + 'static> CommandHandler<CreateOrganiz
     async fn handle(&self, cmd: CreateOrganizationPermissionCommand) -> Result<Self::Output> {
         let entity = OrganizationPermission::builder()
             .id(Uuid::new_v4().to_string())
-            .organization_id(cmd.organization_id)
+            .org_unit_id(cmd.org_unit_id)
             .permission_id(cmd.permission_id)
             .permission_name(cmd.permission_name)
             .resource_id(cmd.resource_id)
@@ -94,7 +94,7 @@ impl<R: OrganizationPermissionRepository + 'static> CommandHandler<CreateOrganiz
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UpdateOrganizationPermissionCommand {
     pub id: String,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub permission_id: Option<Uuid>,
     pub permission_name: Option<String>,
     pub resource_id: Option<Uuid>,
@@ -131,8 +131,8 @@ impl<R: OrganizationPermissionRepository + 'static> CommandHandler<UpdateOrganiz
         };
 
         // Apply updates
-        if let Some(value) = cmd.organization_id {
-            entity.organization_id = value;
+        if let Some(value) = cmd.org_unit_id {
+            entity.org_unit_id = value;
         }
         if let Some(value) = cmd.permission_id {
             entity.permission_id = value;

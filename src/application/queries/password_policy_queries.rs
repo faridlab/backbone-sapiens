@@ -67,7 +67,7 @@ pub struct ListPasswordPolicyQuery {
     pub page: u32,
     pub per_page: u32,
     pub filter_name: Option<String>,
-    pub filter_organization_id: Option<Uuid>,
+    pub filter_org_unit_id: Option<Uuid>,
     pub filter_status: Option<PasswordPolicyStatus>,
 }
 
@@ -77,7 +77,7 @@ impl Default for ListPasswordPolicyQuery {
             page: 1,
             per_page: 20,
             filter_name: None,
-            filter_organization_id: None,
+            filter_org_unit_id: None,
             filter_status: None,
         }
     }
@@ -104,7 +104,7 @@ impl<R: PasswordPolicyRepository + 'static> QueryHandler<ListPasswordPolicyQuery
         // Build filter from query parameters
         let filters = PasswordPolicyFilter {
             name: query.filter_name.clone(),
-            organization_id: query.filter_organization_id.clone(),
+            org_unit_id: query.filter_org_unit_id.clone(),
             status: query.filter_status,
             ..Default::default()
         };

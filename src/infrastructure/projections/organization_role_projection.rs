@@ -23,7 +23,7 @@ use crate::domain::entity::OrganizationRoleStatus;
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct OrganizationRoleProjection {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     pub name: String,
     pub description: Option<String>,
     pub permissions: Option<serde_json::Value>,
@@ -43,7 +43,7 @@ impl OrganizationRoleProjection {
     /// Create a new projection from entity data
     pub fn new(
         id: Uuid,
-        organization_id: Uuid,
+        org_unit_id: Uuid,
         name: String,
         description: Option<String>,
         permissions: Option<serde_json::Value>,
@@ -52,7 +52,7 @@ impl OrganizationRoleProjection {
     ) -> Self {
         Self {
             id,
-            organization_id,
+            org_unit_id,
             name,
             description,
             permissions,

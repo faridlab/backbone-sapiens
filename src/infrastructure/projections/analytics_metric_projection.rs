@@ -29,7 +29,7 @@ pub struct AnalyticsMetricProjection {
     pub period_start: DateTime<Utc>,
     pub period_end: DateTime<Utc>,
     pub aggregation_level: AggregationLevel,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub metadata: serde_json::Value,
 
     // Projection metadata
@@ -53,7 +53,7 @@ impl AnalyticsMetricProjection {
         period_start: DateTime<Utc>,
         period_end: DateTime<Utc>,
         aggregation_level: AggregationLevel,
-        organization_id: Option<Uuid>,
+        org_unit_id: Option<Uuid>,
         metadata: serde_json::Value
     ) -> Self {
         Self {
@@ -66,7 +66,7 @@ impl AnalyticsMetricProjection {
             period_start,
             period_end,
             aggregation_level,
-            organization_id,
+            org_unit_id,
             metadata,
             projection_version: 1,
             last_event_sequence: 0,

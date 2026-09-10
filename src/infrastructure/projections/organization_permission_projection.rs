@@ -23,7 +23,7 @@ use crate::domain::entity::OrganizationPermissionStatus;
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct OrganizationPermissionProjection {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     pub permission_id: Uuid,
     pub permission_name: Option<String>,
     pub resource_id: Option<Uuid>,
@@ -49,7 +49,7 @@ impl OrganizationPermissionProjection {
     /// Create a new projection from entity data
     pub fn new(
         id: Uuid,
-        organization_id: Uuid,
+        org_unit_id: Uuid,
         permission_id: Uuid,
         permission_name: Option<String>,
         resource_id: Option<Uuid>,
@@ -64,7 +64,7 @@ impl OrganizationPermissionProjection {
     ) -> Self {
         Self {
             id,
-            organization_id,
+            org_unit_id,
             permission_id,
             permission_name,
             resource_id,

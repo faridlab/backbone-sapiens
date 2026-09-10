@@ -104,7 +104,7 @@ impl<R: OrganizationRoleProjectionRepository> OrganizationRoleEventHandler for O
     async fn on_created(&self, event: OrganizationRoleCreatedEvent, sequence: i64) -> Result<()> {
         let mut projection = OrganizationRoleProjection::new(
             event.id,
-            event.organization_id,
+            event.org_unit_id,
             event.name,
             event.description,
             event.permissions,
@@ -121,7 +121,7 @@ impl<R: OrganizationRoleProjectionRepository> OrganizationRoleEventHandler for O
     async fn on_updated(&self, event: OrganizationRoleUpdatedEvent, sequence: i64) -> Result<()> {
         if let Some(mut projection) = self.repository.find_by_id(event.id).await? {
             // Apply updates from event
-            projection.organization_id = event.organization_id;
+            projection.org_unit_id = event.org_unit_id;
             projection.name = event.name;
             projection.description = event.description;
             projection.permissions = event.permissions;

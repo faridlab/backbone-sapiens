@@ -48,13 +48,13 @@ pub struct AnalyticsMetricFilter {
     pub metric_type: Option<AnalyticsMetricType>,
     pub unit: Option<String>,
     pub aggregation_level: Option<AggregationLevel>,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
 }
 
 impl AnalyticsMetricFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.metric_name.is_some() || self.metric_type.is_some() || self.unit.is_some() || self.aggregation_level.is_some() || self.organization_id.is_some()
+        self.metric_name.is_some() || self.metric_type.is_some() || self.unit.is_some() || self.aggregation_level.is_some() || self.org_unit_id.is_some()
     }
 }
 

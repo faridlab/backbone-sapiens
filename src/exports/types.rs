@@ -120,7 +120,7 @@ pub struct AnalyticsMetricDto {
     pub period_start: DateTime<Utc>,
     pub period_end: DateTime<Utc>,
     pub aggregation_level: AggregationLevel,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub metadata: serde_json::Value,
 }
 
@@ -1717,7 +1717,7 @@ impl From<OrganizationPermissionId> for Uuid {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OrganizationPermissionDto {
     pub id: OrganizationPermissionId,
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     pub permission_id: Uuid,
     pub permission_name: Option<String>,
     pub resource_id: Option<Uuid>,
@@ -1782,7 +1782,7 @@ impl From<OrganizationRoleId> for Uuid {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OrganizationRoleDto {
     pub id: OrganizationRoleId,
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     pub name: String,
     pub description: Option<String>,
     pub permissions: Option<serde_json::Value>,
@@ -1841,7 +1841,7 @@ impl From<OrganizationUserId> for Uuid {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OrganizationUserDto {
     pub id: OrganizationUserId,
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     pub user_id: Uuid,
     pub role_id: Option<Uuid>,
     pub status: OrganizationMembershipStatus,
@@ -2135,7 +2135,7 @@ impl From<PasswordPolicyId> for Uuid {
 pub struct PasswordPolicyDto {
     pub id: PasswordPolicyId,
     pub name: String,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub status: PasswordPolicyStatus,
     pub password_requirements: serde_json::Value,
     pub password_history: serde_json::Value,

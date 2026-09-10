@@ -194,7 +194,7 @@ pub struct PermissionContext {
     pub action: String,
     pub resource_id: Option<String>,
     pub resource_type: Option<String>,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub department_id: Option<Uuid>,
     pub project_id: Option<Uuid>,
     pub ip_address: Option<String>,
@@ -355,7 +355,7 @@ pub struct PermissionRevocationResult {
 /// Permission scope
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PermissionScope {
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub department_id: Option<Uuid>,
     pub project_id: Option<Uuid>,
     pub resource_type: Option<String>,

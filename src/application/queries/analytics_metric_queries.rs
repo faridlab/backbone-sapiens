@@ -70,7 +70,7 @@ pub struct ListAnalyticsMetricQuery {
     pub filter_metric_type: Option<AnalyticsMetricType>,
     pub filter_unit: Option<String>,
     pub filter_aggregation_level: Option<AggregationLevel>,
-    pub filter_organization_id: Option<Uuid>,
+    pub filter_org_unit_id: Option<Uuid>,
 }
 
 impl Default for ListAnalyticsMetricQuery {
@@ -82,7 +82,7 @@ impl Default for ListAnalyticsMetricQuery {
             filter_metric_type: None,
             filter_unit: None,
             filter_aggregation_level: None,
-            filter_organization_id: None,
+            filter_org_unit_id: None,
         }
     }
 }
@@ -111,7 +111,7 @@ impl<R: AnalyticsMetricRepository + 'static> QueryHandler<ListAnalyticsMetricQue
             metric_type: query.filter_metric_type.clone(),
             unit: query.filter_unit.clone(),
             aggregation_level: query.filter_aggregation_level.clone(),
-            organization_id: query.filter_organization_id.clone(),
+            org_unit_id: query.filter_org_unit_id.clone(),
             ..Default::default()
         };
 

@@ -46,14 +46,14 @@ pub struct PasswordPolicyPaginatedResult {
 #[derive(Debug, Clone, Default)]
 pub struct PasswordPolicyFilter {
     pub name: Option<String>,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub status: Option<PasswordPolicyStatus>,
 }
 
 impl PasswordPolicyFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.name.is_some() || self.organization_id.is_some() || self.status.is_some()
+        self.name.is_some() || self.org_unit_id.is_some() || self.status.is_some()
     }
 }
 

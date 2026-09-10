@@ -104,7 +104,7 @@ impl<R: OrganizationUserProjectionRepository> OrganizationUserEventHandler for O
     async fn on_created(&self, event: OrganizationUserCreatedEvent, sequence: i64) -> Result<()> {
         let mut projection = OrganizationUserProjection::new(
             event.id,
-            event.organization_id,
+            event.org_unit_id,
             event.user_id,
             event.role_id,
             event.status,
@@ -122,7 +122,7 @@ impl<R: OrganizationUserProjectionRepository> OrganizationUserEventHandler for O
     async fn on_updated(&self, event: OrganizationUserUpdatedEvent, sequence: i64) -> Result<()> {
         if let Some(mut projection) = self.repository.find_by_id(event.id).await? {
             // Apply updates from event
-            projection.organization_id = event.organization_id;
+            projection.org_unit_id = event.org_unit_id;
             projection.user_id = event.user_id;
             projection.role_id = event.role_id;
             projection.status = event.status;

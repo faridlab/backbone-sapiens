@@ -36,7 +36,7 @@ pub trait PasswordPolicyCommand: Send + Sync {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreatePasswordPolicyCommand {
     pub name: String,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub status: PasswordPolicyStatus,
     pub password_requirements: serde_json::Value,
     pub password_history: serde_json::Value,
@@ -64,7 +64,7 @@ impl<R: PasswordPolicyRepository + 'static> CommandHandler<CreatePasswordPolicyC
         let entity = PasswordPolicy::builder()
             .id(Uuid::new_v4().to_string())
             .name(cmd.name)
-            .organization_id(cmd.organization_id)
+            .org_unit_id(cmd.org_unit_id)
             .status(cmd.status)
             .password_requirements(cmd.password_requirements)
             .password_history(cmd.password_history)
@@ -86,7 +86,7 @@ impl<R: PasswordPolicyRepository + 'static> CommandHandler<CreatePasswordPolicyC
 pub struct UpdatePasswordPolicyCommand {
     pub id: String,
     pub name: Option<String>,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub status: Option<PasswordPolicyStatus>,
     pub password_requirements: Option<serde_json::Value>,
     pub password_history: Option<serde_json::Value>,
@@ -121,7 +121,7 @@ impl<R: PasswordPolicyRepository + 'static> CommandHandler<UpdatePasswordPolicyC
         if let Some(value) = cmd.name {
             entity.name = value;
         }
-        entity.organization_id = cmd.organization_id;
+        entity.org_unit_id = cmd.org_unit_id;
         if let Some(value) = cmd.status {
             entity.status = value;
         }

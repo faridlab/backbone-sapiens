@@ -140,12 +140,14 @@ models:
         attributes: ["@required"]
         description: "Aggregation level"
 
-      organization_id:
-        type: uuid?
-        attributes: ["@exclude_from_foreign_key_check"]
-        # No Organization entity exists (see organization_user.model.yaml). Pending ADR-0005:
-        # the tenant is the database, so this scopes nothing until the subsystem's fate is decided.
-        description: "Organization if org-specific metric (references corpus.Organization)"
+      org_unit_id:
+        type: uuid
+        attributes: ["@required", "@org_root_shared", "@exclude_from_foreign_key_check"]
+        # Tenant-wide metrics anchor on the org-tree ROOT node (@org_root_shared
+        # widens the kind guard to admit it); a company or branch node scopes the
+        # metric to that unit (organization.org_units, ADR-0028 — shared rows
+        # never ride a NULL key).
+        description: "Owning org-unit node (root node = tenant-wide metric)"
 
       metadata:
         type: Metadata
@@ -162,7 +164,7 @@ models:
       - type: index
         fields: [aggregation_level, period_start]
       - type: index
-        fields: [organization_id, period_start]
+        fields: [org_unit_id, period_start]
       - type: unique
         fields: [metric_name, dimensions, period_start, period_end, aggregation_level]
 

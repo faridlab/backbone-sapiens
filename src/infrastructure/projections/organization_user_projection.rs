@@ -21,7 +21,7 @@ use uuid::Uuid;
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct OrganizationUserProjection {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     pub user_id: Uuid,
     pub role_id: Option<Uuid>,
     pub status: OrganizationMembershipStatus,
@@ -42,7 +42,7 @@ impl OrganizationUserProjection {
     /// Create a new projection from entity data
     pub fn new(
         id: Uuid,
-        organization_id: Uuid,
+        org_unit_id: Uuid,
         user_id: Uuid,
         role_id: Option<Uuid>,
         status: OrganizationMembershipStatus,
@@ -52,7 +52,7 @@ impl OrganizationUserProjection {
     ) -> Self {
         Self {
             id,
-            organization_id,
+            org_unit_id,
             user_id,
             role_id,
             status,

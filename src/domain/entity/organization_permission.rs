@@ -49,7 +49,7 @@ impl std::ops::Deref for OrganizationPermissionId {
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct OrganizationPermission {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub org_unit_id: Uuid,
     pub permission_id: Uuid,
     pub permission_name: Option<String>,
     pub resource_id: Option<Uuid>,
@@ -72,10 +72,10 @@ impl OrganizationPermission {
     }
 
     /// Create a new OrganizationPermission with required fields
-    pub fn new(organization_id: Uuid, permission_id: Uuid, granted_by: Uuid, granted_at: DateTime<Utc>, status: OrganizationPermissionStatus) -> Self {
+    pub fn new(org_unit_id: Uuid, permission_id: Uuid, granted_by: Uuid, granted_at: DateTime<Utc>, status: OrganizationPermissionStatus) -> Self {
         Self {
             id: Uuid::new_v4(),
-            organization_id,
+            org_unit_id,
             permission_id,
             permission_name: None,
             resource_id: None,
@@ -194,8 +194,8 @@ impl OrganizationPermission {
     pub fn apply_patch(&mut self, fields: std::collections::HashMap<String, serde_json::Value>) {
         for (key, value) in fields {
             match key.as_str() {
-                "organization_id" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.organization_id = v; }
+                "org_unit_id" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.org_unit_id = v; }
                 }
                 "permission_id" => {
                     if let Ok(v) = serde_json::from_value(value) { self.permission_id = v; }
@@ -281,7 +281,7 @@ impl backbone_orm::EntityRepoMeta for OrganizationPermission {
     fn column_types() -> std::collections::HashMap<String, String> {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
-        m.insert("organization_id".to_string(), "uuid".to_string());
+        m.insert("org_unit_id".to_string(), "uuid".to_string());
         m.insert("permission_id".to_string(), "uuid".to_string());
         m.insert("resource_id".to_string(), "uuid".to_string());
         m.insert("role_id".to_string(), "uuid".to_string());
@@ -302,7 +302,7 @@ impl backbone_orm::EntityRepoMeta for OrganizationPermission {
 /// System fields (id, metadata, timestamps) are auto-initialized.
 #[derive(Debug, Clone, Default)]
 pub struct OrganizationPermissionBuilder {
-    organization_id: Option<Uuid>,
+    org_unit_id: Option<Uuid>,
     permission_id: Option<Uuid>,
     permission_name: Option<String>,
     resource_id: Option<Uuid>,
@@ -316,9 +316,9 @@ pub struct OrganizationPermissionBuilder {
 }
 
 impl OrganizationPermissionBuilder {
-    /// Set the organization_id field (required)
-    pub fn organization_id(mut self, value: Uuid) -> Self {
-        self.organization_id = Some(value);
+    /// Set the org_unit_id field (required)
+    pub fn org_unit_id(mut self, value: Uuid) -> Self {
+        self.org_unit_id = Some(value);
         self
     }
 
@@ -386,13 +386,13 @@ impl OrganizationPermissionBuilder {
     ///
     /// Returns Err if any required field without a default is missing.
     pub fn build(self) -> Result<OrganizationPermission, String> {
-        let organization_id = self.organization_id.ok_or_else(|| "organization_id is required".to_string())?;
+        let org_unit_id = self.org_unit_id.ok_or_else(|| "org_unit_id is required".to_string())?;
         let permission_id = self.permission_id.ok_or_else(|| "permission_id is required".to_string())?;
         let granted_by = self.granted_by.ok_or_else(|| "granted_by is required".to_string())?;
 
         Ok(OrganizationPermission {
             id: Uuid::new_v4(),
-            organization_id,
+            org_unit_id,
             permission_id,
             permission_name: self.permission_name,
             resource_id: self.resource_id,

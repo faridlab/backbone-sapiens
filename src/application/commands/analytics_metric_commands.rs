@@ -43,7 +43,7 @@ pub struct CreateAnalyticsMetricCommand {
     pub period_start: DateTime<Utc>,
     pub period_end: DateTime<Utc>,
     pub aggregation_level: AggregationLevel,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub metadata: serde_json::Value,
 }
 
@@ -73,7 +73,7 @@ impl<R: AnalyticsMetricRepository + 'static> CommandHandler<CreateAnalyticsMetri
             .period_start(cmd.period_start)
             .period_end(cmd.period_end)
             .aggregation_level(cmd.aggregation_level)
-            .organization_id(cmd.organization_id)
+            .org_unit_id(cmd.org_unit_id)
             .metadata(cmd.metadata)
             .build()?;
 
@@ -97,7 +97,7 @@ pub struct UpdateAnalyticsMetricCommand {
     pub period_start: Option<DateTime<Utc>>,
     pub period_end: Option<DateTime<Utc>>,
     pub aggregation_level: Option<AggregationLevel>,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub metadata: Option<serde_json::Value>,
 }
 
@@ -144,7 +144,7 @@ impl<R: AnalyticsMetricRepository + 'static> CommandHandler<UpdateAnalyticsMetri
         if let Some(value) = cmd.aggregation_level {
             entity.aggregation_level = value;
         }
-        entity.organization_id = cmd.organization_id;
+        entity.org_unit_id = cmd.org_unit_id;
         if let Some(value) = cmd.metadata {
             entity.metadata = value;
         }

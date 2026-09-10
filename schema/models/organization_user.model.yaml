@@ -1,12 +1,17 @@
-# OrganizationUser Entity - Organization membership for users
+# OrganizationUser Entity - Org-unit membership for users
 #
-# DISPOSITION RESOLVED by ADR-0027/0028 (was pending ADR-0005): the tenant is the DATABASE, and
-# identity/membership stays whole inside each tenant database. This model is membership WITHIN a
-# tenant: it links a user to the org-tree node(s) they may act at. During the org re-key
-# transition `organization_id` holds a company id, which the org spine guarantees is a valid
-# `organization.org_units` node (the spine copy is UUID-stable — a company's node id IS the
-# company id), so login and org-scope resolution may join on it as-is. The column re-keys to
-# `org_unit_id` with the all-modules company_id sweep, making branch-level membership expressible.
+# DISPOSITION RESOLVED by ADR-0027/0028 (was pending ADR-0005): the tenant is the
+# DATABASE, and identity/membership stays whole inside each tenant database. This
+# model is membership WITHIN a tenant: it links a user to the org-tree node(s)
+# they may act at.
+#
+# The membership key is `org_unit_id` and references organization.org_units nodes
+# (ADR-0028: one org tree is the scoping key). The values carried before the re-key
+# were the legacy company ids verbatim — the spine mirrored companies.id as
+# company-kind nodes, UUID-stable — so the re-key renamed the column without
+# touching data, and branch-level membership is expressible now. First row of a
+# user's active memberships is the acting unit; the rest are read entitlements
+# (see the host's token mint).
 # Source: libs/modules/sapiens/docs/spec-sapiens.md
 
 models:
@@ -21,10 +26,10 @@ models:
         attributes: ["@id", "@default(uuid)"]
         description: "Primary key"
 
-      organization_id:
+      org_unit_id:
         type: uuid
         attributes: ["@required", "@exclude_from_foreign_key_check"]
-        description: "Organization ID"
+        description: "Owning org-unit node (organization.org_units)"
 
       user_id:
         type: uuid
@@ -66,11 +71,11 @@ models:
 
     indexes:
       - type: index
-        fields: [organization_id]
+        fields: [org_unit_id]
       - type: index
         fields: [user_id]
       - type: index
-        fields: [organization_id, user_id]
+        fields: [org_unit_id, user_id]
       - type: index
         fields: [status]
 

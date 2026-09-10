@@ -22,7 +22,7 @@ use uuid::Uuid;
 pub struct PasswordPolicyProjection {
     pub id: Uuid,
     pub name: String,
-    pub organization_id: Option<Uuid>,
+    pub org_unit_id: Option<Uuid>,
     pub status: PasswordPolicyStatus,
     pub password_requirements: serde_json::Value,
     pub password_history: serde_json::Value,
@@ -44,7 +44,7 @@ impl PasswordPolicyProjection {
     pub fn new(
         id: Uuid,
         name: String,
-        organization_id: Option<Uuid>,
+        org_unit_id: Option<Uuid>,
         status: PasswordPolicyStatus,
         password_requirements: serde_json::Value,
         password_history: serde_json::Value,
@@ -55,7 +55,7 @@ impl PasswordPolicyProjection {
         Self {
             id,
             name,
-            organization_id,
+            org_unit_id,
             status,
             password_requirements,
             password_history,
