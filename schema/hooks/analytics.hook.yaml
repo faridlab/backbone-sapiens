@@ -78,7 +78,7 @@ permissions:
       - action: list
       - action: generate_reports
       - action: export_data
-        if: "$this.organization_id == $actor.organization_id"
+        if: "$this.org_unit_id == $actor.org_unit_id"
     deny:
       - action: create_events
       - action: delete
