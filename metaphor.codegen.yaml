@@ -26,6 +26,11 @@ user_owned:
   # databases replay create-then-rename and converge).
   - "migrations/*rekey_organization_id*"
 
+  # Hand-written auth-context lookup (SECURITY DEFINER function exempting the
+  # pre-scope session verbs — login / me / refresh — from the org fence; not
+  # schema-derived).
+  - "migrations/*auth_lookup*"
+
   # Hand-written auth hardening tables (not schema-derived — the signup
   # kill-switch policy, the durable public-form throttle buckets, and the
   # scoped expiring trusted-device keys).
