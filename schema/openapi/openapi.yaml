@@ -7,7 +7,7 @@ info:
     This API provides 11 standard CRUD endpoints for each model.
 
 servers:
-  - url: http://localhost:3000
+  - url: /
     description: Development server
 
 tags:
@@ -137,7 +137,7 @@ tags:
     description: WorkflowActionExecution management endpoints
 
 paths:
-  /api/v1/analytics_events:
+  /api/v1/sapiens/analytics_events:
     get:
       tags:
         - AnalyticsEvents
@@ -183,7 +183,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/analytics_events/{id}:
+  /api/v1/sapiens/analytics_events/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -255,7 +255,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/analytics_events/bulk:
+  /api/v1/sapiens/analytics_events/bulk:
     post:
       tags:
         - AnalyticsEvents
@@ -347,7 +347,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/analytics_events/upsert:
+  /api/v1/sapiens/analytics_events/upsert:
     post:
       tags:
         - AnalyticsEvents
@@ -377,7 +377,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AnalyticsEvent'
 
-  /api/v1/analytics_events/trash:
+  /api/v1/sapiens/analytics_events/trash:
     get:
       tags:
         - AnalyticsEvents
@@ -394,7 +394,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AnalyticsEventList'
 
-  /api/v1/analytics_events/{id}/restore:
+  /api/v1/sapiens/analytics_events/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -412,7 +412,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/analytics_events/empty:
+  /api/v1/sapiens/analytics_events/empty:
     delete:
       tags:
         - AnalyticsEvents
@@ -429,7 +429,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/analytics_events/delete/bulk:
+  /api/v1/sapiens/analytics_events/delete/bulk:
     post:
       tags:
         - AnalyticsEvents
@@ -449,7 +449,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/analytics_events/restore/bulk:
+  /api/v1/sapiens/analytics_events/restore/bulk:
     post:
       tags:
         - AnalyticsEvents
@@ -467,7 +467,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/analytics_events/restore/all:
+  /api/v1/sapiens/analytics_events/restore/all:
     post:
       tags:
         - AnalyticsEvents
@@ -483,7 +483,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/analytics_events/trash/bulk:
+  /api/v1/sapiens/analytics_events/trash/bulk:
     delete:
       tags:
         - AnalyticsEvents
@@ -503,7 +503,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/analytics_metrics:
+  /api/v1/sapiens/analytics_metrics:
     get:
       tags:
         - AnalyticsMetrics
@@ -549,7 +549,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/analytics_metrics/{id}:
+  /api/v1/sapiens/analytics_metrics/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -621,7 +621,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/analytics_metrics/bulk:
+  /api/v1/sapiens/analytics_metrics/bulk:
     post:
       tags:
         - AnalyticsMetrics
@@ -713,7 +713,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/analytics_metrics/upsert:
+  /api/v1/sapiens/analytics_metrics/upsert:
     post:
       tags:
         - AnalyticsMetrics
@@ -743,7 +743,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AnalyticsMetric'
 
-  /api/v1/analytics_metrics/trash:
+  /api/v1/sapiens/analytics_metrics/trash:
     get:
       tags:
         - AnalyticsMetrics
@@ -760,7 +760,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AnalyticsMetricList'
 
-  /api/v1/analytics_metrics/{id}/restore:
+  /api/v1/sapiens/analytics_metrics/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -778,7 +778,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/analytics_metrics/empty:
+  /api/v1/sapiens/analytics_metrics/empty:
     delete:
       tags:
         - AnalyticsMetrics
@@ -795,7 +795,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/analytics_metrics/delete/bulk:
+  /api/v1/sapiens/analytics_metrics/delete/bulk:
     post:
       tags:
         - AnalyticsMetrics
@@ -815,7 +815,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/analytics_metrics/restore/bulk:
+  /api/v1/sapiens/analytics_metrics/restore/bulk:
     post:
       tags:
         - AnalyticsMetrics
@@ -833,7 +833,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/analytics_metrics/restore/all:
+  /api/v1/sapiens/analytics_metrics/restore/all:
     post:
       tags:
         - AnalyticsMetrics
@@ -849,7 +849,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/analytics_metrics/trash/bulk:
+  /api/v1/sapiens/analytics_metrics/trash/bulk:
     delete:
       tags:
         - AnalyticsMetrics
@@ -869,7 +869,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/analytics_reports:
+  /api/v1/sapiens/analytics_reports:
     get:
       tags:
         - AnalyticsReports
@@ -915,7 +915,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/analytics_reports/{id}:
+  /api/v1/sapiens/analytics_reports/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -987,7 +987,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/analytics_reports/bulk:
+  /api/v1/sapiens/analytics_reports/bulk:
     post:
       tags:
         - AnalyticsReports
@@ -1079,7 +1079,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/analytics_reports/upsert:
+  /api/v1/sapiens/analytics_reports/upsert:
     post:
       tags:
         - AnalyticsReports
@@ -1109,7 +1109,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AnalyticsReport'
 
-  /api/v1/analytics_reports/trash:
+  /api/v1/sapiens/analytics_reports/trash:
     get:
       tags:
         - AnalyticsReports
@@ -1126,7 +1126,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AnalyticsReportList'
 
-  /api/v1/analytics_reports/{id}/restore:
+  /api/v1/sapiens/analytics_reports/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -1144,7 +1144,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/analytics_reports/empty:
+  /api/v1/sapiens/analytics_reports/empty:
     delete:
       tags:
         - AnalyticsReports
@@ -1161,7 +1161,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/analytics_reports/delete/bulk:
+  /api/v1/sapiens/analytics_reports/delete/bulk:
     post:
       tags:
         - AnalyticsReports
@@ -1181,7 +1181,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/analytics_reports/restore/bulk:
+  /api/v1/sapiens/analytics_reports/restore/bulk:
     post:
       tags:
         - AnalyticsReports
@@ -1199,7 +1199,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/analytics_reports/restore/all:
+  /api/v1/sapiens/analytics_reports/restore/all:
     post:
       tags:
         - AnalyticsReports
@@ -1215,7 +1215,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/analytics_reports/trash/bulk:
+  /api/v1/sapiens/analytics_reports/trash/bulk:
     delete:
       tags:
         - AnalyticsReports
@@ -1235,7 +1235,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/anonymization_records:
+  /api/v1/sapiens/anonymization_records:
     get:
       tags:
         - AnonymizationRecords
@@ -1281,7 +1281,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/anonymization_records/{id}:
+  /api/v1/sapiens/anonymization_records/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -1353,7 +1353,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/anonymization_records/bulk:
+  /api/v1/sapiens/anonymization_records/bulk:
     post:
       tags:
         - AnonymizationRecords
@@ -1445,7 +1445,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/anonymization_records/upsert:
+  /api/v1/sapiens/anonymization_records/upsert:
     post:
       tags:
         - AnonymizationRecords
@@ -1475,7 +1475,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AnonymizationRecord'
 
-  /api/v1/anonymization_records/trash:
+  /api/v1/sapiens/anonymization_records/trash:
     get:
       tags:
         - AnonymizationRecords
@@ -1492,7 +1492,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AnonymizationRecordList'
 
-  /api/v1/anonymization_records/{id}/restore:
+  /api/v1/sapiens/anonymization_records/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -1510,7 +1510,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/anonymization_records/empty:
+  /api/v1/sapiens/anonymization_records/empty:
     delete:
       tags:
         - AnonymizationRecords
@@ -1527,7 +1527,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/anonymization_records/delete/bulk:
+  /api/v1/sapiens/anonymization_records/delete/bulk:
     post:
       tags:
         - AnonymizationRecords
@@ -1547,7 +1547,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/anonymization_records/restore/bulk:
+  /api/v1/sapiens/anonymization_records/restore/bulk:
     post:
       tags:
         - AnonymizationRecords
@@ -1565,7 +1565,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/anonymization_records/restore/all:
+  /api/v1/sapiens/anonymization_records/restore/all:
     post:
       tags:
         - AnonymizationRecords
@@ -1581,7 +1581,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/anonymization_records/trash/bulk:
+  /api/v1/sapiens/anonymization_records/trash/bulk:
     delete:
       tags:
         - AnonymizationRecords
@@ -1601,7 +1601,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/audit_logs:
+  /api/v1/sapiens/audit_logs:
     get:
       tags:
         - AuditLogs
@@ -1647,7 +1647,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/audit_logs/{id}:
+  /api/v1/sapiens/audit_logs/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -1719,7 +1719,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/audit_logs/bulk:
+  /api/v1/sapiens/audit_logs/bulk:
     post:
       tags:
         - AuditLogs
@@ -1811,7 +1811,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/audit_logs/upsert:
+  /api/v1/sapiens/audit_logs/upsert:
     post:
       tags:
         - AuditLogs
@@ -1841,7 +1841,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuditLog'
 
-  /api/v1/audit_logs/trash:
+  /api/v1/sapiens/audit_logs/trash:
     get:
       tags:
         - AuditLogs
@@ -1858,7 +1858,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuditLogList'
 
-  /api/v1/audit_logs/{id}/restore:
+  /api/v1/sapiens/audit_logs/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -1876,7 +1876,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/audit_logs/empty:
+  /api/v1/sapiens/audit_logs/empty:
     delete:
       tags:
         - AuditLogs
@@ -1893,7 +1893,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/audit_logs/delete/bulk:
+  /api/v1/sapiens/audit_logs/delete/bulk:
     post:
       tags:
         - AuditLogs
@@ -1913,7 +1913,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/audit_logs/restore/bulk:
+  /api/v1/sapiens/audit_logs/restore/bulk:
     post:
       tags:
         - AuditLogs
@@ -1931,7 +1931,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/audit_logs/restore/all:
+  /api/v1/sapiens/audit_logs/restore/all:
     post:
       tags:
         - AuditLogs
@@ -1947,7 +1947,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/audit_logs/trash/bulk:
+  /api/v1/sapiens/audit_logs/trash/bulk:
     delete:
       tags:
         - AuditLogs
@@ -1967,7 +1967,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/backup_codes:
+  /api/v1/sapiens/backup_codes:
     get:
       tags:
         - BackupCodes
@@ -2013,7 +2013,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/backup_codes/{id}:
+  /api/v1/sapiens/backup_codes/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -2085,7 +2085,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/backup_codes/bulk:
+  /api/v1/sapiens/backup_codes/bulk:
     post:
       tags:
         - BackupCodes
@@ -2177,7 +2177,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/backup_codes/upsert:
+  /api/v1/sapiens/backup_codes/upsert:
     post:
       tags:
         - BackupCodes
@@ -2207,7 +2207,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/BackupCode'
 
-  /api/v1/backup_codes/trash:
+  /api/v1/sapiens/backup_codes/trash:
     get:
       tags:
         - BackupCodes
@@ -2224,7 +2224,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/BackupCodeList'
 
-  /api/v1/backup_codes/{id}/restore:
+  /api/v1/sapiens/backup_codes/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -2242,7 +2242,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/backup_codes/empty:
+  /api/v1/sapiens/backup_codes/empty:
     delete:
       tags:
         - BackupCodes
@@ -2259,7 +2259,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/backup_codes/delete/bulk:
+  /api/v1/sapiens/backup_codes/delete/bulk:
     post:
       tags:
         - BackupCodes
@@ -2279,7 +2279,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/backup_codes/restore/bulk:
+  /api/v1/sapiens/backup_codes/restore/bulk:
     post:
       tags:
         - BackupCodes
@@ -2297,7 +2297,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/backup_codes/restore/all:
+  /api/v1/sapiens/backup_codes/restore/all:
     post:
       tags:
         - BackupCodes
@@ -2313,7 +2313,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/backup_codes/trash/bulk:
+  /api/v1/sapiens/backup_codes/trash/bulk:
     delete:
       tags:
         - BackupCodes
@@ -2333,7 +2333,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/bulk_operations:
+  /api/v1/sapiens/bulk_operations:
     get:
       tags:
         - BulkOperations
@@ -2379,7 +2379,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/bulk_operations/{id}:
+  /api/v1/sapiens/bulk_operations/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -2451,7 +2451,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/bulk_operations/bulk:
+  /api/v1/sapiens/bulk_operations/bulk:
     post:
       tags:
         - BulkOperations
@@ -2543,7 +2543,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/bulk_operations/upsert:
+  /api/v1/sapiens/bulk_operations/upsert:
     post:
       tags:
         - BulkOperations
@@ -2573,7 +2573,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/BulkOperation'
 
-  /api/v1/bulk_operations/trash:
+  /api/v1/sapiens/bulk_operations/trash:
     get:
       tags:
         - BulkOperations
@@ -2590,7 +2590,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/BulkOperationList'
 
-  /api/v1/bulk_operations/{id}/restore:
+  /api/v1/sapiens/bulk_operations/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -2608,7 +2608,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/bulk_operations/empty:
+  /api/v1/sapiens/bulk_operations/empty:
     delete:
       tags:
         - BulkOperations
@@ -2625,7 +2625,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/bulk_operations/delete/bulk:
+  /api/v1/sapiens/bulk_operations/delete/bulk:
     post:
       tags:
         - BulkOperations
@@ -2645,7 +2645,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/bulk_operations/restore/bulk:
+  /api/v1/sapiens/bulk_operations/restore/bulk:
     post:
       tags:
         - BulkOperations
@@ -2663,7 +2663,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/bulk_operations/restore/all:
+  /api/v1/sapiens/bulk_operations/restore/all:
     post:
       tags:
         - BulkOperations
@@ -2679,7 +2679,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/bulk_operations/trash/bulk:
+  /api/v1/sapiens/bulk_operations/trash/bulk:
     delete:
       tags:
         - BulkOperations
@@ -2699,7 +2699,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/bulk_operation_results:
+  /api/v1/sapiens/bulk_operation_results:
     get:
       tags:
         - BulkOperationResults
@@ -2745,7 +2745,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/bulk_operation_results/{id}:
+  /api/v1/sapiens/bulk_operation_results/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -2817,7 +2817,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/bulk_operation_results/bulk:
+  /api/v1/sapiens/bulk_operation_results/bulk:
     post:
       tags:
         - BulkOperationResults
@@ -2909,7 +2909,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/bulk_operation_results/upsert:
+  /api/v1/sapiens/bulk_operation_results/upsert:
     post:
       tags:
         - BulkOperationResults
@@ -2939,7 +2939,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/BulkOperationResult'
 
-  /api/v1/bulk_operation_results/trash:
+  /api/v1/sapiens/bulk_operation_results/trash:
     get:
       tags:
         - BulkOperationResults
@@ -2956,7 +2956,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/BulkOperationResultList'
 
-  /api/v1/bulk_operation_results/{id}/restore:
+  /api/v1/sapiens/bulk_operation_results/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -2974,7 +2974,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/bulk_operation_results/empty:
+  /api/v1/sapiens/bulk_operation_results/empty:
     delete:
       tags:
         - BulkOperationResults
@@ -2991,7 +2991,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/bulk_operation_results/delete/bulk:
+  /api/v1/sapiens/bulk_operation_results/delete/bulk:
     post:
       tags:
         - BulkOperationResults
@@ -3011,7 +3011,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/bulk_operation_results/restore/bulk:
+  /api/v1/sapiens/bulk_operation_results/restore/bulk:
     post:
       tags:
         - BulkOperationResults
@@ -3029,7 +3029,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/bulk_operation_results/restore/all:
+  /api/v1/sapiens/bulk_operation_results/restore/all:
     post:
       tags:
         - BulkOperationResults
@@ -3045,7 +3045,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/bulk_operation_results/trash/bulk:
+  /api/v1/sapiens/bulk_operation_results/trash/bulk:
     delete:
       tags:
         - BulkOperationResults
@@ -3065,7 +3065,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/data_exports:
+  /api/v1/sapiens/data_exports:
     get:
       tags:
         - DataExports
@@ -3111,7 +3111,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/data_exports/{id}:
+  /api/v1/sapiens/data_exports/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -3183,7 +3183,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/data_exports/bulk:
+  /api/v1/sapiens/data_exports/bulk:
     post:
       tags:
         - DataExports
@@ -3275,7 +3275,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/data_exports/upsert:
+  /api/v1/sapiens/data_exports/upsert:
     post:
       tags:
         - DataExports
@@ -3305,7 +3305,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DataExport'
 
-  /api/v1/data_exports/trash:
+  /api/v1/sapiens/data_exports/trash:
     get:
       tags:
         - DataExports
@@ -3322,7 +3322,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DataExportList'
 
-  /api/v1/data_exports/{id}/restore:
+  /api/v1/sapiens/data_exports/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -3340,7 +3340,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/data_exports/empty:
+  /api/v1/sapiens/data_exports/empty:
     delete:
       tags:
         - DataExports
@@ -3357,7 +3357,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/data_exports/delete/bulk:
+  /api/v1/sapiens/data_exports/delete/bulk:
     post:
       tags:
         - DataExports
@@ -3377,7 +3377,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/data_exports/restore/bulk:
+  /api/v1/sapiens/data_exports/restore/bulk:
     post:
       tags:
         - DataExports
@@ -3395,7 +3395,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/data_exports/restore/all:
+  /api/v1/sapiens/data_exports/restore/all:
     post:
       tags:
         - DataExports
@@ -3411,7 +3411,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/data_exports/trash/bulk:
+  /api/v1/sapiens/data_exports/trash/bulk:
     delete:
       tags:
         - DataExports
@@ -3431,7 +3431,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/device_trusts:
+  /api/v1/sapiens/device_trusts:
     get:
       tags:
         - DeviceTrusts
@@ -3477,7 +3477,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/device_trusts/{id}:
+  /api/v1/sapiens/device_trusts/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -3549,7 +3549,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/device_trusts/bulk:
+  /api/v1/sapiens/device_trusts/bulk:
     post:
       tags:
         - DeviceTrusts
@@ -3641,7 +3641,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/device_trusts/upsert:
+  /api/v1/sapiens/device_trusts/upsert:
     post:
       tags:
         - DeviceTrusts
@@ -3671,7 +3671,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DeviceTrust'
 
-  /api/v1/device_trusts/trash:
+  /api/v1/sapiens/device_trusts/trash:
     get:
       tags:
         - DeviceTrusts
@@ -3688,7 +3688,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DeviceTrustList'
 
-  /api/v1/device_trusts/{id}/restore:
+  /api/v1/sapiens/device_trusts/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -3706,7 +3706,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/device_trusts/empty:
+  /api/v1/sapiens/device_trusts/empty:
     delete:
       tags:
         - DeviceTrusts
@@ -3723,7 +3723,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/device_trusts/delete/bulk:
+  /api/v1/sapiens/device_trusts/delete/bulk:
     post:
       tags:
         - DeviceTrusts
@@ -3743,7 +3743,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/device_trusts/restore/bulk:
+  /api/v1/sapiens/device_trusts/restore/bulk:
     post:
       tags:
         - DeviceTrusts
@@ -3761,7 +3761,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/device_trusts/restore/all:
+  /api/v1/sapiens/device_trusts/restore/all:
     post:
       tags:
         - DeviceTrusts
@@ -3777,7 +3777,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/device_trusts/trash/bulk:
+  /api/v1/sapiens/device_trusts/trash/bulk:
     delete:
       tags:
         - DeviceTrusts
@@ -3797,7 +3797,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/direct_permission_grants:
+  /api/v1/sapiens/direct_permission_grants:
     get:
       tags:
         - DirectPermissionGrants
@@ -3843,7 +3843,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/direct_permission_grants/{id}:
+  /api/v1/sapiens/direct_permission_grants/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -3915,7 +3915,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/direct_permission_grants/bulk:
+  /api/v1/sapiens/direct_permission_grants/bulk:
     post:
       tags:
         - DirectPermissionGrants
@@ -4007,7 +4007,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/direct_permission_grants/upsert:
+  /api/v1/sapiens/direct_permission_grants/upsert:
     post:
       tags:
         - DirectPermissionGrants
@@ -4037,7 +4037,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DirectPermissionGrant'
 
-  /api/v1/direct_permission_grants/trash:
+  /api/v1/sapiens/direct_permission_grants/trash:
     get:
       tags:
         - DirectPermissionGrants
@@ -4054,7 +4054,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DirectPermissionGrantList'
 
-  /api/v1/direct_permission_grants/{id}/restore:
+  /api/v1/sapiens/direct_permission_grants/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -4072,7 +4072,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/direct_permission_grants/empty:
+  /api/v1/sapiens/direct_permission_grants/empty:
     delete:
       tags:
         - DirectPermissionGrants
@@ -4089,7 +4089,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/direct_permission_grants/delete/bulk:
+  /api/v1/sapiens/direct_permission_grants/delete/bulk:
     post:
       tags:
         - DirectPermissionGrants
@@ -4109,7 +4109,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/direct_permission_grants/restore/bulk:
+  /api/v1/sapiens/direct_permission_grants/restore/bulk:
     post:
       tags:
         - DirectPermissionGrants
@@ -4127,7 +4127,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/direct_permission_grants/restore/all:
+  /api/v1/sapiens/direct_permission_grants/restore/all:
     post:
       tags:
         - DirectPermissionGrants
@@ -4143,7 +4143,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/direct_permission_grants/trash/bulk:
+  /api/v1/sapiens/direct_permission_grants/trash/bulk:
     delete:
       tags:
         - DirectPermissionGrants
@@ -4163,7 +4163,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/effective_permission_caches:
+  /api/v1/sapiens/effective_permission_caches:
     get:
       tags:
         - EffectivePermissionCaches
@@ -4209,7 +4209,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/effective_permission_caches/{id}:
+  /api/v1/sapiens/effective_permission_caches/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -4281,7 +4281,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/effective_permission_caches/bulk:
+  /api/v1/sapiens/effective_permission_caches/bulk:
     post:
       tags:
         - EffectivePermissionCaches
@@ -4373,7 +4373,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/effective_permission_caches/upsert:
+  /api/v1/sapiens/effective_permission_caches/upsert:
     post:
       tags:
         - EffectivePermissionCaches
@@ -4403,7 +4403,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EffectivePermissionCache'
 
-  /api/v1/effective_permission_caches/trash:
+  /api/v1/sapiens/effective_permission_caches/trash:
     get:
       tags:
         - EffectivePermissionCaches
@@ -4420,7 +4420,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EffectivePermissionCacheList'
 
-  /api/v1/effective_permission_caches/{id}/restore:
+  /api/v1/sapiens/effective_permission_caches/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -4438,7 +4438,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/effective_permission_caches/empty:
+  /api/v1/sapiens/effective_permission_caches/empty:
     delete:
       tags:
         - EffectivePermissionCaches
@@ -4455,7 +4455,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/effective_permission_caches/delete/bulk:
+  /api/v1/sapiens/effective_permission_caches/delete/bulk:
     post:
       tags:
         - EffectivePermissionCaches
@@ -4475,7 +4475,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/effective_permission_caches/restore/bulk:
+  /api/v1/sapiens/effective_permission_caches/restore/bulk:
     post:
       tags:
         - EffectivePermissionCaches
@@ -4493,7 +4493,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/effective_permission_caches/restore/all:
+  /api/v1/sapiens/effective_permission_caches/restore/all:
     post:
       tags:
         - EffectivePermissionCaches
@@ -4509,7 +4509,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/effective_permission_caches/trash/bulk:
+  /api/v1/sapiens/effective_permission_caches/trash/bulk:
     delete:
       tags:
         - EffectivePermissionCaches
@@ -4529,7 +4529,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/email_verification_tokens:
+  /api/v1/sapiens/email_verification_tokens:
     get:
       tags:
         - EmailVerificationTokens
@@ -4575,7 +4575,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/email_verification_tokens/{id}:
+  /api/v1/sapiens/email_verification_tokens/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -4647,7 +4647,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/email_verification_tokens/bulk:
+  /api/v1/sapiens/email_verification_tokens/bulk:
     post:
       tags:
         - EmailVerificationTokens
@@ -4739,7 +4739,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/email_verification_tokens/upsert:
+  /api/v1/sapiens/email_verification_tokens/upsert:
     post:
       tags:
         - EmailVerificationTokens
@@ -4769,7 +4769,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EmailVerificationToken'
 
-  /api/v1/email_verification_tokens/trash:
+  /api/v1/sapiens/email_verification_tokens/trash:
     get:
       tags:
         - EmailVerificationTokens
@@ -4786,7 +4786,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EmailVerificationTokenList'
 
-  /api/v1/email_verification_tokens/{id}/restore:
+  /api/v1/sapiens/email_verification_tokens/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -4804,7 +4804,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/email_verification_tokens/empty:
+  /api/v1/sapiens/email_verification_tokens/empty:
     delete:
       tags:
         - EmailVerificationTokens
@@ -4821,7 +4821,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/email_verification_tokens/delete/bulk:
+  /api/v1/sapiens/email_verification_tokens/delete/bulk:
     post:
       tags:
         - EmailVerificationTokens
@@ -4841,7 +4841,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/email_verification_tokens/restore/bulk:
+  /api/v1/sapiens/email_verification_tokens/restore/bulk:
     post:
       tags:
         - EmailVerificationTokens
@@ -4859,7 +4859,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/email_verification_tokens/restore/all:
+  /api/v1/sapiens/email_verification_tokens/restore/all:
     post:
       tags:
         - EmailVerificationTokens
@@ -4875,7 +4875,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/email_verification_tokens/trash/bulk:
+  /api/v1/sapiens/email_verification_tokens/trash/bulk:
     delete:
       tags:
         - EmailVerificationTokens
@@ -4895,7 +4895,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/impersonation_sessions:
+  /api/v1/sapiens/impersonation_sessions:
     get:
       tags:
         - ImpersonationSessions
@@ -4941,7 +4941,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/impersonation_sessions/{id}:
+  /api/v1/sapiens/impersonation_sessions/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -5013,7 +5013,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/impersonation_sessions/bulk:
+  /api/v1/sapiens/impersonation_sessions/bulk:
     post:
       tags:
         - ImpersonationSessions
@@ -5105,7 +5105,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/impersonation_sessions/upsert:
+  /api/v1/sapiens/impersonation_sessions/upsert:
     post:
       tags:
         - ImpersonationSessions
@@ -5135,7 +5135,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ImpersonationSession'
 
-  /api/v1/impersonation_sessions/trash:
+  /api/v1/sapiens/impersonation_sessions/trash:
     get:
       tags:
         - ImpersonationSessions
@@ -5152,7 +5152,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ImpersonationSessionList'
 
-  /api/v1/impersonation_sessions/{id}/restore:
+  /api/v1/sapiens/impersonation_sessions/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -5170,7 +5170,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/impersonation_sessions/empty:
+  /api/v1/sapiens/impersonation_sessions/empty:
     delete:
       tags:
         - ImpersonationSessions
@@ -5187,7 +5187,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/impersonation_sessions/delete/bulk:
+  /api/v1/sapiens/impersonation_sessions/delete/bulk:
     post:
       tags:
         - ImpersonationSessions
@@ -5207,7 +5207,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/impersonation_sessions/restore/bulk:
+  /api/v1/sapiens/impersonation_sessions/restore/bulk:
     post:
       tags:
         - ImpersonationSessions
@@ -5225,7 +5225,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/impersonation_sessions/restore/all:
+  /api/v1/sapiens/impersonation_sessions/restore/all:
     post:
       tags:
         - ImpersonationSessions
@@ -5241,7 +5241,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/impersonation_sessions/trash/bulk:
+  /api/v1/sapiens/impersonation_sessions/trash/bulk:
     delete:
       tags:
         - ImpersonationSessions
@@ -5261,7 +5261,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/integration_credentials:
+  /api/v1/sapiens/integration_credentials:
     get:
       tags:
         - IntegrationCredentials
@@ -5307,7 +5307,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/integration_credentials/{id}:
+  /api/v1/sapiens/integration_credentials/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -5379,7 +5379,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/integration_credentials/bulk:
+  /api/v1/sapiens/integration_credentials/bulk:
     post:
       tags:
         - IntegrationCredentials
@@ -5471,7 +5471,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/integration_credentials/upsert:
+  /api/v1/sapiens/integration_credentials/upsert:
     post:
       tags:
         - IntegrationCredentials
@@ -5501,7 +5501,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/IntegrationCredential'
 
-  /api/v1/integration_credentials/trash:
+  /api/v1/sapiens/integration_credentials/trash:
     get:
       tags:
         - IntegrationCredentials
@@ -5518,7 +5518,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/IntegrationCredentialList'
 
-  /api/v1/integration_credentials/{id}/restore:
+  /api/v1/sapiens/integration_credentials/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -5536,7 +5536,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/integration_credentials/empty:
+  /api/v1/sapiens/integration_credentials/empty:
     delete:
       tags:
         - IntegrationCredentials
@@ -5553,7 +5553,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/integration_credentials/delete/bulk:
+  /api/v1/sapiens/integration_credentials/delete/bulk:
     post:
       tags:
         - IntegrationCredentials
@@ -5573,7 +5573,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/integration_credentials/restore/bulk:
+  /api/v1/sapiens/integration_credentials/restore/bulk:
     post:
       tags:
         - IntegrationCredentials
@@ -5591,7 +5591,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/integration_credentials/restore/all:
+  /api/v1/sapiens/integration_credentials/restore/all:
     post:
       tags:
         - IntegrationCredentials
@@ -5607,7 +5607,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/integration_credentials/trash/bulk:
+  /api/v1/sapiens/integration_credentials/trash/bulk:
     delete:
       tags:
         - IntegrationCredentials
@@ -5627,7 +5627,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/ldap_directories:
+  /api/v1/sapiens/ldap_directories:
     get:
       tags:
         - LDAPDirectories
@@ -5673,7 +5673,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/ldap_directories/{id}:
+  /api/v1/sapiens/ldap_directories/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -5745,7 +5745,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/ldap_directories/bulk:
+  /api/v1/sapiens/ldap_directories/bulk:
     post:
       tags:
         - LDAPDirectories
@@ -5837,7 +5837,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/ldap_directories/upsert:
+  /api/v1/sapiens/ldap_directories/upsert:
     post:
       tags:
         - LDAPDirectories
@@ -5867,7 +5867,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/LDAPDirectory'
 
-  /api/v1/ldap_directories/trash:
+  /api/v1/sapiens/ldap_directories/trash:
     get:
       tags:
         - LDAPDirectories
@@ -5884,7 +5884,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/LDAPDirectoryList'
 
-  /api/v1/ldap_directories/{id}/restore:
+  /api/v1/sapiens/ldap_directories/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -5902,7 +5902,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/ldap_directories/empty:
+  /api/v1/sapiens/ldap_directories/empty:
     delete:
       tags:
         - LDAPDirectories
@@ -5919,7 +5919,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/ldap_directories/delete/bulk:
+  /api/v1/sapiens/ldap_directories/delete/bulk:
     post:
       tags:
         - LDAPDirectories
@@ -5939,7 +5939,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/ldap_directories/restore/bulk:
+  /api/v1/sapiens/ldap_directories/restore/bulk:
     post:
       tags:
         - LDAPDirectories
@@ -5957,7 +5957,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/ldap_directories/restore/all:
+  /api/v1/sapiens/ldap_directories/restore/all:
     post:
       tags:
         - LDAPDirectories
@@ -5973,7 +5973,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/ldap_directories/trash/bulk:
+  /api/v1/sapiens/ldap_directories/trash/bulk:
     delete:
       tags:
         - LDAPDirectories
@@ -5993,7 +5993,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/mfa_backup_codes:
+  /api/v1/sapiens/mfa_backup_codes:
     get:
       tags:
         - MFABackupCodes
@@ -6039,7 +6039,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/mfa_backup_codes/{id}:
+  /api/v1/sapiens/mfa_backup_codes/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -6111,7 +6111,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/mfa_backup_codes/bulk:
+  /api/v1/sapiens/mfa_backup_codes/bulk:
     post:
       tags:
         - MFABackupCodes
@@ -6203,7 +6203,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/mfa_backup_codes/upsert:
+  /api/v1/sapiens/mfa_backup_codes/upsert:
     post:
       tags:
         - MFABackupCodes
@@ -6233,7 +6233,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/MFABackupCode'
 
-  /api/v1/mfa_backup_codes/trash:
+  /api/v1/sapiens/mfa_backup_codes/trash:
     get:
       tags:
         - MFABackupCodes
@@ -6250,7 +6250,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/MFABackupCodeList'
 
-  /api/v1/mfa_backup_codes/{id}/restore:
+  /api/v1/sapiens/mfa_backup_codes/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -6268,7 +6268,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/mfa_backup_codes/empty:
+  /api/v1/sapiens/mfa_backup_codes/empty:
     delete:
       tags:
         - MFABackupCodes
@@ -6285,7 +6285,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/mfa_backup_codes/delete/bulk:
+  /api/v1/sapiens/mfa_backup_codes/delete/bulk:
     post:
       tags:
         - MFABackupCodes
@@ -6305,7 +6305,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/mfa_backup_codes/restore/bulk:
+  /api/v1/sapiens/mfa_backup_codes/restore/bulk:
     post:
       tags:
         - MFABackupCodes
@@ -6323,7 +6323,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/mfa_backup_codes/restore/all:
+  /api/v1/sapiens/mfa_backup_codes/restore/all:
     post:
       tags:
         - MFABackupCodes
@@ -6339,7 +6339,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/mfa_backup_codes/trash/bulk:
+  /api/v1/sapiens/mfa_backup_codes/trash/bulk:
     delete:
       tags:
         - MFABackupCodes
@@ -6359,7 +6359,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/mfa_devices:
+  /api/v1/sapiens/mfa_devices:
     get:
       tags:
         - MFADevices
@@ -6405,7 +6405,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/mfa_devices/{id}:
+  /api/v1/sapiens/mfa_devices/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -6477,7 +6477,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/mfa_devices/bulk:
+  /api/v1/sapiens/mfa_devices/bulk:
     post:
       tags:
         - MFADevices
@@ -6569,7 +6569,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/mfa_devices/upsert:
+  /api/v1/sapiens/mfa_devices/upsert:
     post:
       tags:
         - MFADevices
@@ -6599,7 +6599,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/MFADevice'
 
-  /api/v1/mfa_devices/trash:
+  /api/v1/sapiens/mfa_devices/trash:
     get:
       tags:
         - MFADevices
@@ -6616,7 +6616,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/MFADeviceList'
 
-  /api/v1/mfa_devices/{id}/restore:
+  /api/v1/sapiens/mfa_devices/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -6634,7 +6634,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/mfa_devices/empty:
+  /api/v1/sapiens/mfa_devices/empty:
     delete:
       tags:
         - MFADevices
@@ -6651,7 +6651,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/mfa_devices/delete/bulk:
+  /api/v1/sapiens/mfa_devices/delete/bulk:
     post:
       tags:
         - MFADevices
@@ -6671,7 +6671,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/mfa_devices/restore/bulk:
+  /api/v1/sapiens/mfa_devices/restore/bulk:
     post:
       tags:
         - MFADevices
@@ -6689,7 +6689,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/mfa_devices/restore/all:
+  /api/v1/sapiens/mfa_devices/restore/all:
     post:
       tags:
         - MFADevices
@@ -6705,7 +6705,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/mfa_devices/trash/bulk:
+  /api/v1/sapiens/mfa_devices/trash/bulk:
     delete:
       tags:
         - MFADevices
@@ -6725,7 +6725,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/mfa_sessions:
+  /api/v1/sapiens/mfa_sessions:
     get:
       tags:
         - MFASessions
@@ -6771,7 +6771,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/mfa_sessions/{id}:
+  /api/v1/sapiens/mfa_sessions/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -6843,7 +6843,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/mfa_sessions/bulk:
+  /api/v1/sapiens/mfa_sessions/bulk:
     post:
       tags:
         - MFASessions
@@ -6935,7 +6935,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/mfa_sessions/upsert:
+  /api/v1/sapiens/mfa_sessions/upsert:
     post:
       tags:
         - MFASessions
@@ -6965,7 +6965,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/MFASession'
 
-  /api/v1/mfa_sessions/trash:
+  /api/v1/sapiens/mfa_sessions/trash:
     get:
       tags:
         - MFASessions
@@ -6982,7 +6982,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/MFASessionList'
 
-  /api/v1/mfa_sessions/{id}/restore:
+  /api/v1/sapiens/mfa_sessions/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -7000,7 +7000,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/mfa_sessions/empty:
+  /api/v1/sapiens/mfa_sessions/empty:
     delete:
       tags:
         - MFASessions
@@ -7017,7 +7017,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/mfa_sessions/delete/bulk:
+  /api/v1/sapiens/mfa_sessions/delete/bulk:
     post:
       tags:
         - MFASessions
@@ -7037,7 +7037,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/mfa_sessions/restore/bulk:
+  /api/v1/sapiens/mfa_sessions/restore/bulk:
     post:
       tags:
         - MFASessions
@@ -7055,7 +7055,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/mfa_sessions/restore/all:
+  /api/v1/sapiens/mfa_sessions/restore/all:
     post:
       tags:
         - MFASessions
@@ -7071,7 +7071,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/mfa_sessions/trash/bulk:
+  /api/v1/sapiens/mfa_sessions/trash/bulk:
     delete:
       tags:
         - MFASessions
@@ -7091,7 +7091,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notifications:
+  /api/v1/sapiens/notifications:
     get:
       tags:
         - Notifications
@@ -7137,7 +7137,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/notifications/{id}:
+  /api/v1/sapiens/notifications/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -7209,7 +7209,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/notifications/bulk:
+  /api/v1/sapiens/notifications/bulk:
     post:
       tags:
         - Notifications
@@ -7301,7 +7301,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notifications/upsert:
+  /api/v1/sapiens/notifications/upsert:
     post:
       tags:
         - Notifications
@@ -7331,7 +7331,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Notification'
 
-  /api/v1/notifications/trash:
+  /api/v1/sapiens/notifications/trash:
     get:
       tags:
         - Notifications
@@ -7348,7 +7348,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/NotificationList'
 
-  /api/v1/notifications/{id}/restore:
+  /api/v1/sapiens/notifications/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -7366,7 +7366,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/notifications/empty:
+  /api/v1/sapiens/notifications/empty:
     delete:
       tags:
         - Notifications
@@ -7383,7 +7383,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/notifications/delete/bulk:
+  /api/v1/sapiens/notifications/delete/bulk:
     post:
       tags:
         - Notifications
@@ -7403,7 +7403,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notifications/restore/bulk:
+  /api/v1/sapiens/notifications/restore/bulk:
     post:
       tags:
         - Notifications
@@ -7421,7 +7421,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notifications/restore/all:
+  /api/v1/sapiens/notifications/restore/all:
     post:
       tags:
         - Notifications
@@ -7437,7 +7437,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/notifications/trash/bulk:
+  /api/v1/sapiens/notifications/trash/bulk:
     delete:
       tags:
         - Notifications
@@ -7457,7 +7457,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notification_templates:
+  /api/v1/sapiens/notification_templates:
     get:
       tags:
         - NotificationTemplates
@@ -7503,7 +7503,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/notification_templates/{id}:
+  /api/v1/sapiens/notification_templates/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -7575,7 +7575,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/notification_templates/bulk:
+  /api/v1/sapiens/notification_templates/bulk:
     post:
       tags:
         - NotificationTemplates
@@ -7667,7 +7667,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notification_templates/upsert:
+  /api/v1/sapiens/notification_templates/upsert:
     post:
       tags:
         - NotificationTemplates
@@ -7697,7 +7697,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/NotificationTemplate'
 
-  /api/v1/notification_templates/trash:
+  /api/v1/sapiens/notification_templates/trash:
     get:
       tags:
         - NotificationTemplates
@@ -7714,7 +7714,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/NotificationTemplateList'
 
-  /api/v1/notification_templates/{id}/restore:
+  /api/v1/sapiens/notification_templates/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -7732,7 +7732,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/notification_templates/empty:
+  /api/v1/sapiens/notification_templates/empty:
     delete:
       tags:
         - NotificationTemplates
@@ -7749,7 +7749,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/notification_templates/delete/bulk:
+  /api/v1/sapiens/notification_templates/delete/bulk:
     post:
       tags:
         - NotificationTemplates
@@ -7769,7 +7769,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notification_templates/restore/bulk:
+  /api/v1/sapiens/notification_templates/restore/bulk:
     post:
       tags:
         - NotificationTemplates
@@ -7787,7 +7787,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notification_templates/restore/all:
+  /api/v1/sapiens/notification_templates/restore/all:
     post:
       tags:
         - NotificationTemplates
@@ -7803,7 +7803,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/notification_templates/trash/bulk:
+  /api/v1/sapiens/notification_templates/trash/bulk:
     delete:
       tags:
         - NotificationTemplates
@@ -7823,7 +7823,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notification_logs:
+  /api/v1/sapiens/notification_logs:
     get:
       tags:
         - NotificationLogs
@@ -7869,7 +7869,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/notification_logs/{id}:
+  /api/v1/sapiens/notification_logs/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -7941,7 +7941,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/notification_logs/bulk:
+  /api/v1/sapiens/notification_logs/bulk:
     post:
       tags:
         - NotificationLogs
@@ -8033,7 +8033,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notification_logs/upsert:
+  /api/v1/sapiens/notification_logs/upsert:
     post:
       tags:
         - NotificationLogs
@@ -8063,7 +8063,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/NotificationLog'
 
-  /api/v1/notification_logs/trash:
+  /api/v1/sapiens/notification_logs/trash:
     get:
       tags:
         - NotificationLogs
@@ -8080,7 +8080,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/NotificationLogList'
 
-  /api/v1/notification_logs/{id}/restore:
+  /api/v1/sapiens/notification_logs/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -8098,7 +8098,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/notification_logs/empty:
+  /api/v1/sapiens/notification_logs/empty:
     delete:
       tags:
         - NotificationLogs
@@ -8115,7 +8115,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/notification_logs/delete/bulk:
+  /api/v1/sapiens/notification_logs/delete/bulk:
     post:
       tags:
         - NotificationLogs
@@ -8135,7 +8135,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notification_logs/restore/bulk:
+  /api/v1/sapiens/notification_logs/restore/bulk:
     post:
       tags:
         - NotificationLogs
@@ -8153,7 +8153,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notification_logs/restore/all:
+  /api/v1/sapiens/notification_logs/restore/all:
     post:
       tags:
         - NotificationLogs
@@ -8169,7 +8169,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/notification_logs/trash/bulk:
+  /api/v1/sapiens/notification_logs/trash/bulk:
     delete:
       tags:
         - NotificationLogs
@@ -8189,7 +8189,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notification_preferences:
+  /api/v1/sapiens/notification_preferences:
     get:
       tags:
         - NotificationPreferences
@@ -8235,7 +8235,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/notification_preferences/{id}:
+  /api/v1/sapiens/notification_preferences/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -8307,7 +8307,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/notification_preferences/bulk:
+  /api/v1/sapiens/notification_preferences/bulk:
     post:
       tags:
         - NotificationPreferences
@@ -8399,7 +8399,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notification_preferences/upsert:
+  /api/v1/sapiens/notification_preferences/upsert:
     post:
       tags:
         - NotificationPreferences
@@ -8429,7 +8429,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/NotificationPreference'
 
-  /api/v1/notification_preferences/trash:
+  /api/v1/sapiens/notification_preferences/trash:
     get:
       tags:
         - NotificationPreferences
@@ -8446,7 +8446,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/NotificationPreferenceList'
 
-  /api/v1/notification_preferences/{id}/restore:
+  /api/v1/sapiens/notification_preferences/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -8464,7 +8464,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/notification_preferences/empty:
+  /api/v1/sapiens/notification_preferences/empty:
     delete:
       tags:
         - NotificationPreferences
@@ -8481,7 +8481,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/notification_preferences/delete/bulk:
+  /api/v1/sapiens/notification_preferences/delete/bulk:
     post:
       tags:
         - NotificationPreferences
@@ -8501,7 +8501,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notification_preferences/restore/bulk:
+  /api/v1/sapiens/notification_preferences/restore/bulk:
     post:
       tags:
         - NotificationPreferences
@@ -8519,7 +8519,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/notification_preferences/restore/all:
+  /api/v1/sapiens/notification_preferences/restore/all:
     post:
       tags:
         - NotificationPreferences
@@ -8535,7 +8535,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/notification_preferences/trash/bulk:
+  /api/v1/sapiens/notification_preferences/trash/bulk:
     delete:
       tags:
         - NotificationPreferences
@@ -8555,7 +8555,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/o_auth_providers:
+  /api/v1/sapiens/o_auth_providers:
     get:
       tags:
         - OAuthProviders
@@ -8601,7 +8601,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/o_auth_providers/{id}:
+  /api/v1/sapiens/o_auth_providers/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -8673,7 +8673,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/o_auth_providers/bulk:
+  /api/v1/sapiens/o_auth_providers/bulk:
     post:
       tags:
         - OAuthProviders
@@ -8765,7 +8765,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/o_auth_providers/upsert:
+  /api/v1/sapiens/o_auth_providers/upsert:
     post:
       tags:
         - OAuthProviders
@@ -8795,7 +8795,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OAuthProvider'
 
-  /api/v1/o_auth_providers/trash:
+  /api/v1/sapiens/o_auth_providers/trash:
     get:
       tags:
         - OAuthProviders
@@ -8812,7 +8812,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OAuthProviderList'
 
-  /api/v1/o_auth_providers/{id}/restore:
+  /api/v1/sapiens/o_auth_providers/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -8830,7 +8830,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/o_auth_providers/empty:
+  /api/v1/sapiens/o_auth_providers/empty:
     delete:
       tags:
         - OAuthProviders
@@ -8847,7 +8847,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/o_auth_providers/delete/bulk:
+  /api/v1/sapiens/o_auth_providers/delete/bulk:
     post:
       tags:
         - OAuthProviders
@@ -8867,7 +8867,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/o_auth_providers/restore/bulk:
+  /api/v1/sapiens/o_auth_providers/restore/bulk:
     post:
       tags:
         - OAuthProviders
@@ -8885,7 +8885,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/o_auth_providers/restore/all:
+  /api/v1/sapiens/o_auth_providers/restore/all:
     post:
       tags:
         - OAuthProviders
@@ -8901,7 +8901,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/o_auth_providers/trash/bulk:
+  /api/v1/sapiens/o_auth_providers/trash/bulk:
     delete:
       tags:
         - OAuthProviders
@@ -8921,7 +8921,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/user_o_auth_links:
+  /api/v1/sapiens/user_o_auth_links:
     get:
       tags:
         - UserOAuthLinks
@@ -8967,7 +8967,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/user_o_auth_links/{id}:
+  /api/v1/sapiens/user_o_auth_links/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -9039,7 +9039,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/user_o_auth_links/bulk:
+  /api/v1/sapiens/user_o_auth_links/bulk:
     post:
       tags:
         - UserOAuthLinks
@@ -9131,7 +9131,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/user_o_auth_links/upsert:
+  /api/v1/sapiens/user_o_auth_links/upsert:
     post:
       tags:
         - UserOAuthLinks
@@ -9161,7 +9161,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserOAuthLink'
 
-  /api/v1/user_o_auth_links/trash:
+  /api/v1/sapiens/user_o_auth_links/trash:
     get:
       tags:
         - UserOAuthLinks
@@ -9178,7 +9178,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserOAuthLinkList'
 
-  /api/v1/user_o_auth_links/{id}/restore:
+  /api/v1/sapiens/user_o_auth_links/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -9196,7 +9196,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/user_o_auth_links/empty:
+  /api/v1/sapiens/user_o_auth_links/empty:
     delete:
       tags:
         - UserOAuthLinks
@@ -9213,7 +9213,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/user_o_auth_links/delete/bulk:
+  /api/v1/sapiens/user_o_auth_links/delete/bulk:
     post:
       tags:
         - UserOAuthLinks
@@ -9233,7 +9233,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/user_o_auth_links/restore/bulk:
+  /api/v1/sapiens/user_o_auth_links/restore/bulk:
     post:
       tags:
         - UserOAuthLinks
@@ -9251,7 +9251,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/user_o_auth_links/restore/all:
+  /api/v1/sapiens/user_o_auth_links/restore/all:
     post:
       tags:
         - UserOAuthLinks
@@ -9267,7 +9267,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/user_o_auth_links/trash/bulk:
+  /api/v1/sapiens/user_o_auth_links/trash/bulk:
     delete:
       tags:
         - UserOAuthLinks
@@ -9287,7 +9287,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/organization_permissions:
+  /api/v1/sapiens/organization_permissions:
     get:
       tags:
         - OrganizationPermissions
@@ -9333,7 +9333,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/organization_permissions/{id}:
+  /api/v1/sapiens/organization_permissions/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -9405,7 +9405,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/organization_permissions/bulk:
+  /api/v1/sapiens/organization_permissions/bulk:
     post:
       tags:
         - OrganizationPermissions
@@ -9497,7 +9497,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/organization_permissions/upsert:
+  /api/v1/sapiens/organization_permissions/upsert:
     post:
       tags:
         - OrganizationPermissions
@@ -9527,7 +9527,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrganizationPermission'
 
-  /api/v1/organization_permissions/trash:
+  /api/v1/sapiens/organization_permissions/trash:
     get:
       tags:
         - OrganizationPermissions
@@ -9544,7 +9544,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrganizationPermissionList'
 
-  /api/v1/organization_permissions/{id}/restore:
+  /api/v1/sapiens/organization_permissions/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -9562,7 +9562,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/organization_permissions/empty:
+  /api/v1/sapiens/organization_permissions/empty:
     delete:
       tags:
         - OrganizationPermissions
@@ -9579,7 +9579,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/organization_permissions/delete/bulk:
+  /api/v1/sapiens/organization_permissions/delete/bulk:
     post:
       tags:
         - OrganizationPermissions
@@ -9599,7 +9599,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/organization_permissions/restore/bulk:
+  /api/v1/sapiens/organization_permissions/restore/bulk:
     post:
       tags:
         - OrganizationPermissions
@@ -9617,7 +9617,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/organization_permissions/restore/all:
+  /api/v1/sapiens/organization_permissions/restore/all:
     post:
       tags:
         - OrganizationPermissions
@@ -9633,7 +9633,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/organization_permissions/trash/bulk:
+  /api/v1/sapiens/organization_permissions/trash/bulk:
     delete:
       tags:
         - OrganizationPermissions
@@ -9653,7 +9653,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/organization_roles:
+  /api/v1/sapiens/organization_roles:
     get:
       tags:
         - OrganizationRoles
@@ -9699,7 +9699,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/organization_roles/{id}:
+  /api/v1/sapiens/organization_roles/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -9771,7 +9771,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/organization_roles/bulk:
+  /api/v1/sapiens/organization_roles/bulk:
     post:
       tags:
         - OrganizationRoles
@@ -9863,7 +9863,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/organization_roles/upsert:
+  /api/v1/sapiens/organization_roles/upsert:
     post:
       tags:
         - OrganizationRoles
@@ -9893,7 +9893,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrganizationRole'
 
-  /api/v1/organization_roles/trash:
+  /api/v1/sapiens/organization_roles/trash:
     get:
       tags:
         - OrganizationRoles
@@ -9910,7 +9910,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrganizationRoleList'
 
-  /api/v1/organization_roles/{id}/restore:
+  /api/v1/sapiens/organization_roles/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -9928,7 +9928,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/organization_roles/empty:
+  /api/v1/sapiens/organization_roles/empty:
     delete:
       tags:
         - OrganizationRoles
@@ -9945,7 +9945,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/organization_roles/delete/bulk:
+  /api/v1/sapiens/organization_roles/delete/bulk:
     post:
       tags:
         - OrganizationRoles
@@ -9965,7 +9965,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/organization_roles/restore/bulk:
+  /api/v1/sapiens/organization_roles/restore/bulk:
     post:
       tags:
         - OrganizationRoles
@@ -9983,7 +9983,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/organization_roles/restore/all:
+  /api/v1/sapiens/organization_roles/restore/all:
     post:
       tags:
         - OrganizationRoles
@@ -9999,7 +9999,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/organization_roles/trash/bulk:
+  /api/v1/sapiens/organization_roles/trash/bulk:
     delete:
       tags:
         - OrganizationRoles
@@ -10019,7 +10019,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/organization_users:
+  /api/v1/sapiens/organization_users:
     get:
       tags:
         - OrganizationUsers
@@ -10065,7 +10065,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/organization_users/{id}:
+  /api/v1/sapiens/organization_users/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -10137,7 +10137,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/organization_users/bulk:
+  /api/v1/sapiens/organization_users/bulk:
     post:
       tags:
         - OrganizationUsers
@@ -10229,7 +10229,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/organization_users/upsert:
+  /api/v1/sapiens/organization_users/upsert:
     post:
       tags:
         - OrganizationUsers
@@ -10259,7 +10259,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrganizationUser'
 
-  /api/v1/organization_users/trash:
+  /api/v1/sapiens/organization_users/trash:
     get:
       tags:
         - OrganizationUsers
@@ -10276,7 +10276,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrganizationUserList'
 
-  /api/v1/organization_users/{id}/restore:
+  /api/v1/sapiens/organization_users/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -10294,7 +10294,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/organization_users/empty:
+  /api/v1/sapiens/organization_users/empty:
     delete:
       tags:
         - OrganizationUsers
@@ -10311,7 +10311,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/organization_users/delete/bulk:
+  /api/v1/sapiens/organization_users/delete/bulk:
     post:
       tags:
         - OrganizationUsers
@@ -10331,7 +10331,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/organization_users/restore/bulk:
+  /api/v1/sapiens/organization_users/restore/bulk:
     post:
       tags:
         - OrganizationUsers
@@ -10349,7 +10349,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/organization_users/restore/all:
+  /api/v1/sapiens/organization_users/restore/all:
     post:
       tags:
         - OrganizationUsers
@@ -10365,7 +10365,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/organization_users/trash/bulk:
+  /api/v1/sapiens/organization_users/trash/bulk:
     delete:
       tags:
         - OrganizationUsers
@@ -10385,7 +10385,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_creation_contexts:
+  /api/v1/sapiens/password_creation_contexts:
     get:
       tags:
         - PasswordCreationContexts
@@ -10431,7 +10431,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/password_creation_contexts/{id}:
+  /api/v1/sapiens/password_creation_contexts/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -10503,7 +10503,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_creation_contexts/bulk:
+  /api/v1/sapiens/password_creation_contexts/bulk:
     post:
       tags:
         - PasswordCreationContexts
@@ -10595,7 +10595,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_creation_contexts/upsert:
+  /api/v1/sapiens/password_creation_contexts/upsert:
     post:
       tags:
         - PasswordCreationContexts
@@ -10625,7 +10625,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordCreationContext'
 
-  /api/v1/password_creation_contexts/trash:
+  /api/v1/sapiens/password_creation_contexts/trash:
     get:
       tags:
         - PasswordCreationContexts
@@ -10642,7 +10642,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordCreationContextList'
 
-  /api/v1/password_creation_contexts/{id}/restore:
+  /api/v1/sapiens/password_creation_contexts/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -10660,7 +10660,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_creation_contexts/empty:
+  /api/v1/sapiens/password_creation_contexts/empty:
     delete:
       tags:
         - PasswordCreationContexts
@@ -10677,7 +10677,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/password_creation_contexts/delete/bulk:
+  /api/v1/sapiens/password_creation_contexts/delete/bulk:
     post:
       tags:
         - PasswordCreationContexts
@@ -10697,7 +10697,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_creation_contexts/restore/bulk:
+  /api/v1/sapiens/password_creation_contexts/restore/bulk:
     post:
       tags:
         - PasswordCreationContexts
@@ -10715,7 +10715,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_creation_contexts/restore/all:
+  /api/v1/sapiens/password_creation_contexts/restore/all:
     post:
       tags:
         - PasswordCreationContexts
@@ -10731,7 +10731,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/password_creation_contexts/trash/bulk:
+  /api/v1/sapiens/password_creation_contexts/trash/bulk:
     delete:
       tags:
         - PasswordCreationContexts
@@ -10751,7 +10751,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_expiration_settingses:
+  /api/v1/sapiens/password_expiration_settingses:
     get:
       tags:
         - PasswordExpirationSettingses
@@ -10797,7 +10797,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/password_expiration_settingses/{id}:
+  /api/v1/sapiens/password_expiration_settingses/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -10869,7 +10869,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_expiration_settingses/bulk:
+  /api/v1/sapiens/password_expiration_settingses/bulk:
     post:
       tags:
         - PasswordExpirationSettingses
@@ -10961,7 +10961,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_expiration_settingses/upsert:
+  /api/v1/sapiens/password_expiration_settingses/upsert:
     post:
       tags:
         - PasswordExpirationSettingses
@@ -10991,7 +10991,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordExpirationSettings'
 
-  /api/v1/password_expiration_settingses/trash:
+  /api/v1/sapiens/password_expiration_settingses/trash:
     get:
       tags:
         - PasswordExpirationSettingses
@@ -11008,7 +11008,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordExpirationSettingsList'
 
-  /api/v1/password_expiration_settingses/{id}/restore:
+  /api/v1/sapiens/password_expiration_settingses/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -11026,7 +11026,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_expiration_settingses/empty:
+  /api/v1/sapiens/password_expiration_settingses/empty:
     delete:
       tags:
         - PasswordExpirationSettingses
@@ -11043,7 +11043,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/password_expiration_settingses/delete/bulk:
+  /api/v1/sapiens/password_expiration_settingses/delete/bulk:
     post:
       tags:
         - PasswordExpirationSettingses
@@ -11063,7 +11063,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_expiration_settingses/restore/bulk:
+  /api/v1/sapiens/password_expiration_settingses/restore/bulk:
     post:
       tags:
         - PasswordExpirationSettingses
@@ -11081,7 +11081,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_expiration_settingses/restore/all:
+  /api/v1/sapiens/password_expiration_settingses/restore/all:
     post:
       tags:
         - PasswordExpirationSettingses
@@ -11097,7 +11097,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/password_expiration_settingses/trash/bulk:
+  /api/v1/sapiens/password_expiration_settingses/trash/bulk:
     delete:
       tags:
         - PasswordExpirationSettingses
@@ -11117,7 +11117,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_histories:
+  /api/v1/sapiens/password_histories:
     get:
       tags:
         - PasswordHistories
@@ -11163,7 +11163,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/password_histories/{id}:
+  /api/v1/sapiens/password_histories/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -11235,7 +11235,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_histories/bulk:
+  /api/v1/sapiens/password_histories/bulk:
     post:
       tags:
         - PasswordHistories
@@ -11327,7 +11327,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_histories/upsert:
+  /api/v1/sapiens/password_histories/upsert:
     post:
       tags:
         - PasswordHistories
@@ -11357,7 +11357,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordHistory'
 
-  /api/v1/password_histories/trash:
+  /api/v1/sapiens/password_histories/trash:
     get:
       tags:
         - PasswordHistories
@@ -11374,7 +11374,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordHistoryList'
 
-  /api/v1/password_histories/{id}/restore:
+  /api/v1/sapiens/password_histories/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -11392,7 +11392,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_histories/empty:
+  /api/v1/sapiens/password_histories/empty:
     delete:
       tags:
         - PasswordHistories
@@ -11409,7 +11409,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/password_histories/delete/bulk:
+  /api/v1/sapiens/password_histories/delete/bulk:
     post:
       tags:
         - PasswordHistories
@@ -11429,7 +11429,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_histories/restore/bulk:
+  /api/v1/sapiens/password_histories/restore/bulk:
     post:
       tags:
         - PasswordHistories
@@ -11447,7 +11447,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_histories/restore/all:
+  /api/v1/sapiens/password_histories/restore/all:
     post:
       tags:
         - PasswordHistories
@@ -11463,7 +11463,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/password_histories/trash/bulk:
+  /api/v1/sapiens/password_histories/trash/bulk:
     delete:
       tags:
         - PasswordHistories
@@ -11483,7 +11483,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_history_settingses:
+  /api/v1/sapiens/password_history_settingses:
     get:
       tags:
         - PasswordHistorySettingses
@@ -11529,7 +11529,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/password_history_settingses/{id}:
+  /api/v1/sapiens/password_history_settingses/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -11601,7 +11601,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_history_settingses/bulk:
+  /api/v1/sapiens/password_history_settingses/bulk:
     post:
       tags:
         - PasswordHistorySettingses
@@ -11693,7 +11693,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_history_settingses/upsert:
+  /api/v1/sapiens/password_history_settingses/upsert:
     post:
       tags:
         - PasswordHistorySettingses
@@ -11723,7 +11723,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordHistorySettings'
 
-  /api/v1/password_history_settingses/trash:
+  /api/v1/sapiens/password_history_settingses/trash:
     get:
       tags:
         - PasswordHistorySettingses
@@ -11740,7 +11740,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordHistorySettingsList'
 
-  /api/v1/password_history_settingses/{id}/restore:
+  /api/v1/sapiens/password_history_settingses/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -11758,7 +11758,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_history_settingses/empty:
+  /api/v1/sapiens/password_history_settingses/empty:
     delete:
       tags:
         - PasswordHistorySettingses
@@ -11775,7 +11775,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/password_history_settingses/delete/bulk:
+  /api/v1/sapiens/password_history_settingses/delete/bulk:
     post:
       tags:
         - PasswordHistorySettingses
@@ -11795,7 +11795,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_history_settingses/restore/bulk:
+  /api/v1/sapiens/password_history_settingses/restore/bulk:
     post:
       tags:
         - PasswordHistorySettingses
@@ -11813,7 +11813,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_history_settingses/restore/all:
+  /api/v1/sapiens/password_history_settingses/restore/all:
     post:
       tags:
         - PasswordHistorySettingses
@@ -11829,7 +11829,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/password_history_settingses/trash/bulk:
+  /api/v1/sapiens/password_history_settingses/trash/bulk:
     delete:
       tags:
         - PasswordHistorySettingses
@@ -11849,7 +11849,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_policies:
+  /api/v1/sapiens/password_policies:
     get:
       tags:
         - PasswordPolicies
@@ -11895,7 +11895,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/password_policies/{id}:
+  /api/v1/sapiens/password_policies/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -11967,7 +11967,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_policies/bulk:
+  /api/v1/sapiens/password_policies/bulk:
     post:
       tags:
         - PasswordPolicies
@@ -12059,7 +12059,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_policies/upsert:
+  /api/v1/sapiens/password_policies/upsert:
     post:
       tags:
         - PasswordPolicies
@@ -12089,7 +12089,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordPolicy'
 
-  /api/v1/password_policies/trash:
+  /api/v1/sapiens/password_policies/trash:
     get:
       tags:
         - PasswordPolicies
@@ -12106,7 +12106,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordPolicyList'
 
-  /api/v1/password_policies/{id}/restore:
+  /api/v1/sapiens/password_policies/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -12124,7 +12124,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_policies/empty:
+  /api/v1/sapiens/password_policies/empty:
     delete:
       tags:
         - PasswordPolicies
@@ -12141,7 +12141,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/password_policies/delete/bulk:
+  /api/v1/sapiens/password_policies/delete/bulk:
     post:
       tags:
         - PasswordPolicies
@@ -12161,7 +12161,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_policies/restore/bulk:
+  /api/v1/sapiens/password_policies/restore/bulk:
     post:
       tags:
         - PasswordPolicies
@@ -12179,7 +12179,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_policies/restore/all:
+  /api/v1/sapiens/password_policies/restore/all:
     post:
       tags:
         - PasswordPolicies
@@ -12195,7 +12195,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/password_policies/trash/bulk:
+  /api/v1/sapiens/password_policies/trash/bulk:
     delete:
       tags:
         - PasswordPolicies
@@ -12215,7 +12215,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_requirementses:
+  /api/v1/sapiens/password_requirementses:
     get:
       tags:
         - PasswordRequirementses
@@ -12261,7 +12261,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/password_requirementses/{id}:
+  /api/v1/sapiens/password_requirementses/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -12333,7 +12333,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_requirementses/bulk:
+  /api/v1/sapiens/password_requirementses/bulk:
     post:
       tags:
         - PasswordRequirementses
@@ -12425,7 +12425,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_requirementses/upsert:
+  /api/v1/sapiens/password_requirementses/upsert:
     post:
       tags:
         - PasswordRequirementses
@@ -12455,7 +12455,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordRequirements'
 
-  /api/v1/password_requirementses/trash:
+  /api/v1/sapiens/password_requirementses/trash:
     get:
       tags:
         - PasswordRequirementses
@@ -12472,7 +12472,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordRequirementsList'
 
-  /api/v1/password_requirementses/{id}/restore:
+  /api/v1/sapiens/password_requirementses/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -12490,7 +12490,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_requirementses/empty:
+  /api/v1/sapiens/password_requirementses/empty:
     delete:
       tags:
         - PasswordRequirementses
@@ -12507,7 +12507,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/password_requirementses/delete/bulk:
+  /api/v1/sapiens/password_requirementses/delete/bulk:
     post:
       tags:
         - PasswordRequirementses
@@ -12527,7 +12527,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_requirementses/restore/bulk:
+  /api/v1/sapiens/password_requirementses/restore/bulk:
     post:
       tags:
         - PasswordRequirementses
@@ -12545,7 +12545,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_requirementses/restore/all:
+  /api/v1/sapiens/password_requirementses/restore/all:
     post:
       tags:
         - PasswordRequirementses
@@ -12561,7 +12561,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/password_requirementses/trash/bulk:
+  /api/v1/sapiens/password_requirementses/trash/bulk:
     delete:
       tags:
         - PasswordRequirementses
@@ -12581,7 +12581,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_resets:
+  /api/v1/sapiens/password_resets:
     get:
       tags:
         - PasswordResets
@@ -12627,7 +12627,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/password_resets/{id}:
+  /api/v1/sapiens/password_resets/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -12699,7 +12699,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_resets/bulk:
+  /api/v1/sapiens/password_resets/bulk:
     post:
       tags:
         - PasswordResets
@@ -12791,7 +12791,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_resets/upsert:
+  /api/v1/sapiens/password_resets/upsert:
     post:
       tags:
         - PasswordResets
@@ -12821,7 +12821,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordReset'
 
-  /api/v1/password_resets/trash:
+  /api/v1/sapiens/password_resets/trash:
     get:
       tags:
         - PasswordResets
@@ -12838,7 +12838,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordResetList'
 
-  /api/v1/password_resets/{id}/restore:
+  /api/v1/sapiens/password_resets/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -12856,7 +12856,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_resets/empty:
+  /api/v1/sapiens/password_resets/empty:
     delete:
       tags:
         - PasswordResets
@@ -12873,7 +12873,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/password_resets/delete/bulk:
+  /api/v1/sapiens/password_resets/delete/bulk:
     post:
       tags:
         - PasswordResets
@@ -12893,7 +12893,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_resets/restore/bulk:
+  /api/v1/sapiens/password_resets/restore/bulk:
     post:
       tags:
         - PasswordResets
@@ -12911,7 +12911,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_resets/restore/all:
+  /api/v1/sapiens/password_resets/restore/all:
     post:
       tags:
         - PasswordResets
@@ -12927,7 +12927,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/password_resets/trash/bulk:
+  /api/v1/sapiens/password_resets/trash/bulk:
     delete:
       tags:
         - PasswordResets
@@ -12947,7 +12947,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_reset_securities:
+  /api/v1/sapiens/password_reset_securities:
     get:
       tags:
         - PasswordResetSecurities
@@ -12993,7 +12993,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/password_reset_securities/{id}:
+  /api/v1/sapiens/password_reset_securities/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -13065,7 +13065,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_reset_securities/bulk:
+  /api/v1/sapiens/password_reset_securities/bulk:
     post:
       tags:
         - PasswordResetSecurities
@@ -13157,7 +13157,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_reset_securities/upsert:
+  /api/v1/sapiens/password_reset_securities/upsert:
     post:
       tags:
         - PasswordResetSecurities
@@ -13187,7 +13187,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordResetSecurity'
 
-  /api/v1/password_reset_securities/trash:
+  /api/v1/sapiens/password_reset_securities/trash:
     get:
       tags:
         - PasswordResetSecurities
@@ -13204,7 +13204,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordResetSecurityList'
 
-  /api/v1/password_reset_securities/{id}/restore:
+  /api/v1/sapiens/password_reset_securities/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -13222,7 +13222,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_reset_securities/empty:
+  /api/v1/sapiens/password_reset_securities/empty:
     delete:
       tags:
         - PasswordResetSecurities
@@ -13239,7 +13239,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/password_reset_securities/delete/bulk:
+  /api/v1/sapiens/password_reset_securities/delete/bulk:
     post:
       tags:
         - PasswordResetSecurities
@@ -13259,7 +13259,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_reset_securities/restore/bulk:
+  /api/v1/sapiens/password_reset_securities/restore/bulk:
     post:
       tags:
         - PasswordResetSecurities
@@ -13277,7 +13277,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_reset_securities/restore/all:
+  /api/v1/sapiens/password_reset_securities/restore/all:
     post:
       tags:
         - PasswordResetSecurities
@@ -13293,7 +13293,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/password_reset_securities/trash/bulk:
+  /api/v1/sapiens/password_reset_securities/trash/bulk:
     delete:
       tags:
         - PasswordResetSecurities
@@ -13313,7 +13313,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_reset_tokens:
+  /api/v1/sapiens/password_reset_tokens:
     get:
       tags:
         - PasswordResetTokens
@@ -13359,7 +13359,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/password_reset_tokens/{id}:
+  /api/v1/sapiens/password_reset_tokens/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -13431,7 +13431,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_reset_tokens/bulk:
+  /api/v1/sapiens/password_reset_tokens/bulk:
     post:
       tags:
         - PasswordResetTokens
@@ -13523,7 +13523,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_reset_tokens/upsert:
+  /api/v1/sapiens/password_reset_tokens/upsert:
     post:
       tags:
         - PasswordResetTokens
@@ -13553,7 +13553,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordResetToken'
 
-  /api/v1/password_reset_tokens/trash:
+  /api/v1/sapiens/password_reset_tokens/trash:
     get:
       tags:
         - PasswordResetTokens
@@ -13570,7 +13570,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordResetTokenList'
 
-  /api/v1/password_reset_tokens/{id}/restore:
+  /api/v1/sapiens/password_reset_tokens/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -13588,7 +13588,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_reset_tokens/empty:
+  /api/v1/sapiens/password_reset_tokens/empty:
     delete:
       tags:
         - PasswordResetTokens
@@ -13605,7 +13605,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/password_reset_tokens/delete/bulk:
+  /api/v1/sapiens/password_reset_tokens/delete/bulk:
     post:
       tags:
         - PasswordResetTokens
@@ -13625,7 +13625,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_reset_tokens/restore/bulk:
+  /api/v1/sapiens/password_reset_tokens/restore/bulk:
     post:
       tags:
         - PasswordResetTokens
@@ -13643,7 +13643,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_reset_tokens/restore/all:
+  /api/v1/sapiens/password_reset_tokens/restore/all:
     post:
       tags:
         - PasswordResetTokens
@@ -13659,7 +13659,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/password_reset_tokens/trash/bulk:
+  /api/v1/sapiens/password_reset_tokens/trash/bulk:
     delete:
       tags:
         - PasswordResetTokens
@@ -13679,7 +13679,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_reset_verification_detailses:
+  /api/v1/sapiens/password_reset_verification_detailses:
     get:
       tags:
         - PasswordResetVerificationDetailses
@@ -13725,7 +13725,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/password_reset_verification_detailses/{id}:
+  /api/v1/sapiens/password_reset_verification_detailses/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -13797,7 +13797,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_reset_verification_detailses/bulk:
+  /api/v1/sapiens/password_reset_verification_detailses/bulk:
     post:
       tags:
         - PasswordResetVerificationDetailses
@@ -13889,7 +13889,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_reset_verification_detailses/upsert:
+  /api/v1/sapiens/password_reset_verification_detailses/upsert:
     post:
       tags:
         - PasswordResetVerificationDetailses
@@ -13919,7 +13919,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordResetVerificationDetails'
 
-  /api/v1/password_reset_verification_detailses/trash:
+  /api/v1/sapiens/password_reset_verification_detailses/trash:
     get:
       tags:
         - PasswordResetVerificationDetailses
@@ -13936,7 +13936,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordResetVerificationDetailsList'
 
-  /api/v1/password_reset_verification_detailses/{id}/restore:
+  /api/v1/sapiens/password_reset_verification_detailses/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -13954,7 +13954,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/password_reset_verification_detailses/empty:
+  /api/v1/sapiens/password_reset_verification_detailses/empty:
     delete:
       tags:
         - PasswordResetVerificationDetailses
@@ -13971,7 +13971,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/password_reset_verification_detailses/delete/bulk:
+  /api/v1/sapiens/password_reset_verification_detailses/delete/bulk:
     post:
       tags:
         - PasswordResetVerificationDetailses
@@ -13991,7 +13991,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_reset_verification_detailses/restore/bulk:
+  /api/v1/sapiens/password_reset_verification_detailses/restore/bulk:
     post:
       tags:
         - PasswordResetVerificationDetailses
@@ -14009,7 +14009,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/password_reset_verification_detailses/restore/all:
+  /api/v1/sapiens/password_reset_verification_detailses/restore/all:
     post:
       tags:
         - PasswordResetVerificationDetailses
@@ -14025,7 +14025,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/password_reset_verification_detailses/trash/bulk:
+  /api/v1/sapiens/password_reset_verification_detailses/trash/bulk:
     delete:
       tags:
         - PasswordResetVerificationDetailses
@@ -14411,7 +14411,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/permission_conflicts:
+  /api/v1/sapiens/permission_conflicts:
     get:
       tags:
         - PermissionConflicts
@@ -14457,7 +14457,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/permission_conflicts/{id}:
+  /api/v1/sapiens/permission_conflicts/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -14529,7 +14529,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/permission_conflicts/bulk:
+  /api/v1/sapiens/permission_conflicts/bulk:
     post:
       tags:
         - PermissionConflicts
@@ -14621,7 +14621,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/permission_conflicts/upsert:
+  /api/v1/sapiens/permission_conflicts/upsert:
     post:
       tags:
         - PermissionConflicts
@@ -14651,7 +14651,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PermissionConflict'
 
-  /api/v1/permission_conflicts/trash:
+  /api/v1/sapiens/permission_conflicts/trash:
     get:
       tags:
         - PermissionConflicts
@@ -14668,7 +14668,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PermissionConflictList'
 
-  /api/v1/permission_conflicts/{id}/restore:
+  /api/v1/sapiens/permission_conflicts/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -14686,7 +14686,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/permission_conflicts/empty:
+  /api/v1/sapiens/permission_conflicts/empty:
     delete:
       tags:
         - PermissionConflicts
@@ -14703,7 +14703,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/permission_conflicts/delete/bulk:
+  /api/v1/sapiens/permission_conflicts/delete/bulk:
     post:
       tags:
         - PermissionConflicts
@@ -14723,7 +14723,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/permission_conflicts/restore/bulk:
+  /api/v1/sapiens/permission_conflicts/restore/bulk:
     post:
       tags:
         - PermissionConflicts
@@ -14741,7 +14741,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/permission_conflicts/restore/all:
+  /api/v1/sapiens/permission_conflicts/restore/all:
     post:
       tags:
         - PermissionConflicts
@@ -14757,7 +14757,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/permission_conflicts/trash/bulk:
+  /api/v1/sapiens/permission_conflicts/trash/bulk:
     delete:
       tags:
         - PermissionConflicts
@@ -14777,7 +14777,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/resource_permissions:
+  /api/v1/sapiens/resource_permissions:
     get:
       tags:
         - ResourcePermissions
@@ -14823,7 +14823,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/resource_permissions/{id}:
+  /api/v1/sapiens/resource_permissions/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -14895,7 +14895,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/resource_permissions/bulk:
+  /api/v1/sapiens/resource_permissions/bulk:
     post:
       tags:
         - ResourcePermissions
@@ -14987,7 +14987,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/resource_permissions/upsert:
+  /api/v1/sapiens/resource_permissions/upsert:
     post:
       tags:
         - ResourcePermissions
@@ -15017,7 +15017,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResourcePermission'
 
-  /api/v1/resource_permissions/trash:
+  /api/v1/sapiens/resource_permissions/trash:
     get:
       tags:
         - ResourcePermissions
@@ -15034,7 +15034,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResourcePermissionList'
 
-  /api/v1/resource_permissions/{id}/restore:
+  /api/v1/sapiens/resource_permissions/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -15052,7 +15052,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/resource_permissions/empty:
+  /api/v1/sapiens/resource_permissions/empty:
     delete:
       tags:
         - ResourcePermissions
@@ -15069,7 +15069,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/resource_permissions/delete/bulk:
+  /api/v1/sapiens/resource_permissions/delete/bulk:
     post:
       tags:
         - ResourcePermissions
@@ -15089,7 +15089,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/resource_permissions/restore/bulk:
+  /api/v1/sapiens/resource_permissions/restore/bulk:
     post:
       tags:
         - ResourcePermissions
@@ -15107,7 +15107,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/resource_permissions/restore/all:
+  /api/v1/sapiens/resource_permissions/restore/all:
     post:
       tags:
         - ResourcePermissions
@@ -15123,7 +15123,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/resource_permissions/trash/bulk:
+  /api/v1/sapiens/resource_permissions/trash/bulk:
     delete:
       tags:
         - ResourcePermissions
@@ -15509,7 +15509,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/role_assignments:
+  /api/v1/sapiens/role_assignments:
     get:
       tags:
         - RoleAssignments
@@ -15555,7 +15555,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/role_assignments/{id}:
+  /api/v1/sapiens/role_assignments/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -15627,7 +15627,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/role_assignments/bulk:
+  /api/v1/sapiens/role_assignments/bulk:
     post:
       tags:
         - RoleAssignments
@@ -15719,7 +15719,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/role_assignments/upsert:
+  /api/v1/sapiens/role_assignments/upsert:
     post:
       tags:
         - RoleAssignments
@@ -15749,7 +15749,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RoleAssignment'
 
-  /api/v1/role_assignments/trash:
+  /api/v1/sapiens/role_assignments/trash:
     get:
       tags:
         - RoleAssignments
@@ -15766,7 +15766,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RoleAssignmentList'
 
-  /api/v1/role_assignments/{id}/restore:
+  /api/v1/sapiens/role_assignments/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -15784,7 +15784,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/role_assignments/empty:
+  /api/v1/sapiens/role_assignments/empty:
     delete:
       tags:
         - RoleAssignments
@@ -15801,7 +15801,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/role_assignments/delete/bulk:
+  /api/v1/sapiens/role_assignments/delete/bulk:
     post:
       tags:
         - RoleAssignments
@@ -15821,7 +15821,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/role_assignments/restore/bulk:
+  /api/v1/sapiens/role_assignments/restore/bulk:
     post:
       tags:
         - RoleAssignments
@@ -15839,7 +15839,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/role_assignments/restore/all:
+  /api/v1/sapiens/role_assignments/restore/all:
     post:
       tags:
         - RoleAssignments
@@ -15855,7 +15855,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/role_assignments/trash/bulk:
+  /api/v1/sapiens/role_assignments/trash/bulk:
     delete:
       tags:
         - RoleAssignments
@@ -16241,7 +16241,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/saml_providers:
+  /api/v1/sapiens/saml_providers:
     get:
       tags:
         - SAMLProviders
@@ -16287,7 +16287,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/saml_providers/{id}:
+  /api/v1/sapiens/saml_providers/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -16359,7 +16359,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/saml_providers/bulk:
+  /api/v1/sapiens/saml_providers/bulk:
     post:
       tags:
         - SAMLProviders
@@ -16451,7 +16451,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/saml_providers/upsert:
+  /api/v1/sapiens/saml_providers/upsert:
     post:
       tags:
         - SAMLProviders
@@ -16481,7 +16481,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SAMLProvider'
 
-  /api/v1/saml_providers/trash:
+  /api/v1/sapiens/saml_providers/trash:
     get:
       tags:
         - SAMLProviders
@@ -16498,7 +16498,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SAMLProviderList'
 
-  /api/v1/saml_providers/{id}/restore:
+  /api/v1/sapiens/saml_providers/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -16516,7 +16516,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/saml_providers/empty:
+  /api/v1/sapiens/saml_providers/empty:
     delete:
       tags:
         - SAMLProviders
@@ -16533,7 +16533,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/saml_providers/delete/bulk:
+  /api/v1/sapiens/saml_providers/delete/bulk:
     post:
       tags:
         - SAMLProviders
@@ -16553,7 +16553,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/saml_providers/restore/bulk:
+  /api/v1/sapiens/saml_providers/restore/bulk:
     post:
       tags:
         - SAMLProviders
@@ -16571,7 +16571,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/saml_providers/restore/all:
+  /api/v1/sapiens/saml_providers/restore/all:
     post:
       tags:
         - SAMLProviders
@@ -16587,7 +16587,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/saml_providers/trash/bulk:
+  /api/v1/sapiens/saml_providers/trash/bulk:
     delete:
       tags:
         - SAMLProviders
@@ -16607,7 +16607,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/security_events:
+  /api/v1/sapiens/security_events:
     get:
       tags:
         - SecurityEvents
@@ -16653,7 +16653,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/security_events/{id}:
+  /api/v1/sapiens/security_events/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -16725,7 +16725,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/security_events/bulk:
+  /api/v1/sapiens/security_events/bulk:
     post:
       tags:
         - SecurityEvents
@@ -16817,7 +16817,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/security_events/upsert:
+  /api/v1/sapiens/security_events/upsert:
     post:
       tags:
         - SecurityEvents
@@ -16847,7 +16847,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SecurityEvent'
 
-  /api/v1/security_events/trash:
+  /api/v1/sapiens/security_events/trash:
     get:
       tags:
         - SecurityEvents
@@ -16864,7 +16864,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SecurityEventList'
 
-  /api/v1/security_events/{id}/restore:
+  /api/v1/sapiens/security_events/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -16882,7 +16882,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/security_events/empty:
+  /api/v1/sapiens/security_events/empty:
     delete:
       tags:
         - SecurityEvents
@@ -16899,7 +16899,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/security_events/delete/bulk:
+  /api/v1/sapiens/security_events/delete/bulk:
     post:
       tags:
         - SecurityEvents
@@ -16919,7 +16919,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/security_events/restore/bulk:
+  /api/v1/sapiens/security_events/restore/bulk:
     post:
       tags:
         - SecurityEvents
@@ -16937,7 +16937,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/security_events/restore/all:
+  /api/v1/sapiens/security_events/restore/all:
     post:
       tags:
         - SecurityEvents
@@ -16953,7 +16953,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/security_events/trash/bulk:
+  /api/v1/sapiens/security_events/trash/bulk:
     delete:
       tags:
         - SecurityEvents
@@ -16973,7 +16973,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/sessions:
+  /api/v1/sapiens/sessions:
     get:
       tags:
         - Sessions
@@ -17019,7 +17019,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/sessions/{id}:
+  /api/v1/sapiens/sessions/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -17091,7 +17091,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/sessions/bulk:
+  /api/v1/sapiens/sessions/bulk:
     post:
       tags:
         - Sessions
@@ -17183,7 +17183,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/sessions/upsert:
+  /api/v1/sapiens/sessions/upsert:
     post:
       tags:
         - Sessions
@@ -17213,7 +17213,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Session'
 
-  /api/v1/sessions/trash:
+  /api/v1/sapiens/sessions/trash:
     get:
       tags:
         - Sessions
@@ -17230,7 +17230,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SessionList'
 
-  /api/v1/sessions/{id}/restore:
+  /api/v1/sapiens/sessions/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -17248,7 +17248,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/sessions/empty:
+  /api/v1/sapiens/sessions/empty:
     delete:
       tags:
         - Sessions
@@ -17265,7 +17265,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/sessions/delete/bulk:
+  /api/v1/sapiens/sessions/delete/bulk:
     post:
       tags:
         - Sessions
@@ -17285,7 +17285,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/sessions/restore/bulk:
+  /api/v1/sapiens/sessions/restore/bulk:
     post:
       tags:
         - Sessions
@@ -17303,7 +17303,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/sessions/restore/all:
+  /api/v1/sapiens/sessions/restore/all:
     post:
       tags:
         - Sessions
@@ -17319,7 +17319,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/sessions/trash/bulk:
+  /api/v1/sapiens/sessions/trash/bulk:
     delete:
       tags:
         - Sessions
@@ -17339,7 +17339,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/session_limits:
+  /api/v1/sapiens/session_limits:
     get:
       tags:
         - SessionLimits
@@ -17385,7 +17385,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/session_limits/{id}:
+  /api/v1/sapiens/session_limits/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -17457,7 +17457,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/session_limits/bulk:
+  /api/v1/sapiens/session_limits/bulk:
     post:
       tags:
         - SessionLimits
@@ -17549,7 +17549,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/session_limits/upsert:
+  /api/v1/sapiens/session_limits/upsert:
     post:
       tags:
         - SessionLimits
@@ -17579,7 +17579,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SessionLimit'
 
-  /api/v1/session_limits/trash:
+  /api/v1/sapiens/session_limits/trash:
     get:
       tags:
         - SessionLimits
@@ -17596,7 +17596,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SessionLimitList'
 
-  /api/v1/session_limits/{id}/restore:
+  /api/v1/sapiens/session_limits/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -17614,7 +17614,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/session_limits/empty:
+  /api/v1/sapiens/session_limits/empty:
     delete:
       tags:
         - SessionLimits
@@ -17631,7 +17631,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/session_limits/delete/bulk:
+  /api/v1/sapiens/session_limits/delete/bulk:
     post:
       tags:
         - SessionLimits
@@ -17651,7 +17651,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/session_limits/restore/bulk:
+  /api/v1/sapiens/session_limits/restore/bulk:
     post:
       tags:
         - SessionLimits
@@ -17669,7 +17669,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/session_limits/restore/all:
+  /api/v1/sapiens/session_limits/restore/all:
     post:
       tags:
         - SessionLimits
@@ -17685,7 +17685,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/session_limits/trash/bulk:
+  /api/v1/sapiens/session_limits/trash/bulk:
     delete:
       tags:
         - SessionLimits
@@ -17705,7 +17705,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/system_settingses:
+  /api/v1/sapiens/system_settingses:
     get:
       tags:
         - SystemSettingses
@@ -17751,7 +17751,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/system_settingses/{id}:
+  /api/v1/sapiens/system_settingses/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -17823,7 +17823,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/system_settingses/bulk:
+  /api/v1/sapiens/system_settingses/bulk:
     post:
       tags:
         - SystemSettingses
@@ -17915,7 +17915,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/system_settingses/upsert:
+  /api/v1/sapiens/system_settingses/upsert:
     post:
       tags:
         - SystemSettingses
@@ -17945,7 +17945,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SystemSettings'
 
-  /api/v1/system_settingses/trash:
+  /api/v1/sapiens/system_settingses/trash:
     get:
       tags:
         - SystemSettingses
@@ -17962,7 +17962,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SystemSettingsList'
 
-  /api/v1/system_settingses/{id}/restore:
+  /api/v1/sapiens/system_settingses/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -17980,7 +17980,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/system_settingses/empty:
+  /api/v1/sapiens/system_settingses/empty:
     delete:
       tags:
         - SystemSettingses
@@ -17997,7 +17997,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/system_settingses/delete/bulk:
+  /api/v1/sapiens/system_settingses/delete/bulk:
     post:
       tags:
         - SystemSettingses
@@ -18017,7 +18017,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/system_settingses/restore/bulk:
+  /api/v1/sapiens/system_settingses/restore/bulk:
     post:
       tags:
         - SystemSettingses
@@ -18035,7 +18035,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/system_settingses/restore/all:
+  /api/v1/sapiens/system_settingses/restore/all:
     post:
       tags:
         - SystemSettingses
@@ -18051,7 +18051,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/system_settingses/trash/bulk:
+  /api/v1/sapiens/system_settingses/trash/bulk:
     delete:
       tags:
         - SystemSettingses
@@ -18071,7 +18071,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/temporary_permissions:
+  /api/v1/sapiens/temporary_permissions:
     get:
       tags:
         - TemporaryPermissions
@@ -18117,7 +18117,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/temporary_permissions/{id}:
+  /api/v1/sapiens/temporary_permissions/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -18189,7 +18189,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/temporary_permissions/bulk:
+  /api/v1/sapiens/temporary_permissions/bulk:
     post:
       tags:
         - TemporaryPermissions
@@ -18281,7 +18281,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/temporary_permissions/upsert:
+  /api/v1/sapiens/temporary_permissions/upsert:
     post:
       tags:
         - TemporaryPermissions
@@ -18311,7 +18311,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/TemporaryPermission'
 
-  /api/v1/temporary_permissions/trash:
+  /api/v1/sapiens/temporary_permissions/trash:
     get:
       tags:
         - TemporaryPermissions
@@ -18328,7 +18328,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/TemporaryPermissionList'
 
-  /api/v1/temporary_permissions/{id}/restore:
+  /api/v1/sapiens/temporary_permissions/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -18346,7 +18346,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/temporary_permissions/empty:
+  /api/v1/sapiens/temporary_permissions/empty:
     delete:
       tags:
         - TemporaryPermissions
@@ -18363,7 +18363,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/temporary_permissions/delete/bulk:
+  /api/v1/sapiens/temporary_permissions/delete/bulk:
     post:
       tags:
         - TemporaryPermissions
@@ -18383,7 +18383,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/temporary_permissions/restore/bulk:
+  /api/v1/sapiens/temporary_permissions/restore/bulk:
     post:
       tags:
         - TemporaryPermissions
@@ -18401,7 +18401,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/temporary_permissions/restore/all:
+  /api/v1/sapiens/temporary_permissions/restore/all:
     post:
       tags:
         - TemporaryPermissions
@@ -18417,7 +18417,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/temporary_permissions/trash/bulk:
+  /api/v1/sapiens/temporary_permissions/trash/bulk:
     delete:
       tags:
         - TemporaryPermissions
@@ -18803,7 +18803,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/profiles:
+  /api/v1/sapiens/profiles:
     get:
       tags:
         - Profiles
@@ -18849,7 +18849,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/profiles/{id}:
+  /api/v1/sapiens/profiles/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -18921,7 +18921,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/profiles/bulk:
+  /api/v1/sapiens/profiles/bulk:
     post:
       tags:
         - Profiles
@@ -19013,7 +19013,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/profiles/upsert:
+  /api/v1/sapiens/profiles/upsert:
     post:
       tags:
         - Profiles
@@ -19043,7 +19043,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Profile'
 
-  /api/v1/profiles/trash:
+  /api/v1/sapiens/profiles/trash:
     get:
       tags:
         - Profiles
@@ -19060,7 +19060,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProfileList'
 
-  /api/v1/profiles/{id}/restore:
+  /api/v1/sapiens/profiles/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -19078,7 +19078,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/profiles/empty:
+  /api/v1/sapiens/profiles/empty:
     delete:
       tags:
         - Profiles
@@ -19095,7 +19095,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/profiles/delete/bulk:
+  /api/v1/sapiens/profiles/delete/bulk:
     post:
       tags:
         - Profiles
@@ -19115,7 +19115,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/profiles/restore/bulk:
+  /api/v1/sapiens/profiles/restore/bulk:
     post:
       tags:
         - Profiles
@@ -19133,7 +19133,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/profiles/restore/all:
+  /api/v1/sapiens/profiles/restore/all:
     post:
       tags:
         - Profiles
@@ -19149,7 +19149,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/profiles/trash/bulk:
+  /api/v1/sapiens/profiles/trash/bulk:
     delete:
       tags:
         - Profiles
@@ -19901,7 +19901,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/user_saml_links:
+  /api/v1/sapiens/user_saml_links:
     get:
       tags:
         - UserSAMLLinks
@@ -19947,7 +19947,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/user_saml_links/{id}:
+  /api/v1/sapiens/user_saml_links/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -20019,7 +20019,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/user_saml_links/bulk:
+  /api/v1/sapiens/user_saml_links/bulk:
     post:
       tags:
         - UserSAMLLinks
@@ -20111,7 +20111,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/user_saml_links/upsert:
+  /api/v1/sapiens/user_saml_links/upsert:
     post:
       tags:
         - UserSAMLLinks
@@ -20141,7 +20141,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserSAMLLink'
 
-  /api/v1/user_saml_links/trash:
+  /api/v1/sapiens/user_saml_links/trash:
     get:
       tags:
         - UserSAMLLinks
@@ -20158,7 +20158,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserSAMLLinkList'
 
-  /api/v1/user_saml_links/{id}/restore:
+  /api/v1/sapiens/user_saml_links/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -20176,7 +20176,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/user_saml_links/empty:
+  /api/v1/sapiens/user_saml_links/empty:
     delete:
       tags:
         - UserSAMLLinks
@@ -20193,7 +20193,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/user_saml_links/delete/bulk:
+  /api/v1/sapiens/user_saml_links/delete/bulk:
     post:
       tags:
         - UserSAMLLinks
@@ -20213,7 +20213,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/user_saml_links/restore/bulk:
+  /api/v1/sapiens/user_saml_links/restore/bulk:
     post:
       tags:
         - UserSAMLLinks
@@ -20231,7 +20231,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/user_saml_links/restore/all:
+  /api/v1/sapiens/user_saml_links/restore/all:
     post:
       tags:
         - UserSAMLLinks
@@ -20247,7 +20247,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/user_saml_links/trash/bulk:
+  /api/v1/sapiens/user_saml_links/trash/bulk:
     delete:
       tags:
         - UserSAMLLinks
@@ -20267,7 +20267,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/user_settingses:
+  /api/v1/sapiens/user_settingses:
     get:
       tags:
         - UserSettingses
@@ -20313,7 +20313,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/user_settingses/{id}:
+  /api/v1/sapiens/user_settingses/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -20385,7 +20385,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/user_settingses/bulk:
+  /api/v1/sapiens/user_settingses/bulk:
     post:
       tags:
         - UserSettingses
@@ -20477,7 +20477,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/user_settingses/upsert:
+  /api/v1/sapiens/user_settingses/upsert:
     post:
       tags:
         - UserSettingses
@@ -20507,7 +20507,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserSettings'
 
-  /api/v1/user_settingses/trash:
+  /api/v1/sapiens/user_settingses/trash:
     get:
       tags:
         - UserSettingses
@@ -20524,7 +20524,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserSettingsList'
 
-  /api/v1/user_settingses/{id}/restore:
+  /api/v1/sapiens/user_settingses/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -20542,7 +20542,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/user_settingses/empty:
+  /api/v1/sapiens/user_settingses/empty:
     delete:
       tags:
         - UserSettingses
@@ -20559,7 +20559,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/user_settingses/delete/bulk:
+  /api/v1/sapiens/user_settingses/delete/bulk:
     post:
       tags:
         - UserSettingses
@@ -20579,7 +20579,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/user_settingses/restore/bulk:
+  /api/v1/sapiens/user_settingses/restore/bulk:
     post:
       tags:
         - UserSettingses
@@ -20597,7 +20597,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/user_settingses/restore/all:
+  /api/v1/sapiens/user_settingses/restore/all:
     post:
       tags:
         - UserSettingses
@@ -20613,7 +20613,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/user_settingses/trash/bulk:
+  /api/v1/sapiens/user_settingses/trash/bulk:
     delete:
       tags:
         - UserSettingses
@@ -20633,7 +20633,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflows:
+  /api/v1/sapiens/workflows:
     get:
       tags:
         - Workflows
@@ -20679,7 +20679,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/workflows/{id}:
+  /api/v1/sapiens/workflows/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -20751,7 +20751,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/workflows/bulk:
+  /api/v1/sapiens/workflows/bulk:
     post:
       tags:
         - Workflows
@@ -20843,7 +20843,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflows/upsert:
+  /api/v1/sapiens/workflows/upsert:
     post:
       tags:
         - Workflows
@@ -20873,7 +20873,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Workflow'
 
-  /api/v1/workflows/trash:
+  /api/v1/sapiens/workflows/trash:
     get:
       tags:
         - Workflows
@@ -20890,7 +20890,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowList'
 
-  /api/v1/workflows/{id}/restore:
+  /api/v1/sapiens/workflows/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -20908,7 +20908,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/workflows/empty:
+  /api/v1/sapiens/workflows/empty:
     delete:
       tags:
         - Workflows
@@ -20925,7 +20925,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/workflows/delete/bulk:
+  /api/v1/sapiens/workflows/delete/bulk:
     post:
       tags:
         - Workflows
@@ -20945,7 +20945,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflows/restore/bulk:
+  /api/v1/sapiens/workflows/restore/bulk:
     post:
       tags:
         - Workflows
@@ -20963,7 +20963,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflows/restore/all:
+  /api/v1/sapiens/workflows/restore/all:
     post:
       tags:
         - Workflows
@@ -20979,7 +20979,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/workflows/trash/bulk:
+  /api/v1/sapiens/workflows/trash/bulk:
     delete:
       tags:
         - Workflows
@@ -20999,7 +20999,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_steps:
+  /api/v1/sapiens/workflow_steps:
     get:
       tags:
         - WorkflowSteps
@@ -21045,7 +21045,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/workflow_steps/{id}:
+  /api/v1/sapiens/workflow_steps/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -21117,7 +21117,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/workflow_steps/bulk:
+  /api/v1/sapiens/workflow_steps/bulk:
     post:
       tags:
         - WorkflowSteps
@@ -21209,7 +21209,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_steps/upsert:
+  /api/v1/sapiens/workflow_steps/upsert:
     post:
       tags:
         - WorkflowSteps
@@ -21239,7 +21239,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowStep'
 
-  /api/v1/workflow_steps/trash:
+  /api/v1/sapiens/workflow_steps/trash:
     get:
       tags:
         - WorkflowSteps
@@ -21256,7 +21256,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowStepList'
 
-  /api/v1/workflow_steps/{id}/restore:
+  /api/v1/sapiens/workflow_steps/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -21274,7 +21274,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/workflow_steps/empty:
+  /api/v1/sapiens/workflow_steps/empty:
     delete:
       tags:
         - WorkflowSteps
@@ -21291,7 +21291,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/workflow_steps/delete/bulk:
+  /api/v1/sapiens/workflow_steps/delete/bulk:
     post:
       tags:
         - WorkflowSteps
@@ -21311,7 +21311,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_steps/restore/bulk:
+  /api/v1/sapiens/workflow_steps/restore/bulk:
     post:
       tags:
         - WorkflowSteps
@@ -21329,7 +21329,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_steps/restore/all:
+  /api/v1/sapiens/workflow_steps/restore/all:
     post:
       tags:
         - WorkflowSteps
@@ -21345,7 +21345,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/workflow_steps/trash/bulk:
+  /api/v1/sapiens/workflow_steps/trash/bulk:
     delete:
       tags:
         - WorkflowSteps
@@ -21365,7 +21365,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_definitions:
+  /api/v1/sapiens/workflow_definitions:
     get:
       tags:
         - WorkflowDefinitions
@@ -21411,7 +21411,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/workflow_definitions/{id}:
+  /api/v1/sapiens/workflow_definitions/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -21483,7 +21483,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/workflow_definitions/bulk:
+  /api/v1/sapiens/workflow_definitions/bulk:
     post:
       tags:
         - WorkflowDefinitions
@@ -21575,7 +21575,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_definitions/upsert:
+  /api/v1/sapiens/workflow_definitions/upsert:
     post:
       tags:
         - WorkflowDefinitions
@@ -21605,7 +21605,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowDefinition'
 
-  /api/v1/workflow_definitions/trash:
+  /api/v1/sapiens/workflow_definitions/trash:
     get:
       tags:
         - WorkflowDefinitions
@@ -21622,7 +21622,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowDefinitionList'
 
-  /api/v1/workflow_definitions/{id}/restore:
+  /api/v1/sapiens/workflow_definitions/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -21640,7 +21640,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/workflow_definitions/empty:
+  /api/v1/sapiens/workflow_definitions/empty:
     delete:
       tags:
         - WorkflowDefinitions
@@ -21657,7 +21657,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/workflow_definitions/delete/bulk:
+  /api/v1/sapiens/workflow_definitions/delete/bulk:
     post:
       tags:
         - WorkflowDefinitions
@@ -21677,7 +21677,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_definitions/restore/bulk:
+  /api/v1/sapiens/workflow_definitions/restore/bulk:
     post:
       tags:
         - WorkflowDefinitions
@@ -21695,7 +21695,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_definitions/restore/all:
+  /api/v1/sapiens/workflow_definitions/restore/all:
     post:
       tags:
         - WorkflowDefinitions
@@ -21711,7 +21711,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/workflow_definitions/trash/bulk:
+  /api/v1/sapiens/workflow_definitions/trash/bulk:
     delete:
       tags:
         - WorkflowDefinitions
@@ -21731,7 +21731,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_actions:
+  /api/v1/sapiens/workflow_actions:
     get:
       tags:
         - WorkflowActions
@@ -21777,7 +21777,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/workflow_actions/{id}:
+  /api/v1/sapiens/workflow_actions/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -21849,7 +21849,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/workflow_actions/bulk:
+  /api/v1/sapiens/workflow_actions/bulk:
     post:
       tags:
         - WorkflowActions
@@ -21941,7 +21941,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_actions/upsert:
+  /api/v1/sapiens/workflow_actions/upsert:
     post:
       tags:
         - WorkflowActions
@@ -21971,7 +21971,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowAction'
 
-  /api/v1/workflow_actions/trash:
+  /api/v1/sapiens/workflow_actions/trash:
     get:
       tags:
         - WorkflowActions
@@ -21988,7 +21988,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowActionList'
 
-  /api/v1/workflow_actions/{id}/restore:
+  /api/v1/sapiens/workflow_actions/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -22006,7 +22006,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/workflow_actions/empty:
+  /api/v1/sapiens/workflow_actions/empty:
     delete:
       tags:
         - WorkflowActions
@@ -22023,7 +22023,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/workflow_actions/delete/bulk:
+  /api/v1/sapiens/workflow_actions/delete/bulk:
     post:
       tags:
         - WorkflowActions
@@ -22043,7 +22043,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_actions/restore/bulk:
+  /api/v1/sapiens/workflow_actions/restore/bulk:
     post:
       tags:
         - WorkflowActions
@@ -22061,7 +22061,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_actions/restore/all:
+  /api/v1/sapiens/workflow_actions/restore/all:
     post:
       tags:
         - WorkflowActions
@@ -22077,7 +22077,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/workflow_actions/trash/bulk:
+  /api/v1/sapiens/workflow_actions/trash/bulk:
     delete:
       tags:
         - WorkflowActions
@@ -22097,7 +22097,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_executions:
+  /api/v1/sapiens/workflow_executions:
     get:
       tags:
         - WorkflowExecutions
@@ -22143,7 +22143,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/workflow_executions/{id}:
+  /api/v1/sapiens/workflow_executions/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -22215,7 +22215,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/workflow_executions/bulk:
+  /api/v1/sapiens/workflow_executions/bulk:
     post:
       tags:
         - WorkflowExecutions
@@ -22307,7 +22307,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_executions/upsert:
+  /api/v1/sapiens/workflow_executions/upsert:
     post:
       tags:
         - WorkflowExecutions
@@ -22337,7 +22337,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowExecution'
 
-  /api/v1/workflow_executions/trash:
+  /api/v1/sapiens/workflow_executions/trash:
     get:
       tags:
         - WorkflowExecutions
@@ -22354,7 +22354,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowExecutionList'
 
-  /api/v1/workflow_executions/{id}/restore:
+  /api/v1/sapiens/workflow_executions/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -22372,7 +22372,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/workflow_executions/empty:
+  /api/v1/sapiens/workflow_executions/empty:
     delete:
       tags:
         - WorkflowExecutions
@@ -22389,7 +22389,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/workflow_executions/delete/bulk:
+  /api/v1/sapiens/workflow_executions/delete/bulk:
     post:
       tags:
         - WorkflowExecutions
@@ -22409,7 +22409,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_executions/restore/bulk:
+  /api/v1/sapiens/workflow_executions/restore/bulk:
     post:
       tags:
         - WorkflowExecutions
@@ -22427,7 +22427,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_executions/restore/all:
+  /api/v1/sapiens/workflow_executions/restore/all:
     post:
       tags:
         - WorkflowExecutions
@@ -22443,7 +22443,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/workflow_executions/trash/bulk:
+  /api/v1/sapiens/workflow_executions/trash/bulk:
     delete:
       tags:
         - WorkflowExecutions
@@ -22463,7 +22463,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_action_executions:
+  /api/v1/sapiens/workflow_action_executions:
     get:
       tags:
         - WorkflowActionExecutions
@@ -22509,7 +22509,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /api/v1/workflow_action_executions/{id}:
+  /api/v1/sapiens/workflow_action_executions/{id}:
     parameters:
       - $ref: '#/components/parameters/IdParam'
 
@@ -22581,7 +22581,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/workflow_action_executions/bulk:
+  /api/v1/sapiens/workflow_action_executions/bulk:
     post:
       tags:
         - WorkflowActionExecutions
@@ -22673,7 +22673,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_action_executions/upsert:
+  /api/v1/sapiens/workflow_action_executions/upsert:
     post:
       tags:
         - WorkflowActionExecutions
@@ -22703,7 +22703,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowActionExecution'
 
-  /api/v1/workflow_action_executions/trash:
+  /api/v1/sapiens/workflow_action_executions/trash:
     get:
       tags:
         - WorkflowActionExecutions
@@ -22720,7 +22720,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowActionExecutionList'
 
-  /api/v1/workflow_action_executions/{id}/restore:
+  /api/v1/sapiens/workflow_action_executions/{id}/restore:
     parameters:
       - $ref: '#/components/parameters/IdParam'
     post:
@@ -22738,7 +22738,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/workflow_action_executions/empty:
+  /api/v1/sapiens/workflow_action_executions/empty:
     delete:
       tags:
         - WorkflowActionExecutions
@@ -22755,7 +22755,7 @@ paths:
                   deleted_count:
                     type: integer
 
-  /api/v1/workflow_action_executions/delete/bulk:
+  /api/v1/sapiens/workflow_action_executions/delete/bulk:
     post:
       tags:
         - WorkflowActionExecutions
@@ -22775,7 +22775,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_action_executions/restore/bulk:
+  /api/v1/sapiens/workflow_action_executions/restore/bulk:
     post:
       tags:
         - WorkflowActionExecutions
@@ -22793,7 +22793,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /api/v1/workflow_action_executions/restore/all:
+  /api/v1/sapiens/workflow_action_executions/restore/all:
     post:
       tags:
         - WorkflowActionExecutions
@@ -22809,7 +22809,7 @@ paths:
                 properties:
                   restored: { type: integer }
 
-  /api/v1/workflow_action_executions/trash/bulk:
+  /api/v1/sapiens/workflow_action_executions/trash/bulk:
     delete:
       tags:
         - WorkflowActionExecutions
