@@ -14,7 +14,6 @@ imports:
   - permission.hook.yaml
   - user_permission.hook.yaml
   - session.hook.yaml
-  - audit_log.hook.yaml
   - mfa_device.hook.yaml
   - password_reset_token.hook.yaml
   - backup_code.hook.yaml
@@ -457,10 +456,6 @@ scheduled_jobs:
   expire_permission_grants:
     schedule: "every 5.minutes"
     handler: UserPermission.expire_grants_batch
-
-  archive_audit_logs:
-    schedule: "every 1.day at 02:00"
-    handler: AuditLog.archive_old_logs
 
   cleanup_reset_tokens:
     schedule: "every 1.hour"

@@ -83,9 +83,6 @@ models:
         type: MFABackupCode[]
         attributes: ["@one_to_many", "@on_delete(cascade)"]
 
-      audit_logs:
-        type: AuditLog[]
-        attributes: ["@one_to_many", "@on_delete(set_null)"]
 
       password_resets:
         type: PasswordResetToken[]

@@ -78,9 +78,6 @@ models:
         type: User
         attributes: ["@one", "@foreign_key(user_id)", "@on_delete(cascade)", "@on_update(cascade)"]
 
-      audit_logs:
-        type: AuditLog[]
-        attributes: ["@one_to_many"]
 
     indexes:
       - type: index
