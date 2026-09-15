@@ -4,7 +4,6 @@
 
 mod types;
 mod analytics_event_permissions;
-mod audit_log_permissions;
 mod backup_code_permissions;
 mod data_export_permissions;
 mod device_trust_permissions;
@@ -32,7 +31,6 @@ mod workflow_permissions;
 
 pub use types::*;
 pub use analytics_event_permissions::AnalyticsEventPermissions;
-pub use audit_log_permissions::AuditLogPermissions;
 pub use backup_code_permissions::BackupCodePermissions;
 pub use data_export_permissions::DataExportPermissions;
 pub use device_trust_permissions::DeviceTrustPermissions;

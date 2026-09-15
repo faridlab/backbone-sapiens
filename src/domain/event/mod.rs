@@ -10,8 +10,6 @@ pub mod analytics_report_events;
 pub mod analytics_report_event_handlers;
 pub mod anonymization_record_events;
 pub mod anonymization_record_event_handlers;
-pub mod audit_log_events;
-pub mod audit_log_event_handlers;
 pub mod backup_code_events;
 pub mod backup_code_event_handlers;
 pub mod bulk_operation_events;
@@ -133,8 +131,6 @@ pub use analytics_report_events::{AnalyticsReportEvent, AnalyticsReportEventPubl
 pub use analytics_report_event_handlers::AnalyticsReportEventHandler;
 pub use anonymization_record_events::{AnonymizationRecordEvent, AnonymizationRecordEventPublisher, NoopAnonymizationRecordEventPublisher};
 pub use anonymization_record_event_handlers::AnonymizationRecordEventHandler;
-pub use audit_log_events::{AuditLogEvent, AuditLogEventPublisher, NoopAuditLogEventPublisher};
-pub use audit_log_event_handlers::AuditLogEventHandler;
 pub use backup_code_events::{BackupCodeEvent, BackupCodeEventPublisher, NoopBackupCodeEventPublisher};
 pub use backup_code_event_handlers::BackupCodeEventHandler;
 pub use bulk_operation_events::{BulkOperationEvent, BulkOperationEventPublisher, NoopBulkOperationEventPublisher};

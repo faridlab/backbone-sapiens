@@ -43,7 +43,6 @@ pub use application::service::AnalyticsEventService;
 pub use application::service::AnalyticsMetricService;
 pub use application::service::AnalyticsReportService;
 pub use application::service::AnonymizationRecordService;
-pub use application::service::AuditLogService;
 pub use application::service::BackupCodeService;
 pub use application::service::BulkOperationService;
 pub use application::service::BulkOperationResultService;
@@ -162,7 +161,6 @@ pub struct SapiensModule {
     pub analytics_metric_service: Arc<AnalyticsMetricService>,
     pub analytics_report_service: Arc<AnalyticsReportService>,
     pub anonymization_record_service: Arc<AnonymizationRecordService>,
-    pub audit_log_service: Arc<AuditLogService>,
     pub backup_code_service: Arc<BackupCodeService>,
     pub bulk_operation_service: Arc<BulkOperationService>,
     pub bulk_operation_result_service: Arc<BulkOperationResultService>,
@@ -255,7 +253,6 @@ impl SapiensModule {
             create_analytics_metric_routes,
             create_analytics_report_routes,
             create_anonymization_record_routes,
-            create_audit_log_routes,
             create_backup_code_routes,
             create_bulk_operation_routes,
             create_bulk_operation_result_routes,
@@ -316,7 +313,6 @@ impl SapiensModule {
             .merge(create_analytics_metric_routes(self.analytics_metric_service.clone()))
             .merge(create_analytics_report_routes(self.analytics_report_service.clone()))
             .merge(create_anonymization_record_routes(self.anonymization_record_service.clone()))
-            .merge(create_audit_log_routes(self.audit_log_service.clone()))
             .merge(create_backup_code_routes(self.backup_code_service.clone()))
             .merge(create_bulk_operation_routes(self.bulk_operation_service.clone()))
             .merge(create_bulk_operation_result_routes(self.bulk_operation_result_service.clone()))
@@ -465,9 +461,6 @@ impl SapiensModuleBuilder {
                 ))),
         );
 
-        // AuditLog service
-        let audit_log_repository = Arc::new(AuditLogRepository::new(db_pool.clone()));
-        let audit_log_service = Arc::new(AuditLogService::with_repository(audit_log_repository.clone()));
 
         // BackupCode service
         let backup_code_repository = Arc::new(BackupCodeRepository::new(db_pool.clone()));
@@ -752,7 +745,6 @@ impl SapiensModuleBuilder {
             analytics_metric_service,
             analytics_report_service,
             anonymization_record_service,
-            audit_log_service,
             backup_code_service,
             bulk_operation_service,
             bulk_operation_result_service,

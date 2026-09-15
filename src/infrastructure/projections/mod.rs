@@ -13,8 +13,6 @@ mod analytics_report_projection;
 mod analytics_report_projector;
 mod anonymization_record_projection;
 mod anonymization_record_projector;
-mod audit_log_projection;
-mod audit_log_projector;
 mod backup_code_projection;
 mod backup_code_projector;
 mod bulk_operation_projection;
@@ -137,8 +135,6 @@ pub use analytics_report_projection::{AnalyticsReportProjection, AnalyticsReport
 pub use analytics_report_projector::{AnalyticsReportEventHandler, AnalyticsReportProjectionRepository, AnalyticsReportProjector};
 pub use anonymization_record_projection::{AnonymizationRecordProjection, AnonymizationRecordSummary};
 pub use anonymization_record_projector::{AnonymizationRecordEventHandler, AnonymizationRecordProjectionRepository, AnonymizationRecordProjector};
-pub use audit_log_projection::{AuditLogProjection, AuditLogSummary};
-pub use audit_log_projector::{AuditLogEventHandler, AuditLogProjectionRepository, AuditLogProjector};
 pub use backup_code_projection::{BackupCodeProjection, BackupCodeSummary};
 pub use backup_code_projector::{BackupCodeEventHandler, BackupCodeProjectionRepository, BackupCodeProjector};
 pub use bulk_operation_projection::{BulkOperationProjection, BulkOperationSummary};

@@ -87,7 +87,6 @@ imports:
   - profile.model.yaml
 
   # Security & Authentication
-  - audit_log.model.yaml
   - session.model.yaml
   - session_limit.model.yaml
   - password_reset_token.model.yaml

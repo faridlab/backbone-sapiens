@@ -9,7 +9,6 @@ pub mod analytics_event_dto;
 pub mod analytics_metric_dto;
 pub mod analytics_report_dto;
 pub mod anonymization_record_dto;
-pub mod audit_log_dto;
 pub mod backup_code_dto;
 pub mod bulk_operation_dto;
 pub mod bulk_operation_result_dto;
@@ -99,14 +98,6 @@ pub use anonymization_record_dto::{
     AnonymizationRecordResponseDto,
     AnonymizationRecordListResponseDto,
     AnonymizationRecordSummaryDto,
-};
-pub use audit_log_dto::{
-    CreateAuditLogDto,
-    UpdateAuditLogDto,
-    PatchAuditLogDto,
-    AuditLogResponseDto,
-    AuditLogListResponseDto,
-    AuditLogSummaryDto,
 };
 pub use backup_code_dto::{
     CreateBackupCodeDto,

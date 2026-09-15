@@ -10,7 +10,6 @@ pub mod analytics_event_specification;
 pub mod analytics_metric_specification;
 pub mod analytics_report_specification;
 pub mod anonymization_record_specification;
-pub mod audit_log_specification;
 pub mod backup_code_specification;
 pub mod bulk_operation_specification;
 pub mod bulk_operation_result_specification;

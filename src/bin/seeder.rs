@@ -16,7 +16,6 @@ use backbone_sapiens::seeders::SeedAnalyticsEventSeeder;
 use backbone_sapiens::seeders::SeedAnalyticsMetricSeeder;
 use backbone_sapiens::seeders::SeedAnalyticsReportSeeder;
 use backbone_sapiens::seeders::SeedAnonymizationRecordSeeder;
-use backbone_sapiens::seeders::SeedAuditLogSeeder;
 use backbone_sapiens::seeders::SeedBackupCodeSeeder;
 use backbone_sapiens::seeders::SeedBulkOperationSeeder;
 use backbone_sapiens::seeders::SeedBulkOperationResultSeeder;
@@ -107,7 +106,6 @@ async fn main() -> Result<()> {
     seeders.push(Box::new(SeedAnalyticsMetricSeeder::new()));
     seeders.push(Box::new(SeedAnalyticsReportSeeder::new()));
     seeders.push(Box::new(SeedAnonymizationRecordSeeder::new()));
-    seeders.push(Box::new(SeedAuditLogSeeder::new()));
     seeders.push(Box::new(SeedBackupCodeSeeder::new()));
     seeders.push(Box::new(SeedBulkOperationSeeder::new()));
     seeders.push(Box::new(SeedBulkOperationResultSeeder::new()));

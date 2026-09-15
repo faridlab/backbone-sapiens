@@ -9,7 +9,6 @@ pub mod analytics_event_handler;
 pub mod analytics_metric_handler;
 pub mod analytics_report_handler;
 pub mod anonymization_record_handler;
-pub mod audit_log_handler;
 pub mod backup_code_handler;
 pub mod bulk_operation_handler;
 pub mod bulk_operation_result_handler;
@@ -84,7 +83,6 @@ pub use analytics_event_handler::{create_analytics_event_routes, create_analytic
 pub use analytics_metric_handler::{create_analytics_metric_routes, create_analytics_metric_read_routes, create_analytics_metric_write_routes};
 pub use analytics_report_handler::{create_analytics_report_routes, create_analytics_report_read_routes, create_analytics_report_write_routes};
 pub use anonymization_record_handler::{create_anonymization_record_routes, create_anonymization_record_read_routes, create_anonymization_record_write_routes};
-pub use audit_log_handler::{create_audit_log_routes, create_audit_log_read_routes, create_audit_log_write_routes};
 pub use backup_code_handler::{create_backup_code_routes, create_backup_code_read_routes, create_backup_code_write_routes};
 pub use bulk_operation_handler::{create_bulk_operation_routes, create_bulk_operation_read_routes, create_bulk_operation_write_routes};
 pub use bulk_operation_result_handler::{create_bulk_operation_result_routes, create_bulk_operation_result_read_routes, create_bulk_operation_result_write_routes};

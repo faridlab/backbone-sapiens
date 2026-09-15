@@ -154,50 +154,6 @@ impl HasComputedFields for AnalyticsEvent {
     }
 }
 
-/// Computed fields for AuditLog entity
-impl HasComputedFields for AuditLog {
-    fn computed_fields(&self) -> ComputedFieldValues {
-        let mut fields = ComputedFieldValues::new();
-
-        // age
-        // NOTE: Expression requires external data - requires repository access
-        // Implement via async computed field trait or cache
-        fields.set("age", serde_json::json!(null));
-
-        // is_archive_candidate
-        // WARNING: Expression references fields not on this entity: ["age"]
-        // These may be on a related entity or junction table.
-        // Implement via AsyncComputedFields trait or repository query.
-        fields.set("is_archive_candidate", serde_json::json!(null));
-
-        // is_retention_expired
-        // WARNING: Expression references fields not on this entity: ["age"]
-        // These may be on a related entity or junction table.
-        // Implement via AsyncComputedFields trait or repository query.
-        fields.set("is_retention_expired", serde_json::json!(null));
-
-        // display_label
-        // WARNING: Expression references fields not on this entity: ["format"]
-        // These may be on a related entity or junction table.
-        // Implement via AsyncComputedFields trait or repository query.
-        fields.set("display_label", serde_json::json!(null));
-
-        // actor_display
-        fields.set("actor_display", serde_json::json!(self.user_id.is_some()));
-
-        // event_summary
-        // Expression: actor_display + ' performed ' + action + (resource_type !...
-        // NOTE: Computed via AsyncComputedFields trait
-        fields.set("event_summary", serde_json::json!(null));
-
-        fields
-    }
-
-    fn computed_field(&self, name: &str) -> Option<serde_json::Value> {
-        self.computed_fields().fields.get(name).cloned()
-    }
-}
-
 /// Computed fields for BackupCode entity
 impl HasComputedFields for BackupCode {
     fn computed_fields(&self) -> ComputedFieldValues {

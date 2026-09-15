@@ -10,7 +10,6 @@ pub mod analytics_event_repository;
 pub mod analytics_metric_repository;
 pub mod analytics_report_repository;
 pub mod anonymization_record_repository;
-pub mod audit_log_repository;
 pub mod backup_code_repository;
 pub mod bulk_operation_repository;
 pub mod bulk_operation_result_repository;
@@ -92,12 +91,6 @@ pub use anonymization_record_repository::{
     AnonymizationRecordPaginationParams,
     AnonymizationRecordPaginatedResult,
     AnonymizationRecordFilter,
-};
-pub use audit_log_repository::{
-    AuditLogRepository,
-    AuditLogPaginationParams,
-    AuditLogPaginatedResult,
-    AuditLogFilter,
 };
 pub use backup_code_repository::{
     BackupCodeRepository,
