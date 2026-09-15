@@ -73,6 +73,10 @@ pub mod integration_credential_handler;
 // that want the public auth forms mount it themselves (see the file's
 // mounting-contract docs).
 pub mod public_auth_routes;
+// The signed-in person's notification tray. Recipient-scoped by hand because
+// the generated CRUD router for this entity must never be mounted — the table
+// has no org column and its only fence is `user_id`.
+pub mod notification_inbox;
 // END CUSTOM
 
 // Re-exports
@@ -138,6 +142,7 @@ pub use workflow_execution_handler::{create_workflow_execution_routes, create_wo
 pub use workflow_action_execution_handler::{create_workflow_action_execution_routes, create_workflow_action_execution_read_routes, create_workflow_action_execution_write_routes};
 // <<< CUSTOM
 pub use integration_credential_handler::create_integration_credential_routes;
+pub use notification_inbox::{create_notification_inbox_routes, NotificationInboxState};
 // <<< CUSTOM: Gated public auth router export (mounting is a host decision)
 pub use public_auth_routes::{create_public_auth_routes, PublicAuthState};
 // END CUSTOM
