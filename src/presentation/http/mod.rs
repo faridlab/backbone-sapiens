@@ -142,7 +142,9 @@ pub use workflow_execution_handler::{create_workflow_execution_routes, create_wo
 pub use workflow_action_execution_handler::{create_workflow_action_execution_routes, create_workflow_action_execution_read_routes, create_workflow_action_execution_write_routes};
 // <<< CUSTOM
 pub use integration_credential_handler::create_integration_credential_routes;
-pub use notification_inbox::{create_notification_inbox_routes, NotificationInboxState};
+pub use notification_inbox::{
+    create_notification_inbox_routes, NotificationInboxState, NotificationRecipient,
+};
 // <<< CUSTOM: Gated public auth router export (mounting is a host decision)
 pub use public_auth_routes::{create_public_auth_routes, PublicAuthState};
 // END CUSTOM

@@ -22,7 +22,6 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::{get, post};
 use axum::{Extension, Json, Router};
-use backbone_auth::AuthContext;
 use serde::Deserialize;
 use sqlx::{PgPool, Row};
 
@@ -64,6 +63,20 @@ const TRAY_SCOPE: &str = "user_id = $1::uuid
      AND (metadata->>'deleted_at') IS NULL
      AND (expires_at IS NULL OR expires_at > NOW())";
 
+/// Whose tray this is, as decided by the composing service.
+///
+/// Authentication is the composer's duty, not a module's: a host layers its own
+/// guard and inserts this extension from the verified claims. The module states
+/// the requirement and refuses without it, rather than reaching for one
+/// particular host's auth context — which would bind every composition to the
+/// shape of one of them, and would not even compile where that context sits
+/// behind a feature the module does not enable.
+///
+/// This is also the ONLY source of the recipient. A user id taken from the
+/// query string would be an enumeration hole over every user in the holding.
+#[derive(Debug, Clone)]
+pub struct NotificationRecipient(pub String);
+
 fn unauthorized() -> (StatusCode, Json<serde_json::Value>) {
     (
         StatusCode::UNAUTHORIZED,
@@ -80,10 +93,10 @@ fn failed(e: impl std::fmt::Display) -> (StatusCode, Json<serde_json::Value>) {
 
 async fn list_mine(
     State(state): State<Arc<NotificationInboxState>>,
-    auth: Option<Extension<AuthContext>>,
+    recipient: Option<Extension<NotificationRecipient>>,
     Query(q): Query<InboxQuery>,
 ) -> impl IntoResponse {
-    let Some(Extension(auth)) = auth else { return unauthorized() };
+    let Some(Extension(NotificationRecipient(user_id))) = recipient else { return unauthorized() };
 
     let limit = q.limit.unwrap_or(20).clamp(1, 100) as i64;
     let offset = (q.page.unwrap_or(1).max(1) - 1) as i64 * limit;
@@ -101,7 +114,7 @@ async fn list_mine(
 
     let rows = match backbone_orm::company_scope::fetch_all_rows_scoped(
         &state.pool,
-        sqlx::query(&sql).bind(&auth.user_id),
+        sqlx::query(&sql).bind(&user_id),
     )
     .await
     {
@@ -140,16 +153,16 @@ async fn list_mine(
 
 async fn unread_count(
     State(state): State<Arc<NotificationInboxState>>,
-    auth: Option<Extension<AuthContext>>,
+    recipient: Option<Extension<NotificationRecipient>>,
 ) -> impl IntoResponse {
-    let Some(Extension(auth)) = auth else { return unauthorized() };
+    let Some(Extension(NotificationRecipient(user_id))) = recipient else { return unauthorized() };
 
     let sql = format!(
         "SELECT COUNT(*) FROM sapiens.notifications WHERE {TRAY_SCOPE} AND is_read = false"
     );
     match backbone_orm::company_scope::fetch_one_scalar_scoped(
         &state.pool,
-        sqlx::query_scalar::<_, i64>(&sql).bind(&auth.user_id),
+        sqlx::query_scalar::<_, i64>(&sql).bind(&user_id),
     )
     .await
     {
@@ -163,10 +176,10 @@ async fn unread_count(
 
 async fn read_one(
     State(state): State<Arc<NotificationInboxState>>,
-    auth: Option<Extension<AuthContext>>,
+    recipient: Option<Extension<NotificationRecipient>>,
     Path(id): Path<String>,
 ) -> impl IntoResponse {
-    let Some(Extension(auth)) = auth else { return unauthorized() };
+    let Some(Extension(NotificationRecipient(user_id))) = recipient else { return unauthorized() };
 
     // The recipient predicate is part of the UPDATE, not a check before it:
     // another user's notification matches zero rows rather than being marked.
@@ -180,7 +193,7 @@ async fn read_one(
     );
     match backbone_orm::company_scope::fetch_optional_row_scoped(
         &state.pool,
-        sqlx::query(&sql).bind(&auth.user_id).bind(&id),
+        sqlx::query(&sql).bind(&user_id).bind(&id),
     )
     .await
     {
@@ -200,9 +213,9 @@ async fn read_one(
 
 async fn read_all(
     State(state): State<Arc<NotificationInboxState>>,
-    auth: Option<Extension<AuthContext>>,
+    recipient: Option<Extension<NotificationRecipient>>,
 ) -> impl IntoResponse {
-    let Some(Extension(auth)) = auth else { return unauthorized() };
+    let Some(Extension(NotificationRecipient(user_id))) = recipient else { return unauthorized() };
 
     let sql = format!(
         "WITH marked AS (
@@ -214,7 +227,7 @@ async fn read_all(
     );
     match backbone_orm::company_scope::fetch_one_scalar_scoped(
         &state.pool,
-        sqlx::query_scalar::<_, i64>(&sql).bind(&auth.user_id),
+        sqlx::query_scalar::<_, i64>(&sql).bind(&user_id),
     )
     .await
     {
