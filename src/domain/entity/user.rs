@@ -292,6 +292,16 @@ impl backbone_orm::EntityRepoMeta for User {
         m.insert("status".to_string(), "user_status".to_string());
         m
     }
+    /// Never serialized to anyone but the row's owner or a platform caller.
+    ///
+    /// These carry `@sensitive` in the schema, whose description says plainly
+    /// that they are never exposed over the API. Saying so is not enforcing it:
+    /// the response pruner reads THIS list, and while it was empty a password
+    /// hash was serialized to every caller that could reach the route.
+    fn private_fields() -> &'static [&'static str] {
+        &["passwordHash"]
+    }
+
     fn search_fields() -> &'static [&'static str] {
         &["username", "email", "password_hash"]
     }

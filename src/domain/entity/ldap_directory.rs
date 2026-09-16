@@ -311,6 +311,16 @@ impl backbone_orm::EntityRepoMeta for LDAPDirectory {
         m.insert("status".to_string(), "ldap_directory_status".to_string());
         m
     }
+    /// Never serialized to anyone but the row's owner or a platform caller.
+    ///
+    /// These carry `@sensitive` in the schema, whose description says plainly
+    /// that they are never exposed over the API. Saying so is not enforcing it:
+    /// the response pruner reads THIS list, and while it was empty a password
+    /// hash was serialized to every caller that could reach the route.
+    fn private_fields() -> &'static [&'static str] {
+        &["bindPassword"]
+    }
+
     fn search_fields() -> &'static [&'static str] {
         &["name", "display_name", "host", "bind_dn", "bind_password", "search_base", "search_filter"]
     }

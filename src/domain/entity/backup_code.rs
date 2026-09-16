@@ -250,6 +250,16 @@ impl backbone_orm::EntityRepoMeta for BackupCode {
         m.insert("user_id".to_string(), "uuid".to_string());
         m
     }
+    /// Never serialized to anyone but the row's owner or a platform caller.
+    ///
+    /// These carry `@sensitive` in the schema, whose description says plainly
+    /// that they are never exposed over the API. Saying so is not enforcing it:
+    /// the response pruner reads THIS list, and while it was empty a password
+    /// hash was serialized to every caller that could reach the route.
+    fn private_fields() -> &'static [&'static str] {
+        &["codeHash"]
+    }
+
     fn search_fields() -> &'static [&'static str] {
         &["batch_id", "code_hash"]
     }
