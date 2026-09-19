@@ -80,6 +80,12 @@ futures = "0.3"
 # GraphQL (optional)
 async-graphql = { version = "7", optional = true }
 
+# OpenAPI schema derive. The generator emits `use utoipa::ToSchema;` in every
+# entity and DTO behind the `openapi` feature, so the crate only builds with that
+# feature on when the derive's crate is present: a feature that cannot compile is
+# not a feature.
+utoipa = { version = "5", features = ["chrono", "uuid"] }
+
 [features]
 default = []
 events = []
