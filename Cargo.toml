@@ -1,6 +1,6 @@
 [package]
 name = "backbone-sapiens"
-version = "0.4.16"
+version = "0.4.17"
 edition = "2021"
 description = "Sapiens Bounded Context: User Management Module for Backbone Framework"
 
@@ -9,12 +9,12 @@ path = "src/lib.rs"
 
 [dependencies]
 # Backbone Framework CORE dependencies
-backbone-core = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.30", features = ["postgres"] }
-backbone-orm = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.30" }
-backbone-auth = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.30" }
-backbone-messaging = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.30" }
-backbone-email = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.30" }
-backbone-outbox = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.30" }
+backbone-core = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.31", features = ["postgres"] }
+backbone-orm = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.31" }
+backbone-auth = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.31" }
+backbone-messaging = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.31" }
+backbone-email = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.31" }
+backbone-outbox = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.31" }
 
 # Core dependencies
 tokio = { version = "1.0", features = ["full"] }
