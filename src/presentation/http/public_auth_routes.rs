@@ -47,6 +47,7 @@ use crate::application::service::{
     AuthService, AuthError, AuthThrottleService, DeviceTrustKeyService, RegisterInput,
     SignupPolicyService,
 };
+use crate::infrastructure::auth::refresh_cookie;
 
 // ── Declared throttle postures (Tier B) ─────────────────────────────────────
 //
@@ -83,6 +84,11 @@ pub struct PublicAuthState {
     #[allow(dead_code)] // reserved for the step-up flow the host mounts later
     device_trust_keys: Arc<DeviceTrustKeyService>,
     invitation_verifier: Option<Arc<dyn InvitationVerifier>>,
+    /// The httpOnly refresh-cookie mode: origins allowed to hold the cookie,
+    /// plus the Path the cookie is scoped to (the host's mount base for
+    /// this router). None (the default) keeps the body-token contract
+    /// exactly as before — cookie mode is opt-in per host.
+    cookie_mode: Option<(Vec<String>, String)>,
 }
 
 impl PublicAuthState {
@@ -98,6 +104,7 @@ impl PublicAuthState {
             throttle,
             device_trust_keys,
             invitation_verifier: None,
+            cookie_mode: None,
         }
     }
 
@@ -109,6 +116,35 @@ impl PublicAuthState {
     ) -> Self {
         self.invitation_verifier = Some(verifier);
         self
+    }
+
+    /// Opt the mount into the httpOnly refresh cookie: browser clients (an
+    /// `Origin` matching one of `origins`) get the refresh token as a
+    /// cookie scoped to `path` — the mount base this router answers under —
+    /// and never in a response body. The origins list must be exactly the
+    /// browser origins the deployment serves; `*` is not an origin.
+    pub fn with_cookie_mode(mut self, origins: Vec<String>, path: String) -> Self {
+        self.cookie_mode = Some((origins, path));
+        self
+    }
+
+    /// The cookie Path when cookie mode is armed (Set-Cookie construction
+    /// needs it even on refusals, to clear what may be present).
+    fn cookie_path(&self) -> Option<&str> {
+        self.cookie_mode.as_ref().map(|(_, path)| path.as_str())
+    }
+
+    /// Is this request a browser one this mount trusts with a cookie? The
+    /// `Origin` header is browser-mandatory on cross-origin POSTs and
+    /// absent from mobile/CLI clients, and it must name a configured
+    /// origin.
+    fn browser_origin(&self, headers: &HeaderMap) -> Option<String> {
+        let (origins, _) = self.cookie_mode.as_ref()?;
+        let origin = headers.get(axum::http::header::ORIGIN)?.to_str().ok()?;
+        origins
+            .iter()
+            .any(|allowed| allowed == origin)
+            .then(|| origin.to_string())
     }
 }
 
@@ -245,7 +281,10 @@ struct ResetPasswordRequest {
 
 #[derive(Deserialize)]
 struct ChangePasswordRequest {
-    refresh_token: String,
+    /// Optional in cookie mode: a browser presents its httpOnly cookie
+    /// instead of a body token (the handler falls back to it).
+    #[serde(default)]
+    refresh_token: Option<String>,
     current_password: String,
     new_password: String,
     confirm_password: String,
@@ -332,6 +371,8 @@ async fn register(
 /// POST /login — throttled both dimensions; unknown identity, wrong password,
 /// locked and inactive accounts all answer the SAME 401 body (the service
 /// equalizes verification cost so they are timing-indistinguishable too).
+/// In cookie mode (an `Origin` matching the armed allowlist) the refresh
+/// token rides `Set-Cookie` and the body omits it entirely.
 async fn login(
     State(state): State<PublicAuthState>,
     headers: HeaderMap,
@@ -349,16 +390,27 @@ async fn login(
         return response;
     }
 
+    let browser = state.browser_origin(&headers).is_some();
     match state.auth.login(&req.email, &req.password).await {
-        Ok(result) => (
-            StatusCode::OK,
-            Json(serde_json::json!({
+        Ok(result) => {
+            let mut body = serde_json::json!({
                 "access_token": result.access_token,
-                "refresh_token": result.refresh_token,
                 "expires_in": result.expires_in,
-            })),
-        )
-            .into_response(),
+            });
+            if browser {
+                let Some(path) = state.cookie_path() else {
+                    unreachable!("browser_origin is Some only when cookie mode is armed")
+                };
+                let mut response = (StatusCode::OK, Json(body)).into_response();
+                response.headers_mut().insert(
+                    axum::http::header::SET_COOKIE,
+                    refresh_cookie::refresh_cookie_header(&result.refresh_token, path),
+                );
+                return response;
+            }
+            body["refresh_token"] = serde_json::json!(result.refresh_token);
+            (StatusCode::OK, Json(body)).into_response()
+        }
         Err(AuthError::InvalidCredentials) => unauthorized("Invalid email or password"),
         // A locked or unverified account is still an authentication refusal;
         // the distinct message helps the legitimate owner without revealing
@@ -371,42 +423,112 @@ async fn login(
     }
 }
 
+/// Parse the optional refresh body: empty (or absent) is cookie mode —
+/// None; a non-empty body that is not a refresh request is a 400, never
+/// silently treated as cookie mode.
+fn body_refresh_token(bytes: &axum::body::Bytes) -> Result<Option<String>, axum::response::Response> {
+    if bytes.iter().all(|b| b.is_ascii_whitespace()) {
+        return Ok(None);
+    }
+    serde_json::from_slice::<RefreshRequest>(bytes)
+        .map(|req| Some(req.refresh_token))
+        .map_err(|_| bad_request("Invalid request body"))
+}
+
 /// POST /refresh — rotate the refresh token. The absolute and idle session
-/// postures (`SESSION_TIMEOUT_POLICY`) are enforced here in the service: an
-/// idle-expired session is revoked, not refreshed.
+/// postures (`SESSION_TIMEOUT_POLICY`) are enforced in the service: an
+/// idle-expired session is revoked, not refreshed, and a replayed (already
+/// rotated) token revokes its whole family. The token comes from the body
+/// (mobile/CLI contract, unchanged) or, when the body is empty, from the
+/// httpOnly cookie — and a cookie-sourced refresh must carry an allowed
+/// `Origin` (the CSRF defense for the cookie lane).
 async fn refresh(
     State(state): State<PublicAuthState>,
-    Json(req): Json<RefreshRequest>,
+    headers: HeaderMap,
+    bytes: axum::body::Bytes,
 ) -> axum::response::Response {
-    match state.auth.refresh_token(&req.refresh_token).await {
-        Ok(result) => (
-            StatusCode::OK,
-            Json(serde_json::json!({
-                "access_token": result.access_token,
-                "refresh_token": result.refresh_token,
-                "expires_in": result.expires_in,
-            })),
-        )
-            .into_response(),
+    let body_token = match body_refresh_token(&bytes) {
+        Ok(token) => token,
+        Err(response) => return response,
+    };
+    let (token, from_cookie) = match body_token {
+        Some(token) => (token, false),
+        None => match refresh_cookie::cookie_value(&headers, refresh_cookie::REFRESH_COOKIE_NAME)
+        {
+            Some(token) => (token, true),
+            None => return unauthorized("Invalid or expired refresh token"),
+        },
+    };
+    if from_cookie && state.browser_origin(&headers).is_none() {
+        return json_body(StatusCode::FORBIDDEN, "error", "Origin not allowed");
+    }
+
+    match state.auth.refresh_token(&token).await {
+        Ok(result) => {
+            if state.browser_origin(&headers).is_some() {
+                let Some(path) = state.cookie_path() else {
+                    unreachable!("browser_origin is Some only when cookie mode is armed")
+                };
+                let mut response = (
+                    StatusCode::OK,
+                    Json(serde_json::json!({
+                        "access_token": result.access_token,
+                        "expires_in": result.expires_in,
+                    })),
+                )
+                    .into_response();
+                response.headers_mut().insert(
+                    axum::http::header::SET_COOKIE,
+                    refresh_cookie::refresh_cookie_header(&result.refresh_token, path),
+                );
+                return response;
+            }
+            (
+                StatusCode::OK,
+                Json(serde_json::json!({
+                    "access_token": result.access_token,
+                    "refresh_token": result.refresh_token,
+                    "expires_in": result.expires_in,
+                })),
+            )
+                .into_response()
+        }
         Err(AuthError::Validation(msg)) => bad_request(&msg),
         Err(_) => axum::http::StatusCode::INTERNAL_SERVER_ERROR.into_response(),
     }
 }
 
-/// POST /logout — revoke every session of the token's owner.
+/// POST /logout — revoke every session of the token's owner. The token is
+/// read from the body or the cookie, whichever is present. Idempotent and
+/// never an oracle; in cookie mode the answer always clears the cookie.
 async fn logout(
     State(state): State<PublicAuthState>,
-    Json(req): Json<RefreshRequest>,
+    headers: HeaderMap,
+    bytes: axum::body::Bytes,
 ) -> axum::response::Response {
-    match state.auth.resolve_refresh_token_owner(&req.refresh_token).await {
-        Some(owner) => match state.auth.logout(owner.user_id).await {
-            Ok(_) => accepted("Logged out"),
-            Err(_) => axum::http::StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    let token = body_refresh_token(&bytes)
+        .ok()
+        .flatten()
+        .or_else(|| refresh_cookie::cookie_value(&headers, refresh_cookie::REFRESH_COOKIE_NAME));
+    let mut response = match token.as_deref() {
+        Some(token) => match state.auth.resolve_refresh_token_owner(token).await {
+            Some(owner) => match state.auth.logout(owner.user_id).await {
+                Ok(_) => accepted("Logged out"),
+                Err(_) => axum::http::StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+            },
+            // An unknown token logs "out" successfully — logout is idempotent
+            // and must not confirm which tokens exist.
+            None => accepted("Logged out"),
         },
-        // An unknown token logs "out" successfully — logout is idempotent and
-        // must not confirm which tokens exist.
         None => accepted("Logged out"),
+    };
+    if let Some(path) = state.cookie_path() {
+        response.headers_mut().insert(
+            axum::http::header::SET_COOKIE,
+            refresh_cookie::clear_refresh_cookie_header(path),
+        );
     }
+    response
 }
 
 /// POST /verify-email — submit a verification code. Unknown address and wrong
@@ -490,9 +612,19 @@ async fn reset_password(
 /// password is the proof, the token only names the surviving session.
 async fn change_password(
     State(state): State<PublicAuthState>,
+    headers: HeaderMap,
     Json(req): Json<ChangePasswordRequest>,
 ) -> axum::response::Response {
-    let Some(owner) = state.auth.resolve_refresh_token_owner(&req.refresh_token).await else {
+    // Body token first (the mobile/CLI contract); a browser in cookie mode
+    // presents its httpOnly cookie instead.
+    let token = req
+        .refresh_token
+        .clone()
+        .or_else(|| refresh_cookie::cookie_value(&headers, refresh_cookie::REFRESH_COOKIE_NAME));
+    let Some(token) = token else {
+        return bad_request("A refresh token is required");
+    };
+    let Some(owner) = state.auth.resolve_refresh_token_owner(&token).await else {
         return unauthorized("Invalid email or password");
     };
 

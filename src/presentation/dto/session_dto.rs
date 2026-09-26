@@ -308,6 +308,8 @@ impl From<CreateSessionDto> for Session {
             device_fingerprint: dto.device_fingerprint,
             status: dto.status,
             revoked_at: dto.revoked_at,
+            family_id: Uuid::new_v4(),
+            replaced_by: None,
             metadata: AuditMetadata::default(),
         };
         entity.normalize_revocation_state();

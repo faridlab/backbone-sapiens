@@ -745,12 +745,36 @@ impl AuthService {
     pub async fn refresh_token(&self, token: &str) -> Result<LoginResult, AuthError> {
         let token_hash = crypto::hash_token(token);
 
-        let session = self
+        let session = match self
             .session_repo
             .find_active_by_token_hash(&token_hash)
             .await
             .map_err(|e| AuthError::Internal(e))?
-            .ok_or_else(|| AuthError::Validation("Invalid or expired refresh token".into()))?;
+        {
+            Some(session) => session,
+            None => {
+                // REUSE: a hash that names a REVOKED row is a spent token
+                // being replayed. The whole family dies with the refusal —
+                // the successor a thief cannot distinguish from the victim's
+                // is exactly the successor they must not keep. The refusal
+                // body stays the generic one: the replay must not become an
+                // oracle that separates "revoked" from "never existed".
+                if let Some(spent) = self
+                    .session_repo
+                    .find_revoked_by_token_hash(&token_hash)
+                    .await
+                    .map_err(|e| AuthError::Internal(e))?
+                {
+                    if let Err(e) = self.session_repo.revoke_family(spent.family_id).await {
+                        warn!(
+                            "Failed to revoke replayed family {} of session {}: {}",
+                            spent.family_id, spent.id, e
+                        );
+                    }
+                }
+                return Err(AuthError::Validation("Invalid or expired refresh token".into()));
+            }
+        };
 
         if session.expires_at < Utc::now() {
             if let Err(e) = self.session_repo.revoke_session(session.id).await {
@@ -784,11 +808,16 @@ impl AuthService {
             .map_err(|e| AuthError::Internal(e))?
             .ok_or_else(|| AuthError::NotFound("User not found".into()))?;
 
-        // Atomic session rotation
+        // Atomic session rotation: the old row dies, the successor is born in
+        // the SAME family (reuse chains stay traceable) and carries the
+        // session's own device posture — a web login must not mutate into a
+        // 'mobile' row at its first reload.
         let new_refresh = crypto::generate_refresh_token();
         let new_hash = crypto::hash_token(&new_refresh);
         let new_expires = Utc::now() + Duration::days(30);
         let metadata = now_metadata();
+        let new_id = Uuid::new_v4();
+        let carried_device = session.device_type;
 
         let mut tx = self
             .db_pool
@@ -796,21 +825,28 @@ impl AuthService {
             .await
             .map_err(|e| AuthError::Internal(e.into()))?;
 
-        sqlx::query("UPDATE sapiens.sessions SET status = 'revoked', revoked_at = NOW() WHERE id = $1")
-            .bind(session.id)
-            .execute(&mut *tx)
-            .await
-            .map_err(|e| AuthError::Internal(e.into()))?;
+        sqlx::query(
+            "UPDATE sapiens.sessions \
+             SET status = 'revoked', revoked_at = NOW(), replaced_by = $2 WHERE id = $1",
+        )
+        .bind(session.id)
+        .bind(new_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| AuthError::Internal(e.into()))?;
 
         sqlx::query(
             "INSERT INTO sapiens.sessions \
-             (user_id, token_hash, expires_at, device_type, status, last_activity, metadata) \
-             VALUES ($1, $2, $3, 'mobile', 'active', NOW(), $4)",
+             (id, user_id, token_hash, expires_at, device_type, status, last_activity, metadata, family_id) \
+             VALUES ($1, $2, $3, $4, $5, 'active', NOW(), $6, $7)",
         )
+        .bind(new_id)
         .bind(user.id)
         .bind(&new_hash)
         .bind(new_expires)
+        .bind(carried_device)
         .bind(&metadata)
+        .bind(session.family_id)
         .execute(&mut *tx)
         .await
         .map_err(|e| AuthError::Internal(e.into()))?;

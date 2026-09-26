@@ -504,16 +504,18 @@ async fn bearer_rotation_keeps_independent_credential() {
         .await
         .expect("rotate refresh token");
 
+    // the NEW bearer works — proven BEFORE the replay below, because the
+    // replay is a family kill: it revokes the successor too (the theft
+    // response, ROT-2's own probe).
+    auth.refresh_token(&rotated.refresh_token)
+        .await
+        .expect("rotated bearer works");
     // the OLD bearer is dead
     match auth.refresh_token(&session.refresh_token).await {
         Err(backbone_sapiens::application::service::AuthError::Validation(_)) => {}
         Ok(_) => panic!("rotated-out token must be refused, got a fresh token pair"),
         Err(e) => panic!("rotated-out token must be refused as Validation, got {e}"),
     }
-    // the NEW bearer works
-    auth.refresh_token(&rotated.refresh_token)
-        .await
-        .expect("rotated bearer works");
     // the INDEPENDENT credential (the trusted-device key) is untouched by the
     // bearer rotation — either rotates without breaking the other
     assert!(
@@ -674,4 +676,239 @@ async fn lifecycle_outbox_stages_deactivated_anonymized_deleted() {
     .await
     .expect("count deleted rows");
     assert_eq!(deleted, 1, "one UserDeleted row per soft-delete");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REFRESH-COOKIE + REUSE-FAMILY probes
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Drive one request with arbitrary extra headers and a RAW body (the cookie
+/// legs post an empty body), returning status, body and the Set-Cookie header.
+async fn send_raw(
+    app: axum::Router,
+    ip: &str,
+    path: &str,
+    body: String,
+    extra: &[(&str, &str)],
+) -> (StatusCode, String, Option<String>) {
+    let mut builder = Request::builder()
+        .method("POST")
+        .uri(path)
+        .header("content-type", "application/json")
+        .header("x-forwarded-for", ip);
+    for (name, value) in extra {
+        builder = builder.header(*name, *value);
+    }
+    let req = builder
+        .body(axum::body::Body::from(body))
+        .expect("build request");
+    let resp = app.oneshot(req).await.expect("oneshot");
+    let set_cookie = resp
+        .headers()
+        .get(axum::http::header::SET_COOKIE)
+        .and_then(|v| v.to_str().ok())
+        .map(str::to_string);
+    let status = resp.status();
+    let bytes = axum::body::to_bytes(resp.into_body(), usize::MAX)
+        .await
+        .expect("read body");
+    (status, String::from_utf8_lossy(&bytes).to_string(), set_cookie)
+}
+
+/// CK-1 the httpOnly cookie journey over the armed router: browser login
+/// sets the hardened cookie and omits the body token; the cookie refreshes
+/// and rotates; a replay is refused AND kills the successor; a disallowed
+/// Origin is refused; logout clears the cookie and revokes server-side;
+/// body mode keeps the pair unchanged.
+#[tokio::test]
+async fn cookie_mode_journey() {
+    let pool = pool().await;
+    let auth = auth_service(&pool).await;
+    let (user_id, email) = verified_user(&pool, &auth, "ck1").await;
+
+    let state = base_state(&pool, auth.clone()).with_cookie_mode(
+        vec!["http://127.0.0.1:3000".to_string()],
+        "/api/v1/auth".to_string(),
+    );
+    let app = router(state);
+    let origin = ("origin", "http://127.0.0.1:3000");
+
+    // browser login: cookie armed, no refresh token in the body
+    let (status, body, set_cookie) = send_raw(
+        app.clone(),
+        "10.10.0.1",
+        "/login",
+        json!({"email": email, "password": "Passw0rd-long"}).to_string(),
+        &[origin],
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK, "browser login succeeds: {body}");
+    assert!(!body.contains("refresh_token"), "body must omit the token: {body}");
+    let Some(raw) = set_cookie else {
+        panic!("browser login set no refresh cookie");
+    };
+    for attr in ["HttpOnly", "Secure", "SameSite=Strict", "Path=/api/v1/auth"] {
+        assert!(raw.contains(attr), "Set-Cookie missing `{attr}`: {raw}");
+    }
+    assert!(!raw.contains("Max-Age"), "session cookie carries no Max-Age: {raw}");
+    let first = raw
+        .split(';')
+        .next()
+        .unwrap_or("")
+        .strip_prefix("sapiens_refresh=")
+        .expect("cookie pair")
+        .to_string();
+
+    // the cookie refreshes and rotates
+    let (status, body, set_cookie) = send_raw(
+        app.clone(),
+        "10.10.0.2",
+        "/refresh",
+        String::new(),
+        &[origin, ("cookie", &format!("sapiens_refresh={first}"))],
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK, "cookie refresh succeeds: {body}");
+    assert!(!body.contains("refresh_token"), "refresh body must omit the token: {body}");
+    let second = set_cookie
+        .expect("refresh rotated the cookie")
+        .split(';')
+        .next()
+        .unwrap_or("")
+        .strip_prefix("sapiens_refresh=")
+        .expect("cookie pair")
+        .to_string();
+    assert_ne!(first, second, "rotation must mint a new token");
+
+    // replay: the OLD cookie is refused AND the successor dies with it
+    let (status, _, _) = send_raw(
+        app.clone(),
+        "10.10.0.3",
+        "/refresh",
+        String::new(),
+        &[origin, ("cookie", &format!("sapiens_refresh={first}"))],
+    )
+    .await;
+    assert!(
+        status == StatusCode::BAD_REQUEST || status == StatusCode::UNAUTHORIZED,
+        "replayed cookie answered {status}; expected a refusal"
+    );
+    let (status, _, _) = send_raw(
+        app.clone(),
+        "10.10.0.4",
+        "/refresh",
+        String::new(),
+        &[origin, ("cookie", &format!("sapiens_refresh={second}"))],
+    )
+    .await;
+    assert!(
+        status == StatusCode::BAD_REQUEST || status == StatusCode::UNAUTHORIZED,
+        "successor survived the family replay: answered {status}"
+    );
+
+    // the cookie lane checks Origin
+    let _ = user_id;
+    let (_, _, _) = send_raw(
+        app.clone(),
+        "10.10.0.5",
+        "/login",
+        json!({"email": email, "password": "Passw0rd-long"}).to_string(),
+        &[origin],
+    )
+    .await;
+    let third = {
+        let (status, _, set_cookie) = send_raw(
+            app.clone(),
+            "10.10.0.6",
+            "/login",
+            json!({"email": email, "password": "Passw0rd-long"}).to_string(),
+            &[origin],
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        set_cookie
+            .expect("cookie")
+            .split(';')
+            .next()
+            .unwrap_or("")
+            .strip_prefix("sapiens_refresh=")
+            .expect("cookie pair")
+            .to_string()
+    };
+    let (status, _, _) = send_raw(
+        app.clone(),
+        "10.10.0.7",
+        "/refresh",
+        String::new(),
+        &[
+            ("origin", "https://evil.example"),
+            ("cookie", &format!("sapiens_refresh={third}")),
+        ],
+    )
+    .await;
+    assert_eq!(status, StatusCode::FORBIDDEN, "disallowed origin must be refused");
+
+    // logout: clearing cookie + server-side revoke
+    let (status, body, set_cookie) = send_raw(
+        app.clone(),
+        "10.10.0.8",
+        "/logout",
+        String::new(),
+        &[origin, ("cookie", &format!("sapiens_refresh={third}"))],
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK, "logout is idempotent: {body}");
+    let clear = set_cookie.expect("logout clears the cookie");
+    assert!(clear.contains("Max-Age=0"), "clearing cookie: {clear}");
+    let (status, _, _) = send_raw(
+        app.clone(),
+        "10.10.0.9",
+        "/refresh",
+        String::new(),
+        &[origin, ("cookie", &format!("sapiens_refresh={third}"))],
+    )
+    .await;
+    assert!(
+        status == StatusCode::BAD_REQUEST || status == StatusCode::UNAUTHORIZED,
+        "revoked cookie refreshed after logout: answered {status}"
+    );
+
+    // body mode keeps the pair (no Origin header present)
+    let (status, body, _) = send_raw(
+        app.clone(),
+        "10.10.1.1",
+        "/login",
+        json!({"email": email, "password": "Passw0rd-long"}).to_string(),
+        &[],
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK);
+    assert!(body.contains("refresh_token"), "body mode keeps the pair: {body}");
+}
+
+/// ROT-2 the reuse family at service level: a replayed token is refused and
+/// the successor it once had is dead too — the theft response.
+#[tokio::test]
+async fn refresh_replay_revokes_the_family() {
+    let pool = pool().await;
+    let auth = auth_service(&pool).await;
+    let (_, email) = verified_user(&pool, &auth, "rot2").await;
+
+    let login = auth.login(&email, "Passw0rd-long").await.expect("login");
+    let first = login.refresh_token.clone();
+    let rotated = auth.refresh_token(&first).await.expect("first rotation");
+    let second = rotated.refresh_token.clone();
+    // one more hop so the family has a live successor beyond the first
+    let _ = auth.refresh_token(&second).await.expect("second rotation");
+
+    // the REPLAY: the spent first token must be refused...
+    let replay = auth.refresh_token(&first).await;
+    assert!(replay.is_err(), "replayed token must be refused");
+    // ...and the family it named must be dead: the still-unspent second
+    // token no longer refreshes either.
+    let survivor = auth.refresh_token(&second).await;
+    assert!(
+        survivor.is_err(),
+        "the family's live successor must die with the replay"
+    );
 }

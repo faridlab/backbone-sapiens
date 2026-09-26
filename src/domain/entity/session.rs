@@ -65,6 +65,12 @@ pub struct Session {
     pub device_fingerprint: Option<String>,
     pub status: SessionStatus,
     pub revoked_at: Option<DateTime<Utc>>,
+    /// The rotation chain this row belongs to: one family per login, every
+    /// refresh appends. A replayed (already-revoked) token revokes every
+    /// live row in its family.
+    pub family_id: Uuid,
+    /// The successor row that superseded this one at rotation.
+    pub replaced_by: Option<Uuid>,
     #[serde(default)]
     #[sqlx(json)]
     pub metadata: AuditMetadata,
@@ -92,6 +98,8 @@ impl Session {
             device_fingerprint: None,
             status,
             revoked_at: None,
+            family_id: Uuid::new_v4(),
+            replaced_by: None,
             metadata: AuditMetadata::default(),
         }
     }
@@ -459,6 +467,8 @@ impl SessionBuilder {
             device_fingerprint: self.device_fingerprint,
             status: self.status.unwrap_or_default(),
             revoked_at: self.revoked_at,
+            family_id: Uuid::new_v4(),
+            replaced_by: None,
             metadata: AuditMetadata::default(),
         })
     }
