@@ -254,6 +254,11 @@ struct RegisterRequest {
 struct LoginRequest {
     email: String,
     password: String,
+    /// Keep me signed in (browser mode only): the refresh cookie persists
+    /// for the token's lifetime instead of dying with the browser. Ignored
+    /// in body mode, which carries no cookie.
+    #[serde(default)]
+    remember_me: bool,
 }
 
 #[derive(Deserialize)]
@@ -391,7 +396,8 @@ async fn login(
     }
 
     let browser = state.browser_origin(&headers).is_some();
-    match state.auth.login(&req.email, &req.password).await {
+    let remembered = browser && req.remember_me;
+    match state.auth.login(&req.email, &req.password, req.remember_me).await {
         Ok(result) => {
             let mut body = serde_json::json!({
                 "access_token": result.access_token,
@@ -404,7 +410,12 @@ async fn login(
                 let mut response = (StatusCode::OK, Json(body)).into_response();
                 response.headers_mut().insert(
                     axum::http::header::SET_COOKIE,
-                    refresh_cookie::refresh_cookie_header(&result.refresh_token, path),
+                    refresh_cookie::refresh_cookie_header(
+                        &result.refresh_token,
+                        path,
+                        // 30 days: the session row's own refresh lifetime.
+                        remembered.then_some(2_592_000_i64),
+                    ),
                 );
                 return response;
             }
@@ -469,6 +480,9 @@ async fn refresh(
                 let Some(path) = state.cookie_path() else {
                     unreachable!("browser_origin is Some only when cookie mode is armed")
                 };
+                // The family's persistence choice rides the rotation: a
+                // remembered session's cookie keeps its Max-Age here too.
+                let remembered = state.auth.is_remembered(&token).await;
                 let mut response = (
                     StatusCode::OK,
                     Json(serde_json::json!({
@@ -479,7 +493,11 @@ async fn refresh(
                     .into_response();
                 response.headers_mut().insert(
                     axum::http::header::SET_COOKIE,
-                    refresh_cookie::refresh_cookie_header(&result.refresh_token, path),
+                    refresh_cookie::refresh_cookie_header(
+                        &result.refresh_token,
+                        path,
+                        remembered.then_some(2_592_000_i64),
+                    ),
                 );
                 return response;
             }

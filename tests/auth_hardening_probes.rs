@@ -398,8 +398,8 @@ async fn password_change_revokes_other_sessions_and_device_keys() {
     let (user_id, email) = verified_user(&pool, &auth, "rev1").await;
 
     // two devices log in; one of them also trusts the device
-    let dev_a = auth.login(&email, "Passw0rd-long").await.expect("login A");
-    let dev_b = auth.login(&email, "Passw0rd-long").await.expect("login B");
+    let dev_a = auth.login(&email, "Passw0rd-long", false).await.expect("login A");
+    let dev_b = auth.login(&email, "Passw0rd-long", false).await.expect("login B");
     let trusted = keys
         .issue(user_id, Some("fp-probe"), SCOPE_MFA_STEP_UP, chrono::TimeDelta::days(365), Some("10.0.0.1"), "probe")
         .await
@@ -480,7 +480,7 @@ async fn password_reset_revokes_device_keys() {
         "password reset revokes trusted-device keys"
     );
     // and the account logs in with the NEW password
-    auth.login(&email, "ResetPassw0rd-3")
+    auth.login(&email, "ResetPassw0rd-3", false)
         .await
         .expect("login after reset");
 }
@@ -492,7 +492,7 @@ async fn bearer_rotation_keeps_independent_credential() {
     let keys = DeviceTrustKeyService::new(pool.clone());
 
     let (user_id, email) = verified_user(&pool, &auth, "rot1").await;
-    let session = auth.login(&email, "Passw0rd-long").await.expect("login");
+    let session = auth.login(&email, "Passw0rd-long", false).await.expect("login");
     let trusted = keys
         .issue(user_id, None, SCOPE_MFA_STEP_UP, chrono::TimeDelta::minutes(10), None, "probe")
         .await
@@ -530,7 +530,7 @@ async fn idle_timeout_posture_refuses_and_revokes() {
     let auth = auth_service(&pool).await;
 
     let (user_id, email) = verified_user(&pool, &auth, "tmo1").await;
-    let session = auth.login(&email, "Passw0rd-long").await.expect("login");
+    let session = auth.login(&email, "Passw0rd-long", false).await.expect("login");
 
     // Age the session PAST the declared idle window but keep it absolutely
     // unexpired: only the idle posture can refuse it.
@@ -884,6 +884,44 @@ async fn cookie_mode_journey() {
     .await;
     assert_eq!(status, StatusCode::OK);
     assert!(body.contains("refresh_token"), "body mode keeps the pair: {body}");
+
+    // CK-2 keep me signed in: a remembered login arms a PERSISTENT cookie
+    // (Max-Age = the 30-day refresh lifetime) and the choice rides the
+    // rotation — the refreshed cookie keeps its Max-Age. Body mode ignores
+    // the flag (no cookie at all there).
+    let (status, body, set_cookie) = send_raw(
+        app.clone(),
+        "10.10.2.1",
+        "/login",
+        json!({"email": email, "password": "Passw0rd-long", "remember_me": true}).to_string(),
+        &[origin],
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK, "remembered login: {body}");
+    assert!(!body.contains("refresh_token"), "remembered login must not leak the token: {body}");
+    let remembered = set_cookie.expect("remembered login sets the cookie");
+    assert!(remembered.contains("Max-Age=2592000"), "remembered cookie: {remembered}");
+    let value = remembered
+        .split(';')
+        .next()
+        .unwrap_or("")
+        .strip_prefix("sapiens_refresh=")
+        .expect("cookie pair")
+        .to_string();
+    let (status, body, set_cookie) = send_raw(
+        app.clone(),
+        "10.10.2.2",
+        "/refresh",
+        String::new(),
+        &[origin, ("cookie", &format!("sapiens_refresh={value}"))],
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK, "remembered refresh: {body}");
+    let rotated = set_cookie.expect("remembered refresh rotates the cookie");
+    assert!(
+        rotated.contains("Max-Age=2592000"),
+        "rotation must keep the persistence choice: {rotated}"
+    );
 }
 
 /// ROT-2 the reuse family at service level: a replayed token is refused and
@@ -894,7 +932,7 @@ async fn refresh_replay_revokes_the_family() {
     let auth = auth_service(&pool).await;
     let (_, email) = verified_user(&pool, &auth, "rot2").await;
 
-    let login = auth.login(&email, "Passw0rd-long").await.expect("login");
+    let login = auth.login(&email, "Passw0rd-long", false).await.expect("login");
     let first = login.refresh_token.clone();
     let rotated = auth.refresh_token(&first).await.expect("first rotation");
     let second = rotated.refresh_token.clone();

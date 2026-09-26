@@ -346,7 +346,12 @@ impl AuthService {
 
     // ── Login ───────────────────────────────────────────────────────────────
 
-    pub async fn login(&self, email: &str, password: &str) -> Result<LoginResult, AuthError> {
+    pub async fn login(
+        &self,
+        email: &str,
+        password: &str,
+        remember_me: bool,
+    ) -> Result<LoginResult, AuthError> {
         let user = match self
             .user_repo
             .find_by_email_for_auth(email)
@@ -412,7 +417,7 @@ impl AuthService {
         let metadata = now_metadata();
 
         self.session_repo
-            .create_auth_session(user.id, &refresh_hash, session_expires, &metadata)
+            .create_auth_session(user.id, &refresh_hash, session_expires, remember_me, &metadata)
             .await
             .map_err(|e| AuthError::Internal(e))?;
 
@@ -811,13 +816,15 @@ impl AuthService {
         // Atomic session rotation: the old row dies, the successor is born in
         // the SAME family (reuse chains stay traceable) and carries the
         // session's own device posture — a web login must not mutate into a
-        // 'mobile' row at its first reload.
+        // 'mobile' row at its first reload — and its persistence choice: a
+        // remembered session's every successor is remembered too.
         let new_refresh = crypto::generate_refresh_token();
         let new_hash = crypto::hash_token(&new_refresh);
         let new_expires = Utc::now() + Duration::days(30);
         let metadata = now_metadata();
         let new_id = Uuid::new_v4();
         let carried_device = session.device_type;
+        let carried_remember = session.remember_me;
 
         let mut tx = self
             .db_pool
@@ -837,14 +844,15 @@ impl AuthService {
 
         sqlx::query(
             "INSERT INTO sapiens.sessions \
-             (id, user_id, token_hash, expires_at, device_type, status, last_activity, metadata, family_id) \
-             VALUES ($1, $2, $3, $4, $5, 'active', NOW(), $6, $7)",
+             (id, user_id, token_hash, expires_at, device_type, remember_me, status, last_activity, metadata, family_id) \
+             VALUES ($1, $2, $3, $4, $5, $6, 'active', NOW(), $7, $8)",
         )
         .bind(new_id)
         .bind(user.id)
         .bind(&new_hash)
         .bind(new_expires)
         .bind(carried_device)
+        .bind(carried_remember)
         .bind(&metadata)
         .bind(session.family_id)
         .execute(&mut *tx)
@@ -870,6 +878,18 @@ impl AuthService {
     }
 
     // ── Logout ──────────────────────────────────────────────────────────────
+
+    /// Does the session a refresh token names carry keep-me-signed-in? The
+    /// cookie layer asks after a successful refresh, to shape the rotated
+    /// Set-Cookie: a remembered family keeps its Max-Age on every rotation.
+    /// Anything unknown is not remembered (fail to the session cookie).
+    pub async fn is_remembered(&self, token: &str) -> bool {
+        self.session_repo
+            .find_by_token_hash(&crypto::hash_token(token))
+            .await
+            .map(|session| session.map(|s| s.remember_me).unwrap_or(false))
+            .unwrap_or(false)
+    }
 
     pub async fn logout(&self, user_id: Uuid) -> Result<u64, AuthError> {
         let count = self

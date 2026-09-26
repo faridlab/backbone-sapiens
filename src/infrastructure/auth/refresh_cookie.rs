@@ -20,11 +20,18 @@ use axum::http::{header, HeaderMap, HeaderValue};
 pub const REFRESH_COOKIE_NAME: &str = "sapiens_refresh";
 
 /// Build the `Set-Cookie` header value that arms the refresh cookie under
-/// the given path (the host's mount base for the auth router).
-pub fn refresh_cookie_header(value: &str, path: &str) -> HeaderValue {
-    format!("{REFRESH_COOKIE_NAME}={value}; Path={path}; HttpOnly; Secure; SameSite=Strict")
-        .parse()
-        .expect("cookie header with caller-supplied path always parses")
+/// the given path (the host's mount base for the auth router). A remembered
+/// session (keep me signed in) passes `Some(max_age_secs)`: the cookie then
+/// survives browser restarts for as long as the refresh token lives.
+pub fn refresh_cookie_header(value: &str, path: &str, max_age_secs: Option<i64>) -> HeaderValue {
+    match max_age_secs {
+        Some(max_age) => {
+            format!("{REFRESH_COOKIE_NAME}={value}; Path={path}; HttpOnly; Secure; SameSite=Strict; Max-Age={max_age}")
+        }
+        None => format!("{REFRESH_COOKIE_NAME}={value}; Path={path}; HttpOnly; Secure; SameSite=Strict"),
+    }
+    .parse()
+    .expect("cookie header with caller-supplied path always parses")
 }
 
 /// Build the `Set-Cookie` header value that clears the refresh cookie.
@@ -50,7 +57,7 @@ mod tests {
 
     #[test]
     fn refresh_cookie_carries_the_hardening_attributes() {
-        let raw = refresh_cookie_header("jwt-value", "/api/v1/auth")
+        let raw = refresh_cookie_header("jwt-value", "/api/v1/auth", None)
             .to_str()
             .unwrap()
             .to_string();
@@ -60,6 +67,18 @@ mod tests {
         assert!(raw.contains("Secure"));
         assert!(raw.contains("SameSite=Strict"));
         assert!(!raw.contains("Max-Age"));
+    }
+
+    #[test]
+    fn remembered_cookie_carries_the_refresh_lifetime() {
+        let raw = refresh_cookie_header("jwt-value", "/api/v1/auth", Some(2_592_000))
+            .to_str()
+            .unwrap()
+            .to_string();
+        assert!(raw.contains("Max-Age=2592000"));
+        for attr in ["HttpOnly", "Secure", "SameSite=Strict", "Path=/api/v1/auth"] {
+            assert!(raw.contains(attr), "missing `{attr}`: {raw:?}");
+        }
     }
 
     #[test]

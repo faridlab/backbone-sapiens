@@ -62,6 +62,7 @@ impl SessionRepository {
         user_id: Uuid,
         token_hash: &str,
         expires_at: DateTime<Utc>,
+        remember_me: bool,
         metadata: &serde_json::Value,
     ) -> Result<Session> {
         let id = Uuid::new_v4();
@@ -70,7 +71,7 @@ impl SessionRepository {
         let sql = format!(
             "INSERT INTO {TABLE_NAME} \
              (id, user_id, token_hash, expires_at, remember_me, device_type, status, last_activity, metadata, family_id) \
-             VALUES ($1, $2, $3, $4, false, 'unknown', 'active', NOW(), $5, $1) \
+             VALUES ($1, $2, $3, $4, $5, 'unknown', 'active', NOW(), $6, $1) \
              RETURNING *"
         );
         let result = sqlx::query_as::<_, Session>(&sql)
@@ -78,6 +79,7 @@ impl SessionRepository {
         .bind(user_id)
         .bind(token_hash)
         .bind(expires_at)
+        .bind(remember_me)
         .bind(metadata)
         .fetch_one(self.pool())
         .await?;
