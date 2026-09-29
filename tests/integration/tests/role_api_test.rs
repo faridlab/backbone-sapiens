@@ -106,3 +106,23 @@ mod tests {
 // <<< CUSTOM TESTS START >>>
 // Add Role specific tests here
 // <<< CUSTOM TESTS END >>>
+
+
+#[async_trait::async_trait]
+impl crate::integration::framework::Test for RoleApiTest {
+    fn name(&self) -> &str {
+        "role_api_test"
+    }
+
+    async fn setup(&mut self) -> Result<(), crate::integration::framework::TestError> {
+        Ok(())
+    }
+
+    async fn run_tests(&mut self) -> Vec<crate::integration::framework::TestResult> {
+        self.run_all().await
+    }
+
+    async fn teardown(&mut self) -> Result<(), crate::integration::framework::TestError> {
+        Ok(())
+    }
+}

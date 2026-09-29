@@ -386,14 +386,14 @@ pub mod database {
     ) -> Result<(), Box<dyn std::error::Error>> {
         // Delete sessions
         for session_id in session_ids {
-            let _ = sqlx::query!("DELETE FROM sessions WHERE id = $1", session_id)
+            let _ = sqlx::query("DELETE FROM sessions WHERE id = $1").bind(session_id)
                 .execute(pool)
                 .await?;
         }
 
         // Delete users
         for user_id in user_ids {
-            let _ = sqlx::query!("DELETE FROM users WHERE id = $1", user_id)
+            let _ = sqlx::query("DELETE FROM users WHERE id = $1").bind(user_id)
                 .execute(pool)
                 .await?;
         }

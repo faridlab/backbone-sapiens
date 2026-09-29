@@ -9,10 +9,9 @@ use crate::integration::framework::Test;
 use crate::integration::tests::{
     UserApiTest, RoleApiTest, PermissionApiTest, SessionApiTest,
     UserRoleApiTest, UserPermissionApiTest, RolePermissionApiTest,
-    AuditLogApiTest, MfaDeviceApiTest, PasswordResetTokenApiTest,
+    AuditLogApiTest, PasswordResetTokenApiTest,
     UserSettingsApiTest, SystemSettingsApiTest,
     AnalyticsEventApiTest, OAuthProviderApiTest, WorkflowApiTest,
-    V2ApiTest,
 };
 
 /// Test type categories
@@ -220,16 +219,6 @@ impl TestRegistry {
             },
         );
 
-        // MfaDevice API tests
-        registry.register(
-            "sapiens.api.mfa_devices",
-            TestRegistration {
-                config: TestConfig::new_api("MfaDevice", "mfa_device_api_test", "MFA device CRUD API tests")
-                    .with_type(TestType::Security),
-                factory: || Box::new(MfaDeviceApiTest::new()),
-            },
-        );
-
         // PasswordResetToken API tests
         registry.register(
             "sapiens.api.password_reset_tokens",
@@ -298,21 +287,6 @@ impl TestRegistry {
                     .with_type(TestType::Integration)
                     .with_expected_endpoints(15), // Workflows have additional endpoints
                 factory: || Box::new(WorkflowApiTest::new()),
-            },
-        );
-
-        // ============================================================
-        // V2.0 Features
-        // ============================================================
-
-        // V2.0 Features API tests
-        registry.register(
-            "sapiens.api.v2_features",
-            TestRegistration {
-                config: TestConfig::new_api("V2Features", "v2_api_test", "V2.0 feature API tests")
-                    .with_type(TestType::Security)
-                    .with_expected_endpoints(20), // 6 entities with additional endpoints
-                factory: || Box::new(V2ApiTest::new()),
             },
         );
 

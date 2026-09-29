@@ -86,6 +86,27 @@ impl Default for UserApiTest {
     }
 }
 
+#[async_trait::async_trait]
+impl crate::integration::framework::Test for UserApiTest {
+    fn name(&self) -> &str {
+        "user_api_test"
+    }
+
+    async fn setup(&mut self) -> Result<(), crate::integration::framework::TestError> {
+        // The CRUD family runs self-contained over the composed pool: no
+        // per-suite fixtures beyond what the harness boot provides.
+        Ok(())
+    }
+
+    async fn run_tests(&mut self) -> Vec<crate::integration::framework::TestResult> {
+        self.run_all().await
+    }
+
+    async fn teardown(&mut self) -> Result<(), crate::integration::framework::TestError> {
+        Ok(())
+    }
+}
+
 // ============================================================================
 // TESTS
 // ============================================================================
