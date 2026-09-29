@@ -368,6 +368,30 @@ async fn remove_decorator_fence(pool: &PgPool) {
     .ok();
 }
 
+/// Panic-safe cleanup for the cluster-scoped probe role: the Drop spawns
+/// the same pre-clean the next run performs (DROP OWNED BY + DROP ROLE),
+/// so a panicking or early-returning probe cannot leave the role holding
+/// grants that block other suites on the shared scratch cluster.
+struct ProbeRoleGuard {
+    admin: sqlx::PgPool,
+}
+
+impl Drop for ProbeRoleGuard {
+    fn drop(&mut self) {
+        if let Ok(handle) = tokio::runtime::Handle::try_current() {
+            let admin = self.admin.clone();
+            handle.spawn(async move {
+                let _ = sqlx::query("DROP OWNED BY csp_org_fence_probe")
+                    .execute(&admin)
+                    .await;
+                let _ = sqlx::query("DROP ROLE IF EXISTS csp_org_fence_probe")
+                    .execute(&admin)
+                    .await;
+            });
+        }
+    }
+}
+
 #[tokio::test]
 async fn csp7_org_fence_scopes_isolation() {
     master_key_env();
@@ -399,6 +423,9 @@ async fn csp7_org_fence_scopes_isolation() {
     .execute(&admin)
     .await
     .unwrap();
+    // From here the guard owns the role's teardown — the explicit drops at
+    // the end stay (they run first; the guard's are idempotent no-ops).
+    let _probe_role_guard = ProbeRoleGuard { admin: admin.clone() };
     let app = PgPool::connect(&role_url(PROBE_ROLE, PROBE_PW)).await.expect("connect probe role");
 
     let unit_a = Uuid::new_v4();
