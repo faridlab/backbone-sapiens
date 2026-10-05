@@ -112,7 +112,7 @@ async fn list_mine(
           LIMIT {limit} OFFSET {offset}"
     );
 
-    let rows = match backbone_orm::company_scope::fetch_all_rows_scoped(
+    let rows = match backbone_orm::org_scope::fetch_all_rows_scoped(
         &state.pool,
         sqlx::query(&sql).bind(&user_id),
     )
@@ -191,7 +191,7 @@ async fn read_one(
           WHERE id = $2::uuid AND {TRAY_SCOPE}
         RETURNING id"
     );
-    match backbone_orm::company_scope::fetch_optional_row_scoped(
+    match backbone_orm::org_scope::fetch_optional_row_scoped(
         &state.pool,
         sqlx::query(&sql).bind(&user_id).bind(&id),
     )
