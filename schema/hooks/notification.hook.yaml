@@ -168,7 +168,6 @@ jobs:
     schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
     actions:
       - "find_notifications_read_before(30.days)"
-    actions:
       - "archive_old_read_notifications(old_read)"
       - "log(notification.cleanup_read, { archived_count: $archived_count })"
 
