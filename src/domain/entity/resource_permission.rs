@@ -70,7 +70,7 @@ pub struct ResourcePermission {
 impl ResourcePermission {
     /// Create a builder for ResourcePermission
     pub fn builder() -> ResourcePermissionBuilder {
-        ResourcePermissionBuilder::default()
+        <ResourcePermissionBuilder as Default>::default()
     }
 
     /// Create a new ResourcePermission with required fields
@@ -285,6 +285,8 @@ impl backbone_orm::EntityRepoMeta for ResourcePermission {
         m.insert("granted_to_user_id".to_string(), "uuid".to_string());
         m.insert("granted_to_role_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "resource_permission_status".to_string());
+        m.insert("granted_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -394,7 +396,7 @@ impl ResourcePermissionBuilder {
             granted_at: self.granted_at.unwrap_or(Utc::now()),
             expires_at: self.expires_at,
             reason: self.reason,
-            status: self.status.unwrap_or(ResourcePermissionStatus::default()),
+            status: self.status.unwrap_or_default(),
             metadata: AuditMetadata::default(),
         })
     }

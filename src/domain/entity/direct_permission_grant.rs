@@ -73,7 +73,7 @@ pub struct DirectPermissionGrant {
 impl DirectPermissionGrant {
     /// Create a builder for DirectPermissionGrant
     pub fn builder() -> DirectPermissionGrantBuilder {
-        DirectPermissionGrantBuilder::default()
+        <DirectPermissionGrantBuilder as Default>::default()
     }
 
     /// Create a new DirectPermissionGrant with required fields
@@ -323,6 +323,10 @@ impl backbone_orm::EntityRepoMeta for DirectPermissionGrant {
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("permission_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "direct_permission_grant_status".to_string());
+        m.insert("granted_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
+        m.insert("last_used_at".to_string(), "timestamptz".to_string());
+        m.insert("revoked_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -468,7 +472,7 @@ impl DirectPermissionGrantBuilder {
             last_used_at: self.last_used_at,
             usage_count: self.usage_count.unwrap_or(0),
             access_log: self.access_log,
-            status: self.status.unwrap_or(DirectPermissionGrantStatus::default()),
+            status: self.status.unwrap_or_default(),
             revoked_at: self.revoked_at,
             revoked_by: self.revoked_by,
             revocation_reason: self.revocation_reason,

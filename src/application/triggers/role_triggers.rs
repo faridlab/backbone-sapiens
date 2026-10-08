@@ -242,4 +242,3 @@ pub fn role_trigger_registry() -> RoleTriggerRegistry {
         r.register(Arc::new(RoleAfterDeleteHandler5::new()));
     })
 }
-

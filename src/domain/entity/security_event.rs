@@ -73,7 +73,7 @@ pub struct SecurityEvent {
 impl SecurityEvent {
     /// Create a builder for SecurityEvent
     pub fn builder() -> SecurityEventBuilder {
-        SecurityEventBuilder::default()
+        <SecurityEventBuilder as Default>::default()
     }
 
     /// Create a new SecurityEvent with required fields
@@ -322,6 +322,7 @@ impl backbone_orm::EntityRepoMeta for SecurityEvent {
         m.insert("resolved_by_user_id".to_string(), "uuid".to_string());
         m.insert("event_type".to_string(), "security_event_type".to_string());
         m.insert("severity".to_string(), "security_event_severity".to_string());
+        m.insert("resolved_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {

@@ -60,7 +60,7 @@ pub struct Permission {
 impl Permission {
     /// Create a builder for Permission
     pub fn builder() -> PermissionBuilder {
-        PermissionBuilder::default()
+        <PermissionBuilder as Default>::default()
     }
 
     /// Create a new Permission with required fields

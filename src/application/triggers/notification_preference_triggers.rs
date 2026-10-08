@@ -241,4 +241,3 @@ pub fn notification_preference_trigger_registry() -> NotificationPreferenceTrigg
         r.register(Arc::new(NotificationPreferenceOnEnterDisabledHandler::new()));
     })
 }
-

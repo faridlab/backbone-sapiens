@@ -348,4 +348,3 @@ pub fn resource_permission_trigger_registry() -> ResourcePermissionTriggerRegist
         r.register(Arc::new(ResourcePermissionOnEnterRevokedHandler::new()));
     })
 }
-

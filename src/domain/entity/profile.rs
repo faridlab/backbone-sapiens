@@ -66,7 +66,7 @@ pub struct Profile {
 impl Profile {
     /// Create a builder for Profile
     pub fn builder() -> ProfileBuilder {
-        ProfileBuilder::default()
+        <ProfileBuilder as Default>::default()
     }
 
     /// Create a new Profile with required fields
@@ -269,6 +269,7 @@ impl backbone_orm::EntityRepoMeta for Profile {
         let mut m = std::collections::HashMap::new();
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("gender".to_string(), "gender".to_string());
+        m.insert("dob".to_string(), "date".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {

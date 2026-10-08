@@ -64,7 +64,7 @@ pub struct PasswordResetToken {
 impl PasswordResetToken {
     /// Create a builder for PasswordResetToken
     pub fn builder() -> PasswordResetTokenBuilder {
-        PasswordResetTokenBuilder::default()
+        <PasswordResetTokenBuilder as Default>::default()
     }
 
     /// Create a new PasswordResetToken with required fields
@@ -243,6 +243,8 @@ impl backbone_orm::EntityRepoMeta for PasswordResetToken {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("user_id".to_string(), "uuid".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
+        m.insert("used_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {

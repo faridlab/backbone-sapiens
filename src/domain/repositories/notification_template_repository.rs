@@ -8,7 +8,7 @@
 use async_trait::async_trait;
 use anyhow::Result;
 
-use crate::domain::entity::{NotificationTemplate, NotificationChannel, NotificationType, NotificationTemplateStatus};
+use crate::domain::entity::{NotificationTemplate, NotificationChannel, NotificationTemplateStatus, NotificationType};
 
 /// Pagination parameters for list queries
 #[derive(Debug, Clone, Default)]

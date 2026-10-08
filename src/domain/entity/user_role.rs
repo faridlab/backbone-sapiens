@@ -60,7 +60,7 @@ pub struct UserRole {
 impl UserRole {
     /// Create a builder for UserRole
     pub fn builder() -> UserRoleBuilder {
-        UserRoleBuilder::default()
+        <UserRoleBuilder as Default>::default()
     }
 
     /// Create a new UserRole with required fields
@@ -212,6 +212,7 @@ impl backbone_orm::EntityRepoMeta for UserRole {
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("role_id".to_string(), "uuid".to_string());
+        m.insert("assigned_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {

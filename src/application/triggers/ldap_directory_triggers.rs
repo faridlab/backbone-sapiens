@@ -434,4 +434,3 @@ pub fn ldap_directory_trigger_registry() -> LDAPDirectoryTriggerRegistry {
         r.register(Arc::new(LDAPDirectoryOnEnterErrorHandler::new()));
     })
 }
-

@@ -26,15 +26,8 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveOAuthProviderSpec;
 // impl Specification<OAuthProvider> for ActiveOAuthProviderSpec {
 //     fn is_satisfied_by(&self, e: &OAuthProvider) -> bool {
-//         // e.status
+//         // e.is_active
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct OAuthProviderHasValidEmailSpec;
-// impl OAuthProviderSpecification for OAuthProviderHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &OAuthProvider) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

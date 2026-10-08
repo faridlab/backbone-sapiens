@@ -8,7 +8,7 @@
 use async_trait::async_trait;
 use anyhow::Result;
 
-use crate::domain::entity::{WorkflowDefinition, TriggerType, WorkflowType, WorkflowDefinitionStatus};
+use crate::domain::entity::{WorkflowDefinition, TriggerType, WorkflowDefinitionStatus, WorkflowType};
 
 /// Pagination parameters for list queries
 #[derive(Debug, Clone, Default)]

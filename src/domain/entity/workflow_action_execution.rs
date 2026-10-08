@@ -70,7 +70,7 @@ pub struct WorkflowActionExecution {
 impl WorkflowActionExecution {
     /// Create a builder for WorkflowActionExecution
     pub fn builder() -> WorkflowActionExecutionBuilder {
-        WorkflowActionExecutionBuilder::default()
+        <WorkflowActionExecutionBuilder as Default>::default()
     }
 
     /// Create a new WorkflowActionExecution with required fields
@@ -296,6 +296,9 @@ impl backbone_orm::EntityRepoMeta for WorkflowActionExecution {
         m.insert("workflow_execution_id".to_string(), "uuid".to_string());
         m.insert("workflow_action_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "workflow_action_execution_status".to_string());
+        m.insert("started_at".to_string(), "timestamptz".to_string());
+        m.insert("completed_at".to_string(), "timestamptz".to_string());
+        m.insert("failed_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -412,7 +415,7 @@ impl WorkflowActionExecutionBuilder {
             workflow_execution_id,
             workflow_action_id,
             action_order,
-            status: self.status.unwrap_or(WorkflowActionExecutionStatus::default()),
+            status: self.status.unwrap_or_default(),
             input_data: self.input_data,
             output_data: self.output_data,
             started_at: self.started_at,

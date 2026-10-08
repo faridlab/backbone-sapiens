@@ -36,7 +36,7 @@ impl Seeder for SeedMFABackupCodeSeeder {
     }
 
     fn order(&self) -> i32 {
-        15
+        31
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
@@ -69,4 +69,3 @@ impl Seeder for SeedMFABackupCodeSeeder {
 // <<< CUSTOM SEED DATA START >>>
 // Add custom seed data methods here
 // <<< CUSTOM SEED DATA END >>>
-

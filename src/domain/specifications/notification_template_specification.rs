@@ -26,15 +26,8 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveNotificationTemplateSpec;
 // impl Specification<NotificationTemplate> for ActiveNotificationTemplateSpec {
 //     fn is_satisfied_by(&self, e: &NotificationTemplate) -> bool {
-//         // e.status
+//         // e.is_active
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct NotificationTemplateHasValidEmailSpec;
-// impl NotificationTemplateSpecification for NotificationTemplateHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &NotificationTemplate) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

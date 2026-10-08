@@ -30,11 +30,4 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct DeviceTrustHasValidEmailSpec;
-// impl DeviceTrustSpecification for DeviceTrustHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &DeviceTrust) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

@@ -30,7 +30,7 @@ impl AuditFields {
 
     /// Create a builder for AuditFields
     pub fn builder() -> AuditFieldsBuilder {
-        AuditFieldsBuilder::default()
+        <AuditFieldsBuilder as Default>::default()
     }
 
 }

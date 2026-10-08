@@ -69,7 +69,7 @@ pub struct AnalyticsEvent {
 impl AnalyticsEvent {
     /// Create a builder for AnalyticsEvent
     pub fn builder() -> AnalyticsEventBuilder {
-        AnalyticsEventBuilder::default()
+        <AnalyticsEventBuilder as Default>::default()
     }
 
     /// Create a new AnalyticsEvent with required fields
@@ -292,6 +292,7 @@ impl backbone_orm::EntityRepoMeta for AnalyticsEvent {
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("session_id".to_string(), "uuid".to_string());
         m.insert("event_type".to_string(), "analytics_event_type".to_string());
+        m.insert("timestamp".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {

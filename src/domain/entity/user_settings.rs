@@ -67,7 +67,7 @@ pub struct UserSettings {
 impl UserSettings {
     /// Create a builder for UserSettings
     pub fn builder() -> UserSettingsBuilder {
-        UserSettingsBuilder::default()
+        <UserSettingsBuilder as Default>::default()
     }
 
     /// Create a new UserSettings with required fields
@@ -330,9 +330,9 @@ impl UserSettingsBuilder {
         Ok(UserSettings {
             id: Uuid::new_v4(),
             user_id,
-            theme: self.theme.unwrap_or(Theme::default()),
-            language: self.language.unwrap_or(Default::default()),
-            timezone: self.timezone.unwrap_or(Default::default()),
+            theme: self.theme.unwrap_or_default(),
+            language: self.language.unwrap_or_default(),
+            timezone: self.timezone.unwrap_or_default(),
             notifications_enabled: self.notifications_enabled.unwrap_or(true),
             email_notifications: self.email_notifications.unwrap_or(true),
             sms_notifications: self.sms_notifications.unwrap_or(false),

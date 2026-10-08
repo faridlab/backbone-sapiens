@@ -274,4 +274,3 @@ pub fn backup_code_trigger_registry() -> BackupCodeTriggerRegistry {
         r.register(Arc::new(BackupCodeAfterCreateHandler5::new()));
     })
 }
-

@@ -30,11 +30,4 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct NotificationPreferenceHasValidEmailSpec;
-// impl NotificationPreferenceSpecification for NotificationPreferenceHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &NotificationPreference) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

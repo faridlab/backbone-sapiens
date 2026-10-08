@@ -383,4 +383,3 @@ pub fn notification_trigger_registry() -> NotificationTriggerRegistry {
         r.register(Arc::new(NotificationAfterCreateHandler7::new()));
     })
 }
-

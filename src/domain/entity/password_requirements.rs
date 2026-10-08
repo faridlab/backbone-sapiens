@@ -65,7 +65,7 @@ pub struct PasswordRequirements {
 impl PasswordRequirements {
     /// Create a builder for PasswordRequirements
     pub fn builder() -> PasswordRequirementsBuilder {
-        PasswordRequirementsBuilder::default()
+        <PasswordRequirementsBuilder as Default>::default()
     }
 
     /// Create a new PasswordRequirements with required fields

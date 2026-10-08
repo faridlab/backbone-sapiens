@@ -75,7 +75,7 @@ pub struct Notification {
 impl Notification {
     /// Create a builder for Notification
     pub fn builder() -> NotificationBuilder {
-        NotificationBuilder::default()
+        <NotificationBuilder as Default>::default()
     }
 
     /// Create a new Notification with required fields
@@ -315,6 +315,10 @@ impl backbone_orm::EntityRepoMeta for Notification {
         m.insert("notification_type".to_string(), "notification_type".to_string());
         m.insert("channel".to_string(), "notification_channel".to_string());
         m.insert("priority".to_string(), "notification_priority".to_string());
+        m.insert("read_at".to_string(), "timestamptz".to_string());
+        m.insert("sent_at".to_string(), "timestamptz".to_string());
+        m.insert("delivered_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -462,7 +466,7 @@ impl NotificationBuilder {
             sent_at: self.sent_at,
             delivered_at: self.delivered_at,
             expires_at: self.expires_at,
-            priority: self.priority.unwrap_or(NotificationPriority::default()),
+            priority: self.priority.unwrap_or_default(),
             action_url: self.action_url,
             action_text: self.action_text,
             category: self.category,

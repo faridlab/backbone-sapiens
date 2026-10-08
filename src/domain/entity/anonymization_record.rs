@@ -68,7 +68,7 @@ pub struct AnonymizationRecord {
 impl AnonymizationRecord {
     /// Create a builder for AnonymizationRecord
     pub fn builder() -> AnonymizationRecordBuilder {
-        AnonymizationRecordBuilder::default()
+        <AnonymizationRecordBuilder as Default>::default()
     }
 
     /// Create a new AnonymizationRecord with required fields
@@ -246,6 +246,7 @@ impl backbone_orm::EntityRepoMeta for AnonymizationRecord {
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("method".to_string(), "anonymization_method".to_string());
         m.insert("status".to_string(), "anonymization_status".to_string());
+        m.insert("anonymized_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -346,10 +347,10 @@ impl AnonymizationRecordBuilder {
             anonymized_by,
             anonymized_at: self.anonymized_at.unwrap_or(Utc::now()),
             reason,
-            method: self.method.unwrap_or(AnonymizationMethod::default()),
+            method: self.method.unwrap_or_default(),
             retention_period_days: self.retention_period_days,
             metadata: AuditMetadata::default(),
-            status: self.status.unwrap_or(AnonymizationStatus::default()),
+            status: self.status.unwrap_or_default(),
         })
     }
 }

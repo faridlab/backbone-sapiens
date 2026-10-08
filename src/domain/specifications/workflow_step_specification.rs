@@ -30,11 +30,4 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct WorkflowStepHasValidEmailSpec;
-// impl WorkflowStepSpecification for WorkflowStepHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &WorkflowStep) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

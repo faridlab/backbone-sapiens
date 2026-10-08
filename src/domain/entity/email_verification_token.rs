@@ -73,7 +73,7 @@ pub struct EmailVerificationToken {
 impl EmailVerificationToken {
     /// Create a builder for EmailVerificationToken
     pub fn builder() -> EmailVerificationTokenBuilder {
-        EmailVerificationTokenBuilder::default()
+        <EmailVerificationTokenBuilder as Default>::default()
     }
 
     /// Create a new EmailVerificationToken with required fields
@@ -295,20 +295,15 @@ impl backbone_orm::EntityRepoMeta for EmailVerificationToken {
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("token_type".to_string(), "email_verification_type".to_string());
         m.insert("status".to_string(), "email_verification_token_status".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
+        m.insert("verified_at".to_string(), "timestamptz".to_string());
         m
     }
-    /// Never serialized to anyone but the row's owner or a platform caller.
-    ///
-    /// These carry `@sensitive` in the schema, whose description says plainly
-    /// that they are never exposed over the API. Saying so is not enforcing it:
-    /// the response pruner reads THIS list, and while it was empty a password
-    /// hash was serialized to every caller that could reach the route.
-    fn private_fields() -> &'static [&'static str] {
-        &["token"]
-    }
-
     fn search_fields() -> &'static [&'static str] {
         &["token", "email"]
+    }
+    fn private_fields() -> &'static [&'static str] {
+        &["token"]
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId")]
@@ -429,7 +424,7 @@ impl EmailVerificationTokenBuilder {
             verified_at: self.verified_at,
             attempts: self.attempts.unwrap_or(0),
             max_attempts: self.max_attempts.unwrap_or(5),
-            status: self.status.unwrap_or(EmailVerificationTokenStatus::default()),
+            status: self.status.unwrap_or_default(),
             ip_address: self.ip_address,
             user_agent: self.user_agent,
             metadata: AuditMetadata::default(),

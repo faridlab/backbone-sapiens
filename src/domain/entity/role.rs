@@ -59,7 +59,7 @@ pub struct Role {
 impl Role {
     /// Create a builder for Role
     pub fn builder() -> RoleBuilder {
-        RoleBuilder::default()
+        <RoleBuilder as Default>::default()
     }
 
     /// Create a new Role with required fields

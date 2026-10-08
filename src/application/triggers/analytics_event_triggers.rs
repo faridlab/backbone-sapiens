@@ -305,4 +305,3 @@ pub fn analytics_event_trigger_registry() -> AnalyticsEventTriggerRegistry {
         r.register(Arc::new(AnalyticsEventAfterCreateHandler5::new()));
     })
 }
-

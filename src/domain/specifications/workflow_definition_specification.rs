@@ -26,15 +26,8 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveWorkflowDefinitionSpec;
 // impl Specification<WorkflowDefinition> for ActiveWorkflowDefinitionSpec {
 //     fn is_satisfied_by(&self, e: &WorkflowDefinition) -> bool {
-//         // e.status
+//         // e.is_active
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct WorkflowDefinitionHasValidEmailSpec;
-// impl WorkflowDefinitionSpecification for WorkflowDefinitionHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &WorkflowDefinition) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

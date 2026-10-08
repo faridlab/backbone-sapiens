@@ -30,11 +30,4 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct RolePermissionHasValidEmailSpec;
-// impl RolePermissionSpecification for RolePermissionHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &RolePermission) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

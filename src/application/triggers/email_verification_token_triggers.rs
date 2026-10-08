@@ -433,4 +433,3 @@ pub fn email_verification_token_trigger_registry() -> EmailVerificationTokenTrig
         r.register(Arc::new(EmailVerificationTokenOnEnterRevokedHandler::new()));
     })
 }
-

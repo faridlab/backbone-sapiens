@@ -90,7 +90,7 @@ pub struct MFADevice {
     pub locked_until: Option<DateTime<Utc>>,
     pub lock_reason: Option<String>,
     pub risk_score: i32,
-    pub status: MFADeviceStatus,
+    pub(crate) status: MFADeviceStatus,
     pub backup_codes_data: Option<serde_json::Value>,
     #[serde(default)]
     #[sqlx(json)]
@@ -100,7 +100,7 @@ pub struct MFADevice {
 impl MFADevice {
     /// Create a builder for MFADevice
     pub fn builder() -> MFADeviceBuilder {
-        MFADeviceBuilder::default()
+        <MFADeviceBuilder as Default>::default()
     }
 
     /// Create a new MFADevice with required fields
@@ -468,9 +468,6 @@ impl MFADevice {
                 "risk_score" => {
                     if let Ok(v) = serde_json::from_value(value) { self.risk_score = v; }
                 }
-                "status" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
-                }
                 "backup_codes_data" => {
                     if let Ok(v) = serde_json::from_value(value) { self.backup_codes_data = v; }
                 }
@@ -532,20 +529,19 @@ impl backbone_orm::EntityRepoMeta for MFADevice {
         m.insert("device_type".to_string(), "mfa_device_type".to_string());
         m.insert("enrollment_method".to_string(), "enrollment_method".to_string());
         m.insert("status".to_string(), "mfa_device_status".to_string());
+        m.insert("enrolled_at".to_string(), "timestamptz".to_string());
+        m.insert("verified_at".to_string(), "timestamptz".to_string());
+        m.insert("last_used".to_string(), "timestamptz".to_string());
+        m.insert("last_used_at".to_string(), "timestamptz".to_string());
+        m.insert("locked_at".to_string(), "timestamptz".to_string());
+        m.insert("locked_until".to_string(), "timestamptz".to_string());
         m
     }
-    /// Never serialized to anyone but the row's owner or a platform caller.
-    ///
-    /// These carry `@sensitive` in the schema, whose description says plainly
-    /// that they are never exposed over the API. Saying so is not enforcing it:
-    /// the response pruner reads THIS list, and while it was empty a password
-    /// hash was serialized to every caller that could reach the route.
-    fn private_fields() -> &'static [&'static str] {
-        &["pushToken", "secret", "totpSecret"]
-    }
-
     fn search_fields() -> &'static [&'static str] {
         &["enrollment_ip"]
+    }
+    fn private_fields() -> &'static [&'static str] {
+        &["totpSecret", "secret", "pushToken"]
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId")]
@@ -856,9 +852,9 @@ impl MFADeviceBuilder {
             requires_verification: self.requires_verification.unwrap_or(true),
             auto_approval_enabled: self.auto_approval_enabled.unwrap_or(false),
             trusted_duration_hours: self.trusted_duration_hours.unwrap_or(24),
-            enrolled_at: self.enrolled_at.unwrap_or(Default::default()),
+            enrolled_at: self.enrolled_at.unwrap_or_default(),
             enrolled_by: self.enrolled_by,
-            enrollment_method: self.enrollment_method.unwrap_or(EnrollmentMethod::default()),
+            enrollment_method: self.enrollment_method.unwrap_or_default(),
             enrollment_ip,
             enrollment_user_agent: self.enrollment_user_agent,
             verification_attempts: self.verification_attempts.unwrap_or(0),
@@ -873,7 +869,7 @@ impl MFADeviceBuilder {
             locked_until: self.locked_until,
             lock_reason: self.lock_reason,
             risk_score: self.risk_score.unwrap_or(0),
-            status: self.status.unwrap_or(MFADeviceStatus::default()),
+            status: self.status.unwrap_or_default(),
             backup_codes_data: self.backup_codes_data,
             metadata: AuditMetadata::default(),
         })

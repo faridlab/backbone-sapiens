@@ -59,7 +59,7 @@ pub struct RolePermission {
 impl RolePermission {
     /// Create a builder for RolePermission
     pub fn builder() -> RolePermissionBuilder {
-        RolePermissionBuilder::default()
+        <RolePermissionBuilder as Default>::default()
     }
 
     /// Create a new RolePermission with required fields
@@ -197,6 +197,7 @@ impl backbone_orm::EntityRepoMeta for RolePermission {
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("role_id".to_string(), "uuid".to_string());
         m.insert("permission_id".to_string(), "uuid".to_string());
+        m.insert("granted_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {

@@ -276,4 +276,3 @@ pub fn session_limit_trigger_registry() -> SessionLimitTriggerRegistry {
         r.register(Arc::new(SessionLimitOnEnterUnenforcedHandler::new()));
     })
 }
-

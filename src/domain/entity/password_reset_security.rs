@@ -63,7 +63,7 @@ pub struct PasswordResetSecurity {
 impl PasswordResetSecurity {
     /// Create a builder for PasswordResetSecurity
     pub fn builder() -> PasswordResetSecurityBuilder {
-        PasswordResetSecurityBuilder::default()
+        <PasswordResetSecurityBuilder as Default>::default()
     }
 
     /// Create a new PasswordResetSecurity with required fields
@@ -225,6 +225,8 @@ impl backbone_orm::EntityRepoMeta for PasswordResetSecurity {
     fn column_types() -> std::collections::HashMap<String, String> {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
+        m.insert("last_attempt_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {

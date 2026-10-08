@@ -76,7 +76,7 @@ pub struct Workflow {
 impl Workflow {
     /// Create a builder for Workflow
     pub fn builder() -> WorkflowBuilder {
-        WorkflowBuilder::default()
+        <WorkflowBuilder as Default>::default()
     }
 
     /// Create a new Workflow with required fields
@@ -329,6 +329,10 @@ impl backbone_orm::EntityRepoMeta for Workflow {
         m.insert("target_user_id".to_string(), "uuid".to_string());
         m.insert("workflow_type".to_string(), "workflow_type".to_string());
         m.insert("status".to_string(), "workflow_status".to_string());
+        m.insert("started_at".to_string(), "timestamptz".to_string());
+        m.insert("completed_at".to_string(), "timestamptz".to_string());
+        m.insert("failed_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -478,7 +482,7 @@ impl WorkflowBuilder {
         Ok(Workflow {
             id: Uuid::new_v4(),
             workflow_type,
-            status: self.status.unwrap_or(WorkflowStatus::default()),
+            status: self.status.unwrap_or_default(),
             initiator_id,
             target_user_id: self.target_user_id,
             title,

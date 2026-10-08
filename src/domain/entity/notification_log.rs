@@ -70,7 +70,7 @@ pub struct NotificationLog {
 impl NotificationLog {
     /// Create a builder for NotificationLog
     pub fn builder() -> NotificationLogBuilder {
-        NotificationLogBuilder::default()
+        <NotificationLogBuilder as Default>::default()
     }
 
     /// Create a new NotificationLog with required fields
@@ -300,6 +300,9 @@ impl backbone_orm::EntityRepoMeta for NotificationLog {
         m.insert("recipient_id".to_string(), "uuid".to_string());
         m.insert("channel".to_string(), "notification_channel".to_string());
         m.insert("status".to_string(), "notification_log_status".to_string());
+        m.insert("sent_at".to_string(), "timestamptz".to_string());
+        m.insert("delivered_at".to_string(), "timestamptz".to_string());
+        m.insert("failed_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {

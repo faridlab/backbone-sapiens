@@ -76,7 +76,7 @@ pub struct PasswordReset {
 impl PasswordReset {
     /// Create a builder for PasswordReset
     pub fn builder() -> PasswordResetBuilder {
-        PasswordResetBuilder::default()
+        <PasswordResetBuilder as Default>::default()
     }
 
     /// Create a new PasswordReset with required fields
@@ -340,20 +340,17 @@ impl backbone_orm::EntityRepoMeta for PasswordReset {
         m.insert("completion_details_id".to_string(), "uuid".to_string());
         m.insert("security_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "password_reset_status".to_string());
+        m.insert("last_attempt_at".to_string(), "timestamptz".to_string());
+        m.insert("verified_at".to_string(), "timestamptz".to_string());
+        m.insert("used_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
         m
     }
-    /// Never serialized to anyone but the row's owner or a platform caller.
-    ///
-    /// These carry `@sensitive` in the schema, whose description says plainly
-    /// that they are never exposed over the API. Saying so is not enforcing it:
-    /// the response pruner reads THIS list, and while it was empty a password
-    /// hash was serialized to every caller that could reach the route.
-    fn private_fields() -> &'static [&'static str] {
-        &["token"]
-    }
-
     fn search_fields() -> &'static [&'static str] {
         &["token", "token_hash", "email"]
+    }
+    fn private_fields() -> &'static [&'static str] {
+        &["token"]
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId"), ("verificationDetails", "password_reset_verification_details", "verificationDetailsId"), ("security", "password_reset_security", "securityId")]
@@ -511,7 +508,7 @@ impl PasswordResetBuilder {
             token,
             token_hash,
             email,
-            status: self.status.unwrap_or(PasswordResetStatus::default()),
+            status: self.status.unwrap_or_default(),
             max_attempts: self.max_attempts.unwrap_or(3),
             attempts_remaining: self.attempts_remaining.unwrap_or(3),
             last_attempt_at: self.last_attempt_at,

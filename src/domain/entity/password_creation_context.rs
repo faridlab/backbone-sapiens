@@ -63,7 +63,7 @@ pub struct PasswordCreationContext {
 impl PasswordCreationContext {
     /// Create a builder for PasswordCreationContext
     pub fn builder() -> PasswordCreationContextBuilder {
-        PasswordCreationContextBuilder::default()
+        <PasswordCreationContextBuilder as Default>::default()
     }
 
     /// Create a new PasswordCreationContext with required fields

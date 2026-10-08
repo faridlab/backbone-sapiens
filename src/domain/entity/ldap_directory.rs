@@ -67,7 +67,7 @@ pub struct LDAPDirectory {
     pub sync_interval_minutes: Option<i32>,
     pub last_sync_at: Option<DateTime<Utc>>,
     pub last_sync_result: Option<serde_json::Value>,
-    pub status: LDAPDirectoryStatus,
+    pub(crate) status: LDAPDirectoryStatus,
     #[serde(default)]
     #[sqlx(json)]
     pub metadata: AuditMetadata,
@@ -76,7 +76,7 @@ pub struct LDAPDirectory {
 impl LDAPDirectory {
     /// Create a builder for LDAPDirectory
     pub fn builder() -> LDAPDirectoryBuilder {
-        LDAPDirectoryBuilder::default()
+        <LDAPDirectoryBuilder as Default>::default()
     }
 
     /// Create a new LDAPDirectory with required fields
@@ -251,9 +251,6 @@ impl LDAPDirectory {
                 "last_sync_result" => {
                     if let Ok(v) = serde_json::from_value(value) { self.last_sync_result = v; }
                 }
-                "status" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
-                }
                 _ => {} // ignore unknown fields
             }
         }
@@ -309,20 +306,14 @@ impl backbone_orm::EntityRepoMeta for LDAPDirectory {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "ldap_directory_status".to_string());
+        m.insert("last_sync_at".to_string(), "timestamptz".to_string());
         m
     }
-    /// Never serialized to anyone but the row's owner or a platform caller.
-    ///
-    /// These carry `@sensitive` in the schema, whose description says plainly
-    /// that they are never exposed over the API. Saying so is not enforcing it:
-    /// the response pruner reads THIS list, and while it was empty a password
-    /// hash was serialized to every caller that could reach the route.
-    fn private_fields() -> &'static [&'static str] {
-        &["bindPassword"]
-    }
-
     fn search_fields() -> &'static [&'static str] {
         &["name", "display_name", "host", "bind_dn", "bind_password", "search_base", "search_filter"]
+    }
+    fn private_fields() -> &'static [&'static str] {
+        &["bindPassword"]
     }
 }
 
@@ -469,13 +460,13 @@ impl LDAPDirectoryBuilder {
             bind_dn,
             bind_password,
             search_base,
-            search_filter: self.search_filter.unwrap_or(Default::default()),
-            attribute_mapping: self.attribute_mapping.unwrap_or(Default::default()),
+            search_filter: self.search_filter.unwrap_or_default(),
+            attribute_mapping: self.attribute_mapping.unwrap_or_default(),
             sync_enabled: self.sync_enabled.unwrap_or(false),
             sync_interval_minutes: self.sync_interval_minutes,
             last_sync_at: self.last_sync_at,
             last_sync_result: self.last_sync_result,
-            status: self.status.unwrap_or(LDAPDirectoryStatus::default()),
+            status: self.status.unwrap_or_default(),
             metadata: AuditMetadata::default(),
         })
     }

@@ -209,4 +209,3 @@ pub fn password_reset_token_trigger_registry() -> PasswordResetTokenTriggerRegis
         r.register(Arc::new(PasswordResetTokenOnEnterUsedHandler::new()));
     })
 }
-

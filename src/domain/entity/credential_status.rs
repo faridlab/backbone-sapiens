@@ -4,10 +4,6 @@ use std::str::FromStr;
 #[cfg(feature = "openapi")]
 use utoipa::ToSchema;
 
-/// Lifecycle of a stored credential. `expired` and `revoked` are terminal:
-/// `expired` is set lazily (read-time CAS) or by rotation lineage, `revoked` by
-/// the revoke verb or as a predecessor's fate under rotate. Only `active` is
-/// readable — every other status fails closed.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Type)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 #[serde(rename_all = "snake_case")]

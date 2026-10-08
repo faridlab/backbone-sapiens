@@ -64,7 +64,7 @@ pub struct OrganizationUser {
 impl OrganizationUser {
     /// Create a builder for OrganizationUser
     pub fn builder() -> OrganizationUserBuilder {
-        OrganizationUserBuilder::default()
+        <OrganizationUserBuilder as Default>::default()
     }
 
     /// Create a new OrganizationUser with required fields
@@ -237,6 +237,8 @@ impl backbone_orm::EntityRepoMeta for OrganizationUser {
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("role_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "organization_membership_status".to_string());
+        m.insert("joined_at".to_string(), "timestamptz".to_string());
+        m.insert("left_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -310,7 +312,7 @@ impl OrganizationUserBuilder {
             org_unit_id,
             user_id,
             role_id: self.role_id,
-            status: self.status.unwrap_or(OrganizationMembershipStatus::default()),
+            status: self.status.unwrap_or_default(),
             joined_at: self.joined_at.unwrap_or(Utc::now()),
             left_at: self.left_at,
             metadata: AuditMetadata::default(),

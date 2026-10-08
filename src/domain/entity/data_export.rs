@@ -72,7 +72,7 @@ pub struct DataExport {
 impl DataExport {
     /// Create a builder for DataExport
     pub fn builder() -> DataExportBuilder {
-        DataExportBuilder::default()
+        <DataExportBuilder as Default>::default()
     }
 
     /// Create a new DataExport with required fields
@@ -296,6 +296,9 @@ impl backbone_orm::EntityRepoMeta for DataExport {
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "data_export_status".to_string());
         m.insert("format".to_string(), "data_export_format".to_string());
+        m.insert("requested_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
+        m.insert("completed_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -405,13 +408,13 @@ impl DataExportBuilder {
             user_id,
             requested_by,
             requested_at: self.requested_at.unwrap_or(Utc::now()),
-            status: self.status.unwrap_or(DataExportStatus::default()),
+            status: self.status.unwrap_or_default(),
             file_path: self.file_path,
             file_url: self.file_url,
             expires_at,
             completed_at: self.completed_at,
             record_count: self.record_count,
-            format: self.format.unwrap_or(DataExportFormat::default()),
+            format: self.format.unwrap_or_default(),
             justification: self.justification,
             metadata: AuditMetadata::default(),
         })

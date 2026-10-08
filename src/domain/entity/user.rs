@@ -68,7 +68,7 @@ pub struct User {
 impl User {
     /// Create a builder for User
     pub fn builder() -> UserBuilder {
-        UserBuilder::default()
+        <UserBuilder as Default>::default()
     }
 
     /// Create a new User with required fields
@@ -257,6 +257,9 @@ impl super::Entity for User {
 }
 
 impl backbone_core::PersistentEntity for User {
+    fn write_protected_fields() -> &'static [&'static str] {
+        &["password_hash"]
+    }
     fn entity_id(&self) -> String {
         self.id.to_string()
     }
@@ -290,20 +293,15 @@ impl backbone_orm::EntityRepoMeta for User {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "user_status".to_string());
+        m.insert("locked_until".to_string(), "timestamptz".to_string());
+        m.insert("last_login".to_string(), "timestamptz".to_string());
         m
     }
-    /// Never serialized to anyone but the row's owner or a platform caller.
-    ///
-    /// These carry `@sensitive` in the schema, whose description says plainly
-    /// that they are never exposed over the API. Saying so is not enforcing it:
-    /// the response pruner reads THIS list, and while it was empty a password
-    /// hash was serialized to every caller that could reach the route.
-    fn private_fields() -> &'static [&'static str] {
-        &["passwordHash"]
-    }
-
     fn search_fields() -> &'static [&'static str] {
         &["username", "email", "password_hash"]
+    }
+    fn private_fields() -> &'static [&'static str] {
+        &["passwordHash"]
     }
 }
 
@@ -385,7 +383,7 @@ impl UserBuilder {
             username,
             email,
             password_hash,
-            status: self.status.unwrap_or(UserStatus::default()),
+            status: self.status.unwrap_or_default(),
             email_verified: self.email_verified.unwrap_or(false),
             failed_login_attempts: self.failed_login_attempts.unwrap_or(0),
             locked_until: self.locked_until,

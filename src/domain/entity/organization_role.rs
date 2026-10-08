@@ -2,8 +2,9 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
-use super::AuditMetadata;
+
 use super::OrganizationRoleStatus;
+use super::AuditMetadata;
 
 /// Strongly-typed ID for OrganizationRole
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -62,7 +63,7 @@ pub struct OrganizationRole {
 impl OrganizationRole {
     /// Create a builder for OrganizationRole
     pub fn builder() -> OrganizationRoleBuilder {
-        OrganizationRoleBuilder::default()
+        <OrganizationRoleBuilder as Default>::default()
     }
 
     /// Create a new OrganizationRole with required fields

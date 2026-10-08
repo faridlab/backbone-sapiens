@@ -110,7 +110,7 @@ pub struct MFASession {
 impl MFASession {
     /// Create a builder for MFASession
     pub fn builder() -> MFASessionBuilder {
-        MFASessionBuilder::default()
+        <MFASessionBuilder as Default>::default()
     }
 
     /// Create a new MFASession with required fields
@@ -541,6 +541,12 @@ impl backbone_orm::EntityRepoMeta for MFASession {
         m.insert("device_trust_status".to_string(), "device_trust_status".to_string());
         m.insert("network_quality".to_string(), "network_quality".to_string());
         m.insert("status".to_string(), "mfa_session_status".to_string());
+        m.insert("mfa_enforced_at".to_string(), "timestamptz".to_string());
+        m.insert("verification_initiated_at".to_string(), "timestamptz".to_string());
+        m.insert("verification_completed_at".to_string(), "timestamptz".to_string());
+        m.insert("terminated_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
+        m.insert("last_activity_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -915,7 +921,7 @@ impl MFASessionBuilder {
             mfa_required,
             mfa_enforced_at: self.mfa_enforced_at,
             risk_score: self.risk_score.unwrap_or(0),
-            trust_level: self.trust_level.unwrap_or(MfaTrustLevel::default()),
+            trust_level: self.trust_level.unwrap_or_default(),
             adaptive_authentication_triggered: self.adaptive_authentication_triggered.unwrap_or(false),
             additional_factors_required: self.additional_factors_required.unwrap_or(0),
             ip_risk_score: self.ip_risk_score,
@@ -929,7 +935,7 @@ impl MFASessionBuilder {
             max_attempts_allowed: self.max_attempts_allowed.unwrap_or(5),
             verification_success: self.verification_success,
             verification_time_ms: self.verification_time_ms,
-            device_trust_status: self.device_trust_status.unwrap_or(DeviceTrustStatus::default()),
+            device_trust_status: self.device_trust_status.unwrap_or_default(),
             is_terminated: self.is_terminated.unwrap_or(false),
             terminated_at: self.terminated_at,
             termination_reason: self.termination_reason,
@@ -945,15 +951,15 @@ impl MFASessionBuilder {
             max_duration_minutes: self.max_duration_minutes.unwrap_or(30),
             idle_timeout_minutes: self.idle_timeout_minutes.unwrap_or(15),
             auto_renew_enabled: self.auto_renew_enabled.unwrap_or(false),
-            last_activity_at: self.last_activity_at.unwrap_or(Default::default()),
+            last_activity_at: self.last_activity_at.unwrap_or_default(),
             extension_count: self.extension_count.unwrap_or(0),
             initiation_time_ms,
             total_session_time_ms: self.total_session_time_ms,
             device_performance_score: self.device_performance_score,
-            network_quality: self.network_quality.unwrap_or(NetworkQuality::default()),
+            network_quality: self.network_quality.unwrap_or_default(),
             audit_log_required: self.audit_log_required.unwrap_or(true),
             data_retention_hours: self.data_retention_hours.unwrap_or(8760),
-            status: self.status.unwrap_or(MFASessionStatus::default()),
+            status: self.status.unwrap_or_default(),
             metadata: AuditMetadata::default(),
         })
     }

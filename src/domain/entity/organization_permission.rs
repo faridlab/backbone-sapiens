@@ -2,8 +2,9 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
-use super::AuditMetadata;
+
 use super::OrganizationPermissionStatus;
+use super::AuditMetadata;
 
 /// Strongly-typed ID for OrganizationPermission
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -68,7 +69,7 @@ pub struct OrganizationPermission {
 impl OrganizationPermission {
     /// Create a builder for OrganizationPermission
     pub fn builder() -> OrganizationPermissionBuilder {
-        OrganizationPermissionBuilder::default()
+        <OrganizationPermissionBuilder as Default>::default()
     }
 
     /// Create a new OrganizationPermission with required fields
@@ -286,6 +287,8 @@ impl backbone_orm::EntityRepoMeta for OrganizationPermission {
         m.insert("resource_id".to_string(), "uuid".to_string());
         m.insert("role_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "organization_permission_status".to_string());
+        m.insert("granted_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {

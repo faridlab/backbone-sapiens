@@ -63,7 +63,7 @@ pub struct PasswordResetVerificationDetails {
 impl PasswordResetVerificationDetails {
     /// Create a builder for PasswordResetVerificationDetails
     pub fn builder() -> PasswordResetVerificationDetailsBuilder {
-        PasswordResetVerificationDetailsBuilder::default()
+        <PasswordResetVerificationDetailsBuilder as Default>::default()
     }
 
     /// Create a new PasswordResetVerificationDetails with required fields
@@ -255,6 +255,8 @@ impl backbone_orm::EntityRepoMeta for PasswordResetVerificationDetails {
     fn column_types() -> std::collections::HashMap<String, String> {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
+        m.insert("verified_at".to_string(), "timestamptz".to_string());
+        m.insert("last_attempt_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {

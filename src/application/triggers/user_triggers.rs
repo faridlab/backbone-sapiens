@@ -561,4 +561,3 @@ pub fn user_trigger_registry() -> UserTriggerRegistry {
         r.register(Arc::new(UserOnEnterSuspendedHandler::new()));
     })
 }
-

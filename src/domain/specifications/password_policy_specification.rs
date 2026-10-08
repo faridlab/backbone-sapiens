@@ -26,15 +26,8 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActivePasswordPolicySpec;
 // impl Specification<PasswordPolicy> for ActivePasswordPolicySpec {
 //     fn is_satisfied_by(&self, e: &PasswordPolicy) -> bool {
-//         // e.status
+//         // e.is_active
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct PasswordPolicyHasValidEmailSpec;
-// impl PasswordPolicySpecification for PasswordPolicyHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &PasswordPolicy) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

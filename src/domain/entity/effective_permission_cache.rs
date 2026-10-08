@@ -66,7 +66,7 @@ pub struct EffectivePermissionCache {
 impl EffectivePermissionCache {
     /// Create a builder for EffectivePermissionCache
     pub fn builder() -> EffectivePermissionCacheBuilder {
-        EffectivePermissionCacheBuilder::default()
+        <EffectivePermissionCacheBuilder as Default>::default()
     }
 
     /// Create a new EffectivePermissionCache with required fields

@@ -83,7 +83,7 @@ pub struct RoleAssignment {
 impl RoleAssignment {
     /// Create a builder for RoleAssignment
     pub fn builder() -> RoleAssignmentBuilder {
-        RoleAssignmentBuilder::default()
+        <RoleAssignmentBuilder as Default>::default()
     }
 
     /// Create a new RoleAssignment with required fields
@@ -371,6 +371,9 @@ impl backbone_orm::EntityRepoMeta for RoleAssignment {
         m.insert("parent_assignment_id".to_string(), "uuid".to_string());
         m.insert("conflict_resolution".to_string(), "conflict_resolution_type".to_string());
         m.insert("status".to_string(), "role_assignment_status".to_string());
+        m.insert("assigned_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
+        m.insert("last_used_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -583,14 +586,14 @@ impl RoleAssignmentBuilder {
             inheritance_level: self.inheritance_level.unwrap_or(0),
             inherited_from: self.inherited_from,
             conflicts_with,
-            conflict_resolution: self.conflict_resolution.unwrap_or(ConflictResolutionType::default()),
+            conflict_resolution: self.conflict_resolution.unwrap_or_default(),
             has_conflicts: self.has_conflicts.unwrap_or(false),
             conflict_types,
             detected_conflicts: self.detected_conflicts,
             last_used_at: self.last_used_at,
             usage_count: self.usage_count.unwrap_or(0),
             modification_history: self.modification_history,
-            status: self.status.unwrap_or(RoleAssignmentStatus::default()),
+            status: self.status.unwrap_or_default(),
             warning_sent: self.warning_sent.unwrap_or(false),
             auto_renew: self.auto_renew.unwrap_or(false),
             renewal_period_days: self.renewal_period_days.unwrap_or(30),

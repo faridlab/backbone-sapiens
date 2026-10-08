@@ -70,7 +70,7 @@ pub struct TemporaryPermission {
 impl TemporaryPermission {
     /// Create a builder for TemporaryPermission
     pub fn builder() -> TemporaryPermissionBuilder {
-        TemporaryPermissionBuilder::default()
+        <TemporaryPermissionBuilder as Default>::default()
     }
 
     /// Create a new TemporaryPermission with required fields
@@ -278,6 +278,9 @@ impl backbone_orm::EntityRepoMeta for TemporaryPermission {
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("permission_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "temporary_permission_status".to_string());
+        m.insert("granted_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
+        m.insert("revoked_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -387,7 +390,7 @@ impl TemporaryPermissionBuilder {
             revoked_by: self.revoked_by,
             reason: self.reason,
             notified_before_expiry: self.notified_before_expiry.unwrap_or(false),
-            status: self.status.unwrap_or(TemporaryPermissionStatus::default()),
+            status: self.status.unwrap_or_default(),
             metadata: AuditMetadata::default(),
         })
     }

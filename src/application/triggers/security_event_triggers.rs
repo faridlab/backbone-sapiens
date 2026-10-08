@@ -268,4 +268,3 @@ pub fn security_event_trigger_registry() -> SecurityEventTriggerRegistry {
         r.register(Arc::new(SecurityEventOnEnterTrueHandler::new()));
     })
 }
-

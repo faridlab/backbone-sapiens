@@ -26,15 +26,8 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveSessionSpec;
 // impl Specification<Session> for ActiveSessionSpec {
 //     fn is_satisfied_by(&self, e: &Session) -> bool {
-//         // e.status
+//         // e.is_active
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct SessionHasValidEmailSpec;
-// impl SessionSpecification for SessionHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &Session) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

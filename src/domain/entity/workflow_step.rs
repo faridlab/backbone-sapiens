@@ -73,7 +73,7 @@ pub struct WorkflowStep {
 impl WorkflowStep {
     /// Create a builder for WorkflowStep
     pub fn builder() -> WorkflowStepBuilder {
-        WorkflowStepBuilder::default()
+        <WorkflowStepBuilder as Default>::default()
     }
 
     /// Create a new WorkflowStep with required fields
@@ -313,6 +313,9 @@ impl backbone_orm::EntityRepoMeta for WorkflowStep {
         m.insert("workflow_id".to_string(), "uuid".to_string());
         m.insert("step_type".to_string(), "workflow_step_type".to_string());
         m.insert("status".to_string(), "workflow_step_status".to_string());
+        m.insert("started_at".to_string(), "timestamptz".to_string());
+        m.insert("completed_at".to_string(), "timestamptz".to_string());
+        m.insert("failed_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -446,7 +449,7 @@ impl WorkflowStepBuilder {
             step_type,
             step_name,
             description: self.description,
-            status: self.status.unwrap_or(WorkflowStepStatus::default()),
+            status: self.status.unwrap_or_default(),
             parameters: self.parameters,
             result: self.result,
             started_at: self.started_at,

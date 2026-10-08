@@ -9,8 +9,7 @@ use async_trait::async_trait;
 use anyhow::Result;
 use uuid::Uuid;
 
-use crate::domain::entity::OrganizationPermission;
-use crate::domain::entity::OrganizationPermissionStatus;
+use crate::domain::entity::{OrganizationPermission, OrganizationPermissionStatus};
 
 /// Pagination parameters for list queries
 #[derive(Debug, Clone, Default)]

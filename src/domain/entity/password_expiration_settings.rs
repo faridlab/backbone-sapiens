@@ -59,7 +59,7 @@ pub struct PasswordExpirationSettings {
 impl PasswordExpirationSettings {
     /// Create a builder for PasswordExpirationSettings
     pub fn builder() -> PasswordExpirationSettingsBuilder {
-        PasswordExpirationSettingsBuilder::default()
+        <PasswordExpirationSettingsBuilder as Default>::default()
     }
 
     /// Create a new PasswordExpirationSettings with required fields

@@ -71,7 +71,7 @@ pub struct ImpersonationSession {
 impl ImpersonationSession {
     /// Create a builder for ImpersonationSession
     pub fn builder() -> ImpersonationSessionBuilder {
-        ImpersonationSessionBuilder::default()
+        <ImpersonationSessionBuilder as Default>::default()
     }
 
     /// Create a new ImpersonationSession with required fields
@@ -284,6 +284,8 @@ impl backbone_orm::EntityRepoMeta for ImpersonationSession {
         m.insert("target_user_id".to_string(), "uuid".to_string());
         m.insert("session_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "impersonation_session_status".to_string());
+        m.insert("started_at".to_string(), "timestamptz".to_string());
+        m.insert("ended_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -401,7 +403,7 @@ impl ImpersonationSessionBuilder {
             actions_performed: self.actions_performed.unwrap_or(0),
             terminated_by: self.terminated_by,
             termination_reason: self.termination_reason,
-            status: self.status.unwrap_or(ImpersonationSessionStatus::default()),
+            status: self.status.unwrap_or_default(),
             metadata: AuditMetadata::default(),
         })
     }

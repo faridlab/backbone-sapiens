@@ -67,7 +67,7 @@ pub struct WorkflowAction {
 impl WorkflowAction {
     /// Create a builder for WorkflowAction
     pub fn builder() -> WorkflowActionBuilder {
-        WorkflowActionBuilder::default()
+        <WorkflowActionBuilder as Default>::default()
     }
 
     /// Create a new WorkflowAction with required fields

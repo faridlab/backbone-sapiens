@@ -70,7 +70,7 @@ pub struct NotificationPreference {
 impl NotificationPreference {
     /// Create a builder for NotificationPreference
     pub fn builder() -> NotificationPreferenceBuilder {
-        NotificationPreferenceBuilder::default()
+        <NotificationPreferenceBuilder as Default>::default()
     }
 
     /// Create a new NotificationPreference with required fields
@@ -367,12 +367,12 @@ impl NotificationPreferenceBuilder {
             user_id,
             notification_type,
             channel_enabled: self.channel_enabled.unwrap_or(true),
-            channels: self.channels.unwrap_or(Default::default()),
+            channels: self.channels.unwrap_or_default(),
             quiet_hours_start: self.quiet_hours_start,
             quiet_hours_end: self.quiet_hours_end,
-            quiet_timezone: self.quiet_timezone.unwrap_or(Default::default()),
+            quiet_timezone: self.quiet_timezone.unwrap_or_default(),
             digest_enabled: self.digest_enabled.unwrap_or(false),
-            digest_frequency: self.digest_frequency.unwrap_or(DigestFrequency::default()),
+            digest_frequency: self.digest_frequency.unwrap_or_default(),
             enabled: self.enabled.unwrap_or(true),
             metadata: AuditMetadata::default(),
         })

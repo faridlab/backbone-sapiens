@@ -36,7 +36,7 @@ impl Seeder for SeedLDAPDirectorySeeder {
     }
 
     fn order(&self) -> i32 {
-        14
+        2
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
@@ -69,4 +69,3 @@ impl Seeder for SeedLDAPDirectorySeeder {
 // <<< CUSTOM SEED DATA START >>>
 // Add custom seed data methods here
 // <<< CUSTOM SEED DATA END >>>
-

@@ -623,4 +623,3 @@ pub fn workflow_trigger_registry() -> WorkflowTriggerRegistry {
         r.register(Arc::new(WorkflowAfterCreateHandler10::new()));
     })
 }
-

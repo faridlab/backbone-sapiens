@@ -68,7 +68,7 @@ pub struct BulkOperationResult {
 impl BulkOperationResult {
     /// Create a builder for BulkOperationResult
     pub fn builder() -> BulkOperationResultBuilder {
-        BulkOperationResultBuilder::default()
+        <BulkOperationResultBuilder as Default>::default()
     }
 
     /// Create a new BulkOperationResult with required fields
@@ -279,6 +279,7 @@ impl backbone_orm::EntityRepoMeta for BulkOperationResult {
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("bulk_operation_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "bulk_operation_result_status".to_string());
+        m.insert("processed_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {

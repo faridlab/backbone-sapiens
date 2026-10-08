@@ -26,15 +26,8 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveUserOAuthLinkSpec;
 // impl Specification<UserOAuthLink> for ActiveUserOAuthLinkSpec {
 //     fn is_satisfied_by(&self, e: &UserOAuthLink) -> bool {
-//         // e.status
+//         // e.is_active
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct UserOAuthLinkHasValidEmailSpec;
-// impl UserOAuthLinkSpecification for UserOAuthLinkHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &UserOAuthLink) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

@@ -39,3 +39,9 @@ impl FromStr for CredentialPurpose {
         }
     }
 }
+
+impl Default for CredentialPurpose {
+    fn default() -> Self {
+        Self::WebhookVerify
+    }
+}

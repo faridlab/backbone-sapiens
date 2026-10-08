@@ -41,7 +41,7 @@ impl PasswordHashParams {
 
     /// Create a builder for PasswordHashParams
     pub fn builder() -> PasswordHashParamsBuilder {
-        PasswordHashParamsBuilder::default()
+        <PasswordHashParamsBuilder as Default>::default()
     }
 
 }

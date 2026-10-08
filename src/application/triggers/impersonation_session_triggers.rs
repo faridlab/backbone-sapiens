@@ -390,4 +390,3 @@ pub fn impersonation_session_trigger_registry() -> ImpersonationSessionTriggerRe
         r.register(Arc::new(ImpersonationSessionOnEnterTerminatedHandler::new()));
     })
 }
-

@@ -73,7 +73,7 @@ pub struct DeviceTrust {
 impl DeviceTrust {
     /// Create a builder for DeviceTrust
     pub fn builder() -> DeviceTrustBuilder {
-        DeviceTrustBuilder::default()
+        <DeviceTrustBuilder as Default>::default()
     }
 
     /// Create a new DeviceTrust with required fields
@@ -278,6 +278,9 @@ impl backbone_orm::EntityRepoMeta for DeviceTrust {
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("device_type".to_string(), "device_trust_type".to_string());
         m.insert("trust_level".to_string(), "trust_level".to_string());
+        m.insert("trusted_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
+        m.insert("last_used_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -410,7 +413,7 @@ impl DeviceTrustBuilder {
             device_fingerprint,
             device_name,
             device_type,
-            trust_level: self.trust_level.unwrap_or(TrustLevel::default()),
+            trust_level: self.trust_level.unwrap_or_default(),
             is_trusted: self.is_trusted.unwrap_or(true),
             trusted_at: self.trusted_at.unwrap_or(Utc::now()),
             expires_at: self.expires_at,

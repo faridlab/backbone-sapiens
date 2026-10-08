@@ -8,7 +8,7 @@
 //! ## Usage from other modules
 //!
 //! ```text
-//! use sapiens::exports::{AnalyticsEventDto, SapiensQueryService};
+//! use sapiens::exports::{AnalyticsEventDto};
 //! ```
 
 mod types;
@@ -39,9 +39,6 @@ pub use events::*;
 /// - `AnonymizationRecordDto` - Data transfer object for AnonymizationRecord
 /// - `AnonymizationRecordSummary` - Summary view of AnonymizationRecord
 /// - `AnonymizationRecordId` - Type-safe ID wrapper
-/// - `AuditLogDto` - Data transfer object for AuditLog
-/// - `AuditLogSummary` - Summary view of AuditLog
-/// - `AuditLogId` - Type-safe ID wrapper
 /// - `BackupCodeDto` - Data transfer object for BackupCode
 /// - `BackupCodeSummary` - Summary view of BackupCode
 /// - `BackupCodeId` - Type-safe ID wrapper
@@ -69,6 +66,9 @@ pub use events::*;
 /// - `ImpersonationSessionDto` - Data transfer object for ImpersonationSession
 /// - `ImpersonationSessionSummary` - Summary view of ImpersonationSession
 /// - `ImpersonationSessionId` - Type-safe ID wrapper
+/// - `IntegrationCredentialDto` - Data transfer object for IntegrationCredential
+/// - `IntegrationCredentialSummary` - Summary view of IntegrationCredential
+/// - `IntegrationCredentialId` - Type-safe ID wrapper
 /// - `LDAPDirectoryDto` - Data transfer object for LDAPDirectory
 /// - `LDAPDirectorySummary` - Summary view of LDAPDirectory
 /// - `LDAPDirectoryId` - Type-safe ID wrapper
@@ -211,9 +211,6 @@ pub use events::*;
 /// - `WorkflowActionExecutionSummary` - Summary view of WorkflowActionExecution
 /// - `WorkflowActionExecutionId` - Type-safe ID wrapper
 ///
-/// ## Public Services
-/// - `SapiensQueryService` - Read-only queries
-///
 /// ## Public Events
 /// - `AnalyticsEventCreatedEvent` - Published when AnalyticsEvent is created
 /// - `AnalyticsEventUpdatedEvent` - Published when AnalyticsEvent is updated
@@ -227,9 +224,6 @@ pub use events::*;
 /// - `AnonymizationRecordCreatedEvent` - Published when AnonymizationRecord is created
 /// - `AnonymizationRecordUpdatedEvent` - Published when AnonymizationRecord is updated
 /// - `AnonymizationRecordDeletedEvent` - Published when AnonymizationRecord is deleted
-/// - `AuditLogCreatedEvent` - Published when AuditLog is created
-/// - `AuditLogUpdatedEvent` - Published when AuditLog is updated
-/// - `AuditLogDeletedEvent` - Published when AuditLog is deleted
 /// - `BackupCodeCreatedEvent` - Published when BackupCode is created
 /// - `BackupCodeUpdatedEvent` - Published when BackupCode is updated
 /// - `BackupCodeDeletedEvent` - Published when BackupCode is deleted
@@ -257,6 +251,9 @@ pub use events::*;
 /// - `ImpersonationSessionCreatedEvent` - Published when ImpersonationSession is created
 /// - `ImpersonationSessionUpdatedEvent` - Published when ImpersonationSession is updated
 /// - `ImpersonationSessionDeletedEvent` - Published when ImpersonationSession is deleted
+/// - `IntegrationCredentialCreatedEvent` - Published when IntegrationCredential is created
+/// - `IntegrationCredentialUpdatedEvent` - Published when IntegrationCredential is updated
+/// - `IntegrationCredentialDeletedEvent` - Published when IntegrationCredential is deleted
 /// - `LDAPDirectoryCreatedEvent` - Published when LDAPDirectory is created
 /// - `LDAPDirectoryUpdatedEvent` - Published when LDAPDirectory is updated
 /// - `LDAPDirectoryDeletedEvent` - Published when LDAPDirectory is deleted

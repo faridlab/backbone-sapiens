@@ -64,7 +64,7 @@ pub struct SessionLimit {
 impl SessionLimit {
     /// Create a builder for SessionLimit
     pub fn builder() -> SessionLimitBuilder {
-        SessionLimitBuilder::default()
+        <SessionLimitBuilder as Default>::default()
     }
 
     /// Create a new SessionLimit with required fields
@@ -243,6 +243,7 @@ impl backbone_orm::EntityRepoMeta for SessionLimit {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("user_id".to_string(), "uuid".to_string());
+        m.insert("last_session_revoke_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {

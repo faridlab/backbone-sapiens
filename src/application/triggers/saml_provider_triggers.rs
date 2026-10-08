@@ -372,4 +372,3 @@ pub fn saml_provider_trigger_registry() -> SAMLProviderTriggerRegistry {
         r.register(Arc::new(SAMLProviderOnEnterInactiveHandler::new()));
     })
 }
-

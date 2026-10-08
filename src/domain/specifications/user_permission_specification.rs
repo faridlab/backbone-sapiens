@@ -26,15 +26,8 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveUserPermissionSpec;
 // impl Specification<UserPermission> for ActiveUserPermissionSpec {
 //     fn is_satisfied_by(&self, e: &UserPermission) -> bool {
-//         // e.status == UserPermissionStatus::Active
+//         // e.is_active
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct UserPermissionHasValidEmailSpec;
-// impl UserPermissionSpecification for UserPermissionHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &UserPermission) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

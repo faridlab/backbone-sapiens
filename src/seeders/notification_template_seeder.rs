@@ -36,7 +36,7 @@ impl Seeder for SeedNotificationTemplateSeeder {
     }
 
     fn order(&self) -> i32 {
-        19
+        3
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
@@ -69,4 +69,3 @@ impl Seeder for SeedNotificationTemplateSeeder {
 // <<< CUSTOM SEED DATA START >>>
 // Add custom seed data methods here
 // <<< CUSTOM SEED DATA END >>>
-

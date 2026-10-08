@@ -69,7 +69,7 @@ pub struct UserSAMLLink {
 impl UserSAMLLink {
     /// Create a builder for UserSAMLLink
     pub fn builder() -> UserSAMLLinkBuilder {
-        UserSAMLLinkBuilder::default()
+        <UserSAMLLinkBuilder as Default>::default()
     }
 
     /// Create a new UserSAMLLink with required fields
@@ -261,6 +261,8 @@ impl backbone_orm::EntityRepoMeta for UserSAMLLink {
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("provider_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "user_saml_link_status".to_string());
+        m.insert("first_login_at".to_string(), "timestamptz".to_string());
+        m.insert("last_login_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -359,9 +361,9 @@ impl UserSAMLLinkBuilder {
             session_index: self.session_index,
             first_login_at: self.first_login_at.unwrap_or(Utc::now()),
             last_login_at: self.last_login_at.unwrap_or(Utc::now()),
-            attributes: self.attributes.unwrap_or(Default::default()),
+            attributes: self.attributes.unwrap_or_default(),
             is_primary: self.is_primary.unwrap_or(false),
-            status: self.status.unwrap_or(UserSAMLLinkStatus::default()),
+            status: self.status.unwrap_or_default(),
             metadata: AuditMetadata::default(),
         })
     }

@@ -69,7 +69,7 @@ pub struct WorkflowDefinition {
 impl WorkflowDefinition {
     /// Create a builder for WorkflowDefinition
     pub fn builder() -> WorkflowDefinitionBuilder {
-        WorkflowDefinitionBuilder::default()
+        <WorkflowDefinitionBuilder as Default>::default()
     }
 
     /// Create a new WorkflowDefinition with required fields

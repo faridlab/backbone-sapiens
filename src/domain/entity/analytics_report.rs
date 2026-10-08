@@ -72,7 +72,7 @@ pub struct AnalyticsReport {
 impl AnalyticsReport {
     /// Create a builder for AnalyticsReport
     pub fn builder() -> AnalyticsReportBuilder {
-        AnalyticsReportBuilder::default()
+        <AnalyticsReportBuilder as Default>::default()
     }
 
     /// Create a new AnalyticsReport with required fields
@@ -292,6 +292,8 @@ impl backbone_orm::EntityRepoMeta for AnalyticsReport {
         m.insert("report_type".to_string(), "analytics_report_type".to_string());
         m.insert("format".to_string(), "report_format".to_string());
         m.insert("status".to_string(), "report_status".to_string());
+        m.insert("generated_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -416,7 +418,7 @@ impl AnalyticsReportBuilder {
             expires_at: self.expires_at,
             file_path: self.file_path,
             file_size: self.file_size,
-            status: self.status.unwrap_or(ReportStatus::default()),
+            status: self.status.unwrap_or_default(),
             download_count: self.download_count.unwrap_or(0),
             metadata: AuditMetadata::default(),
         })

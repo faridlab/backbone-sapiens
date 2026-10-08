@@ -30,11 +30,4 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct PasswordResetHasValidEmailSpec;
-// impl PasswordResetSpecification for PasswordResetHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &PasswordReset) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

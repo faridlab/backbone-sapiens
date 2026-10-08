@@ -26,15 +26,8 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveOrganizationPermissionSpec;
 // impl Specification<OrganizationPermission> for ActiveOrganizationPermissionSpec {
 //     fn is_satisfied_by(&self, e: &OrganizationPermission) -> bool {
-//         // e.status == OrganizationPermissionStatus::Active
+//         // e.is_active
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct OrganizationPermissionHasValidEmailSpec;
-// impl OrganizationPermissionSpecification for OrganizationPermissionHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &OrganizationPermission) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

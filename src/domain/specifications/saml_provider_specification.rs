@@ -26,15 +26,8 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveSAMLProviderSpec;
 // impl Specification<SAMLProvider> for ActiveSAMLProviderSpec {
 //     fn is_satisfied_by(&self, e: &SAMLProvider) -> bool {
-//         // e.status
+//         // e.is_active
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct SAMLProviderHasValidEmailSpec;
-// impl SAMLProviderSpecification for SAMLProviderHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &SAMLProvider) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

@@ -60,7 +60,7 @@ pub struct PasswordHistorySettings {
 impl PasswordHistorySettings {
     /// Create a builder for PasswordHistorySettings
     pub fn builder() -> PasswordHistorySettingsBuilder {
-        PasswordHistorySettingsBuilder::default()
+        <PasswordHistorySettingsBuilder as Default>::default()
     }
 
     /// Create a new PasswordHistorySettings with required fields

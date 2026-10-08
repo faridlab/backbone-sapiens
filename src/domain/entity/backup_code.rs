@@ -65,7 +65,7 @@ pub struct BackupCode {
 impl BackupCode {
     /// Create a builder for BackupCode
     pub fn builder() -> BackupCodeBuilder {
-        BackupCodeBuilder::default()
+        <BackupCodeBuilder as Default>::default()
     }
 
     /// Create a new BackupCode with required fields
@@ -248,20 +248,15 @@ impl backbone_orm::EntityRepoMeta for BackupCode {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("user_id".to_string(), "uuid".to_string());
+        m.insert("used_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
         m
     }
-    /// Never serialized to anyone but the row's owner or a platform caller.
-    ///
-    /// These carry `@sensitive` in the schema, whose description says plainly
-    /// that they are never exposed over the API. Saying so is not enforcing it:
-    /// the response pruner reads THIS list, and while it was empty a password
-    /// hash was serialized to every caller that could reach the route.
-    fn private_fields() -> &'static [&'static str] {
-        &["codeHash"]
-    }
-
     fn search_fields() -> &'static [&'static str] {
         &["batch_id", "code_hash"]
+    }
+    fn private_fields() -> &'static [&'static str] {
+        &["codeHash"]
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId")]

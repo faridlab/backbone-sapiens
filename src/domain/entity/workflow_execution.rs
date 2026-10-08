@@ -71,7 +71,7 @@ pub struct WorkflowExecution {
 impl WorkflowExecution {
     /// Create a builder for WorkflowExecution
     pub fn builder() -> WorkflowExecutionBuilder {
-        WorkflowExecutionBuilder::default()
+        <WorkflowExecutionBuilder as Default>::default()
     }
 
     /// Create a new WorkflowExecution with required fields
@@ -301,6 +301,10 @@ impl backbone_orm::EntityRepoMeta for WorkflowExecution {
         m.insert("workflow_id".to_string(), "uuid".to_string());
         m.insert("workflow_definition_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "workflow_execution_status".to_string());
+        m.insert("started_at".to_string(), "timestamptz".to_string());
+        m.insert("completed_at".to_string(), "timestamptz".to_string());
+        m.insert("failed_at".to_string(), "timestamptz".to_string());
+        m.insert("cancelled_at".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -422,7 +426,7 @@ impl WorkflowExecutionBuilder {
             id: Uuid::new_v4(),
             workflow_id,
             workflow_definition_id,
-            status: self.status.unwrap_or(WorkflowExecutionStatus::default()),
+            status: self.status.unwrap_or_default(),
             current_action: self.current_action.unwrap_or(0),
             total_actions: self.total_actions.unwrap_or(0),
             progress_percentage: self.progress_percentage.unwrap_or(0_f64),

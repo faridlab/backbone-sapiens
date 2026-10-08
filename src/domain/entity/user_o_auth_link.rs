@@ -61,7 +61,7 @@ pub struct UserOAuthLink {
     pub refresh_token: Option<String>,
     pub token_expires_at: Option<DateTime<Utc>>,
     pub is_primary: bool,
-    pub status: UserOAuthLinkStatus,
+    pub(crate) status: UserOAuthLinkStatus,
     pub last_synced: Option<DateTime<Utc>>,
     pub sync_enabled: bool,
     #[serde(default)]
@@ -72,7 +72,7 @@ pub struct UserOAuthLink {
 impl UserOAuthLink {
     /// Create a builder for UserOAuthLink
     pub fn builder() -> UserOAuthLinkBuilder {
-        UserOAuthLinkBuilder::default()
+        <UserOAuthLinkBuilder as Default>::default()
     }
 
     /// Create a new UserOAuthLink with required fields
@@ -143,6 +143,11 @@ impl UserOAuthLink {
     /// Get who deleted this entity
     pub fn deleted_by(&self) -> Option<&Uuid> {
         self.metadata.deleted_by.as_ref()
+    }
+
+    /// Get the current status
+    pub fn status(&self) -> &UserOAuthLinkStatus {
+        &self.status
     }
 
 
@@ -232,9 +237,6 @@ impl UserOAuthLink {
                 "is_primary" => {
                     if let Ok(v) = serde_json::from_value(value) { self.is_primary = v; }
                 }
-                "status" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
-                }
                 "last_synced" => {
                     if let Ok(v) = serde_json::from_value(value) { self.last_synced = v; }
                 }
@@ -298,10 +300,15 @@ impl backbone_orm::EntityRepoMeta for UserOAuthLink {
         m.insert("user_id".to_string(), "uuid".to_string());
         m.insert("oauth_provider_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "user_o_auth_link_status".to_string());
+        m.insert("token_expires_at".to_string(), "timestamptz".to_string());
+        m.insert("last_synced".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
         &["provider_user_id", "provider_email"]
+    }
+    fn private_fields() -> &'static [&'static str] {
+        &["accessToken", "refreshToken"]
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId"), ("oauthProvider", "oauth_providers", "oauthProviderId")]
@@ -421,7 +428,7 @@ impl UserOAuthLinkBuilder {
             refresh_token: self.refresh_token,
             token_expires_at: self.token_expires_at,
             is_primary: self.is_primary.unwrap_or(false),
-            status: self.status.unwrap_or(UserOAuthLinkStatus::default()),
+            status: self.status.unwrap_or_default(),
             last_synced: self.last_synced,
             sync_enabled: self.sync_enabled.unwrap_or(true),
             metadata: AuditMetadata::default(),

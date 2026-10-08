@@ -36,7 +36,7 @@ impl Seeder for SeedDirectPermissionGrantSeeder {
     }
 
     fn order(&self) -> i32 {
-        10
+        27
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
@@ -69,4 +69,3 @@ impl Seeder for SeedDirectPermissionGrantSeeder {
 // <<< CUSTOM SEED DATA START >>>
 // Add custom seed data methods here
 // <<< CUSTOM SEED DATA END >>>
-

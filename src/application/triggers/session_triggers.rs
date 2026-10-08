@@ -245,4 +245,3 @@ pub fn session_trigger_registry() -> SessionTriggerRegistry {
         r.register(Arc::new(SessionOnEnterRevokedHandler::new()));
     })
 }
-

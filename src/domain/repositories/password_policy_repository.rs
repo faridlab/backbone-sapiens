@@ -9,8 +9,7 @@ use async_trait::async_trait;
 use anyhow::Result;
 use uuid::Uuid;
 
-use crate::domain::entity::PasswordPolicy;
-use crate::domain::entity::PasswordPolicyStatus;
+use crate::domain::entity::{PasswordPolicy, PasswordPolicyStatus};
 
 /// Pagination parameters for list queries
 #[derive(Debug, Clone, Default)]

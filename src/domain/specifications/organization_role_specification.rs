@@ -26,15 +26,8 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveOrganizationRoleSpec;
 // impl Specification<OrganizationRole> for ActiveOrganizationRoleSpec {
 //     fn is_satisfied_by(&self, e: &OrganizationRole) -> bool {
-//         // e.status == OrganizationRoleStatus::Active
+//         // e.is_active
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct OrganizationRoleHasValidEmailSpec;
-// impl OrganizationRoleSpecification for OrganizationRoleHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &OrganizationRole) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

@@ -373,4 +373,3 @@ pub fn temporary_permission_trigger_registry() -> TemporaryPermissionTriggerRegi
         r.register(Arc::new(TemporaryPermissionOnEnterRevokedHandler::new()));
     })
 }
-

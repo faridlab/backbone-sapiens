@@ -202,4 +202,3 @@ pub fn profile_trigger_registry() -> ProfileTriggerRegistry {
         r.register(Arc::new(ProfileAfterDeleteHandler4::new()));
     })
 }
-

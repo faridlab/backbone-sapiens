@@ -279,4 +279,3 @@ pub fn user_saml_link_trigger_registry() -> UserSAMLLinkTriggerRegistry {
         r.register(Arc::new(UserSAMLLinkOnEnterInactiveHandler::new()));
     })
 }
-

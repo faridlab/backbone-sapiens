@@ -26,15 +26,8 @@ pub use backbone_core::{AndSpecification, OrSpecification, NotSpecification};
 // pub struct ActiveMFADeviceSpec;
 // impl Specification<MFADevice> for ActiveMFADeviceSpec {
 //     fn is_satisfied_by(&self, e: &MFADevice) -> bool {
-//         // e.status
+//         // e.is_active
 //         todo!()
 //     }
 // }
-// <<< CUSTOM SPECIFICATIONS START >>>
-// Add your custom specifications here
-// pub struct MFADeviceHasValidEmailSpec;
-// impl MFADeviceSpecification for MFADeviceHasValidEmailSpec {
-//     fn is_satisfied_by(&self, entity: &MFADevice) -> bool {
-//         entity.email.contains('@')
-// END CUSTOM
 // END CUSTOM

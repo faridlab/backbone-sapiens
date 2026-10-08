@@ -59,7 +59,7 @@ pub struct SystemSettings {
 impl SystemSettings {
     /// Create a builder for SystemSettings
     pub fn builder() -> SystemSettingsBuilder {
-        SystemSettingsBuilder::default()
+        <SystemSettingsBuilder as Default>::default()
     }
 
     /// Create a new SystemSettings with required fields

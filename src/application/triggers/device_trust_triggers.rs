@@ -321,4 +321,3 @@ pub fn device_trust_trigger_registry() -> DeviceTrustTriggerRegistry {
         r.register(Arc::new(DeviceTrustAfterDeleteHandler6::new()));
     })
 }
-

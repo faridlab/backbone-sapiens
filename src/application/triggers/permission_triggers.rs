@@ -200,4 +200,3 @@ pub fn permission_trigger_registry() -> PermissionTriggerRegistry {
         r.register(Arc::new(PermissionAfterDeleteHandler4::new()));
     })
 }
-

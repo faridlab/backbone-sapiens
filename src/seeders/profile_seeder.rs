@@ -36,7 +36,7 @@ impl Seeder for SeedProfileSeeder {
     }
 
     fn order(&self) -> i32 {
-        46
+        50
     }
 
     async fn should_run(&self, pool: &PgPool) -> Result<bool> {
@@ -69,4 +69,3 @@ impl Seeder for SeedProfileSeeder {
 // <<< CUSTOM SEED DATA START >>>
 // Add custom seed data methods here
 // <<< CUSTOM SEED DATA END >>>
-

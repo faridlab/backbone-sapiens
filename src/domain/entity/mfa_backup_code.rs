@@ -101,7 +101,7 @@ pub struct MFABackupCode {
 impl MFABackupCode {
     /// Create a builder for MFABackupCode
     pub fn builder() -> MFABackupCodeBuilder {
-        MFABackupCodeBuilder::default()
+        <MFABackupCodeBuilder as Default>::default()
     }
 
     /// Create a new MFABackupCode with required fields
@@ -499,20 +499,20 @@ impl backbone_orm::EntityRepoMeta for MFABackupCode {
         m.insert("session_id".to_string(), "uuid".to_string());
         m.insert("generation_method".to_string(), "generation_method".to_string());
         m.insert("compromise_detection_method".to_string(), "compromise_detection_method".to_string());
+        m.insert("generated_at".to_string(), "timestamptz".to_string());
+        m.insert("used_at".to_string(), "timestamptz".to_string());
+        m.insert("revoked_at".to_string(), "timestamptz".to_string());
+        m.insert("compromised_detected_at".to_string(), "timestamptz".to_string());
+        m.insert("expires_at".to_string(), "timestamptz".to_string());
+        m.insert("last_access_before_expiry".to_string(), "timestamptz".to_string());
+        m.insert("last_notification_at".to_string(), "timestamptz".to_string());
         m
     }
-    /// Never serialized to anyone but the row's owner or a platform caller.
-    ///
-    /// These carry `@sensitive` in the schema, whose description says plainly
-    /// that they are never exposed over the API. Saying so is not enforcing it:
-    /// the response pruner reads THIS list, and while it was empty a password
-    /// hash was serialized to every caller that could reach the route.
-    fn private_fields() -> &'static [&'static str] {
-        &["code"]
-    }
-
     fn search_fields() -> &'static [&'static str] {
         &["code", "code_hash", "generation_ip", "algorithm_version"]
+    }
+    fn private_fields() -> &'static [&'static str] {
+        &["code"]
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId"), ("device", "mfa_devices", "deviceId")]
@@ -842,11 +842,11 @@ impl MFABackupCodeBuilder {
             code,
             code_hash,
             code_index,
-            generated_at: self.generated_at.unwrap_or(Default::default()),
+            generated_at: self.generated_at.unwrap_or_default(),
             generated_by: self.generated_by,
-            generation_method: self.generation_method.unwrap_or(GenerationMethod::default()),
+            generation_method: self.generation_method.unwrap_or_default(),
             generation_ip,
-            algorithm_version: self.algorithm_version.unwrap_or(Default::default()),
+            algorithm_version: self.algorithm_version.unwrap_or_default(),
             used_at: self.used_at,
             used_ip: self.used_ip,
             used_user_agent: self.used_user_agent,
