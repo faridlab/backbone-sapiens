@@ -15,6 +15,11 @@
 # regeneration loses nothing before you remove an entry.
 
 user_owned:
+  # DTOs shaped to the hand-written password policy and analytics metric
+  # entities, whose field types the schema does not describe; the generated
+  # ones do not compile against them.
+  - "src/presentation/dto/password_policy_dto.rs"
+  - "src/presentation/dto/analytics_metric_dto.rs"
   # Hand-written or hand-edited source, listed file by file so every other
   # file under src/ is generated again (this list replaced a blanket src/**).
   - "src/application/auth/analytics_event_auth.rs"

@@ -380,7 +380,8 @@ impl SapiensModule {
 /// Builder for SapiensModule
 pub struct SapiensModuleBuilder {
     db_pool: Option<PgPool>,
-    // <<< CUSTOM: Optional integration event bus for cross-module communication
+    // <<< CUSTOM BUILDER FIELDS
+    // Optional integration event bus for cross-module communication
     integration_bus: Option<Arc<IntegrationEventBus>>,
     // >>> END CUSTOM
 }
@@ -390,7 +391,8 @@ impl SapiensModuleBuilder {
     pub fn new() -> Self {
         Self {
             db_pool: None,
-            // <<< CUSTOM: Initialize integration_bus to None
+            // <<< CUSTOM BUILDER DEFAULTS
+            // Initialize integration_bus to None
             integration_bus: None,
             // >>> END CUSTOM
         }
