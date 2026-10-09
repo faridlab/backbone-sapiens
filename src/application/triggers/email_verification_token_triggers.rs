@@ -137,7 +137,7 @@ impl TriggerHandler<EmailVerificationTokenTriggerContext, EmailVerificationToken
         // <<< CUSTOM ACTION END >>>
         tracing::info!("Trigger executed for entity: {:?}", ctx.entity.id);
         // Emit emailverifiedevent event
-        if let Some(publisher) = &self.event_publisher {
+        if let Some(_publisher) = &self.event_publisher {
             // Custom event: emailverifiedevent
             // <<< CUSTOM EMIT: emailverifiedevent >>>
         }
@@ -357,7 +357,7 @@ impl TriggerHandler<EmailVerificationTokenTriggerContext, EmailVerificationToken
         // <<< CUSTOM ACTION END >>>
         tracing::info!("Trigger executed for entity: {:?}", ctx.entity.id);
         // Emit emailverifiedevent event
-        if let Some(publisher) = &self.event_publisher {
+        if let Some(_publisher) = &self.event_publisher {
             // Custom event: emailverifiedevent
             // <<< CUSTOM EMIT: emailverifiedevent >>>
         }

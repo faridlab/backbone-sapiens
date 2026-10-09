@@ -53,6 +53,14 @@ pub struct PermissionGuard<P: PermissionChecker> {
 }
 
 impl<P: PermissionChecker + 'static> PermissionGuard<P> {
+    /// The resource field that names its owner, when this guard was made with
+    /// [`RbacMiddleware::guard_owner`]. The guard does not read resources itself:
+    /// the caller reads this field off the resource and passes its value to
+    /// [`Self::check_with_owner`].
+    pub fn owner_field(&self) -> Option<&'static str> {
+        self.resource_owner_field
+    }
+
     /// Check if the auth context has permission for the action
     pub fn check(&self, ctx: &AuthContext) -> Result<(), PermissionError> {
         // Super admin bypasses all permission checks

@@ -15,6 +15,9 @@
 //! - Workflow orchestrator
 
 #![recursion_limit = "1024"]
+// As in every generated module: the per-file generators emit one uniform import
+// block, and not every file uses every import.
+#![allow(unused_imports)]
 
 // Generated modules
 pub mod domain;
