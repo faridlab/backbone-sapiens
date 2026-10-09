@@ -73,6 +73,17 @@ config:
       - graphql
       - grpc
       - proto
+      # Nothing reads these: no hand-written code here, no sibling module and no host
+      # uses them, and seeding runs from migrations/seeds (SQL), not Rust seeders.
+      - bulk-operations
+      - cqrs
+      - projection
+      - usecase
+      - workflow
+      - trigger
+      - specification
+      - seeder
+      - versioning
 
 # Import all model files
 imports:

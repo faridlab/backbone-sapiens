@@ -341,7 +341,6 @@ user_owned:
   - "src/application/usecases/workflow_execution_usecases.rs"
   - "src/application/usecases/workflow_step_usecases.rs"
   - "src/application/usecases/workflow_usecases.rs"
-  - "src/bin/seeder.rs"
   - "src/config/app_config.rs"
   - "src/config/mod.rs"
   - "src/domain/computed/mod.rs"
