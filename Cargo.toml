@@ -1,6 +1,6 @@
 [package]
 name = "backbone-sapiens"
-version = "0.5.1"
+version = "0.5.2"
 edition = "2021"
 description = "Sapiens Bounded Context: User Management Module for Backbone Framework"
 license = "MIT OR Apache-2.0"
