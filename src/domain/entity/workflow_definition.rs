@@ -261,6 +261,12 @@ impl backbone_orm::EntityRepoMeta for WorkflowDefinition {
     fn search_fields() -> &'static [&'static str] {
         &["name"]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "createdByUser" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("createdByUser", "users", "createdBy")]
     }

@@ -210,6 +210,9 @@ impl super::Entity for PasswordResetToken {
 }
 
 impl backbone_core::PersistentEntity for PasswordResetToken {
+    fn write_protected_fields() -> &'static [&'static str] {
+        &["token_hash"]
+    }
     fn entity_id(&self) -> String {
         self.id.to_string()
     }
@@ -248,7 +251,16 @@ impl backbone_orm::EntityRepoMeta for PasswordResetToken {
         m
     }
     fn search_fields() -> &'static [&'static str] {
-        &["token_hash"]
+        &[]
+    }
+    fn secret_fields() -> &'static [&'static str] {
+        &["tokenHash"]
+    }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            _ => &[],
+        }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId")]

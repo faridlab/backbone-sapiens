@@ -338,6 +338,13 @@ impl backbone_orm::EntityRepoMeta for Workflow {
     fn search_fields() -> &'static [&'static str] {
         &["title"]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "initiator" => &["passwordHash"],
+            "targetUser" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("initiator", "users", "initiatorId"), ("targetUser", "users", "targetUserId")]
     }

@@ -66,9 +66,6 @@ pub struct UpdatePasswordResetTokenDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "user_id")]
     pub user_id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "example"))]
-    #[serde(alias = "token_hash")]
-    pub token_hash: String,
     #[cfg_attr(feature = "openapi", schema(example = "2024-01-01T00:00:00Z"))]
     #[serde(alias = "expires_at")]
     pub expires_at: DateTime<Utc>,
@@ -97,9 +94,6 @@ pub struct PatchPasswordResetTokenDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "user_id")]
     pub user_id: Option<Uuid>,
-    #[cfg_attr(feature = "openapi", schema(example = "example"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "token_hash")]
-    pub token_hash: Option<String>,
     #[cfg_attr(feature = "openapi", schema(example = "2024-01-01T00:00:00Z"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "expires_at")]
     pub expires_at: Option<DateTime<Utc>>,
@@ -115,7 +109,7 @@ pub struct PatchPasswordResetTokenDto {
 impl PatchPasswordResetTokenDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.user_id.is_some() || self.token_hash.is_some() || self.expires_at.is_some() || self.is_used.is_some() || self.used_at.is_some() || self.ip_address.is_some()
+        self.user_id.is_some() || self.expires_at.is_some() || self.is_used.is_some() || self.used_at.is_some() || self.ip_address.is_some()
     }
 }
 
@@ -277,7 +271,6 @@ impl backbone_core::FromCreateDto<CreatePasswordResetTokenDto> for PasswordReset
 impl backbone_core::ApplyUpdateDto<UpdatePasswordResetTokenDto> for PasswordResetToken {
     fn apply_update(mut self, dto: UpdatePasswordResetTokenDto) -> backbone_core::ServiceResult<Self> {
         self.user_id = dto.user_id;
-        self.token_hash = dto.token_hash;
         self.expires_at = dto.expires_at;
         self.is_used = dto.is_used;
         self.used_at = dto.used_at;

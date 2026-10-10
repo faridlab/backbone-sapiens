@@ -200,6 +200,7 @@ models:
 
       backup_codes_data:
         type: json?
+        attributes: ["@sensitive"]
         description: "Backup codes for this device (JSON array)"
 
       # Metadata

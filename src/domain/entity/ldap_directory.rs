@@ -310,9 +310,9 @@ impl backbone_orm::EntityRepoMeta for LDAPDirectory {
         m
     }
     fn search_fields() -> &'static [&'static str] {
-        &["name", "display_name", "host", "bind_dn", "bind_password", "search_base", "search_filter"]
+        &["name", "display_name", "host", "bind_dn", "search_base", "search_filter"]
     }
-    fn private_fields() -> &'static [&'static str] {
+    fn secret_fields() -> &'static [&'static str] {
         &["bindPassword"]
     }
 }

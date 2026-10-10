@@ -24,12 +24,12 @@ models:
       # Session tokens
       session_token:
         type: string
-        attributes: ["@unique", "@required", "@max(128)"]
+        attributes: ["@unique", "@required", "@max(128)", "@sensitive", "@immutable"]
         description: "Unique session token for MFA verification"
 
       session_hash:
         type: string
-        attributes: ["@unique", "@required", "@max(64)"]
+        attributes: ["@unique", "@required", "@max(64)", "@sensitive", "@immutable"]
         description: "Hashed session token for security"
 
       # Authentication context

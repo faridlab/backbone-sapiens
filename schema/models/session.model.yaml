@@ -19,7 +19,7 @@ models:
 
       token_hash:
         type: string
-        attributes: ["@unique", "@required", "@length(64)"]
+        attributes: ["@unique", "@required", "@length(64)", "@sensitive", "@immutable"]
         description: "SHA-256 hash of JWT for revocation"
 
       expires_at:

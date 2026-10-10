@@ -298,9 +298,9 @@ impl backbone_orm::EntityRepoMeta for User {
         m
     }
     fn search_fields() -> &'static [&'static str] {
-        &["username", "email", "password_hash"]
+        &["username", "email"]
     }
-    fn private_fields() -> &'static [&'static str] {
+    fn secret_fields() -> &'static [&'static str] {
         &["passwordHash"]
     }
 }

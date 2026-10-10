@@ -328,6 +328,14 @@ impl backbone_orm::EntityRepoMeta for SecurityEvent {
     fn search_fields() -> &'static [&'static str] {
         &[]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            "session" => &["tokenHash"],
+            "resolver" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId"), ("session", "sessions", "sessionId"), ("resolver", "users", "resolvedByUserId")]
     }

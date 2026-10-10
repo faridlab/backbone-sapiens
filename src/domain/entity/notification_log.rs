@@ -308,6 +308,12 @@ impl backbone_orm::EntityRepoMeta for NotificationLog {
     fn search_fields() -> &'static [&'static str] {
         &["recipient_type"]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "recipient" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("notification", "notifications", "notificationId"), ("template", "notification_templates", "templateId"), ("recipient", "users", "recipientId")]
     }

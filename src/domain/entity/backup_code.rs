@@ -253,10 +253,16 @@ impl backbone_orm::EntityRepoMeta for BackupCode {
         m
     }
     fn search_fields() -> &'static [&'static str] {
-        &["batch_id", "code_hash"]
+        &["batch_id"]
     }
-    fn private_fields() -> &'static [&'static str] {
+    fn secret_fields() -> &'static [&'static str] {
         &["codeHash"]
+    }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            _ => &[],
+        }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId")]

@@ -257,7 +257,10 @@ impl backbone_orm::EntityRepoMeta for OAuthProvider {
         m
     }
     fn search_fields() -> &'static [&'static str] {
-        &["display_name", "client_id", "client_secret"]
+        &["display_name"]
+    }
+    fn secret_fields() -> &'static [&'static str] {
+        &["clientId", "clientSecret"]
     }
 }
 

@@ -332,6 +332,14 @@ impl backbone_orm::EntityRepoMeta for DirectPermissionGrant {
     fn search_fields() -> &'static [&'static str] {
         &[]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            "granter" => &["passwordHash"],
+            "revoker" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId"), ("permission", "permissions", "permissionId"), ("granter", "users", "grantedBy"), ("revoker", "users", "revokedBy")]
     }

@@ -81,9 +81,6 @@ pub struct UpdateSessionDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "user_id")]
     pub user_id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "example"))]
-    #[serde(alias = "token_hash")]
-    pub token_hash: String,
     #[cfg_attr(feature = "openapi", schema(example = "2024-01-01T00:00:00Z"))]
     #[serde(alias = "expires_at")]
     pub expires_at: DateTime<Utc>,
@@ -125,9 +122,6 @@ pub struct PatchSessionDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "user_id")]
     pub user_id: Option<Uuid>,
-    #[cfg_attr(feature = "openapi", schema(example = "example"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "token_hash")]
-    pub token_hash: Option<String>,
     #[cfg_attr(feature = "openapi", schema(example = "2024-01-01T00:00:00Z"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "expires_at")]
     pub expires_at: Option<DateTime<Utc>>,
@@ -157,7 +151,7 @@ pub struct PatchSessionDto {
 impl PatchSessionDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.user_id.is_some() || self.token_hash.is_some() || self.expires_at.is_some() || self.extended_at.is_some() || self.remember_me.is_some() || self.last_activity.is_some() || self.ip_address.is_some() || self.user_agent.is_some() || self.device_type.is_some() || self.device_fingerprint.is_some() || self.status.is_some() || self.revoked_at.is_some()
+        self.user_id.is_some() || self.expires_at.is_some() || self.extended_at.is_some() || self.remember_me.is_some() || self.last_activity.is_some() || self.ip_address.is_some() || self.user_agent.is_some() || self.device_type.is_some() || self.device_fingerprint.is_some() || self.status.is_some() || self.revoked_at.is_some()
     }
 }
 
@@ -347,7 +341,6 @@ impl backbone_core::FromCreateDto<CreateSessionDto> for Session {
 impl backbone_core::ApplyUpdateDto<UpdateSessionDto> for Session {
     fn apply_update(mut self, dto: UpdateSessionDto) -> backbone_core::ServiceResult<Self> {
         self.user_id = dto.user_id;
-        self.token_hash = dto.token_hash;
         self.expires_at = dto.expires_at;
         self.extended_at = dto.extended_at;
         self.remember_me = dto.remember_me;

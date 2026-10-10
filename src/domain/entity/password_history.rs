@@ -242,7 +242,16 @@ impl backbone_orm::EntityRepoMeta for PasswordHistory {
         m
     }
     fn search_fields() -> &'static [&'static str] {
-        &["password_hash"]
+        &[]
+    }
+    fn secret_fields() -> &'static [&'static str] {
+        &["passwordHash"]
+    }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            _ => &[],
+        }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId")]

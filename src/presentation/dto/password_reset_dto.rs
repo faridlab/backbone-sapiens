@@ -102,10 +102,6 @@ pub struct UpdatePasswordResetDto {
     #[cfg_attr(feature = "validation", validate(length(max = 255)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub token: String,
-    #[cfg_attr(feature = "validation", validate(length(max = 255)))]
-    #[cfg_attr(feature = "openapi", schema(example = "example"))]
-    #[serde(alias = "token_hash")]
-    pub token_hash: String,
     #[cfg_attr(feature = "validation", validate(email))]
     #[cfg_attr(feature = "openapi", schema(example = "user@example.com"))]
     pub email: String,
@@ -166,10 +162,6 @@ pub struct PatchPasswordResetDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
-    #[cfg_attr(feature = "validation", validate(length(max = 255)))]
-    #[cfg_attr(feature = "openapi", schema(example = "example"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "token_hash")]
-    pub token_hash: Option<String>,
     #[cfg_attr(feature = "validation", validate(email))]
     #[cfg_attr(feature = "openapi", schema(example = "user@example.com"))]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -215,7 +207,7 @@ pub struct PatchPasswordResetDto {
 impl PatchPasswordResetDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.user_id.is_some() || self.token.is_some() || self.token_hash.is_some() || self.email.is_some() || self.status.is_some() || self.max_attempts.is_some() || self.attempts_remaining.is_some() || self.last_attempt_at.is_some() || self.request_metadata.is_some() || self.verification_details_id.is_some() || self.completion_details_id.is_some() || self.security_id.is_some() || self.device_fingerprint.is_some() || self.ip_address.is_some() || self.user_agent.is_some() || self.verified_at.is_some() || self.used_at.is_some() || self.expires_at.is_some()
+        self.user_id.is_some() || self.token.is_some() || self.email.is_some() || self.status.is_some() || self.max_attempts.is_some() || self.attempts_remaining.is_some() || self.last_attempt_at.is_some() || self.request_metadata.is_some() || self.verification_details_id.is_some() || self.completion_details_id.is_some() || self.security_id.is_some() || self.device_fingerprint.is_some() || self.ip_address.is_some() || self.user_agent.is_some() || self.verified_at.is_some() || self.used_at.is_some() || self.expires_at.is_some()
     }
 }
 
@@ -429,7 +421,6 @@ impl backbone_core::ApplyUpdateDto<UpdatePasswordResetDto> for PasswordReset {
     fn apply_update(mut self, dto: UpdatePasswordResetDto) -> backbone_core::ServiceResult<Self> {
         self.user_id = dto.user_id;
         self.token = dto.token;
-        self.token_hash = dto.token_hash;
         self.email = dto.email;
         self.status = dto.status;
         self.max_attempts = dto.max_attempts;

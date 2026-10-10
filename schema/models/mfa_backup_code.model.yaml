@@ -35,7 +35,7 @@ models:
 
       code_hash:
         type: string
-        attributes: ["@required", "@max(64)"]
+        attributes: ["@required", "@max(64)", "@sensitive", "@immutable"]
         description: "Hashed backup code for verification"
 
       code_index:

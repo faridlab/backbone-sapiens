@@ -271,6 +271,12 @@ impl backbone_orm::EntityRepoMeta for NotificationPreference {
     fn search_fields() -> &'static [&'static str] {
         &["notification_type", "quiet_timezone"]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId")]
     }

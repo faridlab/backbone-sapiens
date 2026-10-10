@@ -461,6 +461,9 @@ impl super::Entity for MFABackupCode {
 }
 
 impl backbone_core::PersistentEntity for MFABackupCode {
+    fn write_protected_fields() -> &'static [&'static str] {
+        &["code_hash"]
+    }
     fn entity_id(&self) -> String {
         self.id.to_string()
     }
@@ -509,10 +512,17 @@ impl backbone_orm::EntityRepoMeta for MFABackupCode {
         m
     }
     fn search_fields() -> &'static [&'static str] {
-        &["code", "code_hash", "generation_ip", "algorithm_version"]
+        &["generation_ip", "algorithm_version"]
     }
-    fn private_fields() -> &'static [&'static str] {
-        &["code"]
+    fn secret_fields() -> &'static [&'static str] {
+        &["code", "codeHash"]
+    }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            "device" => &["totpSecret", "secret", "pushToken", "backupCodesData"],
+            _ => &[],
+        }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId"), ("device", "mfa_devices", "deviceId")]

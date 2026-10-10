@@ -268,6 +268,12 @@ impl backbone_orm::EntityRepoMeta for UserSAMLLink {
     fn search_fields() -> &'static [&'static str] {
         &["name_id"]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId"), ("provider", "saml_providers", "providerId")]
     }

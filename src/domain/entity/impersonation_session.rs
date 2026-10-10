@@ -291,6 +291,15 @@ impl backbone_orm::EntityRepoMeta for ImpersonationSession {
     fn search_fields() -> &'static [&'static str] {
         &["reason"]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "admin" => &["passwordHash"],
+            "targetUser" => &["passwordHash"],
+            "session" => &["tokenHash"],
+            "terminator" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("admin", "users", "adminId"), ("targetUser", "users", "targetUserId"), ("session", "sessions", "sessionId"), ("terminator", "users", "terminatedBy")]
     }

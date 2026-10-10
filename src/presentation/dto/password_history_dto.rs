@@ -68,10 +68,6 @@ pub struct UpdatePasswordHistoryDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "user_id")]
     pub user_id: Uuid,
-    #[cfg_attr(feature = "validation", validate(length(max = 255)))]
-    #[cfg_attr(feature = "openapi", schema(example = "example"))]
-    #[serde(alias = "password_hash")]
-    pub password_hash: String,
     #[serde(alias = "password_strength")]
     pub password_strength: serde_json::Value,
     #[serde(alias = "password_metadata")]
@@ -100,10 +96,6 @@ pub struct PatchPasswordHistoryDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "user_id")]
     pub user_id: Option<Uuid>,
-    #[cfg_attr(feature = "validation", validate(length(max = 255)))]
-    #[cfg_attr(feature = "openapi", schema(example = "example"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "password_hash")]
-    pub password_hash: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "password_strength")]
     pub password_strength: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "password_metadata")]
@@ -121,7 +113,7 @@ pub struct PatchPasswordHistoryDto {
 impl PatchPasswordHistoryDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.user_id.is_some() || self.password_hash.is_some() || self.password_strength.is_some() || self.password_metadata.is_some() || self.creation_context.is_some() || self.status.is_some() || self.usage.is_some() || self.expiry.is_some()
+        self.user_id.is_some() || self.password_strength.is_some() || self.password_metadata.is_some() || self.creation_context.is_some() || self.status.is_some() || self.usage.is_some() || self.expiry.is_some()
     }
 }
 
@@ -289,7 +281,6 @@ impl backbone_core::FromCreateDto<CreatePasswordHistoryDto> for PasswordHistory 
 impl backbone_core::ApplyUpdateDto<UpdatePasswordHistoryDto> for PasswordHistory {
     fn apply_update(mut self, dto: UpdatePasswordHistoryDto) -> backbone_core::ServiceResult<Self> {
         self.user_id = dto.user_id;
-        self.password_hash = dto.password_hash;
         self.password_strength = dto.password_strength;
         self.password_metadata = dto.password_metadata;
         self.creation_context = dto.creation_context;

@@ -307,8 +307,15 @@ impl backbone_orm::EntityRepoMeta for UserOAuthLink {
     fn search_fields() -> &'static [&'static str] {
         &["provider_user_id", "provider_email"]
     }
-    fn private_fields() -> &'static [&'static str] {
+    fn secret_fields() -> &'static [&'static str] {
         &["accessToken", "refreshToken"]
+    }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            "oauthProvider" => &["clientId", "clientSecret"],
+            _ => &[],
+        }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId"), ("oauthProvider", "oauth_providers", "oauthProviderId")]

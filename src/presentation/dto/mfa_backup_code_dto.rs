@@ -178,10 +178,6 @@ pub struct UpdateMFABackupCodeDto {
     #[cfg_attr(feature = "validation", validate(length(max = 10)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub code: String,
-    #[cfg_attr(feature = "validation", validate(length(max = 64)))]
-    #[cfg_attr(feature = "openapi", schema(example = "example"))]
-    #[serde(alias = "code_hash")]
-    pub code_hash: String,
     #[cfg_attr(feature = "validation", validate(range(min = 1), range(max = 10)))]
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     #[serde(alias = "code_index")]
@@ -312,10 +308,6 @@ pub struct PatchMFABackupCodeDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
-    #[cfg_attr(feature = "validation", validate(length(max = 64)))]
-    #[cfg_attr(feature = "openapi", schema(example = "example"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "code_hash")]
-    pub code_hash: Option<String>,
     #[cfg_attr(feature = "validation", validate(range(min = 1), range(max = 10)))]
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "code_index")]
@@ -425,7 +417,7 @@ pub struct PatchMFABackupCodeDto {
 impl PatchMFABackupCodeDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.user_id.is_some() || self.device_id.is_some() || self.batch_id.is_some() || self.code.is_some() || self.code_hash.is_some() || self.code_index.is_some() || self.generated_at.is_some() || self.generated_by.is_some() || self.generation_method.is_some() || self.generation_ip.is_some() || self.algorithm_version.is_some() || self.used_at.is_some() || self.used_ip.is_some() || self.used_user_agent.is_some() || self.session_id.is_some() || self.verification_attempt.is_some() || self.time_since_generation.is_some() || self.usage_risk_score.is_some() || self.is_consumed.is_some() || self.consumption_attempts.is_some() || self.successful_verification.is_some() || self.is_revoked.is_some() || self.revoked_at.is_some() || self.revoked_by.is_some() || self.revocation_reason.is_some() || self.compromised.is_some() || self.compromised_detected_at.is_some() || self.compromise_detection_method.is_some() || self.expires_at.is_some() || self.created_with_expiry.is_some() || self.grace_period_hours.is_some() || self.auto_renew_enabled.is_some() || self.renewal_reminder_sent.is_some() || self.last_access_before_expiry.is_some() || self.creation_notification_sent.is_some() || self.expiry_warning_sent.is_some() || self.usage_notification_sent.is_some() || self.security_alert_sent.is_some() || self.last_notification_at.is_some() || self.gdpr_compliant.is_some() || self.audit_log_required.is_some() || self.data_retention_days.is_some()
+        self.user_id.is_some() || self.device_id.is_some() || self.batch_id.is_some() || self.code.is_some() || self.code_index.is_some() || self.generated_at.is_some() || self.generated_by.is_some() || self.generation_method.is_some() || self.generation_ip.is_some() || self.algorithm_version.is_some() || self.used_at.is_some() || self.used_ip.is_some() || self.used_user_agent.is_some() || self.session_id.is_some() || self.verification_attempt.is_some() || self.time_since_generation.is_some() || self.usage_risk_score.is_some() || self.is_consumed.is_some() || self.consumption_attempts.is_some() || self.successful_verification.is_some() || self.is_revoked.is_some() || self.revoked_at.is_some() || self.revoked_by.is_some() || self.revocation_reason.is_some() || self.compromised.is_some() || self.compromised_detected_at.is_some() || self.compromise_detection_method.is_some() || self.expires_at.is_some() || self.created_with_expiry.is_some() || self.grace_period_hours.is_some() || self.auto_renew_enabled.is_some() || self.renewal_reminder_sent.is_some() || self.last_access_before_expiry.is_some() || self.creation_notification_sent.is_some() || self.expiry_warning_sent.is_some() || self.usage_notification_sent.is_some() || self.security_alert_sent.is_some() || self.last_notification_at.is_some() || self.gdpr_compliant.is_some() || self.audit_log_required.is_some() || self.data_retention_days.is_some()
     }
 }
 
@@ -755,7 +747,6 @@ impl backbone_core::ApplyUpdateDto<UpdateMFABackupCodeDto> for MFABackupCode {
         self.device_id = dto.device_id;
         self.batch_id = dto.batch_id;
         self.code = dto.code;
-        self.code_hash = dto.code_hash;
         self.code_index = dto.code_index;
         self.generated_at = dto.generated_at;
         self.generated_by = dto.generated_by;

@@ -252,6 +252,13 @@ impl backbone_orm::EntityRepoMeta for AnonymizationRecord {
     fn search_fields() -> &'static [&'static str] {
         &["original_email", "original_username", "reason"]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            "anonymizer" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId"), ("anonymizer", "users", "anonymizedBy")]
     }

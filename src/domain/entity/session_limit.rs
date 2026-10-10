@@ -249,6 +249,12 @@ impl backbone_orm::EntityRepoMeta for SessionLimit {
     fn search_fields() -> &'static [&'static str] {
         &[]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId")]
     }

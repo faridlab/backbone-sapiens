@@ -341,7 +341,16 @@ impl backbone_orm::EntityRepoMeta for Session {
         m
     }
     fn search_fields() -> &'static [&'static str] {
-        &["token_hash"]
+        &[]
+    }
+    fn secret_fields() -> &'static [&'static str] {
+        &["tokenHash"]
+    }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            _ => &[],
+        }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId")]

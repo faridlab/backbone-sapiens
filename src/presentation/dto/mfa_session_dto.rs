@@ -194,14 +194,6 @@ pub struct UpdateMFASessionDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "device_id")]
     pub device_id: Uuid,
-    #[cfg_attr(feature = "validation", validate(length(max = 128)))]
-    #[cfg_attr(feature = "openapi", schema(example = "example"))]
-    #[serde(alias = "session_token")]
-    pub session_token: String,
-    #[cfg_attr(feature = "validation", validate(length(max = 64)))]
-    #[cfg_attr(feature = "openapi", schema(example = "example"))]
-    #[serde(alias = "session_hash")]
-    pub session_hash: String,
     #[serde(alias = "primary_authentication_method")]
     pub primary_authentication_method: PrimaryAuthMethod,
     #[cfg_attr(feature = "openapi", schema(example = true))]
@@ -344,14 +336,6 @@ pub struct PatchMFASessionDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "device_id")]
     pub device_id: Option<Uuid>,
-    #[cfg_attr(feature = "validation", validate(length(max = 128)))]
-    #[cfg_attr(feature = "openapi", schema(example = "example"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "session_token")]
-    pub session_token: Option<String>,
-    #[cfg_attr(feature = "validation", validate(length(max = 64)))]
-    #[cfg_attr(feature = "openapi", schema(example = "example"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "session_hash")]
-    pub session_hash: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "primary_authentication_method")]
     pub primary_authentication_method: Option<PrimaryAuthMethod>,
     #[cfg_attr(feature = "openapi", schema(example = true))]
@@ -479,7 +463,7 @@ pub struct PatchMFASessionDto {
 impl PatchMFASessionDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.user_id.is_some() || self.device_id.is_some() || self.session_token.is_some() || self.session_hash.is_some() || self.primary_authentication_method.is_some() || self.mfa_required.is_some() || self.mfa_enforced_at.is_some() || self.risk_score.is_some() || self.trust_level.is_some() || self.adaptive_authentication_triggered.is_some() || self.additional_factors_required.is_some() || self.ip_risk_score.is_some() || self.device_risk_score.is_some() || self.location_anomaly.is_some() || self.time_anomaly.is_some() || self.verification_method.is_some() || self.verification_initiated_at.is_some() || self.verification_completed_at.is_some() || self.verification_attempts.is_some() || self.max_attempts_allowed.is_some() || self.verification_success.is_some() || self.verification_time_ms.is_some() || self.device_trust_status.is_some() || self.is_terminated.is_some() || self.terminated_at.is_some() || self.termination_reason.is_some() || self.ip_address.is_some() || self.user_agent.is_some() || self.device_fingerprint.is_some() || self.country.is_some() || self.region.is_some() || self.city.is_some() || self.latitude.is_some() || self.longitude.is_some() || self.expires_at.is_some() || self.max_duration_minutes.is_some() || self.idle_timeout_minutes.is_some() || self.auto_renew_enabled.is_some() || self.last_activity_at.is_some() || self.extension_count.is_some() || self.initiation_time_ms.is_some() || self.total_session_time_ms.is_some() || self.device_performance_score.is_some() || self.network_quality.is_some() || self.audit_log_required.is_some() || self.data_retention_hours.is_some() || self.status.is_some()
+        self.user_id.is_some() || self.device_id.is_some() || self.primary_authentication_method.is_some() || self.mfa_required.is_some() || self.mfa_enforced_at.is_some() || self.risk_score.is_some() || self.trust_level.is_some() || self.adaptive_authentication_triggered.is_some() || self.additional_factors_required.is_some() || self.ip_risk_score.is_some() || self.device_risk_score.is_some() || self.location_anomaly.is_some() || self.time_anomaly.is_some() || self.verification_method.is_some() || self.verification_initiated_at.is_some() || self.verification_completed_at.is_some() || self.verification_attempts.is_some() || self.max_attempts_allowed.is_some() || self.verification_success.is_some() || self.verification_time_ms.is_some() || self.device_trust_status.is_some() || self.is_terminated.is_some() || self.terminated_at.is_some() || self.termination_reason.is_some() || self.ip_address.is_some() || self.user_agent.is_some() || self.device_fingerprint.is_some() || self.country.is_some() || self.region.is_some() || self.city.is_some() || self.latitude.is_some() || self.longitude.is_some() || self.expires_at.is_some() || self.max_duration_minutes.is_some() || self.idle_timeout_minutes.is_some() || self.auto_renew_enabled.is_some() || self.last_activity_at.is_some() || self.extension_count.is_some() || self.initiation_time_ms.is_some() || self.total_session_time_ms.is_some() || self.device_performance_score.is_some() || self.network_quality.is_some() || self.audit_log_required.is_some() || self.data_retention_hours.is_some() || self.status.is_some()
     }
 }
 
@@ -826,8 +810,6 @@ impl backbone_core::ApplyUpdateDto<UpdateMFASessionDto> for MFASession {
     fn apply_update(mut self, dto: UpdateMFASessionDto) -> backbone_core::ServiceResult<Self> {
         self.user_id = dto.user_id;
         self.device_id = dto.device_id;
-        self.session_token = dto.session_token;
-        self.session_hash = dto.session_hash;
         self.primary_authentication_method = dto.primary_authentication_method;
         self.mfa_required = dto.mfa_required;
         self.mfa_enforced_at = dto.mfa_enforced_at;

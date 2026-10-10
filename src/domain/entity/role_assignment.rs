@@ -379,6 +379,13 @@ impl backbone_orm::EntityRepoMeta for RoleAssignment {
     fn search_fields() -> &'static [&'static str] {
         &[]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            "assigner" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId"), ("role", "roles", "roleId"), ("assigner", "users", "assignedBy"), ("parentAssignment", "role_assignments", "parentAssignmentId"), ("inheritedFromAssignment", "role_assignments", "inheritedFrom")]
     }

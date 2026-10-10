@@ -324,6 +324,12 @@ impl backbone_orm::EntityRepoMeta for Notification {
     fn search_fields() -> &'static [&'static str] {
         &["title", "message"]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId")]
     }

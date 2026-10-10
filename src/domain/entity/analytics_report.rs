@@ -299,6 +299,12 @@ impl backbone_orm::EntityRepoMeta for AnalyticsReport {
     fn search_fields() -> &'static [&'static str] {
         &["report_name"]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "generator" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("generator", "users", "generatedBy")]
     }

@@ -501,6 +501,9 @@ impl super::Entity for MFASession {
 }
 
 impl backbone_core::PersistentEntity for MFASession {
+    fn write_protected_fields() -> &'static [&'static str] {
+        &["session_token", "session_hash"]
+    }
     fn entity_id(&self) -> String {
         self.id.to_string()
     }
@@ -550,7 +553,17 @@ impl backbone_orm::EntityRepoMeta for MFASession {
         m
     }
     fn search_fields() -> &'static [&'static str] {
-        &["session_token", "session_hash", "ip_address"]
+        &["ip_address"]
+    }
+    fn secret_fields() -> &'static [&'static str] {
+        &["sessionToken", "sessionHash"]
+    }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "user" => &["passwordHash"],
+            "device" => &["totpSecret", "secret", "pushToken", "backupCodesData"],
+            _ => &[],
+        }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("user", "users", "userId"), ("device", "mfa_devices", "deviceId")]

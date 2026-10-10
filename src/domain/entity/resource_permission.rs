@@ -292,6 +292,13 @@ impl backbone_orm::EntityRepoMeta for ResourcePermission {
     fn search_fields() -> &'static [&'static str] {
         &["resource_type", "resource_id"]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "grantedUser" => &["passwordHash"],
+            "granter" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("permission", "permissions", "permissionId"), ("grantedUser", "users", "grantedToUserId"), ("grantedRole", "roles", "grantedToRoleId"), ("granter", "users", "grantedBy")]
     }

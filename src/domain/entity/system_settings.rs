@@ -210,6 +210,12 @@ impl backbone_orm::EntityRepoMeta for SystemSettings {
     fn search_fields() -> &'static [&'static str] {
         &["key"]
     }
+    fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
+        match relation {
+            "updater" => &["passwordHash"],
+            _ => &[],
+        }
+    }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
         &[("updater", "users", "updatedBy")]
     }
