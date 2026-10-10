@@ -69,6 +69,9 @@ config:
   audit: true
   default_timestamps: true
   generators:
+    # Hook triggers written before only set and emit compiled: their problems are
+    # warnings, not errors, until the declarations are rewritten.
+    legacy_triggers: true
     disabled:
       - graphql
       - grpc
