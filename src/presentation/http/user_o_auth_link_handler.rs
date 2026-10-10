@@ -228,8 +228,8 @@ pub async fn unlink_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<UserOAuthLinkResponseDto>::not_found("UserOAuthLink", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserOAuthLinkResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("UserOAuthLink", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -239,7 +239,7 @@ pub async fn unlink_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "user_o_auth_link:transition:unlink");
         let has_update_perm = auth.permissions.iter().any(|p| p == "user_o_auth_link:update");
         if !has_specific_perm && !has_update_perm {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserOAuthLinkResponseDto>::error("Insufficient permissions for unlink transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for unlink transition")));
         }
     }
 
@@ -248,7 +248,7 @@ pub async fn unlink_transition(
         .unwrap_or(UserOAuthLinkState::default());
     let sm = UserOAuthLinkStateMachine::from_state(current_state);
     if !sm.can_transition(UserOAuthLinkTransition::Unlink) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<UserOAuthLinkResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -258,10 +258,10 @@ pub async fn unlink_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: UserOAuthLinkResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<UserOAuthLink, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<UserOAuthLinkResponseDto>::not_found("UserOAuthLink", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserOAuthLinkResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("UserOAuthLink", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 
@@ -278,8 +278,8 @@ pub async fn require_verification_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<UserOAuthLinkResponseDto>::not_found("UserOAuthLink", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserOAuthLinkResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("UserOAuthLink", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -289,7 +289,7 @@ pub async fn require_verification_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "user_o_auth_link:transition:require_verification");
         let has_update_perm = auth.permissions.iter().any(|p| p == "user_o_auth_link:update");
         if !has_specific_perm && !has_update_perm {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserOAuthLinkResponseDto>::error("Insufficient permissions for require_verification transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for require_verification transition")));
         }
     }
 
@@ -298,7 +298,7 @@ pub async fn require_verification_transition(
         .unwrap_or(UserOAuthLinkState::default());
     let sm = UserOAuthLinkStateMachine::from_state(current_state);
     if !sm.can_transition(UserOAuthLinkTransition::RequireVerification) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<UserOAuthLinkResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -308,10 +308,10 @@ pub async fn require_verification_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: UserOAuthLinkResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<UserOAuthLink, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<UserOAuthLinkResponseDto>::not_found("UserOAuthLink", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserOAuthLinkResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("UserOAuthLink", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 
@@ -328,8 +328,8 @@ pub async fn verify_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<UserOAuthLinkResponseDto>::not_found("UserOAuthLink", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserOAuthLinkResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("UserOAuthLink", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -339,7 +339,7 @@ pub async fn verify_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "user_o_auth_link:transition:verify");
         let has_update_perm = auth.permissions.iter().any(|p| p == "user_o_auth_link:update");
         if !has_specific_perm && !has_update_perm {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserOAuthLinkResponseDto>::error("Insufficient permissions for verify transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for verify transition")));
         }
     }
 
@@ -348,7 +348,7 @@ pub async fn verify_transition(
         .unwrap_or(UserOAuthLinkState::default());
     let sm = UserOAuthLinkStateMachine::from_state(current_state);
     if !sm.can_transition(UserOAuthLinkTransition::Verify) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<UserOAuthLinkResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -358,10 +358,10 @@ pub async fn verify_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: UserOAuthLinkResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<UserOAuthLink, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<UserOAuthLinkResponseDto>::not_found("UserOAuthLink", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserOAuthLinkResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("UserOAuthLink", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 
@@ -378,8 +378,8 @@ pub async fn expire_verification_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<UserOAuthLinkResponseDto>::not_found("UserOAuthLink", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserOAuthLinkResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("UserOAuthLink", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -389,7 +389,7 @@ pub async fn expire_verification_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "user_o_auth_link:transition:expire_verification");
         let has_update_perm = auth.permissions.iter().any(|p| p == "user_o_auth_link:update");
         if !has_specific_perm && !has_update_perm {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserOAuthLinkResponseDto>::error("Insufficient permissions for expire_verification transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for expire_verification transition")));
         }
     }
 
@@ -398,7 +398,7 @@ pub async fn expire_verification_transition(
         .unwrap_or(UserOAuthLinkState::default());
     let sm = UserOAuthLinkStateMachine::from_state(current_state);
     if !sm.can_transition(UserOAuthLinkTransition::ExpireVerification) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<UserOAuthLinkResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -408,10 +408,10 @@ pub async fn expire_verification_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: UserOAuthLinkResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<UserOAuthLink, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<UserOAuthLinkResponseDto>::not_found("UserOAuthLink", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserOAuthLinkResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("UserOAuthLink", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 

@@ -235,8 +235,8 @@ pub async fn verify_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<UserResponseDto>::not_found("User", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("User", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -247,7 +247,7 @@ pub async fn verify_transition(
         let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserResponseDto>::error("Insufficient permissions for verify transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for verify transition")));
         }
     }
 
@@ -256,7 +256,7 @@ pub async fn verify_transition(
         .unwrap_or(UserState::default());
     let sm = UserStateMachine::from_state(current_state);
     if !sm.can_transition(UserTransition::Verify) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<UserResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -266,10 +266,10 @@ pub async fn verify_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: UserResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<User, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<UserResponseDto>::not_found("User", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("User", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 
@@ -286,8 +286,8 @@ pub async fn activate_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<UserResponseDto>::not_found("User", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("User", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -298,7 +298,7 @@ pub async fn activate_transition(
         let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserResponseDto>::error("Insufficient permissions for activate transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for activate transition")));
         }
     }
 
@@ -307,7 +307,7 @@ pub async fn activate_transition(
         .unwrap_or(UserState::default());
     let sm = UserStateMachine::from_state(current_state);
     if !sm.can_transition(UserTransition::Activate) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<UserResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -317,10 +317,10 @@ pub async fn activate_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: UserResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<User, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<UserResponseDto>::not_found("User", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("User", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 
@@ -337,8 +337,8 @@ pub async fn deactivate_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<UserResponseDto>::not_found("User", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("User", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -349,7 +349,7 @@ pub async fn deactivate_transition(
         let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserResponseDto>::error("Insufficient permissions for deactivate transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for deactivate transition")));
         }
     }
 
@@ -358,7 +358,7 @@ pub async fn deactivate_transition(
         .unwrap_or(UserState::default());
     let sm = UserStateMachine::from_state(current_state);
     if !sm.can_transition(UserTransition::Deactivate) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<UserResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -368,10 +368,10 @@ pub async fn deactivate_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: UserResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<User, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<UserResponseDto>::not_found("User", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("User", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 
@@ -388,8 +388,8 @@ pub async fn reactivate_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<UserResponseDto>::not_found("User", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("User", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -400,7 +400,7 @@ pub async fn reactivate_transition(
         let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserResponseDto>::error("Insufficient permissions for reactivate transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for reactivate transition")));
         }
     }
 
@@ -409,7 +409,7 @@ pub async fn reactivate_transition(
         .unwrap_or(UserState::default());
     let sm = UserStateMachine::from_state(current_state);
     if !sm.can_transition(UserTransition::Reactivate) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<UserResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -419,10 +419,10 @@ pub async fn reactivate_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: UserResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<User, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<UserResponseDto>::not_found("User", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("User", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 
@@ -439,8 +439,8 @@ pub async fn suspend_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<UserResponseDto>::not_found("User", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("User", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -451,7 +451,7 @@ pub async fn suspend_transition(
         let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserResponseDto>::error("Insufficient permissions for suspend transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for suspend transition")));
         }
     }
 
@@ -460,7 +460,7 @@ pub async fn suspend_transition(
         .unwrap_or(UserState::default());
     let sm = UserStateMachine::from_state(current_state);
     if !sm.can_transition(UserTransition::Suspend) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<UserResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -470,10 +470,10 @@ pub async fn suspend_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: UserResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<User, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<UserResponseDto>::not_found("User", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("User", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 

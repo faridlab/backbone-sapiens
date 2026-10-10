@@ -247,8 +247,8 @@ pub async fn activate_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<LDAPDirectoryResponseDto>::not_found("LDAPDirectory", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<LDAPDirectoryResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("LDAPDirectory", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -259,7 +259,7 @@ pub async fn activate_transition(
         let has_update_perm = auth.permissions.iter().any(|p| p == "ldap_directory:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<LDAPDirectoryResponseDto>::error("Insufficient permissions for activate transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for activate transition")));
         }
     }
 
@@ -268,7 +268,7 @@ pub async fn activate_transition(
         .unwrap_or(LDAPDirectoryState::default());
     let sm = LDAPDirectoryStateMachine::from_state(current_state);
     if !sm.can_transition(LDAPDirectoryTransition::Activate) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<LDAPDirectoryResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -278,10 +278,10 @@ pub async fn activate_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: LDAPDirectoryResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<LDAPDirectory, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<LDAPDirectoryResponseDto>::not_found("LDAPDirectory", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<LDAPDirectoryResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("LDAPDirectory", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 
@@ -298,8 +298,8 @@ pub async fn deactivate_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<LDAPDirectoryResponseDto>::not_found("LDAPDirectory", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<LDAPDirectoryResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("LDAPDirectory", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -310,7 +310,7 @@ pub async fn deactivate_transition(
         let has_update_perm = auth.permissions.iter().any(|p| p == "ldap_directory:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<LDAPDirectoryResponseDto>::error("Insufficient permissions for deactivate transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for deactivate transition")));
         }
     }
 
@@ -319,7 +319,7 @@ pub async fn deactivate_transition(
         .unwrap_or(LDAPDirectoryState::default());
     let sm = LDAPDirectoryStateMachine::from_state(current_state);
     if !sm.can_transition(LDAPDirectoryTransition::Deactivate) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<LDAPDirectoryResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -329,10 +329,10 @@ pub async fn deactivate_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: LDAPDirectoryResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<LDAPDirectory, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<LDAPDirectoryResponseDto>::not_found("LDAPDirectory", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<LDAPDirectoryResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("LDAPDirectory", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 
@@ -349,8 +349,8 @@ pub async fn report_error_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<LDAPDirectoryResponseDto>::not_found("LDAPDirectory", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<LDAPDirectoryResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("LDAPDirectory", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -361,7 +361,7 @@ pub async fn report_error_transition(
         let has_update_perm = auth.permissions.iter().any(|p| p == "ldap_directory:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<LDAPDirectoryResponseDto>::error("Insufficient permissions for report_error transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for report_error transition")));
         }
     }
 
@@ -370,7 +370,7 @@ pub async fn report_error_transition(
         .unwrap_or(LDAPDirectoryState::default());
     let sm = LDAPDirectoryStateMachine::from_state(current_state);
     if !sm.can_transition(LDAPDirectoryTransition::ReportError) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<LDAPDirectoryResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -380,10 +380,10 @@ pub async fn report_error_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: LDAPDirectoryResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<LDAPDirectory, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<LDAPDirectoryResponseDto>::not_found("LDAPDirectory", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<LDAPDirectoryResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("LDAPDirectory", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 

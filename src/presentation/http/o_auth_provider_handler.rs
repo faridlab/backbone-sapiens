@@ -219,8 +219,8 @@ pub async fn activate_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<OAuthProviderResponseDto>::not_found("OAuthProvider", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<OAuthProviderResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("OAuthProvider", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -231,7 +231,7 @@ pub async fn activate_transition(
         let has_update_perm = auth.permissions.iter().any(|p| p == "o_auth_provider:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<OAuthProviderResponseDto>::error("Insufficient permissions for activate transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for activate transition")));
         }
     }
 
@@ -240,7 +240,7 @@ pub async fn activate_transition(
         .unwrap_or(OAuthProviderState::default());
     let sm = OAuthProviderStateMachine::from_state(current_state);
     if !sm.can_transition(OAuthProviderTransition::Activate) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<OAuthProviderResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -250,10 +250,10 @@ pub async fn activate_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: OAuthProviderResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<OAuthProvider, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<OAuthProviderResponseDto>::not_found("OAuthProvider", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<OAuthProviderResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("OAuthProvider", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 
@@ -270,8 +270,8 @@ pub async fn deactivate_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<OAuthProviderResponseDto>::not_found("OAuthProvider", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<OAuthProviderResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("OAuthProvider", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -282,7 +282,7 @@ pub async fn deactivate_transition(
         let has_update_perm = auth.permissions.iter().any(|p| p == "o_auth_provider:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<OAuthProviderResponseDto>::error("Insufficient permissions for deactivate transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for deactivate transition")));
         }
     }
 
@@ -291,7 +291,7 @@ pub async fn deactivate_transition(
         .unwrap_or(OAuthProviderState::default());
     let sm = OAuthProviderStateMachine::from_state(current_state);
     if !sm.can_transition(OAuthProviderTransition::Deactivate) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<OAuthProviderResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -301,10 +301,10 @@ pub async fn deactivate_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: OAuthProviderResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<OAuthProvider, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<OAuthProviderResponseDto>::not_found("OAuthProvider", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<OAuthProviderResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("OAuthProvider", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 
@@ -321,8 +321,8 @@ pub async fn maintenance_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<OAuthProviderResponseDto>::not_found("OAuthProvider", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<OAuthProviderResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("OAuthProvider", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -333,7 +333,7 @@ pub async fn maintenance_transition(
         let has_update_perm = auth.permissions.iter().any(|p| p == "o_auth_provider:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<OAuthProviderResponseDto>::error("Insufficient permissions for maintenance transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for maintenance transition")));
         }
     }
 
@@ -342,7 +342,7 @@ pub async fn maintenance_transition(
         .unwrap_or(OAuthProviderState::default());
     let sm = OAuthProviderStateMachine::from_state(current_state);
     if !sm.can_transition(OAuthProviderTransition::Maintenance) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<OAuthProviderResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -352,10 +352,10 @@ pub async fn maintenance_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: OAuthProviderResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<OAuthProvider, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<OAuthProviderResponseDto>::not_found("OAuthProvider", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<OAuthProviderResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("OAuthProvider", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 

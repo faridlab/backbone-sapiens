@@ -231,8 +231,8 @@ pub async fn verify_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<EmailVerificationTokenResponseDto>::not_found("EmailVerificationToken", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<EmailVerificationTokenResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("EmailVerificationToken", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -242,7 +242,7 @@ pub async fn verify_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "email_verification_token:transition:verify");
         let has_update_perm = auth.permissions.iter().any(|p| p == "email_verification_token:update");
         if !has_specific_perm && !has_update_perm {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<EmailVerificationTokenResponseDto>::error("Insufficient permissions for verify transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for verify transition")));
         }
     }
 
@@ -251,7 +251,7 @@ pub async fn verify_transition(
         .unwrap_or(EmailVerificationTokenState::default());
     let sm = EmailVerificationTokenStateMachine::from_state(current_state);
     if !sm.can_transition(EmailVerificationTokenTransition::Verify) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<EmailVerificationTokenResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -261,10 +261,10 @@ pub async fn verify_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: EmailVerificationTokenResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<EmailVerificationToken, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<EmailVerificationTokenResponseDto>::not_found("EmailVerificationToken", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<EmailVerificationTokenResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("EmailVerificationToken", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 
@@ -281,8 +281,8 @@ pub async fn expire_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<EmailVerificationTokenResponseDto>::not_found("EmailVerificationToken", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<EmailVerificationTokenResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("EmailVerificationToken", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -292,7 +292,7 @@ pub async fn expire_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "email_verification_token:transition:expire");
         let has_update_perm = auth.permissions.iter().any(|p| p == "email_verification_token:update");
         if !has_specific_perm && !has_update_perm {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<EmailVerificationTokenResponseDto>::error("Insufficient permissions for expire transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for expire transition")));
         }
     }
 
@@ -301,7 +301,7 @@ pub async fn expire_transition(
         .unwrap_or(EmailVerificationTokenState::default());
     let sm = EmailVerificationTokenStateMachine::from_state(current_state);
     if !sm.can_transition(EmailVerificationTokenTransition::Expire) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<EmailVerificationTokenResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -311,10 +311,10 @@ pub async fn expire_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: EmailVerificationTokenResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<EmailVerificationToken, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<EmailVerificationTokenResponseDto>::not_found("EmailVerificationToken", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<EmailVerificationTokenResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("EmailVerificationToken", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 
@@ -331,8 +331,8 @@ pub async fn revoke_transition(
     // Get current entity
     let entity = match service.get_by_id(&id).await {
         Ok(Some(e)) => e,
-        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<EmailVerificationTokenResponseDto>::not_found("EmailVerificationToken", &id))),
-        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<EmailVerificationTokenResponseDto>::error(e.to_string()))),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("EmailVerificationToken", &id))),
+        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
     // Check permission (if auth enabled)
@@ -343,7 +343,7 @@ pub async fn revoke_transition(
         let has_update_perm = auth.permissions.iter().any(|p| p == "email_verification_token:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<EmailVerificationTokenResponseDto>::error("Insufficient permissions for revoke transition")));
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for revoke transition")));
         }
     }
 
@@ -352,7 +352,7 @@ pub async fn revoke_transition(
         .unwrap_or(EmailVerificationTokenState::default());
     let sm = EmailVerificationTokenStateMachine::from_state(current_state);
     if !sm.can_transition(EmailVerificationTokenTransition::Revoke) {
-        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<EmailVerificationTokenResponseDto>::error("Transition not allowed from current state")));
+        return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
     // Apply transition via partial update
@@ -362,10 +362,10 @@ pub async fn revoke_transition(
     match service.partial_update(&id, fields).await {
         Ok(Some(updated)) => {
             let response: EmailVerificationTokenResponseDto = updated.into();
-            (StatusCode::OK, Json(ApiResponse::ok(response)))
+            (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<EmailVerificationToken, _>(response))))
         }
-        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<EmailVerificationTokenResponseDto>::not_found("EmailVerificationToken", &id))),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<EmailVerificationTokenResponseDto>::error(e.to_string()))),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(ApiResponse::<serde_json::Value>::not_found("EmailVerificationToken", &id))),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     }
 }
 
