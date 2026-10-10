@@ -346,9 +346,9 @@ dependencies = [
 
 [[package]]
 name = "backbone-auth"
-version = "3.1.0"
+version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77fcd4375ba63de0a040eafeabc55ca332c16dfdf7f22da2d0435bd656a49232"
+checksum = "01248327da4d12567ce9abea7c8482e2e88f8fd4b734a26838921e3c091247d9"
 dependencies = [
  "anyhow",
  "argon2",
@@ -371,9 +371,9 @@ dependencies = [
 
 [[package]]
 name = "backbone-core"
-version = "3.1.0"
+version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c9220e4f9ed7a20eedfc18f0bb92e777890d14d53ab7f28ab2c309908451b67"
+checksum = "1c25ef1f0f099a6088c5af14d292bbd30deea35366996640a56e57e7d0244439"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -399,9 +399,9 @@ dependencies = [
 
 [[package]]
 name = "backbone-email"
-version = "3.1.0"
+version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "125c52694a8ff2ed7cdd49c0abc58466d13208b54f1154aff454525ac9d9df67"
+checksum = "e1cfe3c580d08459c6bb605920e71d3cfcacf153d34c14ba8f08296c2074365f"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -419,9 +419,9 @@ dependencies = [
 
 [[package]]
 name = "backbone-messaging"
-version = "3.1.0"
+version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aa99b2f984f3d4bac4edd0c736e37673303130bca3bbd388dd99e2a2e4cd0d64"
+checksum = "14ec1f37f1e217a8c4ceedb1d845e215a0b60d7fc1caf094a46e6ca82f0d32cb"
 dependencies = [
  "async-trait",
  "chrono",
@@ -435,9 +435,9 @@ dependencies = [
 
 [[package]]
 name = "backbone-orm"
-version = "3.1.0"
+version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4bb4ff9984d36d18d19dbf751419398572b66f5c8fe8b41024c2ab94e37250e4"
+checksum = "299f54e3b9ee005f58769233b4c15b3bf99c2bc803caeadc1027009daadcd723"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -455,9 +455,9 @@ dependencies = [
 
 [[package]]
 name = "backbone-outbox"
-version = "3.1.0"
+version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5388fc8b325a7d526687eeee1ec1da45ef3a61abe4426dbad0500f04049422d4"
+checksum = "ba36cf1a21ec242e831e6270cb923074f09c49bede9b94cb252f237df8757537"
 dependencies = [
  "chrono",
  "serde",
@@ -469,7 +469,7 @@ dependencies = [
 
 [[package]]
 name = "backbone-sapiens"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
  "aes-gcm",
  "anyhow",
@@ -3146,9 +3146,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.151"
+version = "1.0.152"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14"
+checksum = "1741ab7a6cc54a03a89b5d563ed60075c277d9e3cfa73ad0c1f23f23974703c6"
 dependencies = [
  "itoa",
  "memchr",
