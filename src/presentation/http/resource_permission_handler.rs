@@ -16,7 +16,6 @@ use chrono::{DateTime, Utc};
 use backbone_core::http::{ApiResponse, BackboneCrudHandler};
 
 // Auth integration (optional)
-#[cfg(feature = "auth")]
 use backbone_auth::middleware::AuthContext;
 #[cfg(feature = "auth")]
 use backbone_auth::AuthMiddleware;
@@ -228,7 +227,7 @@ pub fn create_protected_resource_permission_routes<A: AuthMiddleware + Send + Sy
 pub async fn auto_expire_transition(
     axum::extract::State(service): axum::extract::State<Arc<ResourcePermissionService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -239,8 +238,10 @@ pub async fn auto_expire_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<ResourcePermissionResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<ResourcePermissionResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = ResourcePermissionTransition::AutoExpire.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "resource_permission:transition:auto_expire");
@@ -250,7 +251,7 @@ pub async fn auto_expire_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<ResourcePermissionResponseDto>::error("Insufficient permissions for auto_expire transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "ResourcePermission", verb = "auto_expire", code = "transition_by_update_permission", "a transition granted only by resource_permission:update, running in shadow; it needs resource_permission:transition:auto_expire or a role of ["system"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "ResourcePermission", verb = "auto_expire", code = "transition_by_update_permission", "a transition granted only by resource_permission:update, running in shadow; it needs resource_permission:transition:auto_expire or one of the roles system");
         }
     }
 
@@ -285,7 +286,7 @@ pub async fn auto_expire_transition(
 pub async fn revoke_transition(
     axum::extract::State(service): axum::extract::State<Arc<ResourcePermissionService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -296,8 +297,10 @@ pub async fn revoke_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<ResourcePermissionResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<ResourcePermissionResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = ResourcePermissionTransition::Revoke.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "resource_permission:transition:revoke");
@@ -307,7 +310,7 @@ pub async fn revoke_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<ResourcePermissionResponseDto>::error("Insufficient permissions for revoke transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "ResourcePermission", verb = "revoke", code = "transition_by_update_permission", "a transition granted only by resource_permission:update, running in shadow; it needs resource_permission:transition:revoke or a role of ["admin", "granter"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "ResourcePermission", verb = "revoke", code = "transition_by_update_permission", "a transition granted only by resource_permission:update, running in shadow; it needs resource_permission:transition:revoke or one of the roles admin, granter");
         }
     }
 

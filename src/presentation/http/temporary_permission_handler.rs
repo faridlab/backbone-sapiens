@@ -16,7 +16,6 @@ use chrono::{DateTime, Utc};
 use backbone_core::http::{ApiResponse, BackboneCrudHandler};
 
 // Auth integration (optional)
-#[cfg(feature = "auth")]
 use backbone_auth::middleware::AuthContext;
 #[cfg(feature = "auth")]
 use backbone_auth::AuthMiddleware;
@@ -220,7 +219,7 @@ pub fn create_protected_temporary_permission_routes<A: AuthMiddleware + Send + S
 pub async fn activate_transition(
     axum::extract::State(service): axum::extract::State<Arc<TemporaryPermissionService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -231,8 +230,10 @@ pub async fn activate_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<TemporaryPermissionResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = TemporaryPermissionTransition::Activate.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "temporary_permission:transition:activate");
@@ -242,7 +243,7 @@ pub async fn activate_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Insufficient permissions for activate transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "TemporaryPermission", verb = "activate", code = "transition_by_update_permission", "a transition granted only by temporary_permission:update, running in shadow; it needs temporary_permission:transition:activate or a role of ["admin"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "TemporaryPermission", verb = "activate", code = "transition_by_update_permission", "a transition granted only by temporary_permission:update, running in shadow; it needs temporary_permission:transition:activate or one of the roles admin");
         }
     }
 
@@ -277,7 +278,7 @@ pub async fn activate_transition(
 pub async fn revoke_transition(
     axum::extract::State(service): axum::extract::State<Arc<TemporaryPermissionService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -288,8 +289,10 @@ pub async fn revoke_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<TemporaryPermissionResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = TemporaryPermissionTransition::Revoke.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "temporary_permission:transition:revoke");
@@ -299,7 +302,7 @@ pub async fn revoke_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Insufficient permissions for revoke transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "TemporaryPermission", verb = "revoke", code = "transition_by_update_permission", "a transition granted only by temporary_permission:update, running in shadow; it needs temporary_permission:transition:revoke or a role of ["admin", "granter"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "TemporaryPermission", verb = "revoke", code = "transition_by_update_permission", "a transition granted only by temporary_permission:update, running in shadow; it needs temporary_permission:transition:revoke or one of the roles admin, granter");
         }
     }
 
@@ -334,7 +337,7 @@ pub async fn revoke_transition(
 pub async fn auto_expire_transition(
     axum::extract::State(service): axum::extract::State<Arc<TemporaryPermissionService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -345,8 +348,10 @@ pub async fn auto_expire_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<TemporaryPermissionResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = TemporaryPermissionTransition::AutoExpire.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "temporary_permission:transition:auto_expire");
@@ -356,7 +361,7 @@ pub async fn auto_expire_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Insufficient permissions for auto_expire transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "TemporaryPermission", verb = "auto_expire", code = "transition_by_update_permission", "a transition granted only by temporary_permission:update, running in shadow; it needs temporary_permission:transition:auto_expire or a role of ["system"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "TemporaryPermission", verb = "auto_expire", code = "transition_by_update_permission", "a transition granted only by temporary_permission:update, running in shadow; it needs temporary_permission:transition:auto_expire or one of the roles system");
         }
     }
 

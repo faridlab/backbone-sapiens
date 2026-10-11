@@ -15,7 +15,6 @@ use uuid::Uuid;
 use backbone_core::http::{ApiResponse, BackboneCrudHandler};
 
 // Auth integration (optional)
-#[cfg(feature = "auth")]
 use backbone_auth::middleware::AuthContext;
 #[cfg(feature = "auth")]
 use backbone_auth::AuthMiddleware;
@@ -235,7 +234,7 @@ pub fn create_protected_saml_provider_routes<A: AuthMiddleware + Send + Sync + '
 pub async fn activate_transition(
     axum::extract::State(service): axum::extract::State<Arc<SAMLProviderService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -246,8 +245,10 @@ pub async fn activate_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<SAMLProviderResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<SAMLProviderResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = SAMLProviderTransition::Activate.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "saml_provider:transition:activate");
@@ -257,7 +258,7 @@ pub async fn activate_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<SAMLProviderResponseDto>::error("Insufficient permissions for activate transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "SAMLProvider", verb = "activate", code = "transition_by_update_permission", "a transition granted only by saml_provider:update, running in shadow; it needs saml_provider:transition:activate or a role of ["admin"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "SAMLProvider", verb = "activate", code = "transition_by_update_permission", "a transition granted only by saml_provider:update, running in shadow; it needs saml_provider:transition:activate or one of the roles admin");
         }
     }
 
@@ -292,7 +293,7 @@ pub async fn activate_transition(
 pub async fn deactivate_transition(
     axum::extract::State(service): axum::extract::State<Arc<SAMLProviderService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -303,8 +304,10 @@ pub async fn deactivate_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<SAMLProviderResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<SAMLProviderResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = SAMLProviderTransition::Deactivate.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "saml_provider:transition:deactivate");
@@ -314,7 +317,7 @@ pub async fn deactivate_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<SAMLProviderResponseDto>::error("Insufficient permissions for deactivate transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "SAMLProvider", verb = "deactivate", code = "transition_by_update_permission", "a transition granted only by saml_provider:update, running in shadow; it needs saml_provider:transition:deactivate or a role of ["admin"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "SAMLProvider", verb = "deactivate", code = "transition_by_update_permission", "a transition granted only by saml_provider:update, running in shadow; it needs saml_provider:transition:deactivate or one of the roles admin");
         }
     }
 

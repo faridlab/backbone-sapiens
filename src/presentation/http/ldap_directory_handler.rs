@@ -16,7 +16,6 @@ use chrono::{DateTime, Utc};
 use backbone_core::http::{ApiResponse, BackboneCrudHandler};
 
 // Auth integration (optional)
-#[cfg(feature = "auth")]
 use backbone_auth::middleware::AuthContext;
 #[cfg(feature = "auth")]
 use backbone_auth::AuthMiddleware;
@@ -240,7 +239,7 @@ pub fn create_protected_ldap_directory_routes<A: AuthMiddleware + Send + Sync + 
 pub async fn activate_transition(
     axum::extract::State(service): axum::extract::State<Arc<LDAPDirectoryService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -251,8 +250,10 @@ pub async fn activate_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<serde_json::Value>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = LDAPDirectoryTransition::Activate.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "ldap_directory:transition:activate");
@@ -262,7 +263,7 @@ pub async fn activate_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for activate transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "LDAPDirectory", verb = "activate", code = "transition_by_update_permission", "a transition granted only by ldap_directory:update, running in shadow; it needs ldap_directory:transition:activate or a role of ["admin"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "LDAPDirectory", verb = "activate", code = "transition_by_update_permission", "a transition granted only by ldap_directory:update, running in shadow; it needs ldap_directory:transition:activate or one of the roles admin");
         }
     }
 
@@ -297,7 +298,7 @@ pub async fn activate_transition(
 pub async fn deactivate_transition(
     axum::extract::State(service): axum::extract::State<Arc<LDAPDirectoryService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -308,8 +309,10 @@ pub async fn deactivate_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<serde_json::Value>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = LDAPDirectoryTransition::Deactivate.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "ldap_directory:transition:deactivate");
@@ -319,7 +322,7 @@ pub async fn deactivate_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for deactivate transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "LDAPDirectory", verb = "deactivate", code = "transition_by_update_permission", "a transition granted only by ldap_directory:update, running in shadow; it needs ldap_directory:transition:deactivate or a role of ["admin"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "LDAPDirectory", verb = "deactivate", code = "transition_by_update_permission", "a transition granted only by ldap_directory:update, running in shadow; it needs ldap_directory:transition:deactivate or one of the roles admin");
         }
     }
 
@@ -353,7 +356,7 @@ pub async fn deactivate_transition(
 pub async fn report_error_transition(
     axum::extract::State(service): axum::extract::State<Arc<LDAPDirectoryService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -364,8 +367,10 @@ pub async fn report_error_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<serde_json::Value>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = LDAPDirectoryTransition::ReportError.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "ldap_directory:transition:report_error");
@@ -375,7 +380,7 @@ pub async fn report_error_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for report_error transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "LDAPDirectory", verb = "report_error", code = "transition_by_update_permission", "a transition granted only by ldap_directory:update, running in shadow; it needs ldap_directory:transition:report_error or a role of ["system"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "LDAPDirectory", verb = "report_error", code = "transition_by_update_permission", "a transition granted only by ldap_directory:update, running in shadow; it needs ldap_directory:transition:report_error or one of the roles system");
         }
     }
 

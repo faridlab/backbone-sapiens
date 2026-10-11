@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.8] - 2026-10-12
+
+### Fixed
+
+- The generated state-machine transitions check their caller's permission whatever the crate's
+  features: a call with no authenticated caller is refused (401) instead of passing unchecked when
+  the crate is built without `auth`.
+
 ## [0.7.7] - 2026-10-11
 
 ### Fixed

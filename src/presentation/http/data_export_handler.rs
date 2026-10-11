@@ -16,7 +16,6 @@ use chrono::{DateTime, Utc};
 use backbone_core::http::{ApiResponse, BackboneCrudHandler};
 
 // Auth integration (optional)
-#[cfg(feature = "auth")]
 use backbone_auth::middleware::AuthContext;
 #[cfg(feature = "auth")]
 use backbone_auth::AuthMiddleware;
@@ -224,7 +223,7 @@ pub fn create_protected_data_export_routes<A: AuthMiddleware + Send + Sync + 'st
 pub async fn start_processing_transition(
     axum::extract::State(service): axum::extract::State<Arc<DataExportService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -235,8 +234,10 @@ pub async fn start_processing_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<DataExportResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<DataExportResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = DataExportTransition::StartProcessing.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "data_export:transition:start_processing");
@@ -246,7 +247,7 @@ pub async fn start_processing_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for start_processing transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "start_processing", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:start_processing or a role of ["system"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "start_processing", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:start_processing or one of the roles system");
         }
     }
 
@@ -280,7 +281,7 @@ pub async fn start_processing_transition(
 pub async fn complete_transition(
     axum::extract::State(service): axum::extract::State<Arc<DataExportService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -291,8 +292,10 @@ pub async fn complete_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<DataExportResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<DataExportResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = DataExportTransition::Complete.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "data_export:transition:complete");
@@ -302,7 +305,7 @@ pub async fn complete_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for complete transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "complete", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:complete or a role of ["system"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "complete", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:complete or one of the roles system");
         }
     }
 
@@ -336,7 +339,7 @@ pub async fn complete_transition(
 pub async fn fail_transition(
     axum::extract::State(service): axum::extract::State<Arc<DataExportService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -347,8 +350,10 @@ pub async fn fail_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<DataExportResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<DataExportResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = DataExportTransition::Fail.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "data_export:transition:fail");
@@ -358,7 +363,7 @@ pub async fn fail_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for fail transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "fail", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:fail or a role of ["system"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "fail", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:fail or one of the roles system");
         }
     }
 
@@ -392,7 +397,7 @@ pub async fn fail_transition(
 pub async fn expire_transition(
     axum::extract::State(service): axum::extract::State<Arc<DataExportService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -403,8 +408,10 @@ pub async fn expire_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<DataExportResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<DataExportResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = DataExportTransition::Expire.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "data_export:transition:expire");
@@ -414,7 +421,7 @@ pub async fn expire_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for expire transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "expire", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:expire or a role of ["system"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "expire", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:expire or one of the roles system");
         }
     }
 

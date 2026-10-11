@@ -16,7 +16,6 @@ use chrono::{DateTime, Utc};
 use backbone_core::http::{ApiResponse, BackboneCrudHandler};
 
 // Auth integration (optional)
-#[cfg(feature = "auth")]
 use backbone_auth::middleware::AuthContext;
 #[cfg(feature = "auth")]
 use backbone_auth::AuthMiddleware;
@@ -224,7 +223,7 @@ pub fn create_protected_impersonation_session_routes<A: AuthMiddleware + Send + 
 pub async fn end_transition(
     axum::extract::State(service): axum::extract::State<Arc<ImpersonationSessionService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -235,8 +234,10 @@ pub async fn end_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<ImpersonationSessionResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = ImpersonationSessionTransition::End.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "impersonation_session:transition:end");
@@ -246,7 +247,7 @@ pub async fn end_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for end transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "end", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:end or a role of ["admin"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "end", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:end or one of the roles admin");
         }
     }
 
@@ -281,7 +282,7 @@ pub async fn end_transition(
 pub async fn auto_expire_transition(
     axum::extract::State(service): axum::extract::State<Arc<ImpersonationSessionService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -292,8 +293,10 @@ pub async fn auto_expire_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<ImpersonationSessionResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = ImpersonationSessionTransition::AutoExpire.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "impersonation_session:transition:auto_expire");
@@ -303,7 +306,7 @@ pub async fn auto_expire_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for auto_expire transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "auto_expire", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:auto_expire or a role of ["system"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "auto_expire", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:auto_expire or one of the roles system");
         }
     }
 
@@ -338,7 +341,7 @@ pub async fn auto_expire_transition(
 pub async fn terminate_transition(
     axum::extract::State(service): axum::extract::State<Arc<ImpersonationSessionService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -349,8 +352,10 @@ pub async fn terminate_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<ImpersonationSessionResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = ImpersonationSessionTransition::Terminate.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "impersonation_session:transition:terminate");
@@ -360,7 +365,7 @@ pub async fn terminate_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for terminate transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "terminate", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:terminate or a role of ["super_admin"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "terminate", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:terminate or one of the roles super_admin");
         }
     }
 
@@ -394,7 +399,7 @@ pub async fn terminate_transition(
 pub async fn force_terminate_transition(
     axum::extract::State(service): axum::extract::State<Arc<ImpersonationSessionService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -405,8 +410,10 @@ pub async fn force_terminate_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<ImpersonationSessionResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = ImpersonationSessionTransition::ForceTerminate.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "impersonation_session:transition:force_terminate");
@@ -416,7 +423,7 @@ pub async fn force_terminate_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for force_terminate transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "force_terminate", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:force_terminate or a role of ["admin"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "force_terminate", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:force_terminate or one of the roles admin");
         }
     }
 

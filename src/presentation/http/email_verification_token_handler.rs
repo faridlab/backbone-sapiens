@@ -16,7 +16,6 @@ use chrono::{DateTime, Utc};
 use backbone_core::http::{ApiResponse, BackboneCrudHandler};
 
 // Auth integration (optional)
-#[cfg(feature = "auth")]
 use backbone_auth::middleware::AuthContext;
 #[cfg(feature = "auth")]
 use backbone_auth::AuthMiddleware;
@@ -224,7 +223,7 @@ pub fn create_protected_email_verification_token_routes<A: AuthMiddleware + Send
 pub async fn verify_transition(
     axum::extract::State(service): axum::extract::State<Arc<EmailVerificationTokenService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -235,8 +234,10 @@ pub async fn verify_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<serde_json::Value>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = EmailVerificationTokenTransition::Verify.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "email_verification_token:transition:verify");
@@ -281,7 +282,7 @@ pub async fn verify_transition(
 pub async fn expire_transition(
     axum::extract::State(service): axum::extract::State<Arc<EmailVerificationTokenService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -292,8 +293,10 @@ pub async fn expire_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<serde_json::Value>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = EmailVerificationTokenTransition::Expire.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "email_verification_token:transition:expire");
@@ -338,7 +341,7 @@ pub async fn expire_transition(
 pub async fn revoke_transition(
     axum::extract::State(service): axum::extract::State<Arc<EmailVerificationTokenService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -349,8 +352,10 @@ pub async fn revoke_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<serde_json::Value>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<serde_json::Value>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = EmailVerificationTokenTransition::Revoke.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "email_verification_token:transition:revoke");
@@ -360,7 +365,7 @@ pub async fn revoke_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for revoke transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "EmailVerificationToken", verb = "revoke", code = "transition_by_update_permission", "a transition granted only by email_verification_token:update, running in shadow; it needs email_verification_token:transition:revoke or a role of ["admin", "system"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "EmailVerificationToken", verb = "revoke", code = "transition_by_update_permission", "a transition granted only by email_verification_token:update, running in shadow; it needs email_verification_token:transition:revoke or one of the roles admin, system");
         }
     }
 

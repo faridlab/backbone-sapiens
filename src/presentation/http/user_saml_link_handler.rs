@@ -16,7 +16,6 @@ use chrono::{DateTime, Utc};
 use backbone_core::http::{ApiResponse, BackboneCrudHandler};
 
 // Auth integration (optional)
-#[cfg(feature = "auth")]
 use backbone_auth::middleware::AuthContext;
 #[cfg(feature = "auth")]
 use backbone_auth::AuthMiddleware;
@@ -224,7 +223,7 @@ pub fn create_protected_user_saml_link_routes<A: AuthMiddleware + Send + Sync + 
 pub async fn deactivate_transition(
     axum::extract::State(service): axum::extract::State<Arc<UserSAMLLinkService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -235,8 +234,10 @@ pub async fn deactivate_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserSAMLLinkResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = UserSAMLLinkTransition::Deactivate.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "user_saml_link:transition:deactivate");
@@ -246,7 +247,7 @@ pub async fn deactivate_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("Insufficient permissions for deactivate transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "UserSAMLLink", verb = "deactivate", code = "transition_by_update_permission", "a transition granted only by user_saml_link:update, running in shadow; it needs user_saml_link:transition:deactivate or a role of ["admin", "owner"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "UserSAMLLink", verb = "deactivate", code = "transition_by_update_permission", "a transition granted only by user_saml_link:update, running in shadow; it needs user_saml_link:transition:deactivate or one of the roles admin, owner");
         }
     }
 
@@ -281,7 +282,7 @@ pub async fn deactivate_transition(
 pub async fn reactivate_transition(
     axum::extract::State(service): axum::extract::State<Arc<UserSAMLLinkService>>,
     axum::extract::Path(id): axum::extract::Path<String>,
-    #[cfg(feature = "auth")] axum::Extension(auth): axum::Extension<AuthContext>,
+    auth: Option<axum::Extension<AuthContext>>,
 ) -> impl axum::response::IntoResponse {
     use axum::{http::StatusCode, Json};
 
@@ -292,8 +293,10 @@ pub async fn reactivate_transition(
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<UserSAMLLinkResponseDto>::error(e.to_string()))),
     };
 
-    // Check permission (if auth enabled)
-    #[cfg(feature = "auth")]
+    // Check permission
+    let Some(axum::Extension(auth)) = auth else {
+        return (StatusCode::UNAUTHORIZED, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("A transition needs an authenticated caller")));
+    };
     {
         let allowed_roles = UserSAMLLinkTransition::Reactivate.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "user_saml_link:transition:reactivate");
@@ -303,7 +306,7 @@ pub async fn reactivate_transition(
             if !has_update_perm {
                 return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("Insufficient permissions for reactivate transition")));
             }
-            tracing::warn!(target: "backbone::write_guard", entity = "UserSAMLLink", verb = "reactivate", code = "transition_by_update_permission", "a transition granted only by user_saml_link:update, running in shadow; it needs user_saml_link:transition:reactivate or a role of ["admin"]");
+            tracing::warn!(target: "backbone::write_guard", entity = "UserSAMLLink", verb = "reactivate", code = "transition_by_update_permission", "a transition granted only by user_saml_link:update, running in shadow; it needs user_saml_link:transition:reactivate or one of the roles admin");
         }
     }
 
