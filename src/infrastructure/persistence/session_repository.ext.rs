@@ -1,0 +1,108 @@
+// This directory's extension (hand-written; ADR-0031). The generated mod.rs (lib.rs for
+// src/) pulls it in with include!, so its lines resolve against this directory.
+
+//! The extension of `session_repository.rs` (hand-written; ADR-0031).
+
+#[allow(unused_imports)]
+use super::*;
+
+use chrono::{DateTime, Utc};
+use uuid::Uuid;
+impl SessionRepository {
+    /// Insert a new authentication session row and return the created session.
+    ///
+    /// Arguments: `user_id`, `token_hash` (hashed refresh token), `expires_at`,
+    /// and raw `metadata` JSON value. `last_activity` starts at NOW() — the
+    /// idle-timeout posture keys on it.
+    pub async fn create_auth_session(
+        &self,
+        user_id: Uuid,
+        token_hash: &str,
+        expires_at: DateTime<Utc>,
+        remember_me: bool,
+        metadata: &serde_json::Value,
+    ) -> Result<Session> {
+        let id = Uuid::new_v4();
+        // A login starts a NEW rotation family: every refresh appends to it,
+        // and a replayed token revokes exactly this chain.
+        let sql = format!(
+            "INSERT INTO {TABLE_NAME} \
+             (id, user_id, token_hash, expires_at, remember_me, device_type, status, last_activity, metadata, family_id) \
+             VALUES ($1, $2, $3, $4, $5, 'unknown', 'active', NOW(), $6, $1) \
+             RETURNING *"
+        );
+        let result = sqlx::query_as::<_, Session>(&sql)
+        .bind(id)
+        .bind(user_id)
+        .bind(token_hash)
+        .bind(expires_at)
+        .bind(remember_me)
+        .bind(metadata)
+        .fetch_one(self.pool())
+        .await?;
+        Ok(result)
+    }
+    /// Find an active (non-revoked, non-expired) session by its token hash.
+    pub async fn find_active_by_token_hash(&self, token_hash: &str) -> Result<Option<Session>> {
+        let sql = format!(
+            "SELECT * FROM {TABLE_NAME} \
+             WHERE token_hash = $1 AND revoked_at IS NULL AND expires_at > NOW()"
+        );
+        let result = sqlx::query_as::<_, Session>(&sql)
+        .bind(token_hash)
+        .fetch_optional(self.pool())
+        .await?;
+        Ok(result)
+    }
+    /// Soft-revoke a session: stamp `revoked_at` and flip `status` to `revoked`.
+    pub async fn revoke_session(&self, session_id: Uuid) -> Result<()> {
+        sqlx::query(&format!(
+            "UPDATE {TABLE_NAME} SET revoked_at = NOW(), status = 'revoked' WHERE id = $1"
+        ))
+        .bind(session_id)
+        .execute(self.pool())
+        .await?;
+        Ok(())
+    }
+    /// Revoke all active sessions belonging to a user.
+    ///
+    /// Returns the number of rows affected.
+    pub async fn revoke_all_user_sessions(&self, user_id: Uuid) -> Result<u64> {
+        let result =
+            sqlx::query(&format!(
+                "UPDATE {TABLE_NAME} SET revoked_at = NOW(), status = 'revoked' \
+                 WHERE user_id = $1 AND revoked_at IS NULL"
+            ))
+            .bind(user_id)
+            .execute(self.pool())
+            .await?;
+        Ok(result.rows_affected())
+    }
+    /// Find a REVOKED session by its token hash — the replay signal. A hash
+    /// that names a revoked row is a spent token being presented again,
+    /// which [`crate::application::service::AuthService::refresh_token`]
+    /// answers by revoking the row's whole family.
+    pub async fn find_revoked_by_token_hash(&self, token_hash: &str) -> Result<Option<Session>> {
+        let sql = format!(
+            "SELECT * FROM {TABLE_NAME} WHERE token_hash = $1 AND revoked_at IS NOT NULL"
+        );
+        let result = sqlx::query_as::<_, Session>(&sql)
+            .bind(token_hash)
+            .fetch_optional(self.pool())
+            .await?;
+        Ok(result)
+    }
+    /// Revoke every live row in a rotation family — the theft response: a
+    /// replayed token takes the legitimate successor down with it, forcing
+    /// a re-login on every device the family spans.
+    pub async fn revoke_family(&self, family_id: Uuid) -> Result<u64> {
+        let result = sqlx::query(&format!(
+            "UPDATE {TABLE_NAME} SET revoked_at = NOW(), status = 'revoked' \
+             WHERE family_id = $1 AND revoked_at IS NULL"
+        ))
+        .bind(family_id)
+        .execute(self.pool())
+        .await?;
+        Ok(result.rows_affected())
+    }
+}

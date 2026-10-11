@@ -1,0 +1,112 @@
+// This directory's extension (hand-written; ADR-0031). The generated mod.rs (lib.rs for
+// src/) pulls it in with include!, so its lines resolve against this directory.
+
+//! The extension of `email_verification_token_repository.rs` (hand-written; ADR-0031).
+
+#[allow(unused_imports)]
+use super::*;
+
+use chrono::{DateTime, Utc};
+use uuid::Uuid;
+impl EmailVerificationTokenRepository {
+    /// Insert a new email verification token row.
+    ///
+    /// Arguments: `user_id`, `token_hash` (hashed OTP), `email`, `expires_at`,
+    /// and raw `metadata` JSON value.
+    pub async fn create_verification_token(
+        &self,
+        user_id: Uuid,
+        token_hash: &str,
+        email: &str,
+        expires_at: DateTime<Utc>,
+        metadata: &serde_json::Value,
+    ) -> Result<EmailVerificationToken> {
+        let id = Uuid::new_v4();
+        let sql = format!(
+            "INSERT INTO {TABLE_NAME} \
+             (id, user_id, token, email, token_type, expires_at, attempts, max_attempts, status, metadata) \
+             VALUES ($1, $2, $3, $4, 'account_creation', $5, 0, 5, 'pending', $6) \
+             RETURNING *"
+        );
+        let result = sqlx::query_as::<_, EmailVerificationToken>(&sql)
+        .bind(id)
+        .bind(user_id)
+        .bind(token_hash)
+        .bind(email)
+        .bind(expires_at)
+        .bind(metadata)
+        .fetch_one(self.pool())
+        .await?;
+        Ok(result)
+    }
+    /// Find the most recent pending token for a given email address.
+    pub async fn find_pending_by_email(
+        &self,
+        email: &str,
+    ) -> Result<Option<EmailVerificationToken>> {
+        let sql = format!(
+            "SELECT * FROM {TABLE_NAME} \
+             WHERE email = $1 AND status = 'pending' \
+             ORDER BY (metadata->>'created_at')::timestamptz DESC \
+             LIMIT 1"
+        );
+        let result = sqlx::query_as::<_, EmailVerificationToken>(&sql)
+        .bind(email)
+        .fetch_optional(self.pool())
+        .await?;
+        Ok(result)
+    }
+    /// Update the status of a specific token.
+    pub async fn update_token_status(&self, token_id: Uuid, status: &str) -> Result<()> {
+        let sql = format!("UPDATE {TABLE_NAME} SET status = $2 WHERE id = $1");
+        sqlx::query(&sql)
+        .bind(token_id)
+        .bind(status)
+        .execute(self.pool())
+        .await?;
+        Ok(())
+    }
+    /// Increment the verification attempt counter for a token and return the new value.
+    pub async fn increment_attempts(&self, token_id: Uuid) -> Result<i32> {
+        let sql = format!(
+            "UPDATE {TABLE_NAME} \
+             SET attempts = attempts + 1 \
+             WHERE id = $1 \
+             RETURNING attempts"
+        );
+        let row: (i32,) = sqlx::query_as(&sql)
+        .bind(token_id)
+        .fetch_one(self.pool())
+        .await?;
+        Ok(row.0)
+    }
+    /// Return the expiry time of the most recent pending token for a user.
+    pub async fn latest_pending_expires_at(
+        &self,
+        user_id: Uuid,
+    ) -> Result<Option<DateTime<Utc>>> {
+        let sql = format!(
+            "SELECT expires_at FROM {TABLE_NAME} \
+             WHERE user_id = $1 AND status = 'pending' \
+             ORDER BY (metadata->>'created_at')::timestamptz DESC \
+             LIMIT 1"
+        );
+        let row: Option<(DateTime<Utc>,)> = sqlx::query_as(&sql)
+        .bind(user_id)
+        .fetch_optional(self.pool())
+        .await?;
+        Ok(row.map(|(t,)| t))
+    }
+    /// Revoke all pending tokens for a given user.
+    pub async fn revoke_pending_for_user(&self, user_id: Uuid) -> Result<()> {
+        let sql = format!(
+            "UPDATE {TABLE_NAME} SET status = 'revoked' \
+             WHERE user_id = $1 AND status = 'pending'"
+        );
+        sqlx::query(&sql)
+        .bind(user_id)
+        .execute(self.pool())
+        .await?;
+        Ok(())
+    }
+}
