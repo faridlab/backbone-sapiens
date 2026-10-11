@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.5] - 2026-10-11
+
+### Added
+
+- 2 role checks (data exports and impersonation) and 2 delete guards (a permission or role still
+  granted to a role or a user) check writes in shadow. A role check asks the roles source the
+  composing service installs; a delete guard counts the rows still referencing the row on the
+  request's own connection. Requires backbone-core 3.6.
+
 ## [0.7.4] - 2026-10-11
 
 ### Added

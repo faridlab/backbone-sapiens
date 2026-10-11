@@ -55,6 +55,10 @@ impl backbone_core::write_guard::WriteGuard<DataExport> for DataExportRowRules {
         };
         let row = &row;
         let mut shadow = Vec::new();
+        // `user_can_request_own_data` (data_export.hook.yaml:71)
+        if (create) && !r::holds(&r::or(r::eq(r::field(row, "requested_by"), r::field(row, "user_id")), r::has_role(ctx.actor.as_deref(), "admin").await)) {
+            shadow.push(Violation::new("requested_by", "unauthorized_export", "Users can only export their own data"));
+        }
         // `admin_requires_justification` (data_export.hook.yaml:77)
         if (create) && !r::holds(&r::or(r::eq(r::field(row, "requested_by"), r::field(row, "user_id")), r::and(r::is_not_null(r::field(row, "justification")), r::ge(r::length(r::field(row, "justification")), r::Val::Num(20.0_f64))))) {
             shadow.push(Violation::new("requested_by", "justification_required", "Admins must provide justification (min 20 characters) when exporting another user's data"));

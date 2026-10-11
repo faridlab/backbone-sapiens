@@ -46,6 +46,17 @@ impl backbone_core::write_guard::WriteGuard<Permission> for PermissionRowRules {
         use backbone_core::row_rule as r;
         use backbone_core::violation::Violation;
         use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        if matches!(ctx.kind, WriteKind::Delete | WriteKind::HardDelete) {
+            let Some(Ok(old)) = ctx.before.map(serde_json::to_value) else {
+                return GuardOutcome::allow();
+            };
+            let mut shadow = Vec::new();
+            // `no_roles_on_delete` (permission.hook.yaml:30)
+            if !r::holds(&r::eq(r::referencing("SELECT count(*) FROM role_permissions WHERE \"permission_id\" = $1::uuid", r::field(&old, "id")).await, r::Val::Num(0.0_f64))) {
+                shadow.push(Violation::new("", "permission_has_roles", "Cannot delete permission that is assigned to roles"));
+            }
+            return GuardOutcome { refuse: Vec::new(), shadow };
+        }
         let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
         let Some(after) = ctx.after.filter(|_| create || update) else {
             return GuardOutcome::allow();

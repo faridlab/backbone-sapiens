@@ -67,6 +67,10 @@ impl backbone_core::write_guard::WriteGuard<ImpersonationSession> for Impersonat
         if (create) && !r::holds(&r::and(r::gt(r::field(row, "max_duration_minutes"), r::Val::Num(0.0_f64)), r::le(r::field(row, "max_duration_minutes"), r::Val::Num(480.0_f64)))) {
             shadow.push(Violation::new("max_duration_minutes", "invalid_duration", "Duration must be between 1 and 480 minutes (8 hours)"));
         }
+        // `admin_has_impersonate_role` (impersonation_session.hook.yaml:91)
+        if (create) && !r::holds(&r::or(r::has_role(ctx.actor.as_deref(), "admin").await, r::has_role(ctx.actor.as_deref(), "super_admin").await)) {
+            shadow.push(Violation::new("", "unauthorized_impersonation", "Only administrators can start impersonation sessions"));
+        }
         GuardOutcome { refuse: Vec::new(), shadow }
     }
 }
