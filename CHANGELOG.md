@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.7] - 2026-10-11
+
+### Fixed
+
+- The state-transition check triggers on session limits, notification preferences and password
+  reset tokens are dropped: their state fields are bools with named states, so the trigger warned
+  on every legitimate toggle.
+
 ## [0.7.6] - 2026-10-11
 
 ### Added
