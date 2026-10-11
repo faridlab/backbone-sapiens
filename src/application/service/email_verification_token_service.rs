@@ -59,6 +59,10 @@ impl backbone_core::write_guard::WriteGuard<EmailVerificationToken> for EmailVer
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "email")), r::matches(r::field(row, "email"), "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))) {
             shadow.push(Violation::new("email", "invalid_email", "Invalid email format"));
         }
+        // `valid_expiry` (email_verification.hook.yaml:80)
+        if (create) && !r::holds(&r::gt(r::field(row, "expires_at"), r::at(ctx.at))) {
+            shadow.push(Violation::new("expires_at", "invalid_expiry", "Expiry time must be in the future"));
+        }
         // `token_format` (email_verification.hook.yaml:86)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "token")), r::ge(r::length(r::field(row, "token")), r::Val::Num(32.0_f64)))) {
             shadow.push(Violation::new("token", "invalid_token", "Invalid token format"));

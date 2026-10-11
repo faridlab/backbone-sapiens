@@ -54,10 +54,15 @@ impl backbone_core::write_guard::WriteGuard<UserPermission> for UserPermissionRo
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
         // `reason_required` (user_permission.hook.yaml:43)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "reason")), r::ge(r::length(r::field(row, "reason")), r::Val::Num(10.0_f64)))) {
             shadow.push(Violation::new("reason", "reason_required", "Reason is required for direct permission grants (min 10 characters)"));
+        }
+        // `expires_in_future` (user_permission.hook.yaml:49)
+        if (create || (update && r::changed(old.as_ref(), row, &["expires_at"]))) && !r::holds(&r::or(r::is_null(r::field(row, "expires_at")), r::gt(r::field(row, "expires_at"), r::at(ctx.at)))) {
+            shadow.push(Violation::new("expires_at", "invalid_expiry", "Expiry date must be in the future"));
         }
         // `no_self_grant` (user_permission.hook.yaml:55)
         if (create) && !r::holds(&r::ne(r::field(row, "user_id"), r::field(row, "granted_by"))) {

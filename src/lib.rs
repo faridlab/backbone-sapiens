@@ -586,7 +586,7 @@ impl SapiensModuleBuilder {
 
         // PasswordResetToken service
         let password_reset_token_repository = Arc::new(PasswordResetTokenRepository::new(db_pool.clone()));
-        let password_reset_token_service = Arc::new(PasswordResetTokenService::with_repository(password_reset_token_repository.clone()));
+        let password_reset_token_service = Arc::new(PasswordResetTokenService::with_repository(password_reset_token_repository.clone()).with_guard(Arc::new(crate::application::service::password_reset_token_service::PasswordResetTokenRowRules)));
 
         // PasswordResetVerificationDetails service
         let password_reset_verification_details_repository = Arc::new(PasswordResetVerificationDetailsRepository::new(db_pool.clone()));

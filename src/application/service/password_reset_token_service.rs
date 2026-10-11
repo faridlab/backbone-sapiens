@@ -32,3 +32,40 @@ pub type PasswordResetTokenService = GenericCrudService<
     PasswordResetTokenRepository,
 >;
 
+/// The row rules the schema declares for PasswordResetToken, checked against the row a create or
+/// update would store. The generated build attaches it to [`PasswordResetTokenService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct PasswordResetTokenRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<PasswordResetToken> for PasswordResetTokenRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, PasswordResetToken>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let old_row = old.as_ref().unwrap_or(&serde_json::Value::Null);
+        let mut shadow = Vec::new();
+        // `expires_in_future` (password_reset_token.hook.yaml:43)
+        if (create) && !r::holds(&r::gt(r::field(row, "expires_at"), r::at(ctx.at))) {
+            shadow.push(Violation::new("expires_at", "invalid_expiry", "Token expiry must be in the future"));
+        }
+        // `no_modify_used` (password_reset_token.hook.yaml:62)
+        if (update) && !r::holds(&r::eq(r::field(old_row, "is_used"), r::Val::Bool(false))) {
+            shadow.push(Violation::new("is_used", "token_already_used", "Cannot modify used reset tokens"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

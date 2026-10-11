@@ -54,6 +54,7 @@ impl backbone_core::write_guard::WriteGuard<Profile> for ProfileRowRules {
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
         // `first_name_required` (profile.hook.yaml:16)
         if (create || update) && !r::holds(&r::and(r::is_not_null(r::field(row, "first_name")), r::ge(r::length(r::field(row, "first_name")), r::Val::Num(1.0_f64)))) {
@@ -70,6 +71,10 @@ impl backbone_core::write_guard::WriteGuard<Profile> for ProfileRowRules {
         // `valid_gender` (profile.hook.yaml:46)
         if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "gender")), r::in_list(r::field(row, "gender"), r::Val::List(vec![r::text("male"), r::text("female")])))) {
             shadow.push(Violation::new("gender", "invalid_gender", "Gender must be 'male' or 'female'"));
+        }
+        // `dob_in_past` (profile.hook.yaml:52)
+        if (create || (update && r::changed(old.as_ref(), row, &["dob"]))) && !r::holds(&r::or(r::is_null(r::field(row, "dob")), r::lt(r::field(row, "dob"), r::at(ctx.at)))) {
+            shadow.push(Violation::new("dob", "dob_in_future", "Date of birth must be in the past"));
         }
         GuardOutcome { refuse: Vec::new(), shadow }
     }
