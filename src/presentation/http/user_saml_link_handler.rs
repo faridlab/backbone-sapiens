@@ -240,8 +240,13 @@ pub async fn deactivate_transition(
     };
     {
         let allowed_roles = UserSAMLLinkTransition::Deactivate.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "user_saml_link:transition:deactivate");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "user_saml_link:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("user_saml_link:transition:deactivate");
+        let has_update_perm = granted("user_saml_link:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {
@@ -299,8 +304,13 @@ pub async fn reactivate_transition(
     };
     {
         let allowed_roles = UserSAMLLinkTransition::Reactivate.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "user_saml_link:transition:reactivate");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "user_saml_link:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("user_saml_link:transition:reactivate");
+        let has_update_perm = granted("user_saml_link:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {

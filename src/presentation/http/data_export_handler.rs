@@ -240,8 +240,13 @@ pub async fn start_processing_transition(
     };
     {
         let allowed_roles = DataExportTransition::StartProcessing.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "data_export:transition:start_processing");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "data_export:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("data_export:transition:start_processing");
+        let has_update_perm = granted("data_export:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {
@@ -298,8 +303,13 @@ pub async fn complete_transition(
     };
     {
         let allowed_roles = DataExportTransition::Complete.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "data_export:transition:complete");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "data_export:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("data_export:transition:complete");
+        let has_update_perm = granted("data_export:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {
@@ -356,8 +366,13 @@ pub async fn fail_transition(
     };
     {
         let allowed_roles = DataExportTransition::Fail.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "data_export:transition:fail");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "data_export:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("data_export:transition:fail");
+        let has_update_perm = granted("data_export:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {
@@ -414,8 +429,13 @@ pub async fn expire_transition(
     };
     {
         let allowed_roles = DataExportTransition::Expire.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "data_export:transition:expire");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "data_export:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("data_export:transition:expire");
+        let has_update_perm = granted("data_export:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {

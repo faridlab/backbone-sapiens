@@ -244,8 +244,13 @@ pub async fn verify_transition(
     };
     {
         let allowed_roles = UserTransition::Verify.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "user:transition:verify");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("user:transition:verify");
+        let has_update_perm = granted("user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {
@@ -303,8 +308,13 @@ pub async fn activate_transition(
     };
     {
         let allowed_roles = UserTransition::Activate.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "user:transition:activate");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("user:transition:activate");
+        let has_update_perm = granted("user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {
@@ -361,8 +371,13 @@ pub async fn deactivate_transition(
     };
     {
         let allowed_roles = UserTransition::Deactivate.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "user:transition:deactivate");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("user:transition:deactivate");
+        let has_update_perm = granted("user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {
@@ -420,8 +435,13 @@ pub async fn reactivate_transition(
     };
     {
         let allowed_roles = UserTransition::Reactivate.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "user:transition:reactivate");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("user:transition:reactivate");
+        let has_update_perm = granted("user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {
@@ -478,8 +498,13 @@ pub async fn suspend_transition(
     };
     {
         let allowed_roles = UserTransition::Suspend.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "user:transition:suspend");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("user:transition:suspend");
+        let has_update_perm = granted("user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {

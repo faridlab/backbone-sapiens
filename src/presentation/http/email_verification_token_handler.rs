@@ -240,8 +240,13 @@ pub async fn verify_transition(
     };
     {
         let allowed_roles = EmailVerificationTokenTransition::Verify.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "email_verification_token:transition:verify");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "email_verification_token:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("email_verification_token:transition:verify");
+        let has_update_perm = granted("email_verification_token:update");
         let _ = &allowed_roles;
         if !has_specific_perm {
             if !has_update_perm {
@@ -299,8 +304,13 @@ pub async fn expire_transition(
     };
     {
         let allowed_roles = EmailVerificationTokenTransition::Expire.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "email_verification_token:transition:expire");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "email_verification_token:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("email_verification_token:transition:expire");
+        let has_update_perm = granted("email_verification_token:update");
         let _ = &allowed_roles;
         if !has_specific_perm {
             if !has_update_perm {
@@ -358,8 +368,13 @@ pub async fn revoke_transition(
     };
     {
         let allowed_roles = EmailVerificationTokenTransition::Revoke.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "email_verification_token:transition:revoke");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "email_verification_token:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("email_verification_token:transition:revoke");
+        let has_update_perm = granted("email_verification_token:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {

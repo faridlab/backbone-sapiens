@@ -240,8 +240,13 @@ pub async fn end_transition(
     };
     {
         let allowed_roles = ImpersonationSessionTransition::End.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "impersonation_session:transition:end");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "impersonation_session:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("impersonation_session:transition:end");
+        let has_update_perm = granted("impersonation_session:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {
@@ -299,8 +304,13 @@ pub async fn auto_expire_transition(
     };
     {
         let allowed_roles = ImpersonationSessionTransition::AutoExpire.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "impersonation_session:transition:auto_expire");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "impersonation_session:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("impersonation_session:transition:auto_expire");
+        let has_update_perm = granted("impersonation_session:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {
@@ -358,8 +368,13 @@ pub async fn terminate_transition(
     };
     {
         let allowed_roles = ImpersonationSessionTransition::Terminate.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "impersonation_session:transition:terminate");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "impersonation_session:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("impersonation_session:transition:terminate");
+        let has_update_perm = granted("impersonation_session:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {
@@ -416,8 +431,13 @@ pub async fn force_terminate_transition(
     };
     {
         let allowed_roles = ImpersonationSessionTransition::ForceTerminate.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "impersonation_session:transition:force_terminate");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "impersonation_session:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("impersonation_session:transition:force_terminate");
+        let has_update_perm = granted("impersonation_session:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {

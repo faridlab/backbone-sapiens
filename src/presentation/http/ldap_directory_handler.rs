@@ -256,8 +256,13 @@ pub async fn activate_transition(
     };
     {
         let allowed_roles = LDAPDirectoryTransition::Activate.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "ldap_directory:transition:activate");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "ldap_directory:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("ldap_directory:transition:activate");
+        let has_update_perm = granted("ldap_directory:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {
@@ -315,8 +320,13 @@ pub async fn deactivate_transition(
     };
     {
         let allowed_roles = LDAPDirectoryTransition::Deactivate.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "ldap_directory:transition:deactivate");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "ldap_directory:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("ldap_directory:transition:deactivate");
+        let has_update_perm = granted("ldap_directory:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {
@@ -373,8 +383,13 @@ pub async fn report_error_transition(
     };
     {
         let allowed_roles = LDAPDirectoryTransition::ReportError.allowed_roles();
-        let has_specific_perm = auth.permissions.iter().any(|p| p == "ldap_directory:transition:report_error");
-        let has_update_perm = auth.permissions.iter().any(|p| p == "ldap_directory:update");
+        let granted = |required: &str| auth.permissions.iter().any(|p| {
+            let (have, want): (Vec<&str>, Vec<&str>) = (p.split(':').collect(), required.split(':').collect());
+            have.iter().enumerate().all(|(i, h)| *h == "*" || want.get(i) == Some(h))
+                && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
+        });
+        let has_specific_perm = granted("ldap_directory:transition:report_error");
+        let has_update_perm = granted("ldap_directory:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
             if !has_update_perm {
