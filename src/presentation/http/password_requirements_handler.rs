@@ -186,3 +186,4 @@ pub fn create_protected_password_requirements_routes<A: AuthMiddleware + Send + 
             }
         }))
 }
+

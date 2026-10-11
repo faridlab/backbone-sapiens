@@ -22,7 +22,6 @@ pub fn workflow_validator() -> WorkflowValidator {
         .rule(NonNegative::new("retry_count", |e: &Workflow| e.retry_count as i64))
         .rule(NonNegative::new("max_retries", |e: &Workflow| e.max_retries as i64))
         .rule(OptionalNotBlank::new("error_message", |e: &Workflow| e.error_message.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: valid_workflow_type (implement in CUSTOM zone)
     // hook rule: valid_trigger_type (implement in CUSTOM zone)
     // hook rule: valid_status_transition (implement in CUSTOM zone)
@@ -32,8 +31,5 @@ pub fn workflow_validator() -> WorkflowValidator {
     // hook rule: valid_step_sequence (implement in CUSTOM zone)
     // hook rule: valid_action_order (implement in CUSTOM zone)
     // hook rule: valid_schedule (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

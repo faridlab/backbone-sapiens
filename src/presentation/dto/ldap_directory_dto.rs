@@ -445,7 +445,7 @@ impl backbone_core::ApplyUpdateDto<UpdateLDAPDirectoryDto> for LDAPDirectory {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to LDAPDirectory here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

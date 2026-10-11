@@ -32,5 +32,3 @@ pub type SecurityEventService = GenericCrudService<
     SecurityEventRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

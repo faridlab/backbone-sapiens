@@ -211,3 +211,4 @@ pub fn create_protected_permission_routes<A: AuthMiddleware + Send + Sync + 'sta
             }
         }))
 }
+

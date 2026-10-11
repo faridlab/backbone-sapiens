@@ -17,14 +17,10 @@ pub fn user_saml_link_validator() -> UserSAMLLinkValidator {
     EntityValidator::new()
         .rule(RequiredString::new("name_id", |e: &UserSAMLLink| &e.name_id))
         .rule(OptionalNotBlank::new("session_index", |e: &UserSAMLLink| e.session_index.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: unique_user_provider (implement in CUSTOM zone)
     // hook rule: unique_saml_user (implement in CUSTOM zone)
     // hook rule: saml_user_id_required (implement in CUSTOM zone)
     // hook rule: provider_required (implement in CUSTOM zone)
     // hook rule: provider_must_be_active (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

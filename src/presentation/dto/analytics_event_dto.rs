@@ -343,7 +343,7 @@ impl backbone_core::ApplyUpdateDto<UpdateAnalyticsEventDto> for AnalyticsEvent {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to AnalyticsEvent here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

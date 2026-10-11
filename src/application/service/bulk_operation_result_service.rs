@@ -32,5 +32,3 @@ pub type BulkOperationResultService = GenericCrudService<
     BulkOperationResultRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

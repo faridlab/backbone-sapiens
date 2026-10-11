@@ -186,3 +186,4 @@ pub fn create_protected_password_creation_context_routes<A: AuthMiddleware + Sen
             }
         }))
 }
+

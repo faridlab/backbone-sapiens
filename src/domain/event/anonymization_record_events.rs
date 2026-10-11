@@ -11,8 +11,6 @@ use crate::domain::entity::AnonymizationRecord;
 /// enum containing a `Crud(CrudEvent<AnonymizationRecord>)` variant.
 pub type AnonymizationRecordEvent = CrudEvent<AnonymizationRecord>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

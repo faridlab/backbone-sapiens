@@ -11,8 +11,6 @@ use crate::domain::entity::BulkOperationResult;
 /// enum containing a `Crud(CrudEvent<BulkOperationResult>)` variant.
 pub type BulkOperationResultEvent = CrudEvent<BulkOperationResult>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

@@ -321,3 +321,4 @@ pub fn create_security_event_transition_routes(service: Arc<SecurityEventService
         .route("/security_events/:id/transitions/auto_resolve", post(auto_resolve_transition))
         .with_state(service)
 }
+

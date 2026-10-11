@@ -32,5 +32,3 @@ pub type LDAPDirectoryService = GenericCrudService<
     LDAPDirectoryRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

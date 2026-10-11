@@ -14,7 +14,6 @@ pub struct PermissionDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<Permission> for PermissionDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &Permission) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<Permission> for PermissionDomainPolicy {
     //         Err("locked permission cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

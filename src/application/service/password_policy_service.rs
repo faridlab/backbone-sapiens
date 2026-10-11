@@ -32,5 +32,3 @@ pub type PasswordPolicyService = GenericCrudService<
     PasswordPolicyRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

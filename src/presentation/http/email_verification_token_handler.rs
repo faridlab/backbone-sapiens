@@ -379,3 +379,4 @@ pub fn create_email_verification_token_transition_routes(service: Arc<EmailVerif
         .route("/email_verification_tokens/:id/transitions/revoke", post(revoke_transition))
         .with_state(service)
 }
+

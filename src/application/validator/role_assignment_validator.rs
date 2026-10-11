@@ -19,9 +19,5 @@ pub fn role_assignment_validator() -> RoleAssignmentValidator {
         .rule(NonNegative::new("priority", |e: &RoleAssignment| e.priority as i64))
         .rule(NonNegative::new("usage_count", |e: &RoleAssignment| e.usage_count as i64))
         .rule(NonNegative::new("renewal_period_days", |e: &RoleAssignment| e.renewal_period_days as i64))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

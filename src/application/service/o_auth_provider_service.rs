@@ -32,5 +32,3 @@ pub type OAuthProviderService = GenericCrudService<
     OAuthProviderRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

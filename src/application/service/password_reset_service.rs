@@ -32,5 +32,3 @@ pub type PasswordResetService = GenericCrudService<
     PasswordResetRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

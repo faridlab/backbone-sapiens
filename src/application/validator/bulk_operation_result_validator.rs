@@ -18,9 +18,5 @@ pub fn bulk_operation_result_validator() -> BulkOperationResultValidator {
         .rule(RequiredString::new("record_type", |e: &BulkOperationResult| &e.record_type))
         .rule(OptionalNotBlank::new("error_message", |e: &BulkOperationResult| e.error_message.as_deref()))
         .rule(OptionalNotBlank::new("warning_message", |e: &BulkOperationResult| e.warning_message.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

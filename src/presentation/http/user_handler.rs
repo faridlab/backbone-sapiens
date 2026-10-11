@@ -489,3 +489,4 @@ pub fn create_user_transition_routes(service: Arc<UserService>) -> Router {
         .route("/users/:id/transitions/suspend", post(suspend_transition))
         .with_state(service)
 }
+

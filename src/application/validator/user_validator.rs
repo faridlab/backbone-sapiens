@@ -19,7 +19,6 @@ pub fn user_validator() -> UserValidator {
         .rule(RequiredString::new("email", |e: &User| &e.email))
         .rule(RequiredString::new("password_hash", |e: &User| &e.password_hash))
         .rule(NonNegative::new("failed_login_attempts", |e: &User| e.failed_login_attempts as i64))
-    // <<< CUSTOM RULES
     // hook rule: username_format (implement in CUSTOM zone)
     // hook rule: username_lowercase_check (implement in CUSTOM zone)
     // hook rule: unique_email (implement in CUSTOM zone)
@@ -27,8 +26,5 @@ pub fn user_validator() -> UserValidator {
     // hook rule: password_strength (implement in CUSTOM zone)
     // hook rule: account_not_locked (implement in CUSTOM zone)
     // hook rule: max_failed_attempts (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

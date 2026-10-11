@@ -14,7 +14,6 @@ pub struct BackupCodeDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<BackupCode> for BackupCodeDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &BackupCode) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<BackupCode> for BackupCodeDomainPolicy {
     //         Err("locked backup_code cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

@@ -18,5 +18,3 @@ use crate::domain::entity::PasswordHistorySettings;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type PasswordHistorySettingsDomainPolicy = PermitAllPolicy<PasswordHistorySettings>;
 
-// <<< CUSTOM
-// END CUSTOM

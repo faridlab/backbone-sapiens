@@ -19,9 +19,5 @@ pub fn workflow_step_validator() -> WorkflowStepValidator {
         .rule(OptionalNotBlank::new("description", |e: &WorkflowStep| e.description.as_deref()))
         .rule(OptionalNotBlank::new("error_message", |e: &WorkflowStep| e.error_message.as_deref()))
         .rule(NonNegative::new("retry_count", |e: &WorkflowStep| e.retry_count as i64))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

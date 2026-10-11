@@ -16,9 +16,5 @@ pub type EffectivePermissionCacheValidator = EntityValidator<EffectivePermission
 pub fn effective_permission_cache_validator() -> EffectivePermissionCacheValidator {
     EntityValidator::new()
         .rule(RequiredString::new("permission_key", |e: &EffectivePermissionCache| &e.permission_key))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

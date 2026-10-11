@@ -11,8 +11,6 @@ use crate::domain::entity::DirectPermissionGrant;
 /// enum containing a `Crud(CrudEvent<DirectPermissionGrant>)` variant.
 pub type DirectPermissionGrantEvent = CrudEvent<DirectPermissionGrant>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

@@ -295,7 +295,7 @@ impl backbone_core::ApplyUpdateDto<UpdatePasswordHistoryDto> for PasswordHistory
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to PasswordHistory here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

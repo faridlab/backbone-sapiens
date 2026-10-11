@@ -32,5 +32,3 @@ pub type OrganizationUserService = GenericCrudService<
     OrganizationUserRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

@@ -14,7 +14,6 @@ pub struct DataExportDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<DataExport> for DataExportDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &DataExport) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<DataExport> for DataExportDomainPolicy {
     //         Err("locked data_export cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

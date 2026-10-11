@@ -14,7 +14,6 @@ pub struct RoleDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<Role> for RoleDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &Role) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<Role> for RoleDomainPolicy {
     //         Err("locked role cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

@@ -11,8 +11,6 @@ use crate::domain::entity::UserOAuthLink;
 /// enum containing a `Crud(CrudEvent<UserOAuthLink>)` variant.
 pub type UserOAuthLinkEvent = CrudEvent<UserOAuthLink>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

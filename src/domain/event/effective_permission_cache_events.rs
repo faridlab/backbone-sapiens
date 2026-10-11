@@ -11,8 +11,6 @@ use crate::domain::entity::EffectivePermissionCache;
 /// enum containing a `Crud(CrudEvent<EffectivePermissionCache>)` variant.
 pub type EffectivePermissionCacheEvent = CrudEvent<EffectivePermissionCache>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

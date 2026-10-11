@@ -397,3 +397,4 @@ pub fn create_ldap_directory_transition_routes(service: Arc<LDAPDirectoryService
         .route("/ldap_directories/:id/transitions/report_error", post(report_error_transition))
         .with_state(service)
 }
+

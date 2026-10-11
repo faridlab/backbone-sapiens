@@ -19,14 +19,10 @@ pub fn user_permission_validator() -> UserPermissionValidator {
         .rule(OptionalNotBlank::new("resource_id", |e: &UserPermission| e.resource_id.as_deref()))
         .rule(OptionalNotBlank::new("resource_type", |e: &UserPermission| e.resource_type.as_deref()))
         .rule(OptionalNotBlank::new("revoked_reason", |e: &UserPermission| e.revoked_reason.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: reason_required (implement in CUSTOM zone)
     // hook rule: expires_in_future (implement in CUSTOM zone)
     // hook rule: no_self_grant (implement in CUSTOM zone)
     // hook rule: no_duplicate_grant (implement in CUSTOM zone)
     // hook rule: resource_scope_consistency (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

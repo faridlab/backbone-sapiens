@@ -18,5 +18,3 @@ use crate::domain::entity::BulkOperation;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type BulkOperationDomainPolicy = PermitAllPolicy<BulkOperation>;
 
-// <<< CUSTOM
-// END CUSTOM

@@ -339,7 +339,7 @@ impl backbone_core::ApplyUpdateDto<UpdateAnonymizationRecordDto> for Anonymizati
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to AnonymizationRecord here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

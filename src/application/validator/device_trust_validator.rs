@@ -18,15 +18,11 @@ pub fn device_trust_validator() -> DeviceTrustValidator {
         .rule(RequiredString::new("device_fingerprint", |e: &DeviceTrust| &e.device_fingerprint))
         .rule(RequiredString::new("device_name", |e: &DeviceTrust| &e.device_name))
         .rule(NonNegative::new("usage_count", |e: &DeviceTrust| e.usage_count as i64))
-    // <<< CUSTOM RULES
     // hook rule: unique_device_per_user (implement in CUSTOM zone)
     // hook rule: unique_device_name_per_user (implement in CUSTOM zone)
     // hook rule: valid_risk_score (implement in CUSTOM zone)
     // hook rule: valid_trust_level (implement in CUSTOM zone)
     // hook rule: valid_device_type (implement in CUSTOM zone)
     // hook rule: reasonable_expiry (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

@@ -32,5 +32,3 @@ pub type RoleAssignmentService = GenericCrudService<
     RoleAssignmentRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

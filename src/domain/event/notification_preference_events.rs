@@ -11,8 +11,6 @@ use crate::domain::entity::NotificationPreference;
 /// enum containing a `Crud(CrudEvent<NotificationPreference>)` variant.
 pub type NotificationPreferenceEvent = CrudEvent<NotificationPreference>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

@@ -18,5 +18,3 @@ use crate::domain::entity::OrganizationUser;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type OrganizationUserDomainPolicy = PermitAllPolicy<OrganizationUser>;
 
-// <<< CUSTOM
-// END CUSTOM

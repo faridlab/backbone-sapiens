@@ -32,5 +32,3 @@ pub type PasswordResetVerificationDetailsService = GenericCrudService<
     PasswordResetVerificationDetailsRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

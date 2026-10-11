@@ -11,8 +11,6 @@ use crate::domain::entity::WorkflowAction;
 /// enum containing a `Crud(CrudEvent<WorkflowAction>)` variant.
 pub type WorkflowActionEvent = CrudEvent<WorkflowAction>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

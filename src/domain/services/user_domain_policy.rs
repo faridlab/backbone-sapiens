@@ -14,7 +14,6 @@ pub struct UserDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<User> for UserDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &User) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<User> for UserDomainPolicy {
     //         Err("locked user cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

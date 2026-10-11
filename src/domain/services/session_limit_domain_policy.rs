@@ -14,7 +14,6 @@ pub struct SessionLimitDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<SessionLimit> for SessionLimitDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &SessionLimit) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<SessionLimit> for SessionLimitDomainPolicy {
     //         Err("locked session_limit cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

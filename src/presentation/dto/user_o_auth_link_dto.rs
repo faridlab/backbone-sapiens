@@ -372,7 +372,7 @@ impl backbone_core::ApplyUpdateDto<UpdateUserOAuthLinkDto> for UserOAuthLink {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to UserOAuthLink here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

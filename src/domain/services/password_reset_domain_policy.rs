@@ -18,5 +18,3 @@ use crate::domain::entity::PasswordReset;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type PasswordResetDomainPolicy = PermitAllPolicy<PasswordReset>;
 
-// <<< CUSTOM
-// END CUSTOM

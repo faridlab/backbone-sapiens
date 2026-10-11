@@ -17,9 +17,5 @@ pub fn password_creation_context_validator() -> PasswordCreationContextValidator
     EntityValidator::new()
         .rule(OptionalNotBlank::new("user_agent", |e: &PasswordCreationContext| e.user_agent.as_deref()))
         .rule(OptionalNotBlank::new("reason", |e: &PasswordCreationContext| e.reason.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

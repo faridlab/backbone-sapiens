@@ -11,8 +11,6 @@ use crate::domain::entity::PasswordExpirationSettings;
 /// enum containing a `Crud(CrudEvent<PasswordExpirationSettings>)` variant.
 pub type PasswordExpirationSettingsEvent = CrudEvent<PasswordExpirationSettings>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

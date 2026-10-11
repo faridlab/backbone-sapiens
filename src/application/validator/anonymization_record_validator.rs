@@ -18,9 +18,5 @@ pub fn anonymization_record_validator() -> AnonymizationRecordValidator {
         .rule(RequiredString::new("original_email", |e: &AnonymizationRecord| &e.original_email))
         .rule(RequiredString::new("original_username", |e: &AnonymizationRecord| &e.original_username))
         .rule(RequiredString::new("reason", |e: &AnonymizationRecord| &e.reason))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

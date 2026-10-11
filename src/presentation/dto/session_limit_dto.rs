@@ -296,7 +296,7 @@ impl backbone_core::ApplyUpdateDto<UpdateSessionLimitDto> for SessionLimit {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to SessionLimit here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

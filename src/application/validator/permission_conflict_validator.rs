@@ -17,9 +17,5 @@ pub fn permission_conflict_validator() -> PermissionConflictValidator {
     EntityValidator::new()
         .rule(RequiredString::new("conflict_type", |e: &PermissionConflict| &e.conflict_type))
         .rule(OptionalNotBlank::new("description", |e: &PermissionConflict| e.description.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

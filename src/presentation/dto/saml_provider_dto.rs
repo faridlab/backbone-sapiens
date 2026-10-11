@@ -376,7 +376,7 @@ impl backbone_core::ApplyUpdateDto<UpdateSAMLProviderDto> for SAMLProvider {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to SAMLProvider here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

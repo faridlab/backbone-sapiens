@@ -187,3 +187,4 @@ pub fn create_protected_organization_permission_routes<A: AuthMiddleware + Send 
             }
         }))
 }
+

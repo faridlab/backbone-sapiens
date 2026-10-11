@@ -354,7 +354,7 @@ impl backbone_core::ApplyUpdateDto<UpdateSecurityEventDto> for SecurityEvent {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to SecurityEvent here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

@@ -186,3 +186,4 @@ pub fn create_protected_password_history_settings_routes<A: AuthMiddleware + Sen
             }
         }))
 }
+

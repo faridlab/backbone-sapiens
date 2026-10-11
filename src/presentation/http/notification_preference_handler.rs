@@ -320,3 +320,4 @@ pub fn create_notification_preference_transition_routes(service: Arc<Notificatio
         .route("/notification_preferences/:id/transitions/disable", post(disable_transition))
         .with_state(service)
 }
+

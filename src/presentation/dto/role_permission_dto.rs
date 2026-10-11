@@ -253,7 +253,7 @@ impl backbone_core::ApplyUpdateDto<UpdateRolePermissionDto> for RolePermission {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to RolePermission here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

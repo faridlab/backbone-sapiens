@@ -32,5 +32,3 @@ pub type DirectPermissionGrantService = GenericCrudService<
     DirectPermissionGrantRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

@@ -32,5 +32,3 @@ pub type MFASessionService = GenericCrudService<
     MFASessionRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

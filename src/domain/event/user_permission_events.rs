@@ -11,8 +11,6 @@ use crate::domain::entity::UserPermission;
 /// enum containing a `Crud(CrudEvent<UserPermission>)` variant.
 pub type UserPermissionEvent = CrudEvent<UserPermission>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

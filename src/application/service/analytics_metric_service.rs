@@ -32,5 +32,3 @@ pub type AnalyticsMetricService = GenericCrudService<
     AnalyticsMetricRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

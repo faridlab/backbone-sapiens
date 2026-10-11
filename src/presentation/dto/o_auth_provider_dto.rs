@@ -359,7 +359,7 @@ impl backbone_core::ApplyUpdateDto<UpdateOAuthProviderDto> for OAuthProvider {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to OAuthProvider here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

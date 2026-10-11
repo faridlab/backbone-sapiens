@@ -18,9 +18,5 @@ pub fn password_reset_verification_details_validator() -> PasswordResetVerificat
         .rule(NonNegative::new("verification_attempts", |e: &PasswordResetVerificationDetails| e.verification_attempts as i64))
         .rule(OptionalNotBlank::new("verification_method", |e: &PasswordResetVerificationDetails| e.verification_method.as_deref()))
         .rule(OptionalNotBlank::new("device_fingerprint", |e: &PasswordResetVerificationDetails| e.device_fingerprint.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

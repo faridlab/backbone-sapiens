@@ -11,8 +11,6 @@ use crate::domain::entity::PasswordResetSecurity;
 /// enum containing a `Crud(CrudEvent<PasswordResetSecurity>)` variant.
 pub type PasswordResetSecurityEvent = CrudEvent<PasswordResetSecurity>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

@@ -212,3 +212,4 @@ pub fn create_protected_analytics_event_routes<A: AuthMiddleware + Send + Sync +
             }
         }))
 }
+

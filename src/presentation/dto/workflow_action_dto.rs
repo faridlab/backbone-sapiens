@@ -330,7 +330,7 @@ impl backbone_core::ApplyUpdateDto<UpdateWorkflowActionDto> for WorkflowAction {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to WorkflowAction here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

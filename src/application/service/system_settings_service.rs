@@ -32,5 +32,3 @@ pub type SystemSettingsService = GenericCrudService<
     SystemSettingsRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

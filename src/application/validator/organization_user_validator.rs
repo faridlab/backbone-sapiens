@@ -14,10 +14,6 @@ pub type OrganizationUserValidator = EntityValidator<OrganizationUser>;
 /// Build a validator for OrganizationUser with all schema-defined field rules.
 pub fn organization_user_validator() -> OrganizationUserValidator {
     EntityValidator::new()
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
         // No schema-derived rules — add custom rules above.
 }
 
-// <<< CUSTOM
-// END CUSTOM

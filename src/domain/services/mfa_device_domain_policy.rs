@@ -14,7 +14,6 @@ pub struct MFADeviceDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<MFADevice> for MFADeviceDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &MFADevice) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<MFADevice> for MFADeviceDomainPolicy {
     //         Err("locked mfa_device cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

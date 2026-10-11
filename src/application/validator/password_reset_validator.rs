@@ -23,9 +23,5 @@ pub fn password_reset_validator() -> PasswordResetValidator {
         .rule(OptionalNotBlank::new("device_fingerprint", |e: &PasswordReset| e.device_fingerprint.as_deref()))
         .rule(OptionalNotBlank::new("ip_address", |e: &PasswordReset| e.ip_address.as_deref()))
         .rule(OptionalNotBlank::new("user_agent", |e: &PasswordReset| e.user_agent.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

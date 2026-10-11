@@ -32,5 +32,3 @@ pub type ImpersonationSessionService = GenericCrudService<
     ImpersonationSessionRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

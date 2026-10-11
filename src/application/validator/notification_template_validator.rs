@@ -19,9 +19,5 @@ pub fn notification_template_validator() -> NotificationTemplateValidator {
         .rule(OptionalNotBlank::new("subject_template", |e: &NotificationTemplate| e.subject_template.as_deref()))
         .rule(RequiredString::new("message_template", |e: &NotificationTemplate| &e.message_template))
         .rule(RequiredString::new("language", |e: &NotificationTemplate| &e.language))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

@@ -274,7 +274,7 @@ impl backbone_core::ApplyUpdateDto<UpdatePasswordCreationContextDto> for Passwor
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to PasswordCreationContext here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

@@ -330,7 +330,7 @@ impl backbone_core::ApplyUpdateDto<UpdateUserSettingsDto> for UserSettings {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to UserSettings here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

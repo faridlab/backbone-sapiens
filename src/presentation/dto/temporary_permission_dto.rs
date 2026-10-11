@@ -344,7 +344,7 @@ impl backbone_core::ApplyUpdateDto<UpdateTemporaryPermissionDto> for TemporaryPe
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to TemporaryPermission here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

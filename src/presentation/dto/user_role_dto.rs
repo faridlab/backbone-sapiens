@@ -264,7 +264,7 @@ impl backbone_core::ApplyUpdateDto<UpdateUserRoleDto> for UserRole {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to UserRole here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

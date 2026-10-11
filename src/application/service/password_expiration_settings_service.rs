@@ -32,5 +32,3 @@ pub type PasswordExpirationSettingsService = GenericCrudService<
     PasswordExpirationSettingsRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

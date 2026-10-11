@@ -18,13 +18,9 @@ pub fn session_validator() -> SessionValidator {
         .rule(RequiredString::new("token_hash", |e: &Session| &e.token_hash))
         .rule(OptionalNotBlank::new("user_agent", |e: &Session| e.user_agent.as_deref()))
         .rule(OptionalNotBlank::new("device_fingerprint", |e: &Session| e.device_fingerprint.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: unique_token_hash (implement in CUSTOM zone)
     // hook rule: expires_in_future (implement in CUSTOM zone)
     // hook rule: expiry_after_creation (implement in CUSTOM zone)
     // hook rule: no_modify_revoked (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

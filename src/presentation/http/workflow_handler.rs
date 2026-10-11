@@ -228,3 +228,4 @@ pub fn create_protected_workflow_routes<A: AuthMiddleware + Send + Sync + 'stati
             }
         }))
 }
+

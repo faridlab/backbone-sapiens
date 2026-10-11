@@ -14,7 +14,6 @@ pub struct OAuthProviderDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<OAuthProvider> for OAuthProviderDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &OAuthProvider) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<OAuthProvider> for OAuthProviderDomainPolicy {
     //         Err("locked o_auth_provider cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

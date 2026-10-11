@@ -17,12 +17,8 @@ pub fn session_limit_validator() -> SessionLimitValidator {
     EntityValidator::new()
         .rule(NonNegative::new("max_sessions", |e: &SessionLimit| e.max_sessions as i64))
         .rule(NonNegative::new("current_session_count", |e: &SessionLimit| e.current_session_count as i64))
-    // <<< CUSTOM RULES
     // hook rule: max_sessions_positive (implement in CUSTOM zone)
     // hook rule: max_sessions_reasonable (implement in CUSTOM zone)
     // hook rule: per_device_within_limit (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

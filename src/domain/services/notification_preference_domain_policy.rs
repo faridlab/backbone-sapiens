@@ -14,7 +14,6 @@ pub struct NotificationPreferenceDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<NotificationPreference> for NotificationPreferenceDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &NotificationPreference) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<NotificationPreference> for NotificationPreferenceDomainPolicy
     //         Err("locked notification_preference cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

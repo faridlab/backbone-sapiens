@@ -20,15 +20,11 @@ pub fn user_o_auth_link_validator() -> UserOAuthLinkValidator {
         .rule(OptionalNotBlank::new("provider_username", |e: &UserOAuthLink| e.provider_username.as_deref()))
         .rule(OptionalNotBlank::new("access_token", |e: &UserOAuthLink| e.access_token.as_deref()))
         .rule(OptionalNotBlank::new("refresh_token", |e: &UserOAuthLink| e.refresh_token.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: unique_provider_link (implement in CUSTOM zone)
     // hook rule: unique_provider_user (implement in CUSTOM zone)
     // hook rule: valid_provider_user_id (implement in CUSTOM zone)
     // hook rule: valid_provider_email (implement in CUSTOM zone)
     // hook rule: primary_link_limit (implement in CUSTOM zone)
     // hook rule: sync_policy_compliance (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

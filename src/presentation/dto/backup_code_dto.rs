@@ -337,7 +337,7 @@ impl backbone_core::ApplyUpdateDto<UpdateBackupCodeDto> for BackupCode {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to BackupCode here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

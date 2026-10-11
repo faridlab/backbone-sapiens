@@ -32,5 +32,3 @@ pub type EmailVerificationTokenService = GenericCrudService<
     EmailVerificationTokenRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

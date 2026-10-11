@@ -32,5 +32,3 @@ pub type NotificationLogService = GenericCrudService<
     NotificationLogRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

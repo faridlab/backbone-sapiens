@@ -243,8 +243,6 @@ impl EmailVerificationToken {
         }
     }
 
-    // <<< CUSTOM METHODS START >>>
-    // <<< CUSTOM METHODS END >>>
 }
 
 impl super::Entity for EmailVerificationToken {

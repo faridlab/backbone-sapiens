@@ -18,9 +18,5 @@ pub fn organization_permission_validator() -> OrganizationPermissionValidator {
         .rule(OptionalNotBlank::new("permission_name", |e: &OrganizationPermission| e.permission_name.as_deref()))
         .rule(OptionalNotBlank::new("resource_type", |e: &OrganizationPermission| e.resource_type.as_deref()))
         .rule(OptionalNotBlank::new("reason", |e: &OrganizationPermission| e.reason.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

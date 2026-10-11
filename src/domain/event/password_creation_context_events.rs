@@ -11,8 +11,6 @@ use crate::domain::entity::PasswordCreationContext;
 /// enum containing a `Crud(CrudEvent<PasswordCreationContext>)` variant.
 pub type PasswordCreationContextEvent = CrudEvent<PasswordCreationContext>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

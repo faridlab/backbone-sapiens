@@ -11,8 +11,6 @@ use crate::domain::entity::DataExport;
 /// enum containing a `Crud(CrudEvent<DataExport>)` variant.
 pub type DataExportEvent = CrudEvent<DataExport>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

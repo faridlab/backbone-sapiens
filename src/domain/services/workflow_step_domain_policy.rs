@@ -18,5 +18,3 @@ use crate::domain::entity::WorkflowStep;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type WorkflowStepDomainPolicy = PermitAllPolicy<WorkflowStep>;
 
-// <<< CUSTOM
-// END CUSTOM

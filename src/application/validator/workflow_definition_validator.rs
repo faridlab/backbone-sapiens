@@ -18,9 +18,5 @@ pub fn workflow_definition_validator() -> WorkflowDefinitionValidator {
         .rule(RequiredString::new("name", |e: &WorkflowDefinition| &e.name))
         .rule(OptionalNotBlank::new("description", |e: &WorkflowDefinition| e.description.as_deref()))
         .rule(NonNegative::new("max_retries", |e: &WorkflowDefinition| e.max_retries as i64))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

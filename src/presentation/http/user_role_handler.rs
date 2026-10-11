@@ -187,3 +187,4 @@ pub fn create_protected_user_role_routes<A: AuthMiddleware + Send + Sync + 'stat
             }
         }))
 }
+

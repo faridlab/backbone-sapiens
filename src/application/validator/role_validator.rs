@@ -17,14 +17,10 @@ pub fn role_validator() -> RoleValidator {
     EntityValidator::new()
         .rule(RequiredString::new("name", |e: &Role| &e.name))
         .rule(OptionalNotBlank::new("description", |e: &Role| e.description.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: name_uppercase (implement in CUSTOM zone)
     // hook rule: unique_name (implement in CUSTOM zone)
     // hook rule: single_default_role (implement in CUSTOM zone)
     // hook rule: no_users_on_delete (implement in CUSTOM zone)
     // hook rule: reserved_names (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

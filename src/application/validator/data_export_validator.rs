@@ -18,14 +18,10 @@ pub fn data_export_validator() -> DataExportValidator {
         .rule(OptionalNotBlank::new("file_path", |e: &DataExport| e.file_path.as_deref()))
         .rule(OptionalNotBlank::new("file_url", |e: &DataExport| e.file_url.as_deref()))
         .rule(OptionalNotBlank::new("justification", |e: &DataExport| e.justification.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: user_can_request_own_data (implement in CUSTOM zone)
     // hook rule: admin_requires_justification (implement in CUSTOM zone)
     // hook rule: export_format_valid (implement in CUSTOM zone)
     // hook rule: expires_after_completion (implement in CUSTOM zone)
     // hook rule: max_retention_30_days (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

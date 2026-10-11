@@ -32,5 +32,3 @@ pub type PermissionConflictService = GenericCrudService<
     PermissionConflictRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

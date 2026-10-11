@@ -216,3 +216,4 @@ pub fn create_protected_device_trust_routes<A: AuthMiddleware + Send + Sync + 's
             }
         }))
 }
+

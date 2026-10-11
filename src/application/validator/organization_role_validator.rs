@@ -17,9 +17,5 @@ pub fn organization_role_validator() -> OrganizationRoleValidator {
     EntityValidator::new()
         .rule(RequiredString::new("name", |e: &OrganizationRole| &e.name))
         .rule(OptionalNotBlank::new("description", |e: &OrganizationRole| e.description.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

@@ -14,7 +14,6 @@ pub struct SessionDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<Session> for SessionDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &Session) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<Session> for SessionDomainPolicy {
     //         Err("locked session cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

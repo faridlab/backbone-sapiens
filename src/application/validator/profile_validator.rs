@@ -20,7 +20,6 @@ pub fn profile_validator() -> ProfileValidator {
         .rule(OptionalNotBlank::new("last_name", |e: &Profile| e.last_name.as_deref()))
         .rule(OptionalNotBlank::new("pob", |e: &Profile| e.pob.as_deref()))
         .rule(OptionalNotBlank::new("profile_picture_url", |e: &Profile| e.profile_picture_url.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: first_name_required (implement in CUSTOM zone)
     // hook rule: phone_number_format (implement in CUSTOM zone)
     // hook rule: profile_picture_url_valid (implement in CUSTOM zone)
@@ -29,8 +28,5 @@ pub fn profile_validator() -> ProfileValidator {
     // hook rule: valid_gender (implement in CUSTOM zone)
     // hook rule: dob_in_past (implement in CUSTOM zone)
     // hook rule: reasonable_age (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

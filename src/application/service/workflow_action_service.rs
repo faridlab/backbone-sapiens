@@ -32,5 +32,3 @@ pub type WorkflowActionService = GenericCrudService<
     WorkflowActionRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

@@ -32,5 +32,3 @@ pub type DataExportService = GenericCrudService<
     DataExportRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

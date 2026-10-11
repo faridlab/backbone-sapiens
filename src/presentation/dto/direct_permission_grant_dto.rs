@@ -398,7 +398,7 @@ impl backbone_core::ApplyUpdateDto<UpdateDirectPermissionGrantDto> for DirectPer
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to DirectPermissionGrant here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

@@ -18,5 +18,3 @@ use crate::domain::entity::PasswordRequirements;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type PasswordRequirementsDomainPolicy = PermitAllPolicy<PasswordRequirements>;
 
-// <<< CUSTOM
-// END CUSTOM

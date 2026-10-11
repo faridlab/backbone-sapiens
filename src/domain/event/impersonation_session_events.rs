@@ -11,8 +11,6 @@ use crate::domain::entity::ImpersonationSession;
 /// enum containing a `Crud(CrudEvent<ImpersonationSession>)` variant.
 pub type ImpersonationSessionEvent = CrudEvent<ImpersonationSession>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

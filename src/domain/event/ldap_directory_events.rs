@@ -11,8 +11,6 @@ use crate::domain::entity::LDAPDirectory;
 /// enum containing a `Crud(CrudEvent<LDAPDirectory>)` variant.
 pub type LDAPDirectoryEvent = CrudEvent<LDAPDirectory>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

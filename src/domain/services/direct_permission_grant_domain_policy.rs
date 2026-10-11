@@ -18,5 +18,3 @@ use crate::domain::entity::DirectPermissionGrant;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type DirectPermissionGrantDomainPolicy = PermitAllPolicy<DirectPermissionGrant>;
 
-// <<< CUSTOM
-// END CUSTOM

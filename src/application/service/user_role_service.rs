@@ -32,5 +32,3 @@ pub type UserRoleService = GenericCrudService<
     UserRoleRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

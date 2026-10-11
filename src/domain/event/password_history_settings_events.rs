@@ -11,8 +11,6 @@ use crate::domain::entity::PasswordHistorySettings;
 /// enum containing a `Crud(CrudEvent<PasswordHistorySettings>)` variant.
 pub type PasswordHistorySettingsEvent = CrudEvent<PasswordHistorySettings>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

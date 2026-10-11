@@ -19,14 +19,10 @@ pub fn impersonation_session_validator() -> ImpersonationSessionValidator {
         .rule(RequiredString::new("reason", |e: &ImpersonationSession| &e.reason))
         .rule(NonNegative::new("actions_performed", |e: &ImpersonationSession| e.actions_performed as i64))
         .rule(OptionalNotBlank::new("termination_reason", |e: &ImpersonationSession| e.termination_reason.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: cannot_impersonate_self (implement in CUSTOM zone)
     // hook rule: reason_required (implement in CUSTOM zone)
     // hook rule: max_duration_reasonable (implement in CUSTOM zone)
     // hook rule: admin_has_impersonate_role (implement in CUSTOM zone)
     // hook rule: max_concurrent_sessions (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

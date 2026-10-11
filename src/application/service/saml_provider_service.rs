@@ -32,5 +32,3 @@ pub type SAMLProviderService = GenericCrudService<
     SAMLProviderRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

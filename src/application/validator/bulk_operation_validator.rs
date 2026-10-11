@@ -24,9 +24,5 @@ pub fn bulk_operation_validator() -> BulkOperationValidator {
         .rule(OptionalNotBlank::new("error_file_path", |e: &BulkOperation| e.error_file_path.as_deref()))
         .rule(OptionalNotBlank::new("error_message", |e: &BulkOperation| e.error_message.as_deref()))
         .rule(NonNegative::new("retry_count", |e: &BulkOperation| e.retry_count as i64))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

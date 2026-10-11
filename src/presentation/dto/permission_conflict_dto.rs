@@ -288,7 +288,7 @@ impl backbone_core::ApplyUpdateDto<UpdatePermissionConflictDto> for PermissionCo
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to PermissionConflict here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

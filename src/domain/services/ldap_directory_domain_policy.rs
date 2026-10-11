@@ -14,7 +14,6 @@ pub struct LDAPDirectoryDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<LDAPDirectory> for LDAPDirectoryDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &LDAPDirectory) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<LDAPDirectory> for LDAPDirectoryDomainPolicy {
     //         Err("locked ldap_directory cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

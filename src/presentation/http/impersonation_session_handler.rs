@@ -433,3 +433,4 @@ pub fn create_impersonation_session_transition_routes(service: Arc<Impersonation
         .route("/impersonation_sessions/:id/transitions/force_terminate", post(force_terminate_transition))
         .with_state(service)
 }
+

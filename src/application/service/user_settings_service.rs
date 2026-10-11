@@ -32,5 +32,3 @@ pub type UserSettingsService = GenericCrudService<
     UserSettingsRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

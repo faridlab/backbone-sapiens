@@ -18,5 +18,3 @@ use crate::domain::entity::MFABackupCode;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type MFABackupCodeDomainPolicy = PermitAllPolicy<MFABackupCode>;
 
-// <<< CUSTOM
-// END CUSTOM

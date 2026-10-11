@@ -377,3 +377,4 @@ pub fn create_temporary_permission_transition_routes(service: Arc<TemporaryPermi
         .route("/temporary_permissions/:id/transitions/auto_expire", post(auto_expire_transition))
         .with_state(service)
 }
+

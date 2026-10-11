@@ -351,7 +351,7 @@ impl backbone_core::ApplyUpdateDto<UpdateNotificationPreferenceDto> for Notifica
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to NotificationPreference here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

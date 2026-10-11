@@ -17,9 +17,5 @@ pub fn analytics_metric_validator() -> AnalyticsMetricValidator {
     EntityValidator::new()
         .rule(RequiredString::new("metric_name", |e: &AnalyticsMetric| &e.metric_name))
         .rule(OptionalNotBlank::new("unit", |e: &AnalyticsMetric| e.unit.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

@@ -14,7 +14,6 @@ pub struct PasswordResetTokenDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<PasswordResetToken> for PasswordResetTokenDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &PasswordResetToken) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<PasswordResetToken> for PasswordResetTokenDomainPolicy {
     //         Err("locked password_reset_token cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

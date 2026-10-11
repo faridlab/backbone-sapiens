@@ -18,9 +18,5 @@ pub fn direct_permission_grant_validator() -> DirectPermissionGrantValidator {
         .rule(OptionalNotBlank::new("reason", |e: &DirectPermissionGrant| e.reason.as_deref()))
         .rule(NonNegative::new("usage_count", |e: &DirectPermissionGrant| e.usage_count as i64))
         .rule(OptionalNotBlank::new("revocation_reason", |e: &DirectPermissionGrant| e.revocation_reason.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

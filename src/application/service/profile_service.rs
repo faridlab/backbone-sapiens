@@ -32,5 +32,3 @@ pub type ProfileService = GenericCrudService<
     ProfileRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

@@ -14,7 +14,6 @@ pub struct AnalyticsEventDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<AnalyticsEvent> for AnalyticsEventDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &AnalyticsEvent) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<AnalyticsEvent> for AnalyticsEventDomainPolicy {
     //         Err("locked analytics_event cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

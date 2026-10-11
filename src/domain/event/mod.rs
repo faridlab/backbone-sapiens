@@ -244,5 +244,3 @@ pub use workflow_execution_event_handlers::WorkflowExecutionEventHandler;
 pub use workflow_action_execution_events::{WorkflowActionExecutionEvent, WorkflowActionExecutionEventPublisher, NoopWorkflowActionExecutionEventPublisher};
 pub use workflow_action_execution_event_handlers::WorkflowActionExecutionEventHandler;
 
-// <<< CUSTOM
-// END CUSTOM

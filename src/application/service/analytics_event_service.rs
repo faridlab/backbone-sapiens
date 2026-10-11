@@ -32,5 +32,3 @@ pub type AnalyticsEventService = GenericCrudService<
     AnalyticsEventRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

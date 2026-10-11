@@ -18,9 +18,5 @@ pub fn password_reset_security_validator() -> PasswordResetSecurityValidator {
         .rule(NonNegative::new("max_attempts", |e: &PasswordResetSecurity| e.max_attempts as i64))
         .rule(NonNegative::new("attempts_remaining", |e: &PasswordResetSecurity| e.attempts_remaining as i64))
         .rule(NonNegative::new("risk_score", |e: &PasswordResetSecurity| e.risk_score as i64))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

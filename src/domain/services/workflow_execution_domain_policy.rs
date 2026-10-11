@@ -18,5 +18,3 @@ use crate::domain::entity::WorkflowExecution;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type WorkflowExecutionDomainPolicy = PermitAllPolicy<WorkflowExecution>;
 
-// <<< CUSTOM
-// END CUSTOM

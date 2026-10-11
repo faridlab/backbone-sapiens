@@ -334,7 +334,7 @@ impl backbone_core::ApplyUpdateDto<UpdateUserSAMLLinkDto> for UserSAMLLink {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to UserSAMLLink here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

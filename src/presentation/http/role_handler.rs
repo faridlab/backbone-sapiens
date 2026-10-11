@@ -211,3 +211,4 @@ pub fn create_protected_role_routes<A: AuthMiddleware + Send + Sync + 'static>(
             }
         }))
 }
+

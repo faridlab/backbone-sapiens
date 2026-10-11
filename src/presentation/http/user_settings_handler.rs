@@ -186,3 +186,4 @@ pub fn create_protected_user_settings_routes<A: AuthMiddleware + Send + Sync + '
             }
         }))
 }
+

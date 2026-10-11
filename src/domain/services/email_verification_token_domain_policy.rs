@@ -14,7 +14,6 @@ pub struct EmailVerificationTokenDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<EmailVerificationToken> for EmailVerificationTokenDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &EmailVerificationToken) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<EmailVerificationToken> for EmailVerificationTokenDomainPolicy
     //         Err("locked email_verification_token cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

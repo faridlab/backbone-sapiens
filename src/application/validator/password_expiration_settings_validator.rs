@@ -18,9 +18,5 @@ pub fn password_expiration_settings_validator() -> PasswordExpirationSettingsVal
         .rule(NonNegative::new("max_age_days", |e: &PasswordExpirationSettings| e.max_age_days as i64))
         .rule(NonNegative::new("warning_days", |e: &PasswordExpirationSettings| e.warning_days as i64))
         .rule(NonNegative::new("grace_logins", |e: &PasswordExpirationSettings| e.grace_logins as i64))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

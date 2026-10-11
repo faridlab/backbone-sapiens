@@ -16,9 +16,5 @@ pub type PasswordHistoryValidator = EntityValidator<PasswordHistory>;
 pub fn password_history_validator() -> PasswordHistoryValidator {
     EntityValidator::new()
         .rule(RequiredString::new("password_hash", |e: &PasswordHistory| &e.password_hash))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

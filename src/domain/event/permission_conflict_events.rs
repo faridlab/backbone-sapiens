@@ -11,8 +11,6 @@ use crate::domain::entity::PermissionConflict;
 /// enum containing a `Crud(CrudEvent<PermissionConflict>)` variant.
 pub type PermissionConflictEvent = CrudEvent<PermissionConflict>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

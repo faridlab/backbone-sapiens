@@ -14,7 +14,6 @@ pub struct SecurityEventDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<SecurityEvent> for SecurityEventDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &SecurityEvent) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<SecurityEvent> for SecurityEventDomainPolicy {
     //         Err("locked security_event cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

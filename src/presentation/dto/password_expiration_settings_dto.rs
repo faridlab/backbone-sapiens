@@ -262,7 +262,7 @@ impl backbone_core::ApplyUpdateDto<UpdatePasswordExpirationSettingsDto> for Pass
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to PasswordExpirationSettings here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

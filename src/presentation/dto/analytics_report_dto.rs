@@ -360,7 +360,7 @@ impl backbone_core::ApplyUpdateDto<UpdateAnalyticsReportDto> for AnalyticsReport
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to AnalyticsReport here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

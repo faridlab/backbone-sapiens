@@ -32,5 +32,3 @@ pub type AnalyticsReportService = GenericCrudService<
     AnalyticsReportRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

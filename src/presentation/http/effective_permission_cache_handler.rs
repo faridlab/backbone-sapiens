@@ -186,3 +186,4 @@ pub fn create_protected_effective_permission_cache_routes<A: AuthMiddleware + Se
             }
         }))
 }
+

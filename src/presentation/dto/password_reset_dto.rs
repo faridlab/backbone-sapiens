@@ -444,7 +444,7 @@ impl backbone_core::ApplyUpdateDto<UpdatePasswordResetDto> for PasswordReset {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to PasswordReset here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

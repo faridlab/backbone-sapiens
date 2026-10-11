@@ -20,14 +20,10 @@ pub fn email_verification_token_validator() -> EmailVerificationTokenValidator {
         .rule(OptionalNotBlank::new("old_email", |e: &EmailVerificationToken| e.old_email.as_deref()))
         .rule(NonNegative::new("attempts", |e: &EmailVerificationToken| e.attempts as i64))
         .rule(OptionalNotBlank::new("user_agent", |e: &EmailVerificationToken| e.user_agent.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: unique_pending_token (implement in CUSTOM zone)
     // hook rule: valid_email (implement in CUSTOM zone)
     // hook rule: valid_expiry (implement in CUSTOM zone)
     // hook rule: token_format (implement in CUSTOM zone)
     // hook rule: token_type_valid (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

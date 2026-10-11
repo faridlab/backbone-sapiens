@@ -32,5 +32,3 @@ pub type OrganizationRoleService = GenericCrudService<
     OrganizationRoleRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

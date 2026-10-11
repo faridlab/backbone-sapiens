@@ -19,12 +19,8 @@ pub fn notification_preference_validator() -> NotificationPreferenceValidator {
         .rule(OptionalNotBlank::new("quiet_hours_start", |e: &NotificationPreference| e.quiet_hours_start.as_deref()))
         .rule(OptionalNotBlank::new("quiet_hours_end", |e: &NotificationPreference| e.quiet_hours_end.as_deref()))
         .rule(RequiredString::new("quiet_timezone", |e: &NotificationPreference| &e.quiet_timezone))
-    // <<< CUSTOM RULES
     // hook rule: digest_frequency_valid (implement in CUSTOM zone)
     // hook rule: at_least_one_channel_enabled (implement in CUSTOM zone)
     // hook rule: timezone_valid (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

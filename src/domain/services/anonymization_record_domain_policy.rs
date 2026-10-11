@@ -18,5 +18,3 @@ use crate::domain::entity::AnonymizationRecord;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type AnonymizationRecordDomainPolicy = PermitAllPolicy<AnonymizationRecord>;
 
-// <<< CUSTOM
-// END CUSTOM

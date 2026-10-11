@@ -11,8 +11,6 @@ use crate::domain::entity::SAMLProvider;
 /// enum containing a `Crud(CrudEvent<SAMLProvider>)` variant.
 pub type SAMLProviderEvent = CrudEvent<SAMLProvider>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

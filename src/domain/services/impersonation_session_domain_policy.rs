@@ -14,7 +14,6 @@ pub struct ImpersonationSessionDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<ImpersonationSession> for ImpersonationSessionDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &ImpersonationSession) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<ImpersonationSession> for ImpersonationSessionDomainPolicy {
     //         Err("locked impersonation_session cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

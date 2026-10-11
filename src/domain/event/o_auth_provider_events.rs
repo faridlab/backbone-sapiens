@@ -11,8 +11,6 @@ use crate::domain::entity::OAuthProvider;
 /// enum containing a `Crud(CrudEvent<OAuthProvider>)` variant.
 pub type OAuthProviderEvent = CrudEvent<OAuthProvider>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

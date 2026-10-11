@@ -36,14 +36,10 @@ pub fn mfa_device_validator() -> MFADeviceValidator {
         .rule(NonNegative::new("failed_verifications", |e: &MFADevice| e.failed_verifications as i64))
         .rule(OptionalNotBlank::new("lock_reason", |e: &MFADevice| e.lock_reason.as_deref()))
         .rule(NonNegative::new("risk_score", |e: &MFADevice| e.risk_score as i64))
-    // <<< CUSTOM RULES
     // hook rule: device_name_required (implement in CUSTOM zone)
     // hook rule: unique_device_name (implement in CUSTOM zone)
     // hook rule: single_active_totp (implement in CUSTOM zone)
     // hook rule: max_devices (implement in CUSTOM zone)
     // hook rule: secret_required (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

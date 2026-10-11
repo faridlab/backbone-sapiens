@@ -22,13 +22,9 @@ pub fn o_auth_provider_validator() -> OAuthProviderValidator {
         .rule(RequiredString::new("authorization_url", |e: &OAuthProvider| &e.authorization_url))
         .rule(RequiredString::new("token_url", |e: &OAuthProvider| &e.token_url))
         .rule(RequiredString::new("user_info_url", |e: &OAuthProvider| &e.user_info_url))
-    // <<< CUSTOM RULES
     // hook rule: unique_provider (implement in CUSTOM zone)
     // hook rule: valid_configuration (implement in CUSTOM zone)
     // hook rule: valid_redirect_uri (implement in CUSTOM zone)
     // hook rule: scopes_not_empty (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

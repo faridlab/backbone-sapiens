@@ -32,5 +32,3 @@ pub type EffectivePermissionCacheService = GenericCrudService<
     EffectivePermissionCacheRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

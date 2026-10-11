@@ -14,7 +14,6 @@ pub struct UserSAMLLinkDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<UserSAMLLink> for UserSAMLLinkDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &UserSAMLLink) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<UserSAMLLink> for UserSAMLLinkDomainPolicy {
     //         Err("locked user_saml_link cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

@@ -314,7 +314,7 @@ impl backbone_core::ApplyUpdateDto<UpdatePasswordResetSecurityDto> for PasswordR
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to PasswordResetSecurity here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

@@ -18,5 +18,3 @@ use crate::domain::entity::AnalyticsMetric;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type AnalyticsMetricDomainPolicy = PermitAllPolicy<AnalyticsMetric>;
 
-// <<< CUSTOM
-// END CUSTOM

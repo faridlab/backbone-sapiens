@@ -861,7 +861,7 @@ impl backbone_core::ApplyUpdateDto<UpdateMFASessionDto> for MFASession {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to MFASession here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

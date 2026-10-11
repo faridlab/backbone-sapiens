@@ -18,5 +18,3 @@ use crate::domain::entity::RolePermission;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type RolePermissionDomainPolicy = PermitAllPolicy<RolePermission>;
 
-// <<< CUSTOM
-// END CUSTOM

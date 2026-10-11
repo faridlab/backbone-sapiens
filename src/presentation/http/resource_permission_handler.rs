@@ -333,3 +333,4 @@ pub fn create_resource_permission_transition_routes(service: Arc<ResourcePermiss
         .route("/resource_permissions/:id/transitions/revoke", post(revoke_transition))
         .with_state(service)
 }
+

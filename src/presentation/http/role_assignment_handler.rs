@@ -187,3 +187,4 @@ pub fn create_protected_role_assignment_routes<A: AuthMiddleware + Send + Sync +
             }
         }))
 }
+

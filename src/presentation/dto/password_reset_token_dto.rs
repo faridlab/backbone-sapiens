@@ -283,7 +283,7 @@ impl backbone_core::ApplyUpdateDto<UpdatePasswordResetTokenDto> for PasswordRese
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to PasswordResetToken here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

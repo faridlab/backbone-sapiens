@@ -285,7 +285,7 @@ impl backbone_core::ApplyUpdateDto<UpdateOrganizationUserDto> for OrganizationUs
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to OrganizationUser here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

@@ -20,15 +20,11 @@ pub fn notification_validator() -> NotificationValidator {
         .rule(OptionalNotBlank::new("action_url", |e: &Notification| e.action_url.as_deref()))
         .rule(OptionalNotBlank::new("action_text", |e: &Notification| e.action_text.as_deref()))
         .rule(OptionalNotBlank::new("category", |e: &Notification| e.category.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: valid_notification_type (implement in CUSTOM zone)
     // hook rule: valid_channel (implement in CUSTOM zone)
     // hook rule: valid_priority (implement in CUSTOM zone)
     // hook rule: reasonable_expiry (implement in CUSTOM zone)
     // hook rule: valid_recipient_for_channel (implement in CUSTOM zone)
     // hook rule: template_has_required_placeholders (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

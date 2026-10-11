@@ -403,7 +403,7 @@ impl backbone_core::ApplyUpdateDto<UpdateDeviceTrustDto> for DeviceTrust {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to DeviceTrust here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

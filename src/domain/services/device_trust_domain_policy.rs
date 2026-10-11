@@ -14,7 +14,6 @@ pub struct DeviceTrustDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<DeviceTrust> for DeviceTrustDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &DeviceTrust) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<DeviceTrust> for DeviceTrustDomainPolicy {
     //         Err("locked device_trust cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

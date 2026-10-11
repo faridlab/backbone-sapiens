@@ -187,3 +187,4 @@ pub fn create_protected_direct_permission_grant_routes<A: AuthMiddleware + Send 
             }
         }))
 }
+

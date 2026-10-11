@@ -187,3 +187,4 @@ pub fn create_protected_notification_log_routes<A: AuthMiddleware + Send + Sync 
             }
         }))
 }
+

@@ -24,7 +24,6 @@ pub fn saml_provider_validator() -> SAMLProviderValidator {
         .rule(RequiredString::new("acs_url", |e: &SAMLProvider| &e.acs_url))
         .rule(OptionalNotBlank::new("sls_url", |e: &SAMLProvider| e.sls_url.as_deref()))
         .rule(RequiredString::new("name_id_format", |e: &SAMLProvider| &e.name_id_format))
-    // <<< CUSTOM RULES
     // hook rule: name_required (implement in CUSTOM zone)
     // hook rule: entity_id_required (implement in CUSTOM zone)
     // hook rule: sso_url_required (implement in CUSTOM zone)
@@ -33,8 +32,5 @@ pub fn saml_provider_validator() -> SAMLProviderValidator {
     // hook rule: certificate_valid_format (implement in CUSTOM zone)
     // hook rule: metadata_url_valid (implement in CUSTOM zone)
     // hook rule: name_id_format_valid (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

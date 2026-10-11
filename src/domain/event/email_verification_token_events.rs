@@ -11,8 +11,6 @@ use crate::domain::entity::EmailVerificationToken;
 /// enum containing a `Crud(CrudEvent<EmailVerificationToken>)` variant.
 pub type EmailVerificationTokenEvent = CrudEvent<EmailVerificationToken>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

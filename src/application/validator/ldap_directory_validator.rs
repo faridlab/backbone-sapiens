@@ -23,7 +23,6 @@ pub fn ldap_directory_validator() -> LDAPDirectoryValidator {
         .rule(RequiredString::new("bind_password", |e: &LDAPDirectory| &e.bind_password))
         .rule(RequiredString::new("search_base", |e: &LDAPDirectory| &e.search_base))
         .rule(RequiredString::new("search_filter", |e: &LDAPDirectory| &e.search_filter))
-    // <<< CUSTOM RULES
     // hook rule: name_required (implement in CUSTOM zone)
     // hook rule: host_required (implement in CUSTOM zone)
     // hook rule: port_valid (implement in CUSTOM zone)
@@ -33,8 +32,5 @@ pub fn ldap_directory_validator() -> LDAPDirectoryValidator {
     // hook rule: use_tls_or_ssl (implement in CUSTOM zone)
     // hook rule: sync_interval_positive (implement in CUSTOM zone)
     // hook rule: max_sync_interval (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

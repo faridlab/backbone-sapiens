@@ -18,5 +18,3 @@ use crate::domain::entity::MFASession;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type MFASessionDomainPolicy = PermitAllPolicy<MFASession>;
 
-// <<< CUSTOM
-// END CUSTOM

@@ -32,5 +32,3 @@ pub type MFABackupCodeService = GenericCrudService<
     MFABackupCodeRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

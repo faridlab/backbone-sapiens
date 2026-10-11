@@ -187,3 +187,4 @@ pub fn create_protected_password_reset_security_routes<A: AuthMiddleware + Send 
             }
         }))
 }
+

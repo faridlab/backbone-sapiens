@@ -11,8 +11,6 @@ use crate::domain::entity::SessionLimit;
 /// enum containing a `Crud(CrudEvent<SessionLimit>)` variant.
 pub type SessionLimitEvent = CrudEvent<SessionLimit>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

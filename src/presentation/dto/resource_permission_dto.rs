@@ -346,7 +346,7 @@ impl backbone_core::ApplyUpdateDto<UpdateResourcePermissionDto> for ResourcePerm
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to ResourcePermission here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

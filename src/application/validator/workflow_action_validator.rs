@@ -18,9 +18,5 @@ pub fn workflow_action_validator() -> WorkflowActionValidator {
         .rule(RequiredString::new("action_name", |e: &WorkflowAction| &e.action_name))
         .rule(OptionalNotBlank::new("description", |e: &WorkflowAction| e.description.as_deref()))
         .rule(NonNegative::new("step_order", |e: &WorkflowAction| e.step_order as i64))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

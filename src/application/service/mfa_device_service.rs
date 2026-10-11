@@ -32,5 +32,3 @@ pub type MFADeviceService = GenericCrudService<
     MFADeviceRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

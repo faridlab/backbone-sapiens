@@ -32,5 +32,3 @@ pub type PasswordRequirementsService = GenericCrudService<
     PasswordRequirementsRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

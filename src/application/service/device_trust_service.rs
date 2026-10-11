@@ -32,5 +32,3 @@ pub type DeviceTrustService = GenericCrudService<
     DeviceTrustRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

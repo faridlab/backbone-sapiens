@@ -17,9 +17,5 @@ pub fn system_settings_validator() -> SystemSettingsValidator {
     EntityValidator::new()
         .rule(RequiredString::new("key", |e: &SystemSettings| &e.key))
         .rule(OptionalNotBlank::new("description", |e: &SystemSettings| e.description.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

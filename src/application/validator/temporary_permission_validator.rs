@@ -16,13 +16,9 @@ pub type TemporaryPermissionValidator = EntityValidator<TemporaryPermission>;
 pub fn temporary_permission_validator() -> TemporaryPermissionValidator {
     EntityValidator::new()
         .rule(OptionalNotBlank::new("reason", |e: &TemporaryPermission| e.reason.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: expires_after_granted (implement in CUSTOM zone)
     // hook rule: max_duration_30_days (implement in CUSTOM zone)
     // hook rule: reason_required (implement in CUSTOM zone)
     // hook rule: cannot_modify_revoked (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

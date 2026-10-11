@@ -32,5 +32,3 @@ pub type AnonymizationRecordService = GenericCrudService<
     AnonymizationRecordRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

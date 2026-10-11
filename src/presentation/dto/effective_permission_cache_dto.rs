@@ -323,7 +323,7 @@ impl backbone_core::ApplyUpdateDto<UpdateEffectivePermissionCacheDto> for Effect
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to EffectivePermissionCache here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

@@ -18,9 +18,5 @@ pub fn workflow_execution_validator() -> WorkflowExecutionValidator {
         .rule(NonNegative::new("current_action", |e: &WorkflowExecution| e.current_action as i64))
         .rule(NonNegative::new("total_actions", |e: &WorkflowExecution| e.total_actions as i64))
         .rule(OptionalNotBlank::new("error_message", |e: &WorkflowExecution| e.error_message.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

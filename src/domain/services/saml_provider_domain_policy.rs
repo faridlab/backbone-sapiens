@@ -14,7 +14,6 @@ pub struct SAMLProviderDomainPolicy;
 
 #[async_trait]
 impl DomainPolicy<SAMLProvider> for SAMLProviderDomainPolicy {
-    // <<< CUSTOM
     // Add entity-specific invariant checks here.
     // Example:
     // async fn can_delete(&self, entity: &SAMLProvider) -> PolicyDecision {
@@ -22,5 +21,4 @@ impl DomainPolicy<SAMLProvider> for SAMLProviderDomainPolicy {
     //         Err("locked saml_provider cannot be deleted".into())
     //     } else { Ok(true) }
     // }
-    // END CUSTOM
 }

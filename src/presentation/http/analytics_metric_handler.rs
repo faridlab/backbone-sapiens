@@ -187,3 +187,4 @@ pub fn create_protected_analytics_metric_routes<A: AuthMiddleware + Send + Sync 
             }
         }))
 }
+

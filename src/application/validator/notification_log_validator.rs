@@ -18,9 +18,5 @@ pub fn notification_log_validator() -> NotificationLogValidator {
         .rule(RequiredString::new("recipient_type", |e: &NotificationLog| &e.recipient_type))
         .rule(OptionalNotBlank::new("error_message", |e: &NotificationLog| e.error_message.as_deref()))
         .rule(OptionalNotBlank::new("external_id", |e: &NotificationLog| e.external_id.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

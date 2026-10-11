@@ -11,8 +11,6 @@ use crate::domain::entity::PasswordRequirements;
 /// enum containing a `Crud(CrudEvent<PasswordRequirements>)` variant.
 pub type PasswordRequirementsEvent = CrudEvent<PasswordRequirements>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

@@ -363,7 +363,7 @@ impl backbone_core::ApplyUpdateDto<UpdateImpersonationSessionDto> for Impersonat
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to ImpersonationSession here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

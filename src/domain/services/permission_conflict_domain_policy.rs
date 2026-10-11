@@ -18,5 +18,3 @@ use crate::domain::entity::PermissionConflict;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type PermissionConflictDomainPolicy = PermitAllPolicy<PermissionConflict>;
 
-// <<< CUSTOM
-// END CUSTOM

@@ -340,3 +340,4 @@ pub fn create_saml_provider_transition_routes(service: Arc<SAMLProviderService>)
         .route("/saml_providers/:id/transitions/deactivate", post(deactivate_transition))
         .with_state(service)
 }
+

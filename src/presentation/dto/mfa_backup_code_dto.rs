@@ -792,7 +792,7 @@ impl backbone_core::ApplyUpdateDto<UpdateMFABackupCodeDto> for MFABackupCode {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to MFABackupCode here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

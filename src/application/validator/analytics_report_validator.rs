@@ -19,9 +19,5 @@ pub fn analytics_report_validator() -> AnalyticsReportValidator {
         .rule(OptionalNotBlank::new("description", |e: &AnalyticsReport| e.description.as_deref()))
         .rule(OptionalNotBlank::new("file_path", |e: &AnalyticsReport| e.file_path.as_deref()))
         .rule(NonNegative::new("download_count", |e: &AnalyticsReport| e.download_count as i64))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

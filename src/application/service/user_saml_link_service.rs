@@ -32,5 +32,3 @@ pub type UserSAMLLinkService = GenericCrudService<
     UserSAMLLinkRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

@@ -14,10 +14,6 @@ pub type UserRoleValidator = EntityValidator<UserRole>;
 /// Build a validator for UserRole with all schema-defined field rules.
 pub fn user_role_validator() -> UserRoleValidator {
     EntityValidator::new()
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
         // No schema-derived rules — add custom rules above.
 }
 
-// <<< CUSTOM
-// END CUSTOM

@@ -17,9 +17,5 @@ pub fn user_settings_validator() -> UserSettingsValidator {
     EntityValidator::new()
         .rule(RequiredString::new("language", |e: &UserSettings| &e.language))
         .rule(RequiredString::new("timezone", |e: &UserSettings| &e.timezone))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

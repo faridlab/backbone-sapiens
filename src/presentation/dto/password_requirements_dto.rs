@@ -352,7 +352,7 @@ impl backbone_core::ApplyUpdateDto<UpdatePasswordRequirementsDto> for PasswordRe
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to PasswordRequirements here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

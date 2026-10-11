@@ -11,8 +11,6 @@ use crate::domain::entity::MFASession;
 /// enum containing a `Crud(CrudEvent<MFASession>)` variant.
 pub type MFASessionEvent = CrudEvent<MFASession>;
 
-// <<< CUSTOM
-// END CUSTOM
 
 use backbone_messaging::{CrudEventPublisher, NoOpCrudEventPublisher};
 use std::sync::Arc;

@@ -187,3 +187,4 @@ pub fn create_protected_password_reset_verification_details_routes<A: AuthMiddle
             }
         }))
 }
+

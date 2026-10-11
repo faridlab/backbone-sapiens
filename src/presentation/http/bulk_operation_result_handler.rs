@@ -187,3 +187,4 @@ pub fn create_protected_bulk_operation_result_routes<A: AuthMiddleware + Send + 
             }
         }))
 }
+

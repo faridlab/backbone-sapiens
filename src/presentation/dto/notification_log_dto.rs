@@ -340,7 +340,7 @@ impl backbone_core::ApplyUpdateDto<UpdateNotificationLogDto> for NotificationLog
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to NotificationLog here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

@@ -18,14 +18,10 @@ pub fn analytics_event_validator() -> AnalyticsEventValidator {
         .rule(OptionalNotBlank::new("resource_type", |e: &AnalyticsEvent| e.resource_type.as_deref()))
         .rule(OptionalNotBlank::new("resource_id", |e: &AnalyticsEvent| e.resource_id.as_deref()))
         .rule(OptionalNotBlank::new("user_agent", |e: &AnalyticsEvent| e.user_agent.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: valid_event_type (implement in CUSTOM zone)
     // hook rule: valid_event_category (implement in CUSTOM zone)
     // hook rule: valid_metric_type (implement in CUSTOM zone)
     // hook rule: valid_aggregation_type (implement in CUSTOM zone)
     // hook rule: valid_date_range (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

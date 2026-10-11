@@ -32,5 +32,3 @@ pub type SessionService = GenericCrudService<
     SessionRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

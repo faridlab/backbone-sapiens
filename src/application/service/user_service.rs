@@ -32,5 +32,3 @@ pub type UserService = GenericCrudService<
     UserRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

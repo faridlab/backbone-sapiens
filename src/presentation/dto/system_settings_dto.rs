@@ -247,7 +247,7 @@ impl backbone_core::ApplyUpdateDto<UpdateSystemSettingsDto> for SystemSettings {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to SystemSettings here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

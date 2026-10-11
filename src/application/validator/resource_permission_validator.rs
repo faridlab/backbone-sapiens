@@ -18,15 +18,11 @@ pub fn resource_permission_validator() -> ResourcePermissionValidator {
         .rule(RequiredString::new("resource_type", |e: &ResourcePermission| &e.resource_type))
         .rule(RequiredString::new("resource_id", |e: &ResourcePermission| &e.resource_id))
         .rule(OptionalNotBlank::new("reason", |e: &ResourcePermission| e.reason.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: grant_to_user_or_role (implement in CUSTOM zone)
     // hook rule: resource_type_required (implement in CUSTOM zone)
     // hook rule: resource_id_required (implement in CUSTOM zone)
     // hook rule: expires_in_future (implement in CUSTOM zone)
     // hook rule: max_duration_by_type (implement in CUSTOM zone)
     // hook rule: no_duplicate_grants (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

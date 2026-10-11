@@ -338,7 +338,7 @@ impl backbone_core::ApplyUpdateDto<UpdateBulkOperationResultDto> for BulkOperati
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to BulkOperationResult here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

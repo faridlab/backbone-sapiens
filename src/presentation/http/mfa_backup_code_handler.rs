@@ -187,3 +187,4 @@ pub fn create_protected_mfa_backup_code_routes<A: AuthMiddleware + Send + Sync +
             }
         }))
 }
+

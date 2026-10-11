@@ -32,9 +32,5 @@ pub fn mfa_session_validator() -> MFASessionValidator {
         .rule(NonNegative::new("idle_timeout_minutes", |e: &MFASession| e.idle_timeout_minutes as i64))
         .rule(NonNegative::new("extension_count", |e: &MFASession| e.extension_count as i64))
         .rule(NonNegative::new("data_retention_hours", |e: &MFASession| e.data_retention_hours as i64))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

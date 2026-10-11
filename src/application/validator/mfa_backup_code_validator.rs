@@ -26,9 +26,5 @@ pub fn mfa_backup_code_validator() -> MFABackupCodeValidator {
         .rule(OptionalNotBlank::new("revocation_reason", |e: &MFABackupCode| e.revocation_reason.as_deref()))
         .rule(NonNegative::new("grace_period_hours", |e: &MFABackupCode| e.grace_period_hours as i64))
         .rule(NonNegative::new("data_retention_days", |e: &MFABackupCode| e.data_retention_days as i64))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

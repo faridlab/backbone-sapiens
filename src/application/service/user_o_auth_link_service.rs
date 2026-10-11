@@ -32,5 +32,3 @@ pub type UserOAuthLinkService = GenericCrudService<
     UserOAuthLinkRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

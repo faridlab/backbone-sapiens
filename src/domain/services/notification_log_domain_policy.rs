@@ -18,5 +18,3 @@ use crate::domain::entity::NotificationLog;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type NotificationLogDomainPolicy = PermitAllPolicy<NotificationLog>;
 
-// <<< CUSTOM
-// END CUSTOM

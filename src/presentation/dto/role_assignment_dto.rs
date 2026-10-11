@@ -523,7 +523,7 @@ impl backbone_core::ApplyUpdateDto<UpdateRoleAssignmentDto> for RoleAssignment {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to RoleAssignment here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

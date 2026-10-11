@@ -32,5 +32,3 @@ pub type TemporaryPermissionService = GenericCrudService<
     TemporaryPermissionRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

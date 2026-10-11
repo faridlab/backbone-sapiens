@@ -734,7 +734,7 @@ impl backbone_core::ApplyUpdateDto<UpdateMFADeviceDto> for MFADevice {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to MFADevice here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

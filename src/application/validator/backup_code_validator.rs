@@ -19,14 +19,10 @@ pub fn backup_code_validator() -> BackupCodeValidator {
         .rule(RequiredString::new("code_hash", |e: &BackupCode| &e.code_hash))
         .rule(NonNegative::new("code_index", |e: &BackupCode| e.code_index as i64))
         .rule(OptionalNotBlank::new("used_user_agent", |e: &BackupCode| e.used_user_agent.as_deref()))
-    // <<< CUSTOM RULES
     // hook rule: unique_active_codes (implement in CUSTOM zone)
     // hook rule: valid_code_index (implement in CUSTOM zone)
     // hook rule: sufficient_batch_size (implement in CUSTOM zone)
     // hook rule: valid_expiry (implement in CUSTOM zone)
     // hook rule: unique_code_hash (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

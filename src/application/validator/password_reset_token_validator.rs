@@ -16,14 +16,10 @@ pub type PasswordResetTokenValidator = EntityValidator<PasswordResetToken>;
 pub fn password_reset_token_validator() -> PasswordResetTokenValidator {
     EntityValidator::new()
         .rule(RequiredString::new("token_hash", |e: &PasswordResetToken| &e.token_hash))
-    // <<< CUSTOM RULES
     // hook rule: unique_token_hash (implement in CUSTOM zone)
     // hook rule: expires_in_future (implement in CUSTOM zone)
     // hook rule: max_active_tokens (implement in CUSTOM zone)
     // hook rule: rate_limit (implement in CUSTOM zone)
     // hook rule: no_modify_used (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

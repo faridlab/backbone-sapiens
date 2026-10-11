@@ -16,9 +16,5 @@ pub type PasswordPolicyValidator = EntityValidator<PasswordPolicy>;
 pub fn password_policy_validator() -> PasswordPolicyValidator {
     EntityValidator::new()
         .rule(RequiredString::new("name", |e: &PasswordPolicy| &e.name))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

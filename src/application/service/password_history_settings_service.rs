@@ -32,5 +32,3 @@ pub type PasswordHistorySettingsService = GenericCrudService<
     PasswordHistorySettingsRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

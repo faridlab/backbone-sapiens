@@ -32,5 +32,3 @@ pub type RolePermissionService = GenericCrudService<
     RolePermissionRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

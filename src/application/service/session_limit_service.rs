@@ -32,5 +32,3 @@ pub type SessionLimitService = GenericCrudService<
     SessionLimitRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

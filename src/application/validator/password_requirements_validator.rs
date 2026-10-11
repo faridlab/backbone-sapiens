@@ -18,9 +18,5 @@ pub fn password_requirements_validator() -> PasswordRequirementsValidator {
         .rule(NonNegative::new("min_length", |e: &PasswordRequirements| e.min_length as i64))
         .rule(NonNegative::new("max_length", |e: &PasswordRequirements| e.max_length as i64))
         .rule(NonNegative::new("min_entropy_bits", |e: &PasswordRequirements| e.min_entropy_bits as i64))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

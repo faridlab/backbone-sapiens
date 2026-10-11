@@ -32,5 +32,3 @@ pub type UserPermissionService = GenericCrudService<
     UserPermissionRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

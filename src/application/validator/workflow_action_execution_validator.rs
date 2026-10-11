@@ -18,9 +18,5 @@ pub fn workflow_action_execution_validator() -> WorkflowActionExecutionValidator
         .rule(NonNegative::new("action_order", |e: &WorkflowActionExecution| e.action_order as i64))
         .rule(OptionalNotBlank::new("error_message", |e: &WorkflowActionExecution| e.error_message.as_deref()))
         .rule(NonNegative::new("retry_count", |e: &WorkflowActionExecution| e.retry_count as i64))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

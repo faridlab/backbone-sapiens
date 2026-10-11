@@ -16,9 +16,5 @@ pub type PasswordHistorySettingsValidator = EntityValidator<PasswordHistorySetti
 pub fn password_history_settings_validator() -> PasswordHistorySettingsValidator {
     EntityValidator::new()
         .rule(NonNegative::new("history_count", |e: &PasswordHistorySettings| e.history_count as i64))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

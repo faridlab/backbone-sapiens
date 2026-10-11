@@ -124,5 +124,3 @@ pub use workflow_action_domain_policy::WorkflowActionDomainPolicy;
 pub use workflow_execution_domain_policy::WorkflowExecutionDomainPolicy;
 pub use workflow_action_execution_domain_policy::WorkflowActionExecutionDomainPolicy;
 
-// <<< CUSTOM
-// END CUSTOM

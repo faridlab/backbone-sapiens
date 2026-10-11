@@ -224,3 +224,4 @@ pub fn create_protected_profile_routes<A: AuthMiddleware + Send + Sync + 'static
             }
         }))
 }
+

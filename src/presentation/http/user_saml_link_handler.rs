@@ -329,3 +329,4 @@ pub fn create_user_saml_link_transition_routes(service: Arc<UserSAMLLinkService>
         .route("/user_saml_links/:id/transitions/reactivate", post(reactivate_transition))
         .with_state(service)
 }
+

@@ -22,14 +22,10 @@ pub fn permission_validator() -> PermissionValidator {
         .rule(Regex::new("resource", |e: &Permission| e.resource.as_str(), r"^[a-z_*]+$", "does not match required pattern"))
         .rule(RequiredString::new("action", |e: &Permission| &e.action))
         .rule(Regex::new("action", |e: &Permission| e.action.as_str(), r"^[a-z_]+$", "does not match required pattern"))
-    // <<< CUSTOM RULES
     // hook rule: name_format (implement in CUSTOM zone)
     // hook rule: unique_name (implement in CUSTOM zone)
     // hook rule: resource_matches_name (implement in CUSTOM zone)
     // hook rule: no_roles_on_delete (implement in CUSTOM zone)
     // hook rule: no_users_on_delete (implement in CUSTOM zone)
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM
