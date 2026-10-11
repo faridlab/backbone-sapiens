@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<EmailVerificationToken> for EmailVer
         let row = &row;
         let mut shadow = Vec::new();
         // `valid_email` (email_verification.hook.yaml:74)
-        if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "email")), r::matches(r::field(row, "email"), "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,}$"))) {
+        if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "email")), r::matches(r::field(row, "email"), "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))) {
             shadow.push(Violation::new("email", "invalid_email", "Invalid email format"));
         }
         // `token_format` (email_verification.hook.yaml:86)

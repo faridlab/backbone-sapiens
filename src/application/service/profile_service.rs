@@ -60,7 +60,7 @@ impl backbone_core::write_guard::WriteGuard<Profile> for ProfileRowRules {
             shadow.push(Violation::new("first_name", "first_name_required", "First name is required"));
         }
         // `phone_number_format` (profile.hook.yaml:22)
-        if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "phone_number")), r::matches(r::field(row, "phone_number"), "^+?[1-9]d{1,14}$"))) {
+        if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "phone_number")), r::matches(r::field(row, "phone_number"), "^\\+?[1-9]\\d{1,14}$"))) {
             shadow.push(Violation::new("phone_number", "invalid_phone_format", "Phone number must be in E.164 format"));
         }
         // `profile_picture_url_valid` (profile.hook.yaml:28)

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.3] - 2026-10-11
+
+### Fixed
+
+- The email and phone row rules check the patterns the schema declares: 0.7.2 was generated
+  before the rule lexer kept regex escapes, so its email patterns read `.` for `\.` and the phone
+  pattern lost `\+` and `\d`.
+
 ## [0.7.2] - 2026-10-11
 
 ### Added

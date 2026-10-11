@@ -60,7 +60,7 @@ impl backbone_core::write_guard::WriteGuard<UserOAuthLink> for UserOAuthLinkRowR
             shadow.push(Violation::new("provider_user_id", "missing_provider_user_id", "Provider user ID is required"));
         }
         // `valid_provider_email` (user_oauth_link.hook.yaml:75)
-        if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider_email")), r::matches(r::field(row, "provider_email"), "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,}$"))) {
+        if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider_email")), r::matches(r::field(row, "provider_email"), "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))) {
             shadow.push(Violation::new("provider_email", "invalid_provider_email", "Invalid provider email format"));
         }
         GuardOutcome { refuse: Vec::new(), shadow }
