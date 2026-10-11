@@ -32,3 +32,42 @@ pub type EmailVerificationTokenService = GenericCrudService<
     EmailVerificationTokenRepository,
 >;
 
+/// The row rules the schema declares for EmailVerificationToken, checked against the row a create or
+/// update would store. The generated build attaches it to [`EmailVerificationTokenService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct EmailVerificationTokenRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<EmailVerificationToken> for EmailVerificationTokenRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, EmailVerificationToken>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `valid_email` (email_verification.hook.yaml:74)
+        if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "email")), r::matches(r::field(row, "email"), "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,}$"))) {
+            shadow.push(Violation::new("email", "invalid_email", "Invalid email format"));
+        }
+        // `token_format` (email_verification.hook.yaml:86)
+        if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "token")), r::ge(r::length(r::field(row, "token")), r::Val::Num(32.0_f64)))) {
+            shadow.push(Violation::new("token", "invalid_token", "Invalid token format"));
+        }
+        // `token_type_valid` (email_verification.hook.yaml:92)
+        if (create) && !r::holds(&r::in_list(r::field(row, "token_type"), r::Val::List(vec![r::text("account_creation"), r::text("email_change"), r::text("password_reset"), r::text("account_reactivation")]))) {
+            shadow.push(Violation::new("token_type", "invalid_token_type", "Invalid verification token type"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

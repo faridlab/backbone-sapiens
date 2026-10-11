@@ -32,3 +32,38 @@ pub type NotificationService = GenericCrudService<
     NotificationRepository,
 >;
 
+/// The row rules the schema declares for Notification, checked against the row a create or
+/// update would store. The generated build attaches it to [`NotificationService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct NotificationRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<Notification> for NotificationRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, Notification>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `valid_channel` (notification.hook.yaml:17)
+        if (create || update) && !r::holds(&r::in_list(r::field(row, "channel"), r::Val::List(vec![r::text("in_app"), r::text("email"), r::text("sms"), r::text("push"), r::text("webhook")]))) {
+            shadow.push(Violation::new("channel", "invalid_channel", "Invalid notification channel"));
+        }
+        // `valid_priority` (notification.hook.yaml:23)
+        if (create || update) && !r::holds(&r::in_list(r::field(row, "priority"), r::Val::List(vec![r::text("low"), r::text("normal"), r::text("high"), r::text("urgent")]))) {
+            shadow.push(Violation::new("priority", "invalid_priority", "Invalid priority level"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

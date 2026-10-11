@@ -32,3 +32,38 @@ pub type UserOAuthLinkService = GenericCrudService<
     UserOAuthLinkRepository,
 >;
 
+/// The row rules the schema declares for UserOAuthLink, checked against the row a create or
+/// update would store. The generated build attaches it to [`UserOAuthLinkService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct UserOAuthLinkRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<UserOAuthLink> for UserOAuthLinkRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, UserOAuthLink>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `valid_provider_user_id` (user_oauth_link.hook.yaml:69)
+        if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider_user_id")), r::gt(r::length(r::field(row, "provider_user_id")), r::Val::Num(0.0_f64)))) {
+            shadow.push(Violation::new("provider_user_id", "missing_provider_user_id", "Provider user ID is required"));
+        }
+        // `valid_provider_email` (user_oauth_link.hook.yaml:75)
+        if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider_email")), r::matches(r::field(row, "provider_email"), "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,}$"))) {
+            shadow.push(Violation::new("provider_email", "invalid_provider_email", "Invalid provider email format"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

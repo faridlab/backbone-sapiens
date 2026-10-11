@@ -32,3 +32,34 @@ pub type AnalyticsMetricService = GenericCrudService<
     AnalyticsMetricRepository,
 >;
 
+/// The row rules the schema declares for AnalyticsMetric, checked against the row a create or
+/// update would store. The generated build attaches it to [`AnalyticsMetricService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct AnalyticsMetricRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<AnalyticsMetric> for AnalyticsMetricRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, AnalyticsMetric>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `valid_metric_type` (analytics.hook.yaml:23)
+        if (create) && !r::holds(&r::in_list(r::field(row, "metric_type"), r::Val::List(vec![r::text("counter"), r::text("gauge"), r::text("histogram"), r::text("timer")]))) {
+            shadow.push(Violation::new("metric_type", "invalid_metric_type", "Invalid metric type"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

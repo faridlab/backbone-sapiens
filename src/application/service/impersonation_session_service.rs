@@ -32,3 +32,42 @@ pub type ImpersonationSessionService = GenericCrudService<
     ImpersonationSessionRepository,
 >;
 
+/// The row rules the schema declares for ImpersonationSession, checked against the row a create or
+/// update would store. The generated build attaches it to [`ImpersonationSessionService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct ImpersonationSessionRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<ImpersonationSession> for ImpersonationSessionRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, ImpersonationSession>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `cannot_impersonate_self` (impersonation_session.hook.yaml:73)
+        if (create) && !r::holds(&r::ne(r::field(row, "admin_id"), r::field(row, "target_user_id"))) {
+            shadow.push(Violation::new("admin_id", "self_impersonation_forbidden", "Cannot impersonate yourself"));
+        }
+        // `reason_required` (impersonation_session.hook.yaml:79)
+        if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "reason")), r::ge(r::length(r::field(row, "reason")), r::Val::Num(20.0_f64)))) {
+            shadow.push(Violation::new("reason", "reason_required", "A detailed reason (min 20 characters) is required for impersonation"));
+        }
+        // `max_duration_reasonable` (impersonation_session.hook.yaml:85)
+        if (create) && !r::holds(&r::and(r::gt(r::field(row, "max_duration_minutes"), r::Val::Num(0.0_f64)), r::le(r::field(row, "max_duration_minutes"), r::Val::Num(480.0_f64)))) {
+            shadow.push(Violation::new("max_duration_minutes", "invalid_duration", "Duration must be between 1 and 480 minutes (8 hours)"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

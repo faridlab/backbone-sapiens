@@ -32,3 +32,38 @@ pub type WorkflowActionService = GenericCrudService<
     WorkflowActionRepository,
 >;
 
+/// The row rules the schema declares for WorkflowAction, checked against the row a create or
+/// update would store. The generated build attaches it to [`WorkflowActionService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct WorkflowActionRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<WorkflowAction> for WorkflowActionRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, WorkflowAction>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `valid_action_type` (workflow.hook.yaml:38)
+        if (create || update) && !r::holds(&r::in_list(r::field(row, "action_type"), r::Val::List(vec![r::text("send_email"), r::text("create_task"), r::text("update_record"), r::text("call_api"), r::text("approve"), r::text("reject"), r::text("notify_user"), r::text("schedule_job")]))) {
+            shadow.push(Violation::new("action_type", "invalid_action_type", "Invalid action type"));
+        }
+        // `valid_action_order` (workflow.hook.yaml:59)
+        if (create || update) && !r::holds(&r::ge(r::field(row, "step_order"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("step_order", "invalid_action_order", "Action order must be non-negative"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

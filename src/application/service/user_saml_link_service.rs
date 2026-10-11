@@ -32,3 +32,34 @@ pub type UserSAMLLinkService = GenericCrudService<
     UserSAMLLinkRepository,
 >;
 
+/// The row rules the schema declares for UserSAMLLink, checked against the row a create or
+/// update would store. The generated build attaches it to [`UserSAMLLinkService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct UserSAMLLinkRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<UserSAMLLink> for UserSAMLLinkRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, UserSAMLLink>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `provider_required` (user_saml_link.hook.yaml:60)
+        if (create) && !r::holds(&r::is_not_null(r::field(row, "provider_id"))) {
+            shadow.push(Violation::new("provider_id", "provider_required", "Provider ID is required"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

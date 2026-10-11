@@ -32,3 +32,34 @@ pub type AnalyticsEventService = GenericCrudService<
     AnalyticsEventRepository,
 >;
 
+/// The row rules the schema declares for AnalyticsEvent, checked against the row a create or
+/// update would store. The generated build attaches it to [`AnalyticsEventService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct AnalyticsEventRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<AnalyticsEvent> for AnalyticsEventRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, AnalyticsEvent>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `valid_event_type` (analytics.hook.yaml:11)
+        if (create) && !r::holds(&r::in_list(r::field(row, "event_type"), r::Val::List(vec![r::text("user_login"), r::text("user_logout"), r::text("user_registration"), r::text("password_change"), r::text("mfa_enabled"), r::text("mfa_disabled"), r::text("role_assigned"), r::text("permission_granted"), r::text("organization_created"), r::text("api_access"), r::text("security_event"), r::text("system_event")]))) {
+            shadow.push(Violation::new("event_type", "invalid_event_type", "Invalid event type"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

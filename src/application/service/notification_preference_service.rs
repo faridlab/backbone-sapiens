@@ -32,3 +32,34 @@ pub type NotificationPreferenceService = GenericCrudService<
     NotificationPreferenceRepository,
 >;
 
+/// The row rules the schema declares for NotificationPreference, checked against the row a create or
+/// update would store. The generated build attaches it to [`NotificationPreferenceService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct NotificationPreferenceRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<NotificationPreference> for NotificationPreferenceRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, NotificationPreference>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `digest_frequency_valid` (notification_preference.hook.yaml:40)
+        if (create || update) && !r::holds(&r::in_list(r::field(row, "digest_frequency"), r::Val::List(vec![r::text("immediate"), r::text("hourly"), r::text("daily"), r::text("weekly")]))) {
+            shadow.push(Violation::new("digest_frequency", "invalid_digest_frequency", "Invalid digest frequency. Valid: immediate, hourly, daily, weekly"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

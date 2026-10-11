@@ -32,3 +32,34 @@ pub type WorkflowExecutionService = GenericCrudService<
     WorkflowExecutionRepository,
 >;
 
+/// The row rules the schema declares for WorkflowExecution, checked against the row a create or
+/// update would store. The generated build attaches it to [`WorkflowExecutionService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct WorkflowExecutionRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<WorkflowExecution> for WorkflowExecutionRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, WorkflowExecution>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `reasonable_timeout` (workflow.hook.yaml:45)
+        if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "timeout_minutes")), r::and(r::gt(r::field(row, "timeout_minutes"), r::Val::Num(0.0_f64)), r::le(r::field(row, "timeout_minutes"), r::Val::Num(10080.0_f64))))) {
+            shadow.push(Violation::new("timeout_minutes", "invalid_timeout", "Timeout must be between 1 and 10080 minutes"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

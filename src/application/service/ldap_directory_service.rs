@@ -32,3 +32,46 @@ pub type LDAPDirectoryService = GenericCrudService<
     LDAPDirectoryRepository,
 >;
 
+/// The row rules the schema declares for LDAPDirectory, checked against the row a create or
+/// update would store. The generated build attaches it to [`LDAPDirectoryService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct LDAPDirectoryRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<LDAPDirectory> for LDAPDirectoryRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, LDAPDirectory>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `name_required` (ldap_directory.hook.yaml:55)
+        if (create || update) && !r::holds(&r::and(r::is_not_null(r::field(row, "name")), r::ge(r::length(r::field(row, "name")), r::Val::Num(3.0_f64)))) {
+            shadow.push(Violation::new("name", "name_required", "Directory name (min 3 characters) is required"));
+        }
+        // `port_valid` (ldap_directory.hook.yaml:67)
+        if (create || update) && !r::holds(&r::and(r::gt(r::field(row, "port"), r::Val::Num(0.0_f64)), r::le(r::field(row, "port"), r::Val::Num(65535.0_f64)))) {
+            shadow.push(Violation::new("port", "invalid_port", "Port must be between 1 and 65535"));
+        }
+        // `sync_interval_positive` (ldap_directory.hook.yaml:97)
+        if (create || update) && !r::holds(&r::gt(r::field(row, "sync_interval_minutes"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("sync_interval_minutes", "invalid_sync_interval", "Sync interval must be positive"));
+        }
+        // `max_sync_interval` (ldap_directory.hook.yaml:103)
+        if (create || update) && !r::holds(&r::le(r::field(row, "sync_interval_minutes"), r::Val::Num(1440.0_f64))) {
+            shadow.push(Violation::new("sync_interval_minutes", "sync_interval_too_long", "Sync interval cannot exceed 1440 minutes (24 hours)"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

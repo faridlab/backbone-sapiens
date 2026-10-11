@@ -32,3 +32,46 @@ pub type SAMLProviderService = GenericCrudService<
     SAMLProviderRepository,
 >;
 
+/// The row rules the schema declares for SAMLProvider, checked against the row a create or
+/// update would store. The generated build attaches it to [`SAMLProviderService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct SAMLProviderRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<SAMLProvider> for SAMLProviderRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, SAMLProvider>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `name_required` (saml_provider.hook.yaml:45)
+        if (create || update) && !r::holds(&r::and(r::is_not_null(r::field(row, "name")), r::ge(r::length(r::field(row, "name")), r::Val::Num(3.0_f64)))) {
+            shadow.push(Violation::new("name", "name_required", "Provider name (min 3 characters) is required"));
+        }
+        // `entity_id_required` (saml_provider.hook.yaml:51)
+        if (create || update) && !r::holds(&r::and(r::is_not_null(r::field(row, "entity_id")), r::gt(r::length(r::field(row, "entity_id")), r::Val::Num(0.0_f64)))) {
+            shadow.push(Violation::new("entity_id", "entity_id_required", "Entity ID is required"));
+        }
+        // `certificate_required_for_active` (saml_provider.hook.yaml:69)
+        if (create || update) && !r::holds(&r::or(r::ne(r::field(row, "status"), r::text("active")), r::and(r::is_not_null(r::field(row, "certificate")), r::gt(r::length(r::field(row, "certificate")), r::Val::Num(0.0_f64))))) {
+            shadow.push(Violation::new("status", "certificate_required", "X.509 certificate is required for active providers"));
+        }
+        // `name_id_format_valid` (saml_provider.hook.yaml:87)
+        if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "name_id_format")), r::in_list(r::field(row, "name_id_format"), r::Val::List(vec![r::text("urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"), r::text("urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"), r::text("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"), r::text("urn:oasis:names:tc:SAML:2.0:nameid-format:transient")])))) {
+            shadow.push(Violation::new("name_id_format", "name_id_format_invalid", "Invalid NameID format"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

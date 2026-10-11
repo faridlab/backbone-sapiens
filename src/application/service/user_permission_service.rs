@@ -32,3 +32,42 @@ pub type UserPermissionService = GenericCrudService<
     UserPermissionRepository,
 >;
 
+/// The row rules the schema declares for UserPermission, checked against the row a create or
+/// update would store. The generated build attaches it to [`UserPermissionService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct UserPermissionRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<UserPermission> for UserPermissionRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, UserPermission>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `reason_required` (user_permission.hook.yaml:43)
+        if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "reason")), r::ge(r::length(r::field(row, "reason")), r::Val::Num(10.0_f64)))) {
+            shadow.push(Violation::new("reason", "reason_required", "Reason is required for direct permission grants (min 10 characters)"));
+        }
+        // `no_self_grant` (user_permission.hook.yaml:55)
+        if (create) && !r::holds(&r::ne(r::field(row, "user_id"), r::field(row, "granted_by"))) {
+            shadow.push(Violation::new("user_id", "self_grant_prohibited", "Cannot grant permissions to yourself"));
+        }
+        // `resource_scope_consistency` (user_permission.hook.yaml:67)
+        if (create) && !r::holds(&r::or(r::and(r::is_null(r::field(row, "resource_id")), r::is_null(r::field(row, "resource_type"))), r::and(r::is_not_null(r::field(row, "resource_id")), r::is_not_null(r::field(row, "resource_type"))))) {
+            shadow.push(Violation::new("resource_id", "incomplete_resource_scope", "Resource ID and type must both be provided or both be null"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

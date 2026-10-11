@@ -32,3 +32,38 @@ pub type DataExportService = GenericCrudService<
     DataExportRepository,
 >;
 
+/// The row rules the schema declares for DataExport, checked against the row a create or
+/// update would store. The generated build attaches it to [`DataExportService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct DataExportRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<DataExport> for DataExportRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, DataExport>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `admin_requires_justification` (data_export.hook.yaml:77)
+        if (create) && !r::holds(&r::or(r::eq(r::field(row, "requested_by"), r::field(row, "user_id")), r::and(r::is_not_null(r::field(row, "justification")), r::ge(r::length(r::field(row, "justification")), r::Val::Num(20.0_f64))))) {
+            shadow.push(Violation::new("requested_by", "justification_required", "Admins must provide justification (min 20 characters) when exporting another user's data"));
+        }
+        // `export_format_valid` (data_export.hook.yaml:83)
+        if (create) && !r::holds(&r::in_list(r::field(row, "format"), r::Val::List(vec![r::text("json"), r::text("csv"), r::text("pdf"), r::text("xml")]))) {
+            shadow.push(Violation::new("format", "invalid_format", "Invalid export format. Supported: json, csv, pdf, xml"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

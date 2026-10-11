@@ -32,3 +32,34 @@ pub type RoleService = GenericCrudService<
     RoleRepository,
 >;
 
+/// The row rules the schema declares for Role, checked against the row a create or
+/// update would store. The generated build attaches it to [`RoleService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct RoleRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<Role> for RoleRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, Role>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `reserved_names` (role.hook.yaml:37)
+        if (create || update) && !r::holds(&r::not_in(r::field(row, "name"), r::Val::List(vec![r::text("SYSTEM"), r::text("ROOT"), r::text("ANONYMOUS")]))) {
+            shadow.push(Violation::new("name", "reserved_role_name", "This role name is reserved"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

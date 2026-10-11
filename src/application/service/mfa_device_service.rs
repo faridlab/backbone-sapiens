@@ -32,3 +32,38 @@ pub type MFADeviceService = GenericCrudService<
     MFADeviceRepository,
 >;
 
+/// The row rules the schema declares for MFADevice, checked against the row a create or
+/// update would store. The generated build attaches it to [`MFADeviceService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct MFADeviceRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<MFADevice> for MFADeviceRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, MFADevice>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `device_name_required` (mfa_device.hook.yaml:37)
+        if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "device_name")), r::ge(r::length(r::field(row, "device_name")), r::Val::Num(1.0_f64)))) {
+            shadow.push(Violation::new("device_name", "device_name_required", "Device name is required"));
+        }
+        // `secret_required` (mfa_device.hook.yaml:61)
+        if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "secret")), r::ge(r::length(r::field(row, "secret")), r::Val::Num(16.0_f64)))) {
+            shadow.push(Violation::new("secret", "secret_required", "Device secret is required"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

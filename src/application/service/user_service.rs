@@ -32,3 +32,34 @@ pub type UserService = GenericCrudService<
     UserRepository,
 >;
 
+/// The row rules the schema declares for User, checked against the row a create or
+/// update would store. The generated build attaches it to [`UserService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct UserRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<User> for UserRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, User>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `username_format` (user.hook.yaml:74)
+        if (create || update) && !r::holds(&r::matches(r::field(row, "username"), "^[a-zA-Z0-9_-]{3,50}$")) {
+            shadow.push(Violation::new("username", "invalid_username_format", "Username must be 3-50 characters, alphanumeric with underscore/hyphen"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

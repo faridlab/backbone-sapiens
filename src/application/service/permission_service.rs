@@ -32,3 +32,34 @@ pub type PermissionService = GenericCrudService<
     PermissionRepository,
 >;
 
+/// The row rules the schema declares for Permission, checked against the row a create or
+/// update would store. The generated build attaches it to [`PermissionService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct PermissionRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<Permission> for PermissionRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, Permission>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `name_format` (permission.hook.yaml:11)
+        if (create || update) && !r::holds(&r::matches(r::field(row, "name"), "^[a-z_]+:[a-z_]+$")) {
+            shadow.push(Violation::new("name", "invalid_permission_format", "Permission name must be in format 'action:resource' (e.g., read:users, write:posts)"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

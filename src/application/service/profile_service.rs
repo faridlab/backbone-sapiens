@@ -32,3 +32,46 @@ pub type ProfileService = GenericCrudService<
     ProfileRepository,
 >;
 
+/// The row rules the schema declares for Profile, checked against the row a create or
+/// update would store. The generated build attaches it to [`ProfileService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct ProfileRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<Profile> for ProfileRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, Profile>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `first_name_required` (profile.hook.yaml:16)
+        if (create || update) && !r::holds(&r::and(r::is_not_null(r::field(row, "first_name")), r::ge(r::length(r::field(row, "first_name")), r::Val::Num(1.0_f64)))) {
+            shadow.push(Violation::new("first_name", "first_name_required", "First name is required"));
+        }
+        // `phone_number_format` (profile.hook.yaml:22)
+        if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "phone_number")), r::matches(r::field(row, "phone_number"), "^+?[1-9]d{1,14}$"))) {
+            shadow.push(Violation::new("phone_number", "invalid_phone_format", "Phone number must be in E.164 format"));
+        }
+        // `profile_picture_url_valid` (profile.hook.yaml:28)
+        if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "profile_picture_url")), r::matches(r::field(row, "profile_picture_url"), "^https?://"))) {
+            shadow.push(Violation::new("profile_picture_url", "invalid_url_format", "Profile picture URL must be a valid HTTP(S) URL"));
+        }
+        // `valid_gender` (profile.hook.yaml:46)
+        if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "gender")), r::in_list(r::field(row, "gender"), r::Val::List(vec![r::text("male"), r::text("female")])))) {
+            shadow.push(Violation::new("gender", "invalid_gender", "Gender must be 'male' or 'female'"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

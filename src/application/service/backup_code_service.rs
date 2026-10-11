@@ -32,3 +32,34 @@ pub type BackupCodeService = GenericCrudService<
     BackupCodeRepository,
 >;
 
+/// The row rules the schema declares for BackupCode, checked against the row a create or
+/// update would store. The generated build attaches it to [`BackupCodeService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct BackupCodeRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<BackupCode> for BackupCodeRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, BackupCode>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `valid_code_index` (backup_code.hook.yaml:17)
+        if (create) && !r::holds(&r::and(r::ge(r::field(row, "code_index"), r::Val::Num(1.0_f64)), r::le(r::field(row, "code_index"), r::Val::Num(10.0_f64)))) {
+            shadow.push(Violation::new("code_index", "invalid_code_index", "Code index must be between 1 and 10"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

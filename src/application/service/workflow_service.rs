@@ -32,3 +32,34 @@ pub type WorkflowService = GenericCrudService<
     WorkflowRepository,
 >;
 
+/// The row rules the schema declares for Workflow, checked against the row a create or
+/// update would store. The generated build attaches it to [`WorkflowService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct WorkflowRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<Workflow> for WorkflowRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, Workflow>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `valid_workflow_type` (workflow.hook.yaml:11)
+        if (create || update) && !r::holds(&r::in_list(r::field(row, "workflow_type"), r::Val::List(vec![r::text("user_registration"), r::text("email_verification"), r::text("password_reset"), r::text("account_suspension"), r::text("role_assignment"), r::text("permission_grant"), r::text("mfa_setup"), r::text("email_change"), r::text("account_recovery"), r::text("bulk_user_import"), r::text("oauth_linking"), r::text("device_trust"), r::text("security_review"), r::text("compliance_audit")]))) {
+            shadow.push(Violation::new("workflow_type", "invalid_workflow_type", "Invalid workflow type"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

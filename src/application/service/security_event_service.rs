@@ -32,3 +32,38 @@ pub type SecurityEventService = GenericCrudService<
     SecurityEventRepository,
 >;
 
+/// The row rules the schema declares for SecurityEvent, checked against the row a create or
+/// update would store. The generated build attaches it to [`SecurityEventService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct SecurityEventRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<SecurityEvent> for SecurityEventRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, SecurityEvent>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `event_type_required` (security_event.hook.yaml:45)
+        if (create) && !r::holds(&r::is_not_null(r::field(row, "event_type"))) {
+            shadow.push(Violation::new("event_type", "event_type_required", "Event type is required"));
+        }
+        // `severity_required` (security_event.hook.yaml:51)
+        if (create) && !r::holds(&r::in_list(r::field(row, "severity"), r::Val::List(vec![r::text("low"), r::text("medium"), r::text("high"), r::text("critical")]))) {
+            shadow.push(Violation::new("severity", "invalid_severity", "Valid severity required: low, medium, high, critical"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

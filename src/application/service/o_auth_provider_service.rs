@@ -32,3 +32,38 @@ pub type OAuthProviderService = GenericCrudService<
     OAuthProviderRepository,
 >;
 
+/// The row rules the schema declares for OAuthProvider, checked against the row a create or
+/// update would store. The generated build attaches it to [`OAuthProviderService`]. Every rule
+/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+pub struct OAuthProviderRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<OAuthProvider> for OAuthProviderRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, OAuthProvider>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let mut shadow = Vec::new();
+        // `valid_configuration` (oauth_provider.hook.yaml:40)
+        if (create || update) && !r::holds(&r::and(r::and(r::and(r::and(r::and(r::is_not_null(r::field(row, "client_id")), r::is_not_null(r::field(row, "client_secret"))), r::is_not_null(r::field(row, "redirect_uri"))), r::is_not_null(r::field(row, "authorization_url"))), r::is_not_null(r::field(row, "token_url"))), r::is_not_null(r::field(row, "user_info_url")))) {
+            shadow.push(Violation::new("client_id", "incomplete_configuration", "Incomplete OAuth provider configuration"));
+        }
+        // `scopes_not_empty` (oauth_provider.hook.yaml:52)
+        if (create || update) && !r::holds(&r::and(r::is_not_null(r::field(row, "scopes")), r::gt(r::length(r::field(row, "scopes")), r::Val::Num(0.0_f64)))) {
+            shadow.push(Violation::new("scopes", "empty_scopes", "OAuth scopes cannot be empty"));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+
