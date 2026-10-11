@@ -242,24 +242,30 @@ pub async fn end_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "impersonation_session:transition:end");
         let has_update_perm = auth.permissions.iter().any(|p| p == "impersonation_session:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for end transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for end transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "end", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:end or a role of ["admin"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: ImpersonationSessionState = entity.status.to_string().parse()
-        .unwrap_or(ImpersonationSessionState::default());
+    let current_state: ImpersonationSessionState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = ImpersonationSessionStateMachine::from_state(current_state);
     if !sm.can_transition(ImpersonationSessionTransition::End) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Transition not allowed from current state")));
     }
 
+    // Guard `$actor.id == admin_id` not compiled (reads the writer, the time or the row before the write); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Ended".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("ended".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("end", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: ImpersonationSessionResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))
@@ -293,24 +299,30 @@ pub async fn auto_expire_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "impersonation_session:transition:auto_expire");
         let has_update_perm = auth.permissions.iter().any(|p| p == "impersonation_session:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for auto_expire transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for auto_expire transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "auto_expire", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:auto_expire or a role of ["system"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: ImpersonationSessionState = entity.status.to_string().parse()
-        .unwrap_or(ImpersonationSessionState::default());
+    let current_state: ImpersonationSessionState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = ImpersonationSessionStateMachine::from_state(current_state);
     if !sm.can_transition(ImpersonationSessionTransition::AutoExpire) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Transition not allowed from current state")));
     }
 
+    // Guard `(started_at + max_duration_minutes.minutes) <= now()` not compiled (`.minutes` reads a relation or a duration); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Expired".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("expired".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("auto_expire", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: ImpersonationSessionResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))
@@ -344,14 +356,19 @@ pub async fn terminate_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "impersonation_session:transition:terminate");
         let has_update_perm = auth.permissions.iter().any(|p| p == "impersonation_session:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for terminate transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for terminate transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "terminate", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:terminate or a role of ["super_admin"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: ImpersonationSessionState = entity.status.to_string().parse()
-        .unwrap_or(ImpersonationSessionState::default());
+    let current_state: ImpersonationSessionState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = ImpersonationSessionStateMachine::from_state(current_state);
     if !sm.can_transition(ImpersonationSessionTransition::Terminate) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Transition not allowed from current state")));
@@ -359,9 +376,9 @@ pub async fn terminate_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Terminated".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("terminated".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("terminate", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: ImpersonationSessionResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))
@@ -395,24 +412,30 @@ pub async fn force_terminate_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "impersonation_session:transition:force_terminate");
         let has_update_perm = auth.permissions.iter().any(|p| p == "impersonation_session:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for force_terminate transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for force_terminate transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "force_terminate", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:force_terminate or a role of ["admin"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: ImpersonationSessionState = entity.status.to_string().parse()
-        .unwrap_or(ImpersonationSessionState::default());
+    let current_state: ImpersonationSessionState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = ImpersonationSessionStateMachine::from_state(current_state);
     if !sm.can_transition(ImpersonationSessionTransition::ForceTerminate) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Transition not allowed from current state")));
     }
 
+    // Guard `$actor.id != admin_id` not compiled (reads the writer, the time or the row before the write); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Terminated".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("terminated".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("force_terminate", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: ImpersonationSessionResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))

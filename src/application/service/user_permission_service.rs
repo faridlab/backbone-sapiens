@@ -56,19 +56,23 @@ impl backbone_core::write_guard::WriteGuard<UserPermission> for UserPermissionRo
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
-        // `reason_required` (user_permission.hook.yaml:43)
+        // `status` belongs to a state machine: only its verbs move it
+        if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
+            shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `reason_required` (user_permission.hook.yaml:44)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "reason")), r::ge(r::length(r::field(row, "reason")), r::Val::Num(10.0_f64)))) {
             shadow.push(Violation::new("reason", "reason_required", "Reason is required for direct permission grants (min 10 characters)"));
         }
-        // `expires_in_future` (user_permission.hook.yaml:49)
+        // `expires_in_future` (user_permission.hook.yaml:50)
         if (create || (update && r::changed(old.as_ref(), row, &["expires_at"]))) && !r::holds(&r::or(r::is_null(r::field(row, "expires_at")), r::gt(r::field(row, "expires_at"), r::at(ctx.at)))) {
             shadow.push(Violation::new("expires_at", "invalid_expiry", "Expiry date must be in the future"));
         }
-        // `no_self_grant` (user_permission.hook.yaml:55)
+        // `no_self_grant` (user_permission.hook.yaml:56)
         if (create) && !r::holds(&r::ne(r::field(row, "user_id"), r::field(row, "granted_by"))) {
             shadow.push(Violation::new("user_id", "self_grant_prohibited", "Cannot grant permissions to yourself"));
         }
-        // `resource_scope_consistency` (user_permission.hook.yaml:67)
+        // `resource_scope_consistency` (user_permission.hook.yaml:68)
         if (create) && !r::holds(&r::or(r::and(r::is_null(r::field(row, "resource_id")), r::is_null(r::field(row, "resource_type"))), r::and(r::is_not_null(r::field(row, "resource_id")), r::is_not_null(r::field(row, "resource_type"))))) {
             shadow.push(Violation::new("resource_id", "incomplete_resource_scope", "Resource ID and type must both be provided or both be null"));
         }

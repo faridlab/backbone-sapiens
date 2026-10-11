@@ -54,16 +54,21 @@ impl backbone_core::write_guard::WriteGuard<DataExport> for DataExportRowRules {
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
-        // `user_can_request_own_data` (data_export.hook.yaml:71)
+        // `status` belongs to a state machine: only its verbs move it
+        if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
+            shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `user_can_request_own_data` (data_export.hook.yaml:72)
         if (create) && !r::holds(&r::or(r::eq(r::field(row, "requested_by"), r::field(row, "user_id")), r::has_role(ctx.actor.as_deref(), "admin").await)) {
             shadow.push(Violation::new("requested_by", "unauthorized_export", "Users can only export their own data"));
         }
-        // `admin_requires_justification` (data_export.hook.yaml:77)
+        // `admin_requires_justification` (data_export.hook.yaml:78)
         if (create) && !r::holds(&r::or(r::eq(r::field(row, "requested_by"), r::field(row, "user_id")), r::and(r::is_not_null(r::field(row, "justification")), r::ge(r::length(r::field(row, "justification")), r::Val::Num(20.0_f64))))) {
             shadow.push(Violation::new("requested_by", "justification_required", "Admins must provide justification (min 20 characters) when exporting another user's data"));
         }
-        // `export_format_valid` (data_export.hook.yaml:83)
+        // `export_format_valid` (data_export.hook.yaml:84)
         if (create) && !r::holds(&r::in_list(r::field(row, "format"), r::Val::List(vec![r::text("json"), r::text("csv"), r::text("pdf"), r::text("xml")]))) {
             shadow.push(Violation::new("format", "invalid_format", "Invalid export format. Supported: json, csv, pdf, xml"));
         }

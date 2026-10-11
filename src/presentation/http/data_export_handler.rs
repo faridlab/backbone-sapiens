@@ -242,14 +242,19 @@ pub async fn start_processing_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "data_export:transition:start_processing");
         let has_update_perm = auth.permissions.iter().any(|p| p == "data_export:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for start_processing transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for start_processing transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "start_processing", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:start_processing or a role of ["system"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: DataExportState = entity.status.to_string().parse()
-        .unwrap_or(DataExportState::default());
+    let current_state: DataExportState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<DataExportResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = DataExportStateMachine::from_state(current_state);
     if !sm.can_transition(DataExportTransition::StartProcessing) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<DataExportResponseDto>::error("Transition not allowed from current state")));
@@ -257,9 +262,9 @@ pub async fn start_processing_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Processing".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("processing".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("start_processing", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: DataExportResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))
@@ -293,14 +298,19 @@ pub async fn complete_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "data_export:transition:complete");
         let has_update_perm = auth.permissions.iter().any(|p| p == "data_export:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for complete transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for complete transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "complete", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:complete or a role of ["system"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: DataExportState = entity.status.to_string().parse()
-        .unwrap_or(DataExportState::default());
+    let current_state: DataExportState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<DataExportResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = DataExportStateMachine::from_state(current_state);
     if !sm.can_transition(DataExportTransition::Complete) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<DataExportResponseDto>::error("Transition not allowed from current state")));
@@ -308,9 +318,9 @@ pub async fn complete_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Completed".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("completed".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("complete", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: DataExportResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))
@@ -344,14 +354,19 @@ pub async fn fail_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "data_export:transition:fail");
         let has_update_perm = auth.permissions.iter().any(|p| p == "data_export:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for fail transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for fail transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "fail", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:fail or a role of ["system"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: DataExportState = entity.status.to_string().parse()
-        .unwrap_or(DataExportState::default());
+    let current_state: DataExportState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<DataExportResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = DataExportStateMachine::from_state(current_state);
     if !sm.can_transition(DataExportTransition::Fail) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<DataExportResponseDto>::error("Transition not allowed from current state")));
@@ -359,9 +374,9 @@ pub async fn fail_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Failed".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("failed".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("fail", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: DataExportResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))
@@ -395,24 +410,30 @@ pub async fn expire_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "data_export:transition:expire");
         let has_update_perm = auth.permissions.iter().any(|p| p == "data_export:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for expire transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for expire transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "expire", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:expire or a role of ["system"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: DataExportState = entity.status.to_string().parse()
-        .unwrap_or(DataExportState::default());
+    let current_state: DataExportState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<DataExportResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = DataExportStateMachine::from_state(current_state);
     if !sm.can_transition(DataExportTransition::Expire) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<DataExportResponseDto>::error("Transition not allowed from current state")));
     }
 
+    // Guard `expires_at <= now()` not compiled (reads the writer, the time or the row before the write); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Expired".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("expired".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("expire", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: DataExportResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))

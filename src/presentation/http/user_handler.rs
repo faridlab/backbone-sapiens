@@ -246,24 +246,30 @@ pub async fn verify_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "user:transition:verify");
         let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for verify transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for verify transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "User", verb = "verify", code = "transition_by_update_permission", "a transition granted only by user:update, running in shadow; it needs user:transition:verify or a role of ["system"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: UserState = entity.status.to_string().parse()
-        .unwrap_or(UserState::default());
+    let current_state: UserState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<serde_json::Value>::error("The stored state is not a state of this machine"))),
+    };
     let sm = UserStateMachine::from_state(current_state);
     if !sm.can_transition(UserTransition::Verify) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
+    // Guard `email_verified == true || $trigger.verification_code_valid` not compiled (reads `$trigger.verification_code_valid`, which a row rule cannot); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Active".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("active".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("verify", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: UserResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<User, _>(response))))
@@ -297,14 +303,19 @@ pub async fn activate_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "user:transition:activate");
         let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for activate transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for activate transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "User", verb = "activate", code = "transition_by_update_permission", "a transition granted only by user:update, running in shadow; it needs user:transition:activate or a role of ["admin"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: UserState = entity.status.to_string().parse()
-        .unwrap_or(UserState::default());
+    let current_state: UserState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<serde_json::Value>::error("The stored state is not a state of this machine"))),
+    };
     let sm = UserStateMachine::from_state(current_state);
     if !sm.can_transition(UserTransition::Activate) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
@@ -312,9 +323,9 @@ pub async fn activate_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Active".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("active".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("activate", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: UserResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<User, _>(response))))
@@ -348,24 +359,30 @@ pub async fn deactivate_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "user:transition:deactivate");
         let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for deactivate transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for deactivate transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "User", verb = "deactivate", code = "transition_by_update_permission", "a transition granted only by user:update, running in shadow; it needs user:transition:deactivate or a role of ["admin", "owner"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: UserState = entity.status.to_string().parse()
-        .unwrap_or(UserState::default());
+    let current_state: UserState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<serde_json::Value>::error("The stored state is not a state of this machine"))),
+    };
     let sm = UserStateMachine::from_state(current_state);
     if !sm.can_transition(UserTransition::Deactivate) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
+    // Guard `$actor.id == id || $actor.has_role('admin')` not compiled (reads the writer, the time or the row before the write); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Inactive".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("inactive".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("deactivate", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: UserResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<User, _>(response))))
@@ -399,14 +416,19 @@ pub async fn reactivate_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "user:transition:reactivate");
         let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for reactivate transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for reactivate transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "User", verb = "reactivate", code = "transition_by_update_permission", "a transition granted only by user:update, running in shadow; it needs user:transition:reactivate or a role of ["admin", "owner"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: UserState = entity.status.to_string().parse()
-        .unwrap_or(UserState::default());
+    let current_state: UserState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<serde_json::Value>::error("The stored state is not a state of this machine"))),
+    };
     let sm = UserStateMachine::from_state(current_state);
     if !sm.can_transition(UserTransition::Reactivate) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
@@ -414,9 +436,9 @@ pub async fn reactivate_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Active".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("active".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("reactivate", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: UserResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<User, _>(response))))
@@ -450,24 +472,30 @@ pub async fn suspend_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "user:transition:suspend");
         let has_update_perm = auth.permissions.iter().any(|p| p == "user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for suspend transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for suspend transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "User", verb = "suspend", code = "transition_by_update_permission", "a transition granted only by user:update, running in shadow; it needs user:transition:suspend or a role of ["admin"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: UserState = entity.status.to_string().parse()
-        .unwrap_or(UserState::default());
+    let current_state: UserState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<serde_json::Value>::error("The stored state is not a state of this machine"))),
+    };
     let sm = UserStateMachine::from_state(current_state);
     if !sm.can_transition(UserTransition::Suspend) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
+    // Guard `$actor.id != id` not compiled (reads the writer, the time or the row before the write); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Suspended".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("suspended".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("suspend", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: UserResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<User, _>(response))))

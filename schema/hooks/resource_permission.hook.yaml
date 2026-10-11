@@ -9,6 +9,7 @@ model: resource_permission.model.yaml
 # =============================================================================
 states:
   field: status
+  verbs: generated
 
   values:
     active:

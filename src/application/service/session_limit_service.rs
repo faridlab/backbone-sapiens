@@ -54,7 +54,12 @@ impl backbone_core::write_guard::WriteGuard<SessionLimit> for SessionLimitRowRul
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        // `enforce_limit` belongs to a state machine: only its verbs move it
+        if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["enforce_limit"]) {
+            shadow.push(Violation::new("enforce_limit", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
         // `max_sessions_positive` (session_limit.hook.yaml:40)
         if (create || update) && !r::holds(&r::gt(r::field(row, "max_sessions"), r::Val::Num(0.0_f64))) {
             shadow.push(Violation::new("max_sessions", "invalid_max_sessions", "Maximum sessions must be at least 1"));

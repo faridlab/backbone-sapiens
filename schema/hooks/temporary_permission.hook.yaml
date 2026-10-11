@@ -9,6 +9,7 @@ model: temporary_permission.model.yaml
 # =============================================================================
 states:
   field: status
+  verbs: hand
 
   values:
     pending:

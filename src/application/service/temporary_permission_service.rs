@@ -54,16 +54,21 @@ impl backbone_core::write_guard::WriteGuard<TemporaryPermission> for TemporaryPe
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
-        // `expires_after_granted` (temporary_permission.hook.yaml:65)
+        // `status` belongs to a state machine: only its verbs move it
+        if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
+            shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `expires_after_granted` (temporary_permission.hook.yaml:66)
         if (create) && !r::holds(&r::gt(r::field(row, "expires_at"), r::field(row, "granted_at"))) {
             shadow.push(Violation::new("expires_at", "invalid_expiration", "Expiration time must be after grant time"));
         }
-        // `reason_required` (temporary_permission.hook.yaml:77)
+        // `reason_required` (temporary_permission.hook.yaml:78)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "reason")), r::gt(r::length(r::field(row, "reason")), r::Val::Num(10.0_f64)))) {
             shadow.push(Violation::new("reason", "reason_required", "A reason (min 10 characters) is required for temporary permissions"));
         }
-        // `cannot_modify_revoked` (temporary_permission.hook.yaml:83)
+        // `cannot_modify_revoked` (temporary_permission.hook.yaml:84)
         if (update) && !r::holds(&r::is_null(r::field(row, "revoked_at"))) {
             shadow.push(Violation::new("revoked_at", "permission_revoked", "Cannot modify a revoked or expired permission"));
         }

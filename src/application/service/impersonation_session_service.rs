@@ -54,20 +54,25 @@ impl backbone_core::write_guard::WriteGuard<ImpersonationSession> for Impersonat
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
-        // `cannot_impersonate_self` (impersonation_session.hook.yaml:73)
+        // `status` belongs to a state machine: only its verbs move it
+        if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
+            shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `cannot_impersonate_self` (impersonation_session.hook.yaml:74)
         if (create) && !r::holds(&r::ne(r::field(row, "admin_id"), r::field(row, "target_user_id"))) {
             shadow.push(Violation::new("admin_id", "self_impersonation_forbidden", "Cannot impersonate yourself"));
         }
-        // `reason_required` (impersonation_session.hook.yaml:79)
+        // `reason_required` (impersonation_session.hook.yaml:80)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "reason")), r::ge(r::length(r::field(row, "reason")), r::Val::Num(20.0_f64)))) {
             shadow.push(Violation::new("reason", "reason_required", "A detailed reason (min 20 characters) is required for impersonation"));
         }
-        // `max_duration_reasonable` (impersonation_session.hook.yaml:85)
+        // `max_duration_reasonable` (impersonation_session.hook.yaml:86)
         if (create) && !r::holds(&r::and(r::gt(r::field(row, "max_duration_minutes"), r::Val::Num(0.0_f64)), r::le(r::field(row, "max_duration_minutes"), r::Val::Num(480.0_f64)))) {
             shadow.push(Violation::new("max_duration_minutes", "invalid_duration", "Duration must be between 1 and 480 minutes (8 hours)"));
         }
-        // `admin_has_impersonate_role` (impersonation_session.hook.yaml:91)
+        // `admin_has_impersonate_role` (impersonation_session.hook.yaml:92)
         if (create) && !r::holds(&r::or(r::has_role(ctx.actor.as_deref(), "admin").await, r::has_role(ctx.actor.as_deref(), "super_admin").await)) {
             shadow.push(Violation::new("", "unauthorized_impersonation", "Only administrators can start impersonation sessions"));
         }

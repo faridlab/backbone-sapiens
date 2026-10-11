@@ -253,24 +253,30 @@ pub async fn activate_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "saml_provider:transition:activate");
         let has_update_perm = auth.permissions.iter().any(|p| p == "saml_provider:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<SAMLProviderResponseDto>::error("Insufficient permissions for activate transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<SAMLProviderResponseDto>::error("Insufficient permissions for activate transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "SAMLProvider", verb = "activate", code = "transition_by_update_permission", "a transition granted only by saml_provider:update, running in shadow; it needs saml_provider:transition:activate or a role of ["admin"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: SAMLProviderState = entity.status.to_string().parse()
-        .unwrap_or(SAMLProviderState::default());
+    let current_state: SAMLProviderState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<SAMLProviderResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = SAMLProviderStateMachine::from_state(current_state);
     if !sm.can_transition(SAMLProviderTransition::Activate) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<SAMLProviderResponseDto>::error("Transition not allowed from current state")));
     }
 
+    // Guard `metadata_valid() && certificate_valid()` not compiled (`metadata_valid()` is not a row-rule function); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Active".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("active".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("activate", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: SAMLProviderResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))
@@ -304,14 +310,19 @@ pub async fn deactivate_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "saml_provider:transition:deactivate");
         let has_update_perm = auth.permissions.iter().any(|p| p == "saml_provider:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<SAMLProviderResponseDto>::error("Insufficient permissions for deactivate transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<SAMLProviderResponseDto>::error("Insufficient permissions for deactivate transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "SAMLProvider", verb = "deactivate", code = "transition_by_update_permission", "a transition granted only by saml_provider:update, running in shadow; it needs saml_provider:transition:deactivate or a role of ["admin"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: SAMLProviderState = entity.status.to_string().parse()
-        .unwrap_or(SAMLProviderState::default());
+    let current_state: SAMLProviderState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<SAMLProviderResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = SAMLProviderStateMachine::from_state(current_state);
     if !sm.can_transition(SAMLProviderTransition::Deactivate) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<SAMLProviderResponseDto>::error("Transition not allowed from current state")));
@@ -319,9 +330,9 @@ pub async fn deactivate_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Inactive".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("inactive".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("deactivate", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: SAMLProviderResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))

@@ -238,24 +238,30 @@ pub async fn activate_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "temporary_permission:transition:activate");
         let has_update_perm = auth.permissions.iter().any(|p| p == "temporary_permission:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Insufficient permissions for activate transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Insufficient permissions for activate transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "TemporaryPermission", verb = "activate", code = "transition_by_update_permission", "a transition granted only by temporary_permission:update, running in shadow; it needs temporary_permission:transition:activate or a role of ["admin"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: TemporaryPermissionState = entity.status.to_string().parse()
-        .unwrap_or(TemporaryPermissionState::default());
+    let current_state: TemporaryPermissionState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = TemporaryPermissionStateMachine::from_state(current_state);
     if !sm.can_transition(TemporaryPermissionTransition::Activate) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Transition not allowed from current state")));
     }
 
+    // Guard `effective_from == null || effective_from <= now()` not compiled (`effective_from` is not a field of TemporaryPermission); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Active".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("active".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("activate", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: TemporaryPermissionResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))
@@ -289,24 +295,30 @@ pub async fn revoke_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "temporary_permission:transition:revoke");
         let has_update_perm = auth.permissions.iter().any(|p| p == "temporary_permission:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Insufficient permissions for revoke transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Insufficient permissions for revoke transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "TemporaryPermission", verb = "revoke", code = "transition_by_update_permission", "a transition granted only by temporary_permission:update, running in shadow; it needs temporary_permission:transition:revoke or a role of ["admin", "granter"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: TemporaryPermissionState = entity.status.to_string().parse()
-        .unwrap_or(TemporaryPermissionState::default());
+    let current_state: TemporaryPermissionState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = TemporaryPermissionStateMachine::from_state(current_state);
     if !sm.can_transition(TemporaryPermissionTransition::Revoke) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Transition not allowed from current state")));
     }
 
+    // Guard `$actor.id == granted_by || $actor.has_role('admin')` not compiled (reads the writer, the time or the row before the write); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Revoked".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("revoked".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("revoke", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: TemporaryPermissionResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))
@@ -340,24 +352,30 @@ pub async fn auto_expire_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "temporary_permission:transition:auto_expire");
         let has_update_perm = auth.permissions.iter().any(|p| p == "temporary_permission:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Insufficient permissions for auto_expire transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Insufficient permissions for auto_expire transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "TemporaryPermission", verb = "auto_expire", code = "transition_by_update_permission", "a transition granted only by temporary_permission:update, running in shadow; it needs temporary_permission:transition:auto_expire or a role of ["system"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: TemporaryPermissionState = entity.status.to_string().parse()
-        .unwrap_or(TemporaryPermissionState::default());
+    let current_state: TemporaryPermissionState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = TemporaryPermissionStateMachine::from_state(current_state);
     if !sm.can_transition(TemporaryPermissionTransition::AutoExpire) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Transition not allowed from current state")));
     }
 
+    // Guard `expires_at <= now()` not compiled (reads the writer, the time or the row before the write); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Expired".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("expired".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("auto_expire", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: TemporaryPermissionResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))

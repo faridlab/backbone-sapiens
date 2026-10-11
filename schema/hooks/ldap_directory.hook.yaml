@@ -9,6 +9,7 @@ model: ldap_directory.model.yaml
 # =============================================================================
 states:
   field: status
+  verbs: hand
 
   values:
     draft:

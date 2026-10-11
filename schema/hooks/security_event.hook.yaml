@@ -9,6 +9,7 @@ model: security_event.model.yaml
 # =============================================================================
 states:
   field: resolved
+  verbs: hand
 
   values:
     "false":

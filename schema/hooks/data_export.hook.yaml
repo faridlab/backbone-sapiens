@@ -9,6 +9,7 @@ model: data_export.model.yaml
 # =============================================================================
 states:
   field: status
+  verbs: hand
 
   values:
     pending:

@@ -54,8 +54,13 @@ impl backbone_core::write_guard::WriteGuard<Session> for SessionRowRules {
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
-        // `expires_in_future` (session.hook.yaml:47)
+        // `status` belongs to a state machine: only its verbs move it
+        if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
+            shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `expires_in_future` (session.hook.yaml:48)
         if (create) && !r::holds(&r::gt(r::field(row, "expires_at"), r::at(ctx.at))) {
             shadow.push(Violation::new("expires_at", "invalid_expiry", "Session expiry must be in the future"));
         }

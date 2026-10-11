@@ -54,12 +54,17 @@ impl backbone_core::write_guard::WriteGuard<UserOAuthLink> for UserOAuthLinkRowR
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
-        // `valid_provider_user_id` (user_oauth_link.hook.yaml:69)
+        // `status` belongs to a state machine: only its verbs move it
+        if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
+            shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `valid_provider_user_id` (user_oauth_link.hook.yaml:70)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider_user_id")), r::gt(r::length(r::field(row, "provider_user_id")), r::Val::Num(0.0_f64)))) {
             shadow.push(Violation::new("provider_user_id", "missing_provider_user_id", "Provider user ID is required"));
         }
-        // `valid_provider_email` (user_oauth_link.hook.yaml:75)
+        // `valid_provider_email` (user_oauth_link.hook.yaml:76)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider_email")), r::matches(r::field(row, "provider_email"), "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))) {
             shadow.push(Violation::new("provider_email", "invalid_provider_email", "Invalid provider email format"));
         }

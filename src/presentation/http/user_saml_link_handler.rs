@@ -242,24 +242,30 @@ pub async fn deactivate_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "user_saml_link:transition:deactivate");
         let has_update_perm = auth.permissions.iter().any(|p| p == "user_saml_link:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("Insufficient permissions for deactivate transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("Insufficient permissions for deactivate transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "UserSAMLLink", verb = "deactivate", code = "transition_by_update_permission", "a transition granted only by user_saml_link:update, running in shadow; it needs user_saml_link:transition:deactivate or a role of ["admin", "owner"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: UserSAMLLinkState = entity.status.to_string().parse()
-        .unwrap_or(UserSAMLLinkState::default());
+    let current_state: UserSAMLLinkState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = UserSAMLLinkStateMachine::from_state(current_state);
     if !sm.can_transition(UserSAMLLinkTransition::Deactivate) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("Transition not allowed from current state")));
     }
 
+    // Guard `$actor.id == user_id || $actor.has_role('admin')` not compiled (reads the writer, the time or the row before the write); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Inactive".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("inactive".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("deactivate", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: UserSAMLLinkResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))
@@ -293,14 +299,19 @@ pub async fn reactivate_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "user_saml_link:transition:reactivate");
         let has_update_perm = auth.permissions.iter().any(|p| p == "user_saml_link:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("Insufficient permissions for reactivate transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("Insufficient permissions for reactivate transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "UserSAMLLink", verb = "reactivate", code = "transition_by_update_permission", "a transition granted only by user_saml_link:update, running in shadow; it needs user_saml_link:transition:reactivate or a role of ["admin"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: UserSAMLLinkState = entity.status.to_string().parse()
-        .unwrap_or(UserSAMLLinkState::default());
+    let current_state: UserSAMLLinkState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("The stored state is not a state of this machine"))),
+    };
     let sm = UserSAMLLinkStateMachine::from_state(current_state);
     if !sm.can_transition(UserSAMLLinkTransition::Reactivate) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("Transition not allowed from current state")));
@@ -308,9 +319,9 @@ pub async fn reactivate_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Active".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("active".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("reactivate", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: UserSAMLLinkResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(response)))

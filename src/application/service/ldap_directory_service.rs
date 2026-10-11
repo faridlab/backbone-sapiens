@@ -54,20 +54,25 @@ impl backbone_core::write_guard::WriteGuard<LDAPDirectory> for LDAPDirectoryRowR
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
-        // `name_required` (ldap_directory.hook.yaml:55)
+        // `status` belongs to a state machine: only its verbs move it
+        if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
+            shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `name_required` (ldap_directory.hook.yaml:56)
         if (create || update) && !r::holds(&r::and(r::is_not_null(r::field(row, "name")), r::ge(r::length(r::field(row, "name")), r::Val::Num(3.0_f64)))) {
             shadow.push(Violation::new("name", "name_required", "Directory name (min 3 characters) is required"));
         }
-        // `port_valid` (ldap_directory.hook.yaml:67)
+        // `port_valid` (ldap_directory.hook.yaml:68)
         if (create || update) && !r::holds(&r::and(r::gt(r::field(row, "port"), r::Val::Num(0.0_f64)), r::le(r::field(row, "port"), r::Val::Num(65535.0_f64)))) {
             shadow.push(Violation::new("port", "invalid_port", "Port must be between 1 and 65535"));
         }
-        // `sync_interval_positive` (ldap_directory.hook.yaml:97)
+        // `sync_interval_positive` (ldap_directory.hook.yaml:98)
         if (create || update) && !r::holds(&r::gt(r::field(row, "sync_interval_minutes"), r::Val::Num(0.0_f64))) {
             shadow.push(Violation::new("sync_interval_minutes", "invalid_sync_interval", "Sync interval must be positive"));
         }
-        // `max_sync_interval` (ldap_directory.hook.yaml:103)
+        // `max_sync_interval` (ldap_directory.hook.yaml:104)
         if (create || update) && !r::holds(&r::le(r::field(row, "sync_interval_minutes"), r::Val::Num(1440.0_f64))) {
             shadow.push(Violation::new("sync_interval_minutes", "sync_interval_too_long", "Sync interval cannot exceed 1440 minutes (24 hours)"));
         }

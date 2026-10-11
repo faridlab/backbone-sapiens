@@ -9,6 +9,7 @@ model: EmailVerificationToken
 # =============================================================================
 states:
   field: status
+  verbs: hand
 
   values:
     pending:

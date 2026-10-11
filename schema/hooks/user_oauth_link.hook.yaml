@@ -9,6 +9,7 @@ model: UserOAuthLink
 # =============================================================================
 states:
   field: status
+  verbs: hand
 
   values:
     pending_verification:

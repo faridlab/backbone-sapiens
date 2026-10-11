@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.6] - 2026-10-11
+
+### Added
+
+- State fields move only through their verbs: a generic write that moves one is reported in shadow
+  (state_field_verbs_only), and a migration adds a trigger warning when a state moves along a
+  transition its machine does not declare. Each machine declares who owns its verbs (verbs:
+  generated | hand). Requires backbone-core 3.7.
+
 ## [0.7.5] - 2026-10-11
 
 ### Added

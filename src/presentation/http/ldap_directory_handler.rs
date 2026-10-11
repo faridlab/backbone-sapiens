@@ -258,24 +258,30 @@ pub async fn activate_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "ldap_directory:transition:activate");
         let has_update_perm = auth.permissions.iter().any(|p| p == "ldap_directory:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for activate transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for activate transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "LDAPDirectory", verb = "activate", code = "transition_by_update_permission", "a transition granted only by ldap_directory:update, running in shadow; it needs ldap_directory:transition:activate or a role of ["admin"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: LDAPDirectoryState = entity.status.to_string().parse()
-        .unwrap_or(LDAPDirectoryState::default());
+    let current_state: LDAPDirectoryState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<serde_json::Value>::error("The stored state is not a state of this machine"))),
+    };
     let sm = LDAPDirectoryStateMachine::from_state(current_state);
     if !sm.can_transition(LDAPDirectoryTransition::Activate) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
+    // Guard `connection_test_successful()` not compiled (`connection_test_successful()` is not a row-rule function); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Active".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("active".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("activate", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: LDAPDirectoryResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<LDAPDirectory, _>(response))))
@@ -309,14 +315,19 @@ pub async fn deactivate_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "ldap_directory:transition:deactivate");
         let has_update_perm = auth.permissions.iter().any(|p| p == "ldap_directory:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for deactivate transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for deactivate transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "LDAPDirectory", verb = "deactivate", code = "transition_by_update_permission", "a transition granted only by ldap_directory:update, running in shadow; it needs ldap_directory:transition:deactivate or a role of ["admin"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: LDAPDirectoryState = entity.status.to_string().parse()
-        .unwrap_or(LDAPDirectoryState::default());
+    let current_state: LDAPDirectoryState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<serde_json::Value>::error("The stored state is not a state of this machine"))),
+    };
     let sm = LDAPDirectoryStateMachine::from_state(current_state);
     if !sm.can_transition(LDAPDirectoryTransition::Deactivate) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
@@ -324,9 +335,9 @@ pub async fn deactivate_transition(
 
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Inactive".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("inactive".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("deactivate", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: LDAPDirectoryResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<LDAPDirectory, _>(response))))
@@ -360,24 +371,30 @@ pub async fn report_error_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "ldap_directory:transition:report_error");
         let has_update_perm = auth.permissions.iter().any(|p| p == "ldap_directory:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for report_error transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for report_error transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "LDAPDirectory", verb = "report_error", code = "transition_by_update_permission", "a transition granted only by ldap_directory:update, running in shadow; it needs ldap_directory:transition:report_error or a role of ["system"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: LDAPDirectoryState = entity.status.to_string().parse()
-        .unwrap_or(LDAPDirectoryState::default());
+    let current_state: LDAPDirectoryState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<serde_json::Value>::error("The stored state is not a state of this machine"))),
+    };
     let sm = LDAPDirectoryStateMachine::from_state(current_state);
     if !sm.can_transition(LDAPDirectoryTransition::ReportError) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
+    // Guard `last_error != null` not compiled (`last_error` is not a field of LDAPDirectory); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Error".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("error".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("report_error", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: LDAPDirectoryResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<LDAPDirectory, _>(response))))

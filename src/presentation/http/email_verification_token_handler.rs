@@ -241,24 +241,31 @@ pub async fn verify_transition(
         let allowed_roles = EmailVerificationTokenTransition::Verify.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "email_verification_token:transition:verify");
         let has_update_perm = auth.permissions.iter().any(|p| p == "email_verification_token:update");
-        if !has_specific_perm && !has_update_perm {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for verify transition")));
+        let _ = &allowed_roles;
+        if !has_specific_perm {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for verify transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "EmailVerificationToken", verb = "verify", code = "transition_by_update_permission", "a transition granted only by email_verification_token:update, running in shadow; it needs email_verification_token:transition:verify");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: EmailVerificationTokenState = entity.status.to_string().parse()
-        .unwrap_or(EmailVerificationTokenState::default());
+    let current_state: EmailVerificationTokenState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<serde_json::Value>::error("The stored state is not a state of this machine"))),
+    };
     let sm = EmailVerificationTokenStateMachine::from_state(current_state);
     if !sm.can_transition(EmailVerificationTokenTransition::Verify) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
+    // Guard `$context.verification_code_valid && expires_at > now()` not compiled (reads `$context.verification_code_valid`, which a row rule cannot); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Verified".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("verified".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("verify", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: EmailVerificationTokenResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<EmailVerificationToken, _>(response))))
@@ -291,24 +298,31 @@ pub async fn expire_transition(
         let allowed_roles = EmailVerificationTokenTransition::Expire.allowed_roles();
         let has_specific_perm = auth.permissions.iter().any(|p| p == "email_verification_token:transition:expire");
         let has_update_perm = auth.permissions.iter().any(|p| p == "email_verification_token:update");
-        if !has_specific_perm && !has_update_perm {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for expire transition")));
+        let _ = &allowed_roles;
+        if !has_specific_perm {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for expire transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "EmailVerificationToken", verb = "expire", code = "transition_by_update_permission", "a transition granted only by email_verification_token:update, running in shadow; it needs email_verification_token:transition:expire");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: EmailVerificationTokenState = entity.status.to_string().parse()
-        .unwrap_or(EmailVerificationTokenState::default());
+    let current_state: EmailVerificationTokenState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<serde_json::Value>::error("The stored state is not a state of this machine"))),
+    };
     let sm = EmailVerificationTokenStateMachine::from_state(current_state);
     if !sm.can_transition(EmailVerificationTokenTransition::Expire) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
+    // Guard `expires_at < now() && archived_at == null` not compiled (`archived_at` is not a field of EmailVerificationToken); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Expired".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("expired".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("expire", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: EmailVerificationTokenResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<EmailVerificationToken, _>(response))))
@@ -342,24 +356,30 @@ pub async fn revoke_transition(
         let has_specific_perm = auth.permissions.iter().any(|p| p == "email_verification_token:transition:revoke");
         let has_update_perm = auth.permissions.iter().any(|p| p == "email_verification_token:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
-        if !has_specific_perm && !has_update_perm && !has_role {
-            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for revoke transition")));
+        if !has_specific_perm && !has_role {
+            if !has_update_perm {
+                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for revoke transition")));
+            }
+            tracing::warn!(target: "backbone::write_guard", entity = "EmailVerificationToken", verb = "revoke", code = "transition_by_update_permission", "a transition granted only by email_verification_token:update, running in shadow; it needs email_verification_token:transition:revoke or a role of ["admin", "system"]");
         }
     }
 
     // Create state machine from entity's actual status and validate transition
-    let current_state: EmailVerificationTokenState = entity.status.to_string().parse()
-        .unwrap_or(EmailVerificationTokenState::default());
+    let current_state: EmailVerificationTokenState = match entity.status.to_string().parse() {
+        Ok(s) => s,
+        Err(_) => return (StatusCode::CONFLICT, Json(ApiResponse::<serde_json::Value>::error("The stored state is not a state of this machine"))),
+    };
     let sm = EmailVerificationTokenStateMachine::from_state(current_state);
     if !sm.can_transition(EmailVerificationTokenTransition::Revoke) {
         return (StatusCode::BAD_REQUEST, Json(ApiResponse::<serde_json::Value>::error("Transition not allowed from current state")));
     }
 
+    // Guard `$context.reason != null` not compiled (reads `$context.reason`, which a row rule cannot); the transition is not checked against it.
     // Apply transition via partial update
     let mut fields: HashMap<String, serde_json::Value> = HashMap::new();
-    fields.insert("status".to_string(), serde_json::Value::String("Revoked".to_string()));
+    fields.insert("status".to_string(), serde_json::Value::String("revoked".to_string()));
 
-    match service.partial_update(&id, fields).await {
+    match backbone_core::write_guard::as_transition("revoke", service.partial_update(&id, fields)).await {
         Ok(Some(updated)) => {
             let response: EmailVerificationTokenResponseDto = updated.into();
             (StatusCode::OK, Json(ApiResponse::ok(backbone_core::http::without_secrets::<EmailVerificationToken, _>(response))))

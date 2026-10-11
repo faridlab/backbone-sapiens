@@ -54,8 +54,13 @@ impl backbone_core::write_guard::WriteGuard<User> for UserRowRules {
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
-        // `username_format` (user.hook.yaml:74)
+        // `status` belongs to a state machine: only its verbs move it
+        if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
+            shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `username_format` (user.hook.yaml:75)
         if (create || update) && !r::holds(&r::matches(r::field(row, "username"), "^[a-zA-Z0-9_-]{3,50}$")) {
             shadow.push(Violation::new("username", "invalid_username_format", "Username must be 3-50 characters, alphanumeric with underscore/hyphen"));
         }

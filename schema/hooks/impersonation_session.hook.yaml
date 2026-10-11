@@ -9,6 +9,7 @@ model: impersonation_session.model.yaml
 # =============================================================================
 states:
   field: status
+  verbs: hand
 
   values:
     active:

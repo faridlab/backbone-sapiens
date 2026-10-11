@@ -54,8 +54,13 @@ impl backbone_core::write_guard::WriteGuard<UserSAMLLink> for UserSAMLLinkRowRul
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
-        // `provider_required` (user_saml_link.hook.yaml:60)
+        // `status` belongs to a state machine: only its verbs move it
+        if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
+            shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `provider_required` (user_saml_link.hook.yaml:61)
         if (create) && !r::holds(&r::is_not_null(r::field(row, "provider_id"))) {
             shadow.push(Violation::new("provider_id", "provider_required", "Provider ID is required"));
         }

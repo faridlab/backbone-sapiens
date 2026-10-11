@@ -9,6 +9,7 @@ model: user.model.yaml
 # =============================================================================
 states:
   field: status
+  verbs: hand
 
   values:
     pending_verification:

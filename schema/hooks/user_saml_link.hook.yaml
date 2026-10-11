@@ -9,6 +9,7 @@ model: user_saml_link.model.yaml
 # =============================================================================
 states:
   field: status
+  verbs: generated
 
   values:
     active:

@@ -54,12 +54,17 @@ impl backbone_core::write_guard::WriteGuard<MFADevice> for MFADeviceRowRules {
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
-        // `device_name_required` (mfa_device.hook.yaml:37)
+        // `status` belongs to a state machine: only its verbs move it
+        if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
+            shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `device_name_required` (mfa_device.hook.yaml:38)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "device_name")), r::ge(r::length(r::field(row, "device_name")), r::Val::Num(1.0_f64)))) {
             shadow.push(Violation::new("device_name", "device_name_required", "Device name is required"));
         }
-        // `secret_required` (mfa_device.hook.yaml:61)
+        // `secret_required` (mfa_device.hook.yaml:62)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "secret")), r::ge(r::length(r::field(row, "secret")), r::Val::Num(16.0_f64)))) {
             shadow.push(Violation::new("secret", "secret_required", "Device secret is required"));
         }

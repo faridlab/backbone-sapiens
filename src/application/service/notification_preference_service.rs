@@ -54,7 +54,12 @@ impl backbone_core::write_guard::WriteGuard<NotificationPreference> for Notifica
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        // `enabled` belongs to a state machine: only its verbs move it
+        if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["enabled"]) {
+            shadow.push(Violation::new("enabled", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
         // `digest_frequency_valid` (notification_preference.hook.yaml:40)
         if (create || update) && !r::holds(&r::in_list(r::field(row, "digest_frequency"), r::Val::List(vec![r::text("immediate"), r::text("hourly"), r::text("daily"), r::text("weekly")]))) {
             shadow.push(Violation::new("digest_frequency", "invalid_digest_frequency", "Invalid digest frequency. Valid: immediate, hourly, daily, weekly"));
