@@ -60,19 +60,19 @@ impl backbone_core::write_guard::WriteGuard<Profile> for ProfileRowRules {
         if (create || update) && !r::holds(&r::and(r::is_not_null(r::field(row, "first_name")), r::ge(r::length(r::field(row, "first_name")), r::Val::Num(1.0_f64)))) {
             shadow.push(Violation::new("first_name", "first_name_required", "First name is required"));
         }
-        // `phone_number_format` (profile.hook.yaml:22)
+        // `phone_number_format` (profile.hook.yaml:23)
         if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "phone_number")), r::matches(r::field(row, "phone_number"), "^\\+?[1-9]\\d{1,14}$"))) {
             shadow.push(Violation::new("phone_number", "invalid_phone_format", "Phone number must be in E.164 format"));
         }
-        // `profile_picture_url_valid` (profile.hook.yaml:28)
+        // `profile_picture_url_valid` (profile.hook.yaml:30)
         if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "profile_picture_url")), r::matches(r::field(row, "profile_picture_url"), "^https?://"))) {
             shadow.push(Violation::new("profile_picture_url", "invalid_url_format", "Profile picture URL must be a valid HTTP(S) URL"));
         }
-        // `valid_gender` (profile.hook.yaml:46)
+        // `valid_gender` (profile.hook.yaml:51)
         if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "gender")), r::in_list(r::field(row, "gender"), r::Val::List(vec![r::text("male"), r::text("female")])))) {
             shadow.push(Violation::new("gender", "invalid_gender", "Gender must be 'male' or 'female'"));
         }
-        // `dob_in_past` (profile.hook.yaml:52)
+        // `dob_in_past` (profile.hook.yaml:58)
         if (create || (update && r::changed(old.as_ref(), row, &["dob"]))) && !r::holds(&r::or(r::is_null(r::field(row, "dob")), r::lt(r::field(row, "dob"), r::at(ctx.at)))) {
             shadow.push(Violation::new("dob", "dob_in_future", "Date of birth must be in the past"));
         }

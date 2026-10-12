@@ -15,48 +15,56 @@ model: user.model.yaml  # Profile is defined in user.model.yaml
 rules:
   first_name_required:
     when: [create, update]
+    entity: Profile
     condition: "first_name != null && first_name.length >= 1"
     message: "First name is required"
     code: FIRST_NAME_REQUIRED
 
   phone_number_format:
     when: [create, update]
+    entity: Profile
     condition: "phone_number == null || phone_number matches '^\\+?[1-9]\\d{1,14}$'"
     message: "Phone number must be in E.164 format"
     code: INVALID_PHONE_FORMAT
 
   profile_picture_url_valid:
     when: [create, update]
+    entity: Profile
     condition: "profile_picture_url == null || profile_picture_url matches '^https?://'"
     message: "Profile picture URL must be a valid HTTP(S) URL"
     code: INVALID_URL_FORMAT
 
   user_exists:
     when: [create]
+    entity: Profile
     condition: "count(User, id == $this.user_id && metadata.deleted_at == null) == 1"
     message: "User not found or deleted"
     code: USER_NOT_FOUND
 
   unique_profile_per_user:
     when: [create]
+    entity: Profile
     condition: "count(Profile, user_id == $this.user_id) == 0"
     message: "Profile already exists for this user"
     code: PROFILE_EXISTS
 
   valid_gender:
     when: [create, update]
+    entity: Profile
     condition: "gender == null || gender in ['male', 'female']"
     message: "Gender must be 'male' or 'female'"
     code: INVALID_GENDER
 
   dob_in_past:
     when: [create, update]
+    entity: Profile
     condition: "dob == null || dob < now()"
     message: "Date of birth must be in the past"
     code: DOB_IN_FUTURE
 
   reasonable_age:
     when: [create, update]
+    entity: Profile
     condition: "dob == null || (now() - dob).years <= 150"
     message: "Date of birth is unreasonably old"
     code: DOB_UNREASONABLE
