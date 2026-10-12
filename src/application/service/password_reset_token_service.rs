@@ -61,11 +61,11 @@ impl backbone_core::write_guard::WriteGuard<PasswordResetToken> for PasswordRese
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["is_used"]) {
             shadow.push(Violation::new("is_used", "state_field_verbs_only", "the state field moves only through its verbs"));
         }
-        // `expires_in_future` (password_reset_token.hook.yaml:44)
+        // `expires_in_future` (password_reset_token.hook.yaml:46)
         if (create) && !r::holds(&r::gt(r::field(row, "expires_at"), r::at(ctx.at))) {
             shadow.push(Violation::new("expires_at", "invalid_expiry", "Token expiry must be in the future"));
         }
-        // `no_modify_used` (password_reset_token.hook.yaml:63)
+        // `no_modify_used` (password_reset_token.hook.yaml:65)
         if (update) && !r::holds(&r::eq(r::field(old_row, "is_used"), r::Val::Bool(false))) {
             shadow.push(Violation::new("is_used", "token_already_used", "Cannot modify used reset tokens"));
         }

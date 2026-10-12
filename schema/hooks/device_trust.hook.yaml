@@ -13,6 +13,8 @@ rules:
     condition: "count(DeviceTrust, user_id == $this.user_id && device_fingerprint == $this.device_fingerprint && id != $this.id && (metadata.deleted_at == null)) == 0"
     message: "Device already registered for this user"
     code: DUPLICATE_DEVICE
+    enforced_by: "migrations/20260426220013_create_device_trust_table.up.sql::idx_device_trusts_device_fingerprint"
+    justification: "Stricter than stated: the fingerprint is unique across all users, not per user, and soft-deleted rows block reuse."
 
   unique_device_name_per_user:
     when: [create, update]
@@ -133,34 +135,35 @@ triggers:
 # =============================================================================
 # PRIORITY 4: Scheduled Jobs and Background Tasks
 # =============================================================================
-jobs:
-  cleanup_expired_devices:
-    schedule: "0 1 * * *"  # Daily at 1 AM
-    actions:
-      - "find_and_revoke_expired_devices()"
-      - "log(device_trust.cleanup_expired, { revoked_count: $revoked_count })"
-
-  update_risk_scores:
-    schedule: "0 */2 * * *"  # Every 2 hours
-    actions:
-      - "analyze_device_risk_factors()"
-      - "update_suspicious_device_risk_scores()"
-      - "log(device_trust.risk_scores_updated, { updated_count: $updated_count })"
-
-  cleanup_unused_devices:
-    schedule: "0 3 * * 0"  # Weekly on Sunday at 3 AM
-    actions:
-      - "find_devices_not_used_for(90.days)"
-      - "send_warning_emails_for_unused_devices()"
-      - "revoke_long_unused_devices(365.days)"
-      - "log(device_trust.cleanup_unused, { revoked_count: $revoked_count })"
-
-  refresh_device_locations:
-    schedule: "0 4 * * *"  # Daily at 4 AM
-    actions:
-      - "update_device_locations_based_on_recent_activity()"
-      - "detect_suspicious_location_changes()"
-      - "log(device_trust.locations_refreshed, { updated_count: $updated_count, suspicious_count: $suspicious_count })"
+# Not read by the generator: the scheduled jobs this lifecycle expects, kept as documentation.
+# jobs:
+#   cleanup_expired_devices:
+#     schedule: "0 1 * * *"  # Daily at 1 AM
+#     actions:
+#       - "find_and_revoke_expired_devices()"
+#       - "log(device_trust.cleanup_expired, { revoked_count: $revoked_count })"
+#
+#   update_risk_scores:
+#     schedule: "0 */2 * * *"  # Every 2 hours
+#     actions:
+#       - "analyze_device_risk_factors()"
+#       - "update_suspicious_device_risk_scores()"
+#       - "log(device_trust.risk_scores_updated, { updated_count: $updated_count })"
+#
+#   cleanup_unused_devices:
+#     schedule: "0 3 * * 0"  # Weekly on Sunday at 3 AM
+#     actions:
+#       - "find_devices_not_used_for(90.days)"
+#       - "send_warning_emails_for_unused_devices()"
+#       - "revoke_long_unused_devices(365.days)"
+#       - "log(device_trust.cleanup_unused, { revoked_count: $revoked_count })"
+#
+#   refresh_device_locations:
+#     schedule: "0 4 * * *"  # Daily at 4 AM
+#     actions:
+#       - "update_device_locations_based_on_recent_activity()"
+#       - "detect_suspicious_location_changes()"
+#       - "log(device_trust.locations_refreshed, { updated_count: $updated_count, suspicious_count: $suspicious_count })"
 
 # =============================================================================
 # PRIORITY 5: Computed Fields

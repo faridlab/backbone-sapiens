@@ -118,18 +118,19 @@ triggers:
 # =============================================================================
 # PRIORITY 4: Scheduled Jobs and Background Tasks
 # =============================================================================
-jobs:
-  cleanup_expired_codes:
-    schedule: "0 2 * * *"  # Daily at 2 AM
-    actions:
-      - "find_and_archive_expired_codes()"
-      - "log(backup_codes.cleanup_expired, { deleted_count: $deleted_count })"
-
-  regenerate_if_low:
-    when: "usage_count <= 2"
-    actions:
-      - "check_user_mfa_requirement(user_id)"
-      - "regenerate_backup_codes_if_required(user_id, batch_id)"
+# Not read by the generator: the scheduled jobs this lifecycle expects, kept as documentation.
+# jobs:
+#   cleanup_expired_codes:
+#     schedule: "0 2 * * *"  # Daily at 2 AM
+#     actions:
+#       - "find_and_archive_expired_codes()"
+#       - "log(backup_codes.cleanup_expired, { deleted_count: $deleted_count })"
+#
+#   regenerate_if_low:
+#     when: "usage_count <= 2"
+#     actions:
+#       - "check_user_mfa_requirement(user_id)"
+#       - "regenerate_backup_codes_if_required(user_id, batch_id)"
 
 # =============================================================================
 # PRIORITY 5: Computed Fields

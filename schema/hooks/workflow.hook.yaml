@@ -234,65 +234,66 @@ triggers:
 # =============================================================================
 # PRIORITY 4: Scheduled Jobs and Background Tasks
 # =============================================================================
-jobs:
-  execute_scheduled_workflows:
-    schedule: "* * * * *"  # Every minute
-    actions:
-      - "find_due_scheduled_workflow_definitions()"
-      - "create_workflow_instances_for_schedules(due_definitions)"
-      - "execute_scheduled_workflow_instances(instances)"
-      - "log(workflow.scheduled_executed, { executed_count: $executed_count })"
-
-  process_event_based_triggers:
-    schedule: "* * * * *"  # Every minute
-    actions:
-      - "check_workflow_event_triggers()"
-      - "create_workflow_executions_for_events(triggered_events)"
-      - "log(workflow.event_triggered, { executions_created: $executions_created_count })"
-
-  check_workflow_timeouts:
-    schedule: "*/5 * * * *"  # Every 5 minutes
-    actions:
-      - "find_timeout_workflows()"
-      - "find_timeout_executions()"
-      - "handle_workflow_timeouts(timeout_workflows)"
-      - "handle_execution_timeouts(timeout_executions)"
-      - "log(workflow.timeouts_handled, { timeouts_handled: $timeouts_handled_count })"
-
-  cleanup_completed_workflows:
-    schedule: "0 2 * * *"  # Daily at 2 AM
-    actions:
-      - "find_workflows_older_than(90.days)"
-      - "find_executions_older_than(90.days)"
-      - "archive_completed_workflows(old_workflows)"
-      - "archive_completed_executions(old_executions)"
-      - "log(workflow.cleanup_completed, { archived_count: $archived_count })"
-
-  retry_failed_workflows:
-    schedule: "0 */2 * * *"  # Every 2 hours
-    actions:
-      - "find_retryable_failed_workflows()"
-      - "find_retryable_failed_executions()"
-      - "retry_failed_workflows(retryable_workflows)"
-      - "retry_failed_executions(retryable_executions)"
-      - "log(workflow.retries_completed, { retried_count: $retried_count })"
-
-  update_workflow_statistics:
-    schedule: "0 1 * * *"  # Daily at 1 AM
-    actions:
-      - "calculate_workflow_performance_metrics()"
-      - "update_workflow_statistics_dashboard()"
-      - "identify_workflow_bottlenecks()"
-      - "update_workflow_health_indicators()"
-      - "log(workflow.statistics_updated, { workflows_analyzed: $workflows_analyzed_count })"
-
-  process_webhook_triggers:
-    schedule: "* * * * *"  # Every minute
-    actions:
-      - "process_pending_workflow_webhooks()"
-      - "validate_webhook_signatures()"
-      - "create_workflows_from_valid_webhooks(valid_webhooks)"
-      - "log(workflow.webhooks_processed, { webhooks_processed: $webhooks_processed_count })"
+# Not read by the generator: the scheduled jobs this lifecycle expects, kept as documentation.
+# jobs:
+#   execute_scheduled_workflows:
+#     schedule: "* * * * *"  # Every minute
+#     actions:
+#       - "find_due_scheduled_workflow_definitions()"
+#       - "create_workflow_instances_for_schedules(due_definitions)"
+#       - "execute_scheduled_workflow_instances(instances)"
+#       - "log(workflow.scheduled_executed, { executed_count: $executed_count })"
+#
+#   process_event_based_triggers:
+#     schedule: "* * * * *"  # Every minute
+#     actions:
+#       - "check_workflow_event_triggers()"
+#       - "create_workflow_executions_for_events(triggered_events)"
+#       - "log(workflow.event_triggered, { executions_created: $executions_created_count })"
+#
+#   check_workflow_timeouts:
+#     schedule: "*/5 * * * *"  # Every 5 minutes
+#     actions:
+#       - "find_timeout_workflows()"
+#       - "find_timeout_executions()"
+#       - "handle_workflow_timeouts(timeout_workflows)"
+#       - "handle_execution_timeouts(timeout_executions)"
+#       - "log(workflow.timeouts_handled, { timeouts_handled: $timeouts_handled_count })"
+#
+#   cleanup_completed_workflows:
+#     schedule: "0 2 * * *"  # Daily at 2 AM
+#     actions:
+#       - "find_workflows_older_than(90.days)"
+#       - "find_executions_older_than(90.days)"
+#       - "archive_completed_workflows(old_workflows)"
+#       - "archive_completed_executions(old_executions)"
+#       - "log(workflow.cleanup_completed, { archived_count: $archived_count })"
+#
+#   retry_failed_workflows:
+#     schedule: "0 */2 * * *"  # Every 2 hours
+#     actions:
+#       - "find_retryable_failed_workflows()"
+#       - "find_retryable_failed_executions()"
+#       - "retry_failed_workflows(retryable_workflows)"
+#       - "retry_failed_executions(retryable_executions)"
+#       - "log(workflow.retries_completed, { retried_count: $retried_count })"
+#
+#   update_workflow_statistics:
+#     schedule: "0 1 * * *"  # Daily at 1 AM
+#     actions:
+#       - "calculate_workflow_performance_metrics()"
+#       - "update_workflow_statistics_dashboard()"
+#       - "identify_workflow_bottlenecks()"
+#       - "update_workflow_health_indicators()"
+#       - "log(workflow.statistics_updated, { workflows_analyzed: $workflows_analyzed_count })"
+#
+#   process_webhook_triggers:
+#     schedule: "* * * * *"  # Every minute
+#     actions:
+#       - "process_pending_workflow_webhooks()"
+#       - "validate_webhook_signatures()"
+#       - "create_workflows_from_valid_webhooks(valid_webhooks)"
+#       - "log(workflow.webhooks_processed, { webhooks_processed: $webhooks_processed_count })"
 
 # =============================================================================
 # PRIORITY 5: Computed Fields

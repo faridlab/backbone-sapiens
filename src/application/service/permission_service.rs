@@ -51,7 +51,7 @@ impl backbone_core::write_guard::WriteGuard<Permission> for PermissionRowRules {
                 return GuardOutcome::allow();
             };
             let mut shadow = Vec::new();
-            // `no_roles_on_delete` (permission.hook.yaml:30)
+            // `no_roles_on_delete` (permission.hook.yaml:32)
             if !r::holds(&r::eq(r::referencing("SELECT count(*) FROM role_permissions WHERE \"permission_id\" = $1::uuid", r::field(&old, "id")).await, r::Val::Num(0.0_f64))) {
                 shadow.push(Violation::new("", "permission_has_roles", "Cannot delete permission that is assigned to roles"));
             }

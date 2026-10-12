@@ -60,11 +60,11 @@ impl backbone_core::write_guard::WriteGuard<OAuthProvider> for OAuthProviderRowR
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
             shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
         }
-        // `valid_configuration` (oauth_provider.hook.yaml:40)
+        // `valid_configuration` (oauth_provider.hook.yaml:42)
         if (create || update) && !r::holds(&r::and(r::and(r::and(r::and(r::and(r::is_not_null(r::field(row, "client_id")), r::is_not_null(r::field(row, "client_secret"))), r::is_not_null(r::field(row, "redirect_uri"))), r::is_not_null(r::field(row, "authorization_url"))), r::is_not_null(r::field(row, "token_url"))), r::is_not_null(r::field(row, "user_info_url")))) {
             shadow.push(Violation::new("client_id", "incomplete_configuration", "Incomplete OAuth provider configuration"));
         }
-        // `scopes_not_empty` (oauth_provider.hook.yaml:52)
+        // `scopes_not_empty` (oauth_provider.hook.yaml:54)
         if (create || update) && !r::holds(&r::and(r::is_not_null(r::field(row, "scopes")), r::gt(r::length(r::field(row, "scopes")), r::Val::Num(0.0_f64)))) {
             shadow.push(Violation::new("scopes", "empty_scopes", "OAuth scopes cannot be empty"));
         }

@@ -139,52 +139,53 @@ triggers:
 # =============================================================================
 # PRIORITY 4: Scheduled Jobs and Background Tasks
 # =============================================================================
-jobs:
-  aggregate_hourly_metrics:
-    schedule: "0 * * * *"  # Every hour
-    actions:
-      - "aggregate_events_for_last_hour()"
-      - "calculate_hourly_metrics()"
-      - "update_real_time_dashboards()"
-      - "log(analytics.hourly_aggregation_completed, { metrics_updated: $metrics_count })"
-
-  aggregate_daily_metrics:
-    schedule: "0 1 * * *"  # Daily at 1 AM
-    actions:
-      - "aggregate_events_for_last_day()"
-      - "calculate_daily_metrics()"
-      - "generate_daily_reports()"
-      - "log(analytics.daily_aggregation_completed, { reports_generated: $reports_count })"
-
-  cleanup_old_events:
-    schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
-    actions:
-      - "find_events_older_than(90.days)"
-      - "archive_old_events(old_events)"
-      - "log(analytics.events_cleanup, { archived_count: $archived_count })"
-
-  generate_weekly_reports:
-    schedule: "0 3 * * 1"  # Weekly on Monday at 3 AM
-    actions:
-      - "generate_scheduled_weekly_reports()"
-      - "send_reports_to_subscribers()"
-      - "log(analytics.weekly_reports_completed, { reports_sent: $reports_sent_count })"
-
-  update_user_engagement:
-    schedule: "0 */6 * * *"  # Every 6 hours
-    actions:
-      - "calculate_user_engagement_scores()"
-      - "update_user_activity_segments()"
-      - "identify_churn_risk_users()"
-      - "log(analytics.engagement_updated, { users_updated: $users_updated_count })"
-
-  monitor_system_performance:
-    schedule: "*/5 * * * *"  # Every 5 minutes
-    actions:
-      - "collect_system_metrics()"
-      - "check_performance_thresholds()"
-      - "trigger_performance_alerts()"
-      - "update_system_health_dashboard()"
+# Not read by the generator: the scheduled jobs this lifecycle expects, kept as documentation.
+# jobs:
+#   aggregate_hourly_metrics:
+#     schedule: "0 * * * *"  # Every hour
+#     actions:
+#       - "aggregate_events_for_last_hour()"
+#       - "calculate_hourly_metrics()"
+#       - "update_real_time_dashboards()"
+#       - "log(analytics.hourly_aggregation_completed, { metrics_updated: $metrics_count })"
+#
+#   aggregate_daily_metrics:
+#     schedule: "0 1 * * *"  # Daily at 1 AM
+#     actions:
+#       - "aggregate_events_for_last_day()"
+#       - "calculate_daily_metrics()"
+#       - "generate_daily_reports()"
+#       - "log(analytics.daily_aggregation_completed, { reports_generated: $reports_count })"
+#
+#   cleanup_old_events:
+#     schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
+#     actions:
+#       - "find_events_older_than(90.days)"
+#       - "archive_old_events(old_events)"
+#       - "log(analytics.events_cleanup, { archived_count: $archived_count })"
+#
+#   generate_weekly_reports:
+#     schedule: "0 3 * * 1"  # Weekly on Monday at 3 AM
+#     actions:
+#       - "generate_scheduled_weekly_reports()"
+#       - "send_reports_to_subscribers()"
+#       - "log(analytics.weekly_reports_completed, { reports_sent: $reports_sent_count })"
+#
+#   update_user_engagement:
+#     schedule: "0 */6 * * *"  # Every 6 hours
+#     actions:
+#       - "calculate_user_engagement_scores()"
+#       - "update_user_activity_segments()"
+#       - "identify_churn_risk_users()"
+#       - "log(analytics.engagement_updated, { users_updated: $users_updated_count })"
+#
+#   monitor_system_performance:
+#     schedule: "*/5 * * * *"  # Every 5 minutes
+#     actions:
+#       - "collect_system_metrics()"
+#       - "check_performance_thresholds()"
+#       - "trigger_performance_alerts()"
+#       - "update_system_health_dashboard()"
 
 # =============================================================================
 # PRIORITY 5: Computed Fields

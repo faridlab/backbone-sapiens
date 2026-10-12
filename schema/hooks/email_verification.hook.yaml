@@ -71,6 +71,8 @@ rules:
     condition: "count(EmailVerification, user_id == $this.user_id && token_type == $this.token_type && verified_at == null && (metadata.deleted_at == null || archived_at == null)) == 0"
     message: "User already has a pending verification token of this type"
     code: PENDING_TOKEN_EXISTS
+    enforced_by: "migrations/20260426220017_create_email_verification_token_table.up.sql::idx_email_verification_tokens_user_id_token_type"
+    justification: "Stricter than stated: revoked and expired tokens keep verified_at null and still hold the slot, so the module's resend_verification (revoke, then insert) always fails."
 
   valid_email:
     when: [create]

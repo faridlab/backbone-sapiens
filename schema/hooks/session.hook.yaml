@@ -44,6 +44,7 @@ rules:
     condition: "count(Session, token_hash == $this.token_hash) == 0"
     message: "Token hash collision detected"
     code: TOKEN_HASH_COLLISION
+    enforced_by: "migrations/20260426220003_create_session_table.up.sql::idx_sessions_token_hash"
 
   expires_in_future:
     when: [create]

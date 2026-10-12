@@ -60,19 +60,19 @@ impl backbone_core::write_guard::WriteGuard<EmailVerificationToken> for EmailVer
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
             shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
         }
-        // `valid_email` (email_verification.hook.yaml:75)
+        // `valid_email` (email_verification.hook.yaml:77)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "email")), r::matches(r::field(row, "email"), "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))) {
             shadow.push(Violation::new("email", "invalid_email", "Invalid email format"));
         }
-        // `valid_expiry` (email_verification.hook.yaml:81)
+        // `valid_expiry` (email_verification.hook.yaml:83)
         if (create) && !r::holds(&r::gt(r::field(row, "expires_at"), r::at(ctx.at))) {
             shadow.push(Violation::new("expires_at", "invalid_expiry", "Expiry time must be in the future"));
         }
-        // `token_format` (email_verification.hook.yaml:87)
+        // `token_format` (email_verification.hook.yaml:89)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "token")), r::ge(r::length(r::field(row, "token")), r::Val::Num(32.0_f64)))) {
             shadow.push(Violation::new("token", "invalid_token", "Invalid token format"));
         }
-        // `token_type_valid` (email_verification.hook.yaml:93)
+        // `token_type_valid` (email_verification.hook.yaml:95)
         if (create) && !r::holds(&r::in_list(r::field(row, "token_type"), r::Val::List(vec![r::text("account_creation"), r::text("email_change"), r::text("password_reset"), r::text("account_reactivation")]))) {
             shadow.push(Violation::new("token_type", "invalid_token_type", "Invalid verification token type"));
         }

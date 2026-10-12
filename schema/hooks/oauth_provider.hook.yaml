@@ -36,6 +36,8 @@ rules:
     condition: "count(OAuthProvider, provider_name == $this.provider_name && (metadata.deleted_at == null)) == 0"
     message: "OAuth provider already exists"
     code: PROVIDER_ALREADY_EXISTS
+    enforced_by: "migrations/20260426220027_create_o_auth_provider_table.up.sql::idx_oauth_providers_provider_name"
+    justification: "Counts soft-deleted providers."
 
   valid_configuration:
     when: [create, update]

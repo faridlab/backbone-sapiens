@@ -89,12 +89,16 @@ rules:
     condition: "count(User, email == $this.email && id != $this.id && metadata.deleted_at == null) == 0"
     message: "Email is already registered"
     code: EMAIL_ALREADY_EXISTS
+    enforced_by: "migrations/20260426220002_create_user_table.up.sql::idx_users_email"
+    justification: "The index compares case-sensitively and counts soft-deleted users, so a deleted user's email cannot be reused; a duplicate answers 409 with the database text, never EMAIL_ALREADY_EXISTS."
 
   unique_username:
     when: [create, update]
     condition: "count(User, username == $this.username && id != $this.id && metadata.deleted_at == null) == 0"
     message: "Username is already taken"
     code: USERNAME_ALREADY_EXISTS
+    enforced_by: "migrations/20260426220002_create_user_table.up.sql::idx_users_username"
+    justification: "Counts soft-deleted users; a duplicate answers with the database text."
 
   password_strength:
     when: [create]

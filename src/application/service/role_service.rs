@@ -51,7 +51,7 @@ impl backbone_core::write_guard::WriteGuard<Role> for RoleRowRules {
                 return GuardOutcome::allow();
             };
             let mut shadow = Vec::new();
-            // `no_users_on_delete` (role.hook.yaml:31)
+            // `no_users_on_delete` (role.hook.yaml:33)
             if !r::holds(&r::eq(r::referencing("SELECT count(*) FROM user_roles WHERE \"role_id\" = $1::uuid", r::field(&old, "id")).await, r::Val::Num(0.0_f64))) {
                 shadow.push(Violation::new("", "role_has_users", "Cannot delete role that is assigned to users. Remove all user assignments first."));
             }
@@ -66,7 +66,7 @@ impl backbone_core::write_guard::WriteGuard<Role> for RoleRowRules {
         };
         let row = &row;
         let mut shadow = Vec::new();
-        // `reserved_names` (role.hook.yaml:37)
+        // `reserved_names` (role.hook.yaml:39)
         if (create || update) && !r::holds(&r::not_in(r::field(row, "name"), r::Val::List(vec![r::text("SYSTEM"), r::text("ROOT"), r::text("ANONYMOUS")]))) {
             shadow.push(Violation::new("name", "reserved_role_name", "This role name is reserved"));
         }

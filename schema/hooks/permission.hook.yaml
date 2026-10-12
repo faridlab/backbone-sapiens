@@ -20,6 +20,8 @@ rules:
     condition: "count(Permission, name == $this.name && id != $this.id && metadata.deleted_at == null) == 0"
     message: "Permission already exists"
     code: PERMISSION_EXISTS
+    enforced_by: "migrations/20260426220014_create_permission_table.up.sql::idx_permissions_name"
+    justification: "Counts soft-deleted permissions."
 
   resource_matches_name:
     when: [create, update]

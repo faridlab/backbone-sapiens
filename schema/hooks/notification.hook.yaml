@@ -142,42 +142,43 @@ triggers:
 # =============================================================================
 # PRIORITY 4: Scheduled Jobs and Background Tasks
 # =============================================================================
-jobs:
-  process_notification_queue:
-    schedule: "* * * * *"  # Every minute
-    actions:
-      - "get_pending_notifications()"
-      - "process_notifications_by_channel(pending)"
-      - "update_queue_status()"
-
-  retry_failed_notifications:
-    schedule: "*/5 * * * *"  # Every 5 minutes
-    actions:
-      - "get_failed_notifications_for_retry()"
-      - "retry_failed_notifications(notifications)"
-      - "log(notification.retry_completed, { retried_count: $retried_count })"
-
-  cleanup_expired_notifications:
-    schedule: "0 1 * * *"  # Daily at 1 AM
-    actions:
-      - "find_expired_notifications()"
-      - "archive_or_delete_expired(expired)"
-      - "log(notification.cleanup_expired, { cleaned_count: $cleaned_count })"
-
-  cleanup_read_notifications:
-    schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
-    actions:
-      - "find_notifications_read_before(30.days)"
-      - "archive_old_read_notifications(old_read)"
-      - "log(notification.cleanup_read, { archived_count: $archived_count })"
-
-  aggregate_notifications:
-    schedule: "0 */6 * * *"  # Every 6 hours
-    actions:
-      - "find_batchable_notifications()"
-      - "create_digest_notifications(batchable)"
-      - "mark_notifications_as_batched(batchable)"
-      - "log(notification.aggregation_completed, { batched_count: $batched_count })"
+# Not read by the generator: the scheduled jobs this lifecycle expects, kept as documentation.
+# jobs:
+#   process_notification_queue:
+#     schedule: "* * * * *"  # Every minute
+#     actions:
+#       - "get_pending_notifications()"
+#       - "process_notifications_by_channel(pending)"
+#       - "update_queue_status()"
+#
+#   retry_failed_notifications:
+#     schedule: "*/5 * * * *"  # Every 5 minutes
+#     actions:
+#       - "get_failed_notifications_for_retry()"
+#       - "retry_failed_notifications(notifications)"
+#       - "log(notification.retry_completed, { retried_count: $retried_count })"
+#
+#   cleanup_expired_notifications:
+#     schedule: "0 1 * * *"  # Daily at 1 AM
+#     actions:
+#       - "find_expired_notifications()"
+#       - "archive_or_delete_expired(expired)"
+#       - "log(notification.cleanup_expired, { cleaned_count: $cleaned_count })"
+#
+#   cleanup_read_notifications:
+#     schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
+#     actions:
+#       - "find_notifications_read_before(30.days)"
+#       - "archive_old_read_notifications(old_read)"
+#       - "log(notification.cleanup_read, { archived_count: $archived_count })"
+#
+#   aggregate_notifications:
+#     schedule: "0 */6 * * *"  # Every 6 hours
+#     actions:
+#       - "find_batchable_notifications()"
+#       - "create_digest_notifications(batchable)"
+#       - "mark_notifications_as_batched(batchable)"
+#       - "log(notification.aggregation_completed, { batched_count: $batched_count })"
 
 # =============================================================================
 # PRIORITY 5: Computed Fields

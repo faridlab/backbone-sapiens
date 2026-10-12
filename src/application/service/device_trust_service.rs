@@ -55,15 +55,15 @@ impl backbone_core::write_guard::WriteGuard<DeviceTrust> for DeviceTrustRowRules
         };
         let row = &row;
         let mut shadow = Vec::new();
-        // `valid_risk_score` (device_trust.hook.yaml:23)
+        // `valid_risk_score` (device_trust.hook.yaml:25)
         if (create || update) && !r::holds(&r::and(r::ge(r::field(row, "risk_score"), r::Val::Num(0.0_f64)), r::le(r::field(row, "risk_score"), r::Val::Num(1.0_f64)))) {
             shadow.push(Violation::new("risk_score", "invalid_risk_score", "Risk score must be between 0.0 and 1.0"));
         }
-        // `valid_trust_level` (device_trust.hook.yaml:29)
+        // `valid_trust_level` (device_trust.hook.yaml:31)
         if (create || update) && !r::holds(&r::in_list(r::field(row, "trust_level"), r::Val::List(vec![r::text("temporary"), r::text("standard"), r::text("trusted"), r::text("permanent")]))) {
             shadow.push(Violation::new("trust_level", "invalid_trust_level", "Invalid trust level"));
         }
-        // `valid_device_type` (device_trust.hook.yaml:35)
+        // `valid_device_type` (device_trust.hook.yaml:37)
         if (create || update) && !r::holds(&r::in_list(r::field(row, "device_type"), r::Val::List(vec![r::text("desktop"), r::text("laptop"), r::text("mobile"), r::text("tablet"), r::text("browser"), r::text("application")]))) {
             shadow.push(Violation::new("device_type", "invalid_device_type", "Invalid device type"));
         }

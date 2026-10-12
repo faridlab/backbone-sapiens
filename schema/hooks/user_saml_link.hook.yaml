@@ -51,6 +51,8 @@ rules:
     condition: "count(UserSAMLLink, provider_id == $this.provider_id && saml_user_id == $this.saml_user_id && status == 'active') == 0"
     message: "SAML user ID is already linked to another account"
     code: SAML_USER_ALREADY_LINKED
+    enforced_by: "migrations/20260426220055_create_user_saml_link_table.up.sql::idx_user_saml_links_provider_id_name_id"
+    justification: "The column is name_id, not saml_user_id; the index ignores the link's status."
 
   saml_user_id_required:
     when: [create]

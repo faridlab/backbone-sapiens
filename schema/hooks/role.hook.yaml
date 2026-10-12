@@ -20,6 +20,8 @@ rules:
     condition: "count(Role, name == $this.name && id != $this.id && metadata.deleted_at == null) == 0"
     message: "Role name already exists"
     code: ROLE_NAME_EXISTS
+    enforced_by: "migrations/20260426220029_create_role_table.up.sql::idx_roles_name"
+    justification: "Counts soft-deleted roles."
 
   single_default_role:
     when: [create, update]
