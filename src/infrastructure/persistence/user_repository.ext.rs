@@ -59,7 +59,9 @@ impl UserRepository {
     /// Return the role names assigned to a user (via user_roles → roles join).
     pub async fn lookup_user_roles(&self, user_id: Uuid) -> Vec<String> {
         let result: Result<Vec<(String,)>, _> = sqlx::query_as(
-            "SELECT r.name FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = $1",
+            // A revoked grant (soft-deleted user_role) or a deleted role grants nothing.
+            "SELECT r.name FROM roles r JOIN user_roles ur ON r.id = ur.role_id \
+             WHERE ur.user_id = $1 AND (ur.metadata->>'deleted_at') IS NULL AND (r.metadata->>'deleted_at') IS NULL",
         )
         .bind(user_id)
         .fetch_all(self.pool())
