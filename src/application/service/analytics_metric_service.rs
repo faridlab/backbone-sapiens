@@ -32,9 +32,10 @@ pub type AnalyticsMetricService = GenericCrudService<
     AnalyticsMetricRepository,
 >;
 
-/// The row rules the schema declares for AnalyticsMetric, checked against the row a create or
-/// update would store. The generated build attaches it to [`AnalyticsMetricService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for AnalyticsMetric, checked against the row a create or update
+/// would store. The generated build attaches it to [`AnalyticsMetricService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct AnalyticsMetricRowRules;
 
 #[async_trait::async_trait]
@@ -54,12 +55,26 @@ impl backbone_core::write_guard::WriteGuard<AnalyticsMetric> for AnalyticsMetric
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `metric_name_required` (@required on AnalyticsMetric.metric_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["metric_name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "metric_name")), r::not(r::is_empty(r::trim(r::field(row, "metric_name")))))) {
+            refuse.push(Violation::new("metric_name", "required", "metric_name is required"));
+        }
+        // `metric_name_max_length` (@max(100) on AnalyticsMetric.metric_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["metric_name"]))) && !r::holds(&r::le(r::length(r::field(row, "metric_name")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("metric_name", "max_length", "metric_name must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `unit_max_length` (@max(50) on AnalyticsMetric.unit)
+        if (create || (update && r::changed(old.as_ref(), row, &["unit"]))) && !r::holds(&r::le(r::length(r::field(row, "unit")), r::Val::Num(50.0_f64))) {
+            shadow.push(Violation::new("unit", "max_length", "unit must be at most 50 characters").with_param("max", 50_i64));
+        }
         // `valid_metric_type` (analytics.hook.yaml:23)
         if (create) && !r::holds(&r::in_list(r::field(row, "metric_type"), r::Val::List(vec![r::text("counter"), r::text("gauge"), r::text("histogram"), r::text("timer")]))) {
             shadow.push(Violation::new("metric_type", "invalid_metric_type", "Invalid metric type"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

@@ -32,3 +32,45 @@ pub type EffectivePermissionCacheService = GenericCrudService<
     EffectivePermissionCacheRepository,
 >;
 
+/// The rules the schema declares for EffectivePermissionCache, checked against the row a create or update
+/// would store. The generated build attaches it to [`EffectivePermissionCacheService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct EffectivePermissionCacheRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<EffectivePermissionCache> for EffectivePermissionCacheRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, EffectivePermissionCache>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `user_id_required` (@required on EffectivePermissionCache.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `permission_key_required` (@required on EffectivePermissionCache.permission_key)
+        if (create || (update && r::changed(old.as_ref(), row, &["permission_key"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "permission_key")), r::not(r::is_empty(r::trim(r::field(row, "permission_key")))))) {
+            refuse.push(Violation::new("permission_key", "required", "permission_key is required"));
+        }
+        // `permission_key_max_length` (@max(255) on EffectivePermissionCache.permission_key)
+        if (create || (update && r::changed(old.as_ref(), row, &["permission_key"]))) && !r::holds(&r::le(r::length(r::field(row, "permission_key")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("permission_key", "max_length", "permission_key must be at most 255 characters").with_param("max", 255_i64));
+        }
+        GuardOutcome { refuse, shadow }
+    }
+}
+

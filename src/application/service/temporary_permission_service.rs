@@ -32,9 +32,10 @@ pub type TemporaryPermissionService = GenericCrudService<
     TemporaryPermissionRepository,
 >;
 
-/// The row rules the schema declares for TemporaryPermission, checked against the row a create or
-/// update would store. The generated build attaches it to [`TemporaryPermissionService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for TemporaryPermission, checked against the row a create or update
+/// would store. The generated build attaches it to [`TemporaryPermissionService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct TemporaryPermissionRowRules;
 
 #[async_trait::async_trait]
@@ -56,9 +57,26 @@ impl backbone_core::write_guard::WriteGuard<TemporaryPermission> for TemporaryPe
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `status` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
             shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `user_id_required` (@required on TemporaryPermission.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `permission_id_required` (@required on TemporaryPermission.permission_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["permission_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "permission_id")), r::not(r::is_empty(r::trim(r::field(row, "permission_id")))))) {
+            refuse.push(Violation::new("permission_id", "required", "permission_id is required"));
+        }
+        // `granted_by_required` (@required on TemporaryPermission.granted_by)
+        if (create || (update && r::changed(old.as_ref(), row, &["granted_by"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "granted_by")), r::not(r::is_empty(r::trim(r::field(row, "granted_by")))))) {
+            refuse.push(Violation::new("granted_by", "required", "granted_by is required"));
+        }
+        // `reason_max_length` (@max(1000) on TemporaryPermission.reason)
+        if (create || (update && r::changed(old.as_ref(), row, &["reason"]))) && !r::holds(&r::le(r::length(r::field(row, "reason")), r::Val::Num(1000.0_f64))) {
+            shadow.push(Violation::new("reason", "max_length", "reason must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `expires_after_granted` (temporary_permission.hook.yaml:66)
         if (create) && !r::holds(&r::gt(r::field(row, "expires_at"), r::field(row, "granted_at"))) {
@@ -72,7 +90,7 @@ impl backbone_core::write_guard::WriteGuard<TemporaryPermission> for TemporaryPe
         if (update) && !r::holds(&r::is_null(r::field(row, "revoked_at"))) {
             shadow.push(Violation::new("revoked_at", "permission_revoked", "Cannot modify a revoked or expired permission"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

@@ -32,3 +32,69 @@ pub type RoleAssignmentService = GenericCrudService<
     RoleAssignmentRepository,
 >;
 
+/// The rules the schema declares for RoleAssignment, checked against the row a create or update
+/// would store. The generated build attaches it to [`RoleAssignmentService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct RoleAssignmentRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<RoleAssignment> for RoleAssignmentRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, RoleAssignment>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `user_id_required` (@required on RoleAssignment.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `role_id_required` (@required on RoleAssignment.role_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["role_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "role_id")), r::not(r::is_empty(r::trim(r::field(row, "role_id")))))) {
+            refuse.push(Violation::new("role_id", "required", "role_id is required"));
+        }
+        // `assigned_by_required` (@required on RoleAssignment.assigned_by)
+        if (create || (update && r::changed(old.as_ref(), row, &["assigned_by"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "assigned_by")), r::not(r::is_empty(r::trim(r::field(row, "assigned_by")))))) {
+            refuse.push(Violation::new("assigned_by", "required", "assigned_by is required"));
+        }
+        // `reason_max_length` (@max(500) on RoleAssignment.reason)
+        if (create || (update && r::changed(old.as_ref(), row, &["reason"]))) && !r::holds(&r::le(r::length(r::field(row, "reason")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("reason", "max_length", "reason must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `priority_min` (@min(1) on RoleAssignment.priority)
+        if (create || (update && r::changed(old.as_ref(), row, &["priority"]))) && !r::holds(&r::ge(r::field(row, "priority"), r::Val::Num(1.0_f64))) {
+            shadow.push(Violation::new("priority", "min", "priority must be at least 1").with_param("min", 1_i64));
+        }
+        // `priority_max` (@max(100) on RoleAssignment.priority)
+        if (create || (update && r::changed(old.as_ref(), row, &["priority"]))) && !r::holds(&r::le(r::field(row, "priority"), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("priority", "max", "priority must be at most 100").with_param("max", 100_i64));
+        }
+        // `usage_count_non_negative` (@non_negative on RoleAssignment.usage_count)
+        if (create || (update && r::changed(old.as_ref(), row, &["usage_count"]))) && !r::holds(&r::ge(r::field(row, "usage_count"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("usage_count", "non_negative", "usage_count must not be negative"));
+        }
+        // `renewal_period_days_min` (@min(1) on RoleAssignment.renewal_period_days)
+        if (create || (update && r::changed(old.as_ref(), row, &["renewal_period_days"]))) && !r::holds(&r::ge(r::field(row, "renewal_period_days"), r::Val::Num(1.0_f64))) {
+            shadow.push(Violation::new("renewal_period_days", "min", "renewal_period_days must be at least 1").with_param("min", 1_i64));
+        }
+        // `renewal_period_days_max` (@max(365) on RoleAssignment.renewal_period_days)
+        if (create || (update && r::changed(old.as_ref(), row, &["renewal_period_days"]))) && !r::holds(&r::le(r::field(row, "renewal_period_days"), r::Val::Num(365.0_f64))) {
+            shadow.push(Violation::new("renewal_period_days", "max", "renewal_period_days must be at most 365").with_param("max", 365_i64));
+        }
+        GuardOutcome { refuse, shadow }
+    }
+}
+

@@ -32,9 +32,10 @@ pub type SAMLProviderService = GenericCrudService<
     SAMLProviderRepository,
 >;
 
-/// The row rules the schema declares for SAMLProvider, checked against the row a create or
-/// update would store. The generated build attaches it to [`SAMLProviderService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for SAMLProvider, checked against the row a create or update
+/// would store. The generated build attaches it to [`SAMLProviderService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct SAMLProviderRowRules;
 
 #[async_trait::async_trait]
@@ -56,9 +57,66 @@ impl backbone_core::write_guard::WriteGuard<SAMLProvider> for SAMLProviderRowRul
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `status` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
             shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `name_required` (@required on SAMLProvider.name)
+        if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "name")), r::not(r::is_empty(r::trim(r::field(row, "name")))))) {
+            refuse.push(Violation::new("name", "required", "name is required"));
+        }
+        // `name_max_length` (@max(100) on SAMLProvider.name)
+        if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::le(r::length(r::field(row, "name")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("name", "max_length", "name must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `display_name_required` (@required on SAMLProvider.display_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["display_name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "display_name")), r::not(r::is_empty(r::trim(r::field(row, "display_name")))))) {
+            refuse.push(Violation::new("display_name", "required", "display_name is required"));
+        }
+        // `display_name_max_length` (@max(200) on SAMLProvider.display_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["display_name"]))) && !r::holds(&r::le(r::length(r::field(row, "display_name")), r::Val::Num(200.0_f64))) {
+            shadow.push(Violation::new("display_name", "max_length", "display_name must be at most 200 characters").with_param("max", 200_i64));
+        }
+        // `entity_id_required` (@required on SAMLProvider.entity_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["entity_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "entity_id")), r::not(r::is_empty(r::trim(r::field(row, "entity_id")))))) {
+            refuse.push(Violation::new("entity_id", "required", "entity_id is required"));
+        }
+        // `entity_id_max_length` (@max(500) on SAMLProvider.entity_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["entity_id"]))) && !r::holds(&r::le(r::length(r::field(row, "entity_id")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("entity_id", "max_length", "entity_id must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `sso_url_required` (@required on SAMLProvider.sso_url)
+        if (create || (update && r::changed(old.as_ref(), row, &["sso_url"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "sso_url")), r::not(r::is_empty(r::trim(r::field(row, "sso_url")))))) {
+            refuse.push(Violation::new("sso_url", "required", "sso_url is required"));
+        }
+        // `sso_url_max_length` (@max(500) on SAMLProvider.sso_url)
+        if (create || (update && r::changed(old.as_ref(), row, &["sso_url"]))) && !r::holds(&r::le(r::length(r::field(row, "sso_url")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("sso_url", "max_length", "sso_url must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `slo_url_max_length` (@max(500) on SAMLProvider.slo_url)
+        if (create || (update && r::changed(old.as_ref(), row, &["slo_url"]))) && !r::holds(&r::le(r::length(r::field(row, "slo_url")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("slo_url", "max_length", "slo_url must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `certificate_required` (@required on SAMLProvider.certificate)
+        if (create || (update && r::changed(old.as_ref(), row, &["certificate"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "certificate")), r::not(r::is_empty(r::trim(r::field(row, "certificate")))))) {
+            refuse.push(Violation::new("certificate", "required", "certificate is required"));
+        }
+        // `acs_url_required` (@required on SAMLProvider.acs_url)
+        if (create || (update && r::changed(old.as_ref(), row, &["acs_url"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "acs_url")), r::not(r::is_empty(r::trim(r::field(row, "acs_url")))))) {
+            refuse.push(Violation::new("acs_url", "required", "acs_url is required"));
+        }
+        // `acs_url_max_length` (@max(500) on SAMLProvider.acs_url)
+        if (create || (update && r::changed(old.as_ref(), row, &["acs_url"]))) && !r::holds(&r::le(r::length(r::field(row, "acs_url")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("acs_url", "max_length", "acs_url must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `sls_url_max_length` (@max(500) on SAMLProvider.sls_url)
+        if (create || (update && r::changed(old.as_ref(), row, &["sls_url"]))) && !r::holds(&r::le(r::length(r::field(row, "sls_url")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("sls_url", "max_length", "sls_url must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `name_id_format_max_length` (@max(500) on SAMLProvider.name_id_format)
+        if (create || (update && r::changed(old.as_ref(), row, &["name_id_format"]))) && !r::holds(&r::le(r::length(r::field(row, "name_id_format")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("name_id_format", "max_length", "name_id_format must be at most 500 characters").with_param("max", 500_i64));
         }
         // `name_required` (saml_provider.hook.yaml:46)
         if (create || update) && !r::holds(&r::and(r::is_not_null(r::field(row, "name")), r::ge(r::length(r::field(row, "name")), r::Val::Num(3.0_f64)))) {
@@ -76,7 +134,7 @@ impl backbone_core::write_guard::WriteGuard<SAMLProvider> for SAMLProviderRowRul
         if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "name_id_format")), r::in_list(r::field(row, "name_id_format"), r::Val::List(vec![r::text("urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"), r::text("urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"), r::text("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"), r::text("urn:oasis:names:tc:SAML:2.0:nameid-format:transient")])))) {
             shadow.push(Violation::new("name_id_format", "name_id_format_invalid", "Invalid NameID format"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

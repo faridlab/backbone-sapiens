@@ -32,9 +32,10 @@ pub type NotificationPreferenceService = GenericCrudService<
     NotificationPreferenceRepository,
 >;
 
-/// The row rules the schema declares for NotificationPreference, checked against the row a create or
-/// update would store. The generated build attaches it to [`NotificationPreferenceService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for NotificationPreference, checked against the row a create or update
+/// would store. The generated build attaches it to [`NotificationPreferenceService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct NotificationPreferenceRowRules;
 
 #[async_trait::async_trait]
@@ -56,15 +57,40 @@ impl backbone_core::write_guard::WriteGuard<NotificationPreference> for Notifica
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `enabled` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["enabled"]) {
             shadow.push(Violation::new("enabled", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `user_id_required` (@required on NotificationPreference.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `notification_type_required` (@required on NotificationPreference.notification_type)
+        if (create || (update && r::changed(old.as_ref(), row, &["notification_type"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "notification_type")), r::not(r::is_empty(r::trim(r::field(row, "notification_type")))))) {
+            refuse.push(Violation::new("notification_type", "required", "notification_type is required"));
+        }
+        // `notification_type_max_length` (@max(100) on NotificationPreference.notification_type)
+        if (create || (update && r::changed(old.as_ref(), row, &["notification_type"]))) && !r::holds(&r::le(r::length(r::field(row, "notification_type")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("notification_type", "max_length", "notification_type must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `quiet_hours_start_max_length` (@max(5) on NotificationPreference.quiet_hours_start)
+        if (create || (update && r::changed(old.as_ref(), row, &["quiet_hours_start"]))) && !r::holds(&r::le(r::length(r::field(row, "quiet_hours_start")), r::Val::Num(5.0_f64))) {
+            shadow.push(Violation::new("quiet_hours_start", "max_length", "quiet_hours_start must be at most 5 characters").with_param("max", 5_i64));
+        }
+        // `quiet_hours_end_max_length` (@max(5) on NotificationPreference.quiet_hours_end)
+        if (create || (update && r::changed(old.as_ref(), row, &["quiet_hours_end"]))) && !r::holds(&r::le(r::length(r::field(row, "quiet_hours_end")), r::Val::Num(5.0_f64))) {
+            shadow.push(Violation::new("quiet_hours_end", "max_length", "quiet_hours_end must be at most 5 characters").with_param("max", 5_i64));
+        }
+        // `quiet_timezone_max_length` (@max(50) on NotificationPreference.quiet_timezone)
+        if (create || (update && r::changed(old.as_ref(), row, &["quiet_timezone"]))) && !r::holds(&r::le(r::length(r::field(row, "quiet_timezone")), r::Val::Num(50.0_f64))) {
+            shadow.push(Violation::new("quiet_timezone", "max_length", "quiet_timezone must be at most 50 characters").with_param("max", 50_i64));
         }
         // `digest_frequency_valid` (notification_preference.hook.yaml:40)
         if (create || update) && !r::holds(&r::in_list(r::field(row, "digest_frequency"), r::Val::List(vec![r::text("immediate"), r::text("hourly"), r::text("daily"), r::text("weekly")]))) {
             shadow.push(Violation::new("digest_frequency", "invalid_digest_frequency", "Invalid digest frequency. Valid: immediate, hourly, daily, weekly"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

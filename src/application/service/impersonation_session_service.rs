@@ -32,9 +32,10 @@ pub type ImpersonationSessionService = GenericCrudService<
     ImpersonationSessionRepository,
 >;
 
-/// The row rules the schema declares for ImpersonationSession, checked against the row a create or
-/// update would store. The generated build attaches it to [`ImpersonationSessionService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for ImpersonationSession, checked against the row a create or update
+/// would store. The generated build attaches it to [`ImpersonationSessionService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct ImpersonationSessionRowRules;
 
 #[async_trait::async_trait]
@@ -56,9 +57,46 @@ impl backbone_core::write_guard::WriteGuard<ImpersonationSession> for Impersonat
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `status` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
             shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `admin_id_required` (@required on ImpersonationSession.admin_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["admin_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "admin_id")), r::not(r::is_empty(r::trim(r::field(row, "admin_id")))))) {
+            refuse.push(Violation::new("admin_id", "required", "admin_id is required"));
+        }
+        // `target_user_id_required` (@required on ImpersonationSession.target_user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["target_user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "target_user_id")), r::not(r::is_empty(r::trim(r::field(row, "target_user_id")))))) {
+            refuse.push(Violation::new("target_user_id", "required", "target_user_id is required"));
+        }
+        // `session_id_required` (@required on ImpersonationSession.session_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["session_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "session_id")), r::not(r::is_empty(r::trim(r::field(row, "session_id")))))) {
+            refuse.push(Violation::new("session_id", "required", "session_id is required"));
+        }
+        // `max_duration_minutes_min` (@min(1) on ImpersonationSession.max_duration_minutes)
+        if (create || (update && r::changed(old.as_ref(), row, &["max_duration_minutes"]))) && !r::holds(&r::ge(r::field(row, "max_duration_minutes"), r::Val::Num(1.0_f64))) {
+            shadow.push(Violation::new("max_duration_minutes", "min", "max_duration_minutes must be at least 1").with_param("min", 1_i64));
+        }
+        // `max_duration_minutes_max` (@max(480) on ImpersonationSession.max_duration_minutes)
+        if (create || (update && r::changed(old.as_ref(), row, &["max_duration_minutes"]))) && !r::holds(&r::le(r::field(row, "max_duration_minutes"), r::Val::Num(480.0_f64))) {
+            shadow.push(Violation::new("max_duration_minutes", "max", "max_duration_minutes must be at most 480").with_param("max", 480_i64));
+        }
+        // `reason_required` (@required on ImpersonationSession.reason)
+        if (create || (update && r::changed(old.as_ref(), row, &["reason"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "reason")), r::not(r::is_empty(r::trim(r::field(row, "reason")))))) {
+            refuse.push(Violation::new("reason", "required", "reason is required"));
+        }
+        // `reason_max_length` (@max(1000) on ImpersonationSession.reason)
+        if (create || (update && r::changed(old.as_ref(), row, &["reason"]))) && !r::holds(&r::le(r::length(r::field(row, "reason")), r::Val::Num(1000.0_f64))) {
+            shadow.push(Violation::new("reason", "max_length", "reason must be at most 1000 characters").with_param("max", 1000_i64));
+        }
+        // `actions_performed_non_negative` (@non_negative on ImpersonationSession.actions_performed)
+        if (create || (update && r::changed(old.as_ref(), row, &["actions_performed"]))) && !r::holds(&r::ge(r::field(row, "actions_performed"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("actions_performed", "non_negative", "actions_performed must not be negative"));
+        }
+        // `termination_reason_max_length` (@max(500) on ImpersonationSession.termination_reason)
+        if (create || (update && r::changed(old.as_ref(), row, &["termination_reason"]))) && !r::holds(&r::le(r::length(r::field(row, "termination_reason")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("termination_reason", "max_length", "termination_reason must be at most 500 characters").with_param("max", 500_i64));
         }
         // `cannot_impersonate_self` (impersonation_session.hook.yaml:74)
         if (create) && !r::holds(&r::ne(r::field(row, "admin_id"), r::field(row, "target_user_id"))) {
@@ -76,7 +114,7 @@ impl backbone_core::write_guard::WriteGuard<ImpersonationSession> for Impersonat
         if (create) && !r::holds(&r::or(r::has_role(ctx.actor.as_deref(), "admin").await, r::has_role(ctx.actor.as_deref(), "super_admin").await)) {
             shadow.push(Violation::new("", "unauthorized_impersonation", "Only administrators can start impersonation sessions"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

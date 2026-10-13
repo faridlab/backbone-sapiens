@@ -32,9 +32,10 @@ pub type UserSAMLLinkService = GenericCrudService<
     UserSAMLLinkRepository,
 >;
 
-/// The row rules the schema declares for UserSAMLLink, checked against the row a create or
-/// update would store. The generated build attaches it to [`UserSAMLLinkService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for UserSAMLLink, checked against the row a create or update
+/// would store. The generated build attaches it to [`UserSAMLLinkService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct UserSAMLLinkRowRules;
 
 #[async_trait::async_trait]
@@ -56,15 +57,36 @@ impl backbone_core::write_guard::WriteGuard<UserSAMLLink> for UserSAMLLinkRowRul
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `status` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
             shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `user_id_required` (@required on UserSAMLLink.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `provider_id_required` (@required on UserSAMLLink.provider_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["provider_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider_id")), r::not(r::is_empty(r::trim(r::field(row, "provider_id")))))) {
+            refuse.push(Violation::new("provider_id", "required", "provider_id is required"));
+        }
+        // `name_id_required` (@required on UserSAMLLink.name_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["name_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "name_id")), r::not(r::is_empty(r::trim(r::field(row, "name_id")))))) {
+            refuse.push(Violation::new("name_id", "required", "name_id is required"));
+        }
+        // `name_id_max_length` (@max(255) on UserSAMLLink.name_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["name_id"]))) && !r::holds(&r::le(r::length(r::field(row, "name_id")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("name_id", "max_length", "name_id must be at most 255 characters").with_param("max", 255_i64));
+        }
+        // `session_index_max_length` (@max(255) on UserSAMLLink.session_index)
+        if (create || (update && r::changed(old.as_ref(), row, &["session_index"]))) && !r::holds(&r::le(r::length(r::field(row, "session_index")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("session_index", "max_length", "session_index must be at most 255 characters").with_param("max", 255_i64));
         }
         // `provider_required` (user_saml_link.hook.yaml:63)
         if (create) && !r::holds(&r::is_not_null(r::field(row, "provider_id"))) {
             shadow.push(Violation::new("provider_id", "provider_required", "Provider ID is required"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

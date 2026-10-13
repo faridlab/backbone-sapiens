@@ -32,3 +32,44 @@ pub type PasswordResetVerificationDetailsService = GenericCrudService<
     PasswordResetVerificationDetailsRepository,
 >;
 
+/// The rules the schema declares for PasswordResetVerificationDetails, checked against the row a create or update
+/// would store. The generated build attaches it to [`PasswordResetVerificationDetailsService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct PasswordResetVerificationDetailsRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<PasswordResetVerificationDetails> for PasswordResetVerificationDetailsRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, PasswordResetVerificationDetails>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        // `verification_attempts_non_negative` (@non_negative on PasswordResetVerificationDetails.verification_attempts)
+        if (create || (update && r::changed(old.as_ref(), row, &["verification_attempts"]))) && !r::holds(&r::ge(r::field(row, "verification_attempts"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("verification_attempts", "non_negative", "verification_attempts must not be negative"));
+        }
+        // `verification_method_max_length` (@max(50) on PasswordResetVerificationDetails.verification_method)
+        if (create || (update && r::changed(old.as_ref(), row, &["verification_method"]))) && !r::holds(&r::le(r::length(r::field(row, "verification_method")), r::Val::Num(50.0_f64))) {
+            shadow.push(Violation::new("verification_method", "max_length", "verification_method must be at most 50 characters").with_param("max", 50_i64));
+        }
+        // `device_fingerprint_max_length` (@max(255) on PasswordResetVerificationDetails.device_fingerprint)
+        if (create || (update && r::changed(old.as_ref(), row, &["device_fingerprint"]))) && !r::holds(&r::le(r::length(r::field(row, "device_fingerprint")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("device_fingerprint", "max_length", "device_fingerprint must be at most 255 characters").with_param("max", 255_i64));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

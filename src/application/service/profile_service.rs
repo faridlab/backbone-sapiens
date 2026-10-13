@@ -32,9 +32,10 @@ pub type ProfileService = GenericCrudService<
     ProfileRepository,
 >;
 
-/// The row rules the schema declares for Profile, checked against the row a create or
-/// update would store. The generated build attaches it to [`ProfileService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for Profile, checked against the row a create or update
+/// would store. The generated build attaches it to [`ProfileService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct ProfileRowRules;
 
 #[async_trait::async_trait]
@@ -56,6 +57,31 @@ impl backbone_core::write_guard::WriteGuard<Profile> for ProfileRowRules {
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `first_name_required` (@required on Profile.first_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["first_name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "first_name")), r::not(r::is_empty(r::trim(r::field(row, "first_name")))))) {
+            refuse.push(Violation::new("first_name", "required", "first_name is required"));
+        }
+        // `first_name_max_length` (@max(100) on Profile.first_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["first_name"]))) && !r::holds(&r::le(r::length(r::field(row, "first_name")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("first_name", "max_length", "first_name must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `middle_name_max_length` (@max(100) on Profile.middle_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["middle_name"]))) && !r::holds(&r::le(r::length(r::field(row, "middle_name")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("middle_name", "max_length", "middle_name must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `last_name_max_length` (@max(100) on Profile.last_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["last_name"]))) && !r::holds(&r::le(r::length(r::field(row, "last_name")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("last_name", "max_length", "last_name must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `profile_picture_url_max_length` (@max(500) on Profile.profile_picture_url)
+        if (create || (update && r::changed(old.as_ref(), row, &["profile_picture_url"]))) && !r::holds(&r::le(r::length(r::field(row, "profile_picture_url")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("profile_picture_url", "max_length", "profile_picture_url must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `profile_picture_url_url` (type url on Profile.profile_picture_url)
+        if (create || (update && r::changed(old.as_ref(), row, &["profile_picture_url"]))) && !r::holds(&r::matches(r::field(row, "profile_picture_url"), "^[a-zA-Z][a-zA-Z0-9+.-]*://\\S+$")) {
+            shadow.push(Violation::new("profile_picture_url", "url", "profile_picture_url must be an absolute URL"));
+        }
         // `first_name_required` (profile.hook.yaml:16)
         if (create || update) && !r::holds(&r::and(r::is_not_null(r::field(row, "first_name")), r::ge(r::length(r::field(row, "first_name")), r::Val::Num(1.0_f64)))) {
             shadow.push(Violation::new("first_name", "first_name_required", "First name is required"));
@@ -76,7 +102,7 @@ impl backbone_core::write_guard::WriteGuard<Profile> for ProfileRowRules {
         if (create || (update && r::changed(old.as_ref(), row, &["dob"]))) && !r::holds(&r::or(r::is_null(r::field(row, "dob")), r::lt(r::field(row, "dob"), r::at(ctx.at)))) {
             shadow.push(Violation::new("dob", "dob_in_future", "Date of birth must be in the past"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

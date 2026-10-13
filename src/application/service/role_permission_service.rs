@@ -32,3 +32,41 @@ pub type RolePermissionService = GenericCrudService<
     RolePermissionRepository,
 >;
 
+/// The rules the schema declares for RolePermission, checked against the row a create or update
+/// would store. The generated build attaches it to [`RolePermissionService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct RolePermissionRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<RolePermission> for RolePermissionRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, RolePermission>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `role_id_required` (@required on RolePermission.role_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["role_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "role_id")), r::not(r::is_empty(r::trim(r::field(row, "role_id")))))) {
+            refuse.push(Violation::new("role_id", "required", "role_id is required"));
+        }
+        // `permission_id_required` (@required on RolePermission.permission_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["permission_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "permission_id")), r::not(r::is_empty(r::trim(r::field(row, "permission_id")))))) {
+            refuse.push(Violation::new("permission_id", "required", "permission_id is required"));
+        }
+        GuardOutcome { refuse, shadow }
+    }
+}
+

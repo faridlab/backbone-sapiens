@@ -32,9 +32,10 @@ pub type DataExportService = GenericCrudService<
     DataExportRepository,
 >;
 
-/// The row rules the schema declares for DataExport, checked against the row a create or
-/// update would store. The generated build attaches it to [`DataExportService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for DataExport, checked against the row a create or update
+/// would store. The generated build attaches it to [`DataExportService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct DataExportRowRules;
 
 #[async_trait::async_trait]
@@ -56,9 +57,34 @@ impl backbone_core::write_guard::WriteGuard<DataExport> for DataExportRowRules {
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `status` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
             shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `user_id_required` (@required on DataExport.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `requested_by_required` (@required on DataExport.requested_by)
+        if (create || (update && r::changed(old.as_ref(), row, &["requested_by"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "requested_by")), r::not(r::is_empty(r::trim(r::field(row, "requested_by")))))) {
+            refuse.push(Violation::new("requested_by", "required", "requested_by is required"));
+        }
+        // `file_path_max_length` (@max(500) on DataExport.file_path)
+        if (create || (update && r::changed(old.as_ref(), row, &["file_path"]))) && !r::holds(&r::le(r::length(r::field(row, "file_path")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("file_path", "max_length", "file_path must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `file_url_max_length` (@max(1000) on DataExport.file_url)
+        if (create || (update && r::changed(old.as_ref(), row, &["file_url"]))) && !r::holds(&r::le(r::length(r::field(row, "file_url")), r::Val::Num(1000.0_f64))) {
+            shadow.push(Violation::new("file_url", "max_length", "file_url must be at most 1000 characters").with_param("max", 1000_i64));
+        }
+        // `record_count_non_negative` (@non_negative on DataExport.record_count)
+        if (create || (update && r::changed(old.as_ref(), row, &["record_count"]))) && !r::holds(&r::ge(r::field(row, "record_count"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("record_count", "non_negative", "record_count must not be negative"));
+        }
+        // `justification_max_length` (@max(1000) on DataExport.justification)
+        if (create || (update && r::changed(old.as_ref(), row, &["justification"]))) && !r::holds(&r::le(r::length(r::field(row, "justification")), r::Val::Num(1000.0_f64))) {
+            shadow.push(Violation::new("justification", "max_length", "justification must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `user_can_request_own_data` (data_export.hook.yaml:72)
         if (create) && !r::holds(&r::or(r::eq(r::field(row, "requested_by"), r::field(row, "user_id")), r::has_role(ctx.actor.as_deref(), "admin").await)) {
@@ -72,7 +98,7 @@ impl backbone_core::write_guard::WriteGuard<DataExport> for DataExportRowRules {
         if (create) && !r::holds(&r::in_list(r::field(row, "format"), r::Val::List(vec![r::text("json"), r::text("csv"), r::text("pdf"), r::text("xml")]))) {
             shadow.push(Violation::new("format", "invalid_format", "Invalid export format. Supported: json, csv, pdf, xml"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

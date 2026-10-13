@@ -32,3 +32,53 @@ pub type NotificationTemplateService = GenericCrudService<
     NotificationTemplateRepository,
 >;
 
+/// The rules the schema declares for NotificationTemplate, checked against the row a create or update
+/// would store. The generated build attaches it to [`NotificationTemplateService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct NotificationTemplateRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<NotificationTemplate> for NotificationTemplateRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, NotificationTemplate>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `name_required` (@required on NotificationTemplate.name)
+        if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "name")), r::not(r::is_empty(r::trim(r::field(row, "name")))))) {
+            refuse.push(Violation::new("name", "required", "name is required"));
+        }
+        // `name_max_length` (@max(100) on NotificationTemplate.name)
+        if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::le(r::length(r::field(row, "name")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("name", "max_length", "name must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `subject_template_max_length` (@max(255) on NotificationTemplate.subject_template)
+        if (create || (update && r::changed(old.as_ref(), row, &["subject_template"]))) && !r::holds(&r::le(r::length(r::field(row, "subject_template")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("subject_template", "max_length", "subject_template must be at most 255 characters").with_param("max", 255_i64));
+        }
+        // `message_template_required` (@required on NotificationTemplate.message_template)
+        if (create || (update && r::changed(old.as_ref(), row, &["message_template"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "message_template")), r::not(r::is_empty(r::trim(r::field(row, "message_template")))))) {
+            refuse.push(Violation::new("message_template", "required", "message_template is required"));
+        }
+        // `language_max_length` (@max(10) on NotificationTemplate.language)
+        if (create || (update && r::changed(old.as_ref(), row, &["language"]))) && !r::holds(&r::le(r::length(r::field(row, "language")), r::Val::Num(10.0_f64))) {
+            shadow.push(Violation::new("language", "max_length", "language must be at most 10 characters").with_param("max", 10_i64));
+        }
+        GuardOutcome { refuse, shadow }
+    }
+}
+

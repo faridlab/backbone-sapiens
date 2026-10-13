@@ -32,9 +32,10 @@ pub type MFADeviceService = GenericCrudService<
     MFADeviceRepository,
 >;
 
-/// The row rules the schema declares for MFADevice, checked against the row a create or
-/// update would store. The generated build attaches it to [`MFADeviceService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for MFADevice, checked against the row a create or update
+/// would store. The generated build attaches it to [`MFADeviceService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct MFADeviceRowRules;
 
 #[async_trait::async_trait]
@@ -56,9 +57,110 @@ impl backbone_core::write_guard::WriteGuard<MFADevice> for MFADeviceRowRules {
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `status` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
             shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `user_id_required` (@required on MFADevice.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `device_name_max_length` (@max(100) on MFADevice.device_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["device_name"]))) && !r::holds(&r::le(r::length(r::field(row, "device_name")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("device_name", "max_length", "device_name must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `phone_number_max_length` (@max(20) on MFADevice.phone_number)
+        if (create || (update && r::changed(old.as_ref(), row, &["phone_number"]))) && !r::holds(&r::le(r::length(r::field(row, "phone_number")), r::Val::Num(20.0_f64))) {
+            shadow.push(Violation::new("phone_number", "max_length", "phone_number must be at most 20 characters").with_param("max", 20_i64));
+        }
+        // `email_address_max_length` (@max(255) on MFADevice.email_address)
+        if (create || (update && r::changed(old.as_ref(), row, &["email_address"]))) && !r::holds(&r::le(r::length(r::field(row, "email_address")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("email_address", "max_length", "email_address must be at most 255 characters").with_param("max", 255_i64));
+        }
+        // `totp_secret_max_length` (@max(64) on MFADevice.totp_secret)
+        if (create || (update && r::changed(old.as_ref(), row, &["totp_secret"]))) && !r::holds(&r::le(r::length(r::field(row, "totp_secret")), r::Val::Num(64.0_f64))) {
+            shadow.push(Violation::new("totp_secret", "max_length", "totp_secret must be at most 64 characters").with_param("max", 64_i64));
+        }
+        // `secret_max_length` (@max(255) on MFADevice.secret)
+        if (create || (update && r::changed(old.as_ref(), row, &["secret"]))) && !r::holds(&r::le(r::length(r::field(row, "secret")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("secret", "max_length", "secret must be at most 255 characters").with_param("max", 255_i64));
+        }
+        // `hardware_key_id_max_length` (@max(100) on MFADevice.hardware_key_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["hardware_key_id"]))) && !r::holds(&r::le(r::length(r::field(row, "hardware_key_id")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("hardware_key_id", "max_length", "hardware_key_id must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `push_token_max_length` (@max(500) on MFADevice.push_token)
+        if (create || (update && r::changed(old.as_ref(), row, &["push_token"]))) && !r::holds(&r::le(r::length(r::field(row, "push_token")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("push_token", "max_length", "push_token must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `device_fingerprint_max_length` (@max(255) on MFADevice.device_fingerprint)
+        if (create || (update && r::changed(old.as_ref(), row, &["device_fingerprint"]))) && !r::holds(&r::le(r::length(r::field(row, "device_fingerprint")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("device_fingerprint", "max_length", "device_fingerprint must be at most 255 characters").with_param("max", 255_i64));
+        }
+        // `manufacturer_max_length` (@max(100) on MFADevice.manufacturer)
+        if (create || (update && r::changed(old.as_ref(), row, &["manufacturer"]))) && !r::holds(&r::le(r::length(r::field(row, "manufacturer")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("manufacturer", "max_length", "manufacturer must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `model_max_length` (@max(100) on MFADevice.model)
+        if (create || (update && r::changed(old.as_ref(), row, &["model"]))) && !r::holds(&r::le(r::length(r::field(row, "model")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("model", "max_length", "model must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `operating_system_max_length` (@max(50) on MFADevice.operating_system)
+        if (create || (update && r::changed(old.as_ref(), row, &["operating_system"]))) && !r::holds(&r::le(r::length(r::field(row, "operating_system")), r::Val::Num(50.0_f64))) {
+            shadow.push(Violation::new("operating_system", "max_length", "operating_system must be at most 50 characters").with_param("max", 50_i64));
+        }
+        // `app_version_max_length` (@max(20) on MFADevice.app_version)
+        if (create || (update && r::changed(old.as_ref(), row, &["app_version"]))) && !r::holds(&r::le(r::length(r::field(row, "app_version")), r::Val::Num(20.0_f64))) {
+            shadow.push(Violation::new("app_version", "max_length", "app_version must be at most 20 characters").with_param("max", 20_i64));
+        }
+        // `trusted_duration_hours_min` (@min(1) on MFADevice.trusted_duration_hours)
+        if (create || (update && r::changed(old.as_ref(), row, &["trusted_duration_hours"]))) && !r::holds(&r::ge(r::field(row, "trusted_duration_hours"), r::Val::Num(1.0_f64))) {
+            shadow.push(Violation::new("trusted_duration_hours", "min", "trusted_duration_hours must be at least 1").with_param("min", 1_i64));
+        }
+        // `trusted_duration_hours_max` (@max(168) on MFADevice.trusted_duration_hours)
+        if (create || (update && r::changed(old.as_ref(), row, &["trusted_duration_hours"]))) && !r::holds(&r::le(r::field(row, "trusted_duration_hours"), r::Val::Num(168.0_f64))) {
+            shadow.push(Violation::new("trusted_duration_hours", "max", "trusted_duration_hours must be at most 168").with_param("max", 168_i64));
+        }
+        // `enrollment_ip_required` (@required on MFADevice.enrollment_ip)
+        if (create || (update && r::changed(old.as_ref(), row, &["enrollment_ip"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "enrollment_ip")), r::not(r::is_empty(r::trim(r::field(row, "enrollment_ip")))))) {
+            refuse.push(Violation::new("enrollment_ip", "required", "enrollment_ip is required"));
+        }
+        // `enrollment_ip_max_length` (@max(45) on MFADevice.enrollment_ip)
+        if (create || (update && r::changed(old.as_ref(), row, &["enrollment_ip"]))) && !r::holds(&r::le(r::length(r::field(row, "enrollment_ip")), r::Val::Num(45.0_f64))) {
+            shadow.push(Violation::new("enrollment_ip", "max_length", "enrollment_ip must be at most 45 characters").with_param("max", 45_i64));
+        }
+        // `enrollment_user_agent_max_length` (@max(500) on MFADevice.enrollment_user_agent)
+        if (create || (update && r::changed(old.as_ref(), row, &["enrollment_user_agent"]))) && !r::holds(&r::le(r::length(r::field(row, "enrollment_user_agent")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("enrollment_user_agent", "max_length", "enrollment_user_agent must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `verification_attempts_non_negative` (@non_negative on MFADevice.verification_attempts)
+        if (create || (update && r::changed(old.as_ref(), row, &["verification_attempts"]))) && !r::holds(&r::ge(r::field(row, "verification_attempts"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("verification_attempts", "non_negative", "verification_attempts must not be negative"));
+        }
+        // `usage_count_non_negative` (@non_negative on MFADevice.usage_count)
+        if (create || (update && r::changed(old.as_ref(), row, &["usage_count"]))) && !r::holds(&r::ge(r::field(row, "usage_count"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("usage_count", "non_negative", "usage_count must not be negative"));
+        }
+        // `successful_verifications_non_negative` (@non_negative on MFADevice.successful_verifications)
+        if (create || (update && r::changed(old.as_ref(), row, &["successful_verifications"]))) && !r::holds(&r::ge(r::field(row, "successful_verifications"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("successful_verifications", "non_negative", "successful_verifications must not be negative"));
+        }
+        // `failed_verifications_non_negative` (@non_negative on MFADevice.failed_verifications)
+        if (create || (update && r::changed(old.as_ref(), row, &["failed_verifications"]))) && !r::holds(&r::ge(r::field(row, "failed_verifications"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("failed_verifications", "non_negative", "failed_verifications must not be negative"));
+        }
+        // `lock_reason_max_length` (@max(500) on MFADevice.lock_reason)
+        if (create || (update && r::changed(old.as_ref(), row, &["lock_reason"]))) && !r::holds(&r::le(r::length(r::field(row, "lock_reason")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("lock_reason", "max_length", "lock_reason must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `risk_score_min` (@min(0) on MFADevice.risk_score)
+        if (create || (update && r::changed(old.as_ref(), row, &["risk_score"]))) && !r::holds(&r::ge(r::field(row, "risk_score"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("risk_score", "min", "risk_score must be at least 0").with_param("min", 0_i64));
+        }
+        // `risk_score_max` (@max(100) on MFADevice.risk_score)
+        if (create || (update && r::changed(old.as_ref(), row, &["risk_score"]))) && !r::holds(&r::le(r::field(row, "risk_score"), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("risk_score", "max", "risk_score must be at most 100").with_param("max", 100_i64));
         }
         // `device_name_required` (mfa_device.hook.yaml:38)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "device_name")), r::ge(r::length(r::field(row, "device_name")), r::Val::Num(1.0_f64)))) {
@@ -68,7 +170,7 @@ impl backbone_core::write_guard::WriteGuard<MFADevice> for MFADeviceRowRules {
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "secret")), r::ge(r::length(r::field(row, "secret")), r::Val::Num(16.0_f64)))) {
             shadow.push(Violation::new("secret", "secret_required", "Device secret is required"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

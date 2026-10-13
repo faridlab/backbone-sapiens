@@ -32,9 +32,10 @@ pub type WorkflowDefinitionService = GenericCrudService<
     WorkflowDefinitionRepository,
 >;
 
-/// The row rules the schema declares for WorkflowDefinition, checked against the row a create or
-/// update would store. The generated build attaches it to [`WorkflowDefinitionService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for WorkflowDefinition, checked against the row a create or update
+/// would store. The generated build attaches it to [`WorkflowDefinitionService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct WorkflowDefinitionRowRules;
 
 #[async_trait::async_trait]
@@ -54,12 +55,34 @@ impl backbone_core::write_guard::WriteGuard<WorkflowDefinition> for WorkflowDefi
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `name_required` (@required on WorkflowDefinition.name)
+        if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "name")), r::not(r::is_empty(r::trim(r::field(row, "name")))))) {
+            refuse.push(Violation::new("name", "required", "name is required"));
+        }
+        // `name_max_length` (@max(255) on WorkflowDefinition.name)
+        if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::le(r::length(r::field(row, "name")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("name", "max_length", "name must be at most 255 characters").with_param("max", 255_i64));
+        }
+        // `description_max_length` (@max(1000) on WorkflowDefinition.description)
+        if (create || (update && r::changed(old.as_ref(), row, &["description"]))) && !r::holds(&r::le(r::length(r::field(row, "description")), r::Val::Num(1000.0_f64))) {
+            shadow.push(Violation::new("description", "max_length", "description must be at most 1000 characters").with_param("max", 1000_i64));
+        }
+        // `timeout_minutes_positive` (@positive on WorkflowDefinition.timeout_minutes)
+        if (create || (update && r::changed(old.as_ref(), row, &["timeout_minutes"]))) && !r::holds(&r::gt(r::field(row, "timeout_minutes"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("timeout_minutes", "positive", "timeout_minutes must be positive"));
+        }
+        // `max_retries_non_negative` (@non_negative on WorkflowDefinition.max_retries)
+        if (create || (update && r::changed(old.as_ref(), row, &["max_retries"]))) && !r::holds(&r::ge(r::field(row, "max_retries"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("max_retries", "non_negative", "max_retries must not be negative"));
+        }
         // `valid_trigger_type` (workflow.hook.yaml:17)
         if (create || update) && !r::holds(&r::in_list(r::field(row, "trigger_type"), r::Val::List(vec![r::text("manual"), r::text("scheduled"), r::text("event_based"), r::text("webhook"), r::text("api_call")]))) {
             shadow.push(Violation::new("trigger_type", "invalid_trigger_type", "Invalid trigger type"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

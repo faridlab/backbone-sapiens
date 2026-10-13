@@ -32,9 +32,10 @@ pub type PasswordResetTokenService = GenericCrudService<
     PasswordResetTokenRepository,
 >;
 
-/// The row rules the schema declares for PasswordResetToken, checked against the row a create or
-/// update would store. The generated build attaches it to [`PasswordResetTokenService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for PasswordResetToken, checked against the row a create or update
+/// would store. The generated build attaches it to [`PasswordResetTokenService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct PasswordResetTokenRowRules;
 
 #[async_trait::async_trait]
@@ -57,9 +58,22 @@ impl backbone_core::write_guard::WriteGuard<PasswordResetToken> for PasswordRese
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let old_row = old.as_ref().unwrap_or(&serde_json::Value::Null);
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `is_used` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["is_used"]) {
             shadow.push(Violation::new("is_used", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `user_id_required` (@required on PasswordResetToken.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `token_hash_required` (@required on PasswordResetToken.token_hash)
+        if (create || (update && r::changed(old.as_ref(), row, &["token_hash"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "token_hash")), r::not(r::is_empty(r::trim(r::field(row, "token_hash")))))) {
+            refuse.push(Violation::new("token_hash", "required", "token_hash is required"));
+        }
+        // `token_hash_length` (@length(64) on PasswordResetToken.token_hash)
+        if (create || (update && r::changed(old.as_ref(), row, &["token_hash"]))) && !r::holds(&r::eq(r::length(r::field(row, "token_hash")), r::Val::Num(64.0_f64))) {
+            shadow.push(Violation::new("token_hash", "length", "token_hash must be exactly 64 characters").with_param("length", 64_i64));
         }
         // `expires_in_future` (password_reset_token.hook.yaml:46)
         if (create) && !r::holds(&r::gt(r::field(row, "expires_at"), r::at(ctx.at))) {
@@ -69,7 +83,7 @@ impl backbone_core::write_guard::WriteGuard<PasswordResetToken> for PasswordRese
         if (update) && !r::holds(&r::eq(r::field(old_row, "is_used"), r::Val::Bool(false))) {
             shadow.push(Violation::new("is_used", "token_already_used", "Cannot modify used reset tokens"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

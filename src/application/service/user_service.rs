@@ -32,9 +32,10 @@ pub type UserService = GenericCrudService<
     UserRepository,
 >;
 
-/// The row rules the schema declares for User, checked against the row a create or
-/// update would store. The generated build attaches it to [`UserService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for User, checked against the row a create or update
+/// would store. The generated build attaches it to [`UserService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct UserRowRules;
 
 #[async_trait::async_trait]
@@ -56,15 +57,44 @@ impl backbone_core::write_guard::WriteGuard<User> for UserRowRules {
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `status` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
             shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `username_required` (@required on User.username)
+        if (create || (update && r::changed(old.as_ref(), row, &["username"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "username")), r::not(r::is_empty(r::trim(r::field(row, "username")))))) {
+            refuse.push(Violation::new("username", "required", "username is required"));
+        }
+        // `username_min_length` (@min(3) on User.username)
+        if (create || (update && r::changed(old.as_ref(), row, &["username"]))) && !r::holds(&r::ge(r::length(r::field(row, "username")), r::Val::Num(3.0_f64))) {
+            shadow.push(Violation::new("username", "min_length", "username must be at least 3 characters").with_param("min", 3_i64));
+        }
+        // `username_max_length` (@max(50) on User.username)
+        if (create || (update && r::changed(old.as_ref(), row, &["username"]))) && !r::holds(&r::le(r::length(r::field(row, "username")), r::Val::Num(50.0_f64))) {
+            shadow.push(Violation::new("username", "max_length", "username must be at most 50 characters").with_param("max", 50_i64));
+        }
+        // `username_alpha_dash` (@alpha_dash on User.username)
+        if (create || (update && r::changed(old.as_ref(), row, &["username"]))) && !r::holds(&r::matches(r::field(row, "username"), "^[a-zA-Z0-9_-]+$")) {
+            shadow.push(Violation::new("username", "alpha_dash", "username may hold only letters, digits, '_' and '-'"));
+        }
+        // `email_required` (@required on User.email)
+        if (create || (update && r::changed(old.as_ref(), row, &["email"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "email")), r::not(r::is_empty(r::trim(r::field(row, "email")))))) {
+            refuse.push(Violation::new("email", "required", "email is required"));
+        }
+        // `email_email` (type email on User.email)
+        if (create || (update && r::changed(old.as_ref(), row, &["email"]))) && !r::holds(&r::matches(r::field(row, "email"), "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            shadow.push(Violation::new("email", "email", "email must be an email address"));
+        }
+        // `failed_login_attempts_non_negative` (@non_negative on User.failed_login_attempts)
+        if (create || (update && r::changed(old.as_ref(), row, &["failed_login_attempts"]))) && !r::holds(&r::ge(r::field(row, "failed_login_attempts"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("failed_login_attempts", "non_negative", "failed_login_attempts must not be negative"));
         }
         // `username_format` (user.hook.yaml:75)
         if (create || update) && !r::holds(&r::matches(r::field(row, "username"), "^[a-zA-Z0-9_-]{3,50}$")) {
             shadow.push(Violation::new("username", "invalid_username_format", "Username must be 3-50 characters, alphanumeric with underscore/hyphen"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

@@ -129,9 +129,6 @@ pub use infrastructure::messaging::user_lifecycle_outbox::{
     AnonymizationRecordOutboxPublisher, UserDeactivationLifecycle,
 };
 // >>> END CUSTOM
-// Re-exports - Validation
-pub use application::validator::{ValidationError, ValidationResult};
-
 // Re-exports - Triggers
 
 // Re-exports - Workflows
@@ -447,7 +444,7 @@ impl SapiensModuleBuilder {
 
         // AnalyticsReport service
         let analytics_report_repository = Arc::new(AnalyticsReportRepository::new(db_pool.clone()));
-        let analytics_report_service = Arc::new(AnalyticsReportService::with_repository(analytics_report_repository.clone()));
+        let analytics_report_service = Arc::new(AnalyticsReportService::with_repository(analytics_report_repository.clone()).with_guard(Arc::new(crate::application::service::analytics_report_service::AnalyticsReportRowRules)));
 
         // AnonymizationRecord service
         let anonymization_record_repository = Arc::new(AnonymizationRecordRepository::new(db_pool.clone()));
@@ -456,7 +453,7 @@ impl SapiensModuleBuilder {
         // downstream subscriptions (portal access revocation, token rotation)
         // fire on the erasure moment itself.
         let anonymization_record_service = Arc::new(
-            AnonymizationRecordService::with_repository(anonymization_record_repository.clone())
+            AnonymizationRecordService::with_repository(anonymization_record_repository.clone()).with_guard(Arc::new(crate::application::service::anonymization_record_service::AnonymizationRecordRowRules))
                 .with_event_publisher(Arc::new(AnonymizationRecordOutboxPublisher::new(
                     db_pool.clone(),
                     user_domain_event_bus.clone(),
@@ -470,11 +467,11 @@ impl SapiensModuleBuilder {
 
         // BulkOperation service
         let bulk_operation_repository = Arc::new(BulkOperationRepository::new(db_pool.clone()));
-        let bulk_operation_service = Arc::new(BulkOperationService::with_repository(bulk_operation_repository.clone()));
+        let bulk_operation_service = Arc::new(BulkOperationService::with_repository(bulk_operation_repository.clone()).with_guard(Arc::new(crate::application::service::bulk_operation_service::BulkOperationRowRules)));
 
         // BulkOperationResult service
         let bulk_operation_result_repository = Arc::new(BulkOperationResultRepository::new(db_pool.clone()));
-        let bulk_operation_result_service = Arc::new(BulkOperationResultService::with_repository(bulk_operation_result_repository.clone()));
+        let bulk_operation_result_service = Arc::new(BulkOperationResultService::with_repository(bulk_operation_result_repository.clone()).with_guard(Arc::new(crate::application::service::bulk_operation_result_service::BulkOperationResultRowRules)));
 
         // DataExport service
         let data_export_repository = Arc::new(DataExportRepository::new(db_pool.clone()));
@@ -486,11 +483,11 @@ impl SapiensModuleBuilder {
 
         // DirectPermissionGrant service
         let direct_permission_grant_repository = Arc::new(DirectPermissionGrantRepository::new(db_pool.clone()));
-        let direct_permission_grant_service = Arc::new(DirectPermissionGrantService::with_repository(direct_permission_grant_repository.clone()));
+        let direct_permission_grant_service = Arc::new(DirectPermissionGrantService::with_repository(direct_permission_grant_repository.clone()).with_guard(Arc::new(crate::application::service::direct_permission_grant_service::DirectPermissionGrantRowRules)));
 
         // EffectivePermissionCache service
         let effective_permission_cache_repository = Arc::new(EffectivePermissionCacheRepository::new(db_pool.clone()));
-        let effective_permission_cache_service = Arc::new(EffectivePermissionCacheService::with_repository(effective_permission_cache_repository.clone()));
+        let effective_permission_cache_service = Arc::new(EffectivePermissionCacheService::with_repository(effective_permission_cache_repository.clone()).with_guard(Arc::new(crate::application::service::effective_permission_cache_service::EffectivePermissionCacheRowRules)));
 
         // EmailVerificationToken service
         let email_verification_token_repository = Arc::new(EmailVerificationTokenRepository::new(db_pool.clone()));
@@ -506,7 +503,7 @@ impl SapiensModuleBuilder {
 
         // MFABackupCode service
         let mfa_backup_code_repository = Arc::new(MFABackupCodeRepository::new(db_pool.clone()));
-        let mfa_backup_code_service = Arc::new(MFABackupCodeService::with_repository(mfa_backup_code_repository.clone()));
+        let mfa_backup_code_service = Arc::new(MFABackupCodeService::with_repository(mfa_backup_code_repository.clone()).with_guard(Arc::new(crate::application::service::mfa_backup_code_service::MFABackupCodeRowRules)));
 
         // MFADevice service
         let mfa_device_repository = Arc::new(MFADeviceRepository::new(db_pool.clone()));
@@ -514,7 +511,7 @@ impl SapiensModuleBuilder {
 
         // MFASession service
         let mfa_session_repository = Arc::new(MFASessionRepository::new(db_pool.clone()));
-        let mfa_session_service = Arc::new(MFASessionService::with_repository(mfa_session_repository.clone()));
+        let mfa_session_service = Arc::new(MFASessionService::with_repository(mfa_session_repository.clone()).with_guard(Arc::new(crate::application::service::mfa_session_service::MFASessionRowRules)));
 
         // Notification service
         let notification_repository = Arc::new(NotificationRepository::new(db_pool.clone()));
@@ -522,11 +519,11 @@ impl SapiensModuleBuilder {
 
         // NotificationTemplate service
         let notification_template_repository = Arc::new(NotificationTemplateRepository::new(db_pool.clone()));
-        let notification_template_service = Arc::new(NotificationTemplateService::with_repository(notification_template_repository.clone()));
+        let notification_template_service = Arc::new(NotificationTemplateService::with_repository(notification_template_repository.clone()).with_guard(Arc::new(crate::application::service::notification_template_service::NotificationTemplateRowRules)));
 
         // NotificationLog service
         let notification_log_repository = Arc::new(NotificationLogRepository::new(db_pool.clone()));
-        let notification_log_service = Arc::new(NotificationLogService::with_repository(notification_log_repository.clone()));
+        let notification_log_service = Arc::new(NotificationLogService::with_repository(notification_log_repository.clone()).with_guard(Arc::new(crate::application::service::notification_log_service::NotificationLogRowRules)));
 
         // NotificationPreference service
         let notification_preference_repository = Arc::new(NotificationPreferenceRepository::new(db_pool.clone()));
@@ -542,47 +539,47 @@ impl SapiensModuleBuilder {
 
         // OrganizationPermission service
         let organization_permission_repository = Arc::new(OrganizationPermissionRepository::new(db_pool.clone()));
-        let organization_permission_service = Arc::new(OrganizationPermissionService::with_repository(organization_permission_repository.clone()));
+        let organization_permission_service = Arc::new(OrganizationPermissionService::with_repository(organization_permission_repository.clone()).with_guard(Arc::new(crate::application::service::organization_permission_service::OrganizationPermissionRowRules)));
 
         // OrganizationRole service
         let organization_role_repository = Arc::new(OrganizationRoleRepository::new(db_pool.clone()));
-        let organization_role_service = Arc::new(OrganizationRoleService::with_repository(organization_role_repository.clone()));
+        let organization_role_service = Arc::new(OrganizationRoleService::with_repository(organization_role_repository.clone()).with_guard(Arc::new(crate::application::service::organization_role_service::OrganizationRoleRowRules)));
 
         // OrganizationUser service
         let organization_user_repository = Arc::new(OrganizationUserRepository::new(db_pool.clone()));
-        let organization_user_service = Arc::new(OrganizationUserService::with_repository(organization_user_repository.clone()));
+        let organization_user_service = Arc::new(OrganizationUserService::with_repository(organization_user_repository.clone()).with_guard(Arc::new(crate::application::service::organization_user_service::OrganizationUserRowRules)));
 
         // PasswordCreationContext service
         let password_creation_context_repository = Arc::new(PasswordCreationContextRepository::new(db_pool.clone()));
-        let password_creation_context_service = Arc::new(PasswordCreationContextService::with_repository(password_creation_context_repository.clone()));
+        let password_creation_context_service = Arc::new(PasswordCreationContextService::with_repository(password_creation_context_repository.clone()).with_guard(Arc::new(crate::application::service::password_creation_context_service::PasswordCreationContextRowRules)));
 
         // PasswordExpirationSettings service
         let password_expiration_settings_repository = Arc::new(PasswordExpirationSettingsRepository::new(db_pool.clone()));
-        let password_expiration_settings_service = Arc::new(PasswordExpirationSettingsService::with_repository(password_expiration_settings_repository.clone()));
+        let password_expiration_settings_service = Arc::new(PasswordExpirationSettingsService::with_repository(password_expiration_settings_repository.clone()).with_guard(Arc::new(crate::application::service::password_expiration_settings_service::PasswordExpirationSettingsRowRules)));
 
         // PasswordHistory service
         let password_history_repository = Arc::new(PasswordHistoryRepository::new(db_pool.clone()));
-        let password_history_service = Arc::new(PasswordHistoryService::with_repository(password_history_repository.clone()));
+        let password_history_service = Arc::new(PasswordHistoryService::with_repository(password_history_repository.clone()).with_guard(Arc::new(crate::application::service::password_history_service::PasswordHistoryRowRules)));
 
         // PasswordHistorySettings service
         let password_history_settings_repository = Arc::new(PasswordHistorySettingsRepository::new(db_pool.clone()));
-        let password_history_settings_service = Arc::new(PasswordHistorySettingsService::with_repository(password_history_settings_repository.clone()));
+        let password_history_settings_service = Arc::new(PasswordHistorySettingsService::with_repository(password_history_settings_repository.clone()).with_guard(Arc::new(crate::application::service::password_history_settings_service::PasswordHistorySettingsRowRules)));
 
         // PasswordPolicy service
         let password_policy_repository = Arc::new(PasswordPolicyRepository::new(db_pool.clone()));
-        let password_policy_service = Arc::new(PasswordPolicyService::with_repository(password_policy_repository.clone()));
+        let password_policy_service = Arc::new(PasswordPolicyService::with_repository(password_policy_repository.clone()).with_guard(Arc::new(crate::application::service::password_policy_service::PasswordPolicyRowRules)));
 
         // PasswordRequirements service
         let password_requirements_repository = Arc::new(PasswordRequirementsRepository::new(db_pool.clone()));
-        let password_requirements_service = Arc::new(PasswordRequirementsService::with_repository(password_requirements_repository.clone()));
+        let password_requirements_service = Arc::new(PasswordRequirementsService::with_repository(password_requirements_repository.clone()).with_guard(Arc::new(crate::application::service::password_requirements_service::PasswordRequirementsRowRules)));
 
         // PasswordReset service
         let password_reset_repository = Arc::new(PasswordResetRepository::new(db_pool.clone()));
-        let password_reset_service = Arc::new(PasswordResetService::with_repository(password_reset_repository.clone()));
+        let password_reset_service = Arc::new(PasswordResetService::with_repository(password_reset_repository.clone()).with_guard(Arc::new(crate::application::service::password_reset_service::PasswordResetRowRules)));
 
         // PasswordResetSecurity service
         let password_reset_security_repository = Arc::new(PasswordResetSecurityRepository::new(db_pool.clone()));
-        let password_reset_security_service = Arc::new(PasswordResetSecurityService::with_repository(password_reset_security_repository.clone()));
+        let password_reset_security_service = Arc::new(PasswordResetSecurityService::with_repository(password_reset_security_repository.clone()).with_guard(Arc::new(crate::application::service::password_reset_security_service::PasswordResetSecurityRowRules)));
 
         // PasswordResetToken service
         let password_reset_token_repository = Arc::new(PasswordResetTokenRepository::new(db_pool.clone()));
@@ -590,7 +587,7 @@ impl SapiensModuleBuilder {
 
         // PasswordResetVerificationDetails service
         let password_reset_verification_details_repository = Arc::new(PasswordResetVerificationDetailsRepository::new(db_pool.clone()));
-        let password_reset_verification_details_service = Arc::new(PasswordResetVerificationDetailsService::with_repository(password_reset_verification_details_repository.clone()));
+        let password_reset_verification_details_service = Arc::new(PasswordResetVerificationDetailsService::with_repository(password_reset_verification_details_repository.clone()).with_guard(Arc::new(crate::application::service::password_reset_verification_details_service::PasswordResetVerificationDetailsRowRules)));
 
         // Permission service
         let permission_repository = Arc::new(PermissionRepository::new(db_pool.clone()));
@@ -598,7 +595,7 @@ impl SapiensModuleBuilder {
 
         // PermissionConflict service
         let permission_conflict_repository = Arc::new(PermissionConflictRepository::new(db_pool.clone()));
-        let permission_conflict_service = Arc::new(PermissionConflictService::with_repository(permission_conflict_repository.clone()));
+        let permission_conflict_service = Arc::new(PermissionConflictService::with_repository(permission_conflict_repository.clone()).with_guard(Arc::new(crate::application::service::permission_conflict_service::PermissionConflictRowRules)));
 
         // ResourcePermission service
         let resource_permission_repository = Arc::new(ResourcePermissionRepository::new(db_pool.clone()));
@@ -610,11 +607,11 @@ impl SapiensModuleBuilder {
 
         // RoleAssignment service
         let role_assignment_repository = Arc::new(RoleAssignmentRepository::new(db_pool.clone()));
-        let role_assignment_service = Arc::new(RoleAssignmentService::with_repository(role_assignment_repository.clone()));
+        let role_assignment_service = Arc::new(RoleAssignmentService::with_repository(role_assignment_repository.clone()).with_guard(Arc::new(crate::application::service::role_assignment_service::RoleAssignmentRowRules)));
 
         // RolePermission service
         let role_permission_repository = Arc::new(RolePermissionRepository::new(db_pool.clone()));
-        let role_permission_service = Arc::new(RolePermissionService::with_repository(role_permission_repository.clone()));
+        let role_permission_service = Arc::new(RolePermissionService::with_repository(role_permission_repository.clone()).with_guard(Arc::new(crate::application::service::role_permission_service::RolePermissionRowRules)));
 
         // SAMLProvider service
         let saml_provider_repository = Arc::new(SAMLProviderRepository::new(db_pool.clone()));
@@ -634,7 +631,7 @@ impl SapiensModuleBuilder {
 
         // SystemSettings service
         let system_settings_repository = Arc::new(SystemSettingsRepository::new(db_pool.clone()));
-        let system_settings_service = Arc::new(SystemSettingsService::with_repository(system_settings_repository.clone()));
+        let system_settings_service = Arc::new(SystemSettingsService::with_repository(system_settings_repository.clone()).with_guard(Arc::new(crate::application::service::system_settings_service::SystemSettingsRowRules)));
 
         // TemporaryPermission service
         let temporary_permission_repository = Arc::new(TemporaryPermissionRepository::new(db_pool.clone()));
@@ -676,7 +673,7 @@ impl SapiensModuleBuilder {
 
         // UserRole service
         let user_role_repository = Arc::new(UserRoleRepository::new(db_pool.clone()));
-        let user_role_service = Arc::new(UserRoleService::with_repository(user_role_repository.clone()));
+        let user_role_service = Arc::new(UserRoleService::with_repository(user_role_repository.clone()).with_guard(Arc::new(crate::application::service::user_role_service::UserRoleRowRules)));
 
         // UserSAMLLink service
         let user_saml_link_repository = Arc::new(UserSAMLLinkRepository::new(db_pool.clone()));
@@ -692,7 +689,7 @@ impl SapiensModuleBuilder {
 
         // WorkflowStep service
         let workflow_step_repository = Arc::new(WorkflowStepRepository::new(db_pool.clone()));
-        let workflow_step_service = Arc::new(WorkflowStepService::with_repository(workflow_step_repository.clone()));
+        let workflow_step_service = Arc::new(WorkflowStepService::with_repository(workflow_step_repository.clone()).with_guard(Arc::new(crate::application::service::workflow_step_service::WorkflowStepRowRules)));
 
         // WorkflowDefinition service
         let workflow_definition_repository = Arc::new(WorkflowDefinitionRepository::new(db_pool.clone()));
@@ -708,7 +705,7 @@ impl SapiensModuleBuilder {
 
         // WorkflowActionExecution service
         let workflow_action_execution_repository = Arc::new(WorkflowActionExecutionRepository::new(db_pool.clone()));
-        let workflow_action_execution_service = Arc::new(WorkflowActionExecutionService::with_repository(workflow_action_execution_repository.clone()));
+        let workflow_action_execution_service = Arc::new(WorkflowActionExecutionService::with_repository(workflow_action_execution_repository.clone()).with_guard(Arc::new(crate::application::service::workflow_action_execution_service::WorkflowActionExecutionRowRules)));
 
         // <<< CUSTOM: Initialize auth_service
         let jwt_config = crate::infrastructure::auth::jwt::JwtConfig::from_env();
@@ -736,6 +733,10 @@ impl SapiensModuleBuilder {
         // in routes() — the host composes create_integration_credential_routes
         // behind its own role gate so the credential surface never rides the
         // CRUD router).
+        // The credential store writes only through its own verbs, not the generic service, so
+        // `IntegrationCredentialRowRules` has no service to attach to: `issue` and `rotate`
+        // refuse an empty or malformed provider and account reference themselves, and the key id
+        // and ciphertext are sealed server-side.
         let integration_credential_service = Arc::new(IntegrationCredentialService::new(db_pool.clone()));
         // <<< CUSTOM: Create integration event publisher if bus is provided
         let integration_publisher = self.integration_bus.map(|bus| {

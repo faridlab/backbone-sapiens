@@ -32,9 +32,10 @@ pub type BackupCodeService = GenericCrudService<
     BackupCodeRepository,
 >;
 
-/// The row rules the schema declares for BackupCode, checked against the row a create or
-/// update would store. The generated build attaches it to [`BackupCodeService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for BackupCode, checked against the row a create or update
+/// would store. The generated build attaches it to [`BackupCodeService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct BackupCodeRowRules;
 
 #[async_trait::async_trait]
@@ -54,12 +55,46 @@ impl backbone_core::write_guard::WriteGuard<BackupCode> for BackupCodeRowRules {
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `user_id_required` (@required on BackupCode.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `batch_id_required` (@required on BackupCode.batch_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["batch_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "batch_id")), r::not(r::is_empty(r::trim(r::field(row, "batch_id")))))) {
+            refuse.push(Violation::new("batch_id", "required", "batch_id is required"));
+        }
+        // `batch_id_length` (@length(32) on BackupCode.batch_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["batch_id"]))) && !r::holds(&r::eq(r::length(r::field(row, "batch_id")), r::Val::Num(32.0_f64))) {
+            shadow.push(Violation::new("batch_id", "length", "batch_id must be exactly 32 characters").with_param("length", 32_i64));
+        }
+        // `code_hash_required` (@required on BackupCode.code_hash)
+        if (create || (update && r::changed(old.as_ref(), row, &["code_hash"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "code_hash")), r::not(r::is_empty(r::trim(r::field(row, "code_hash")))))) {
+            refuse.push(Violation::new("code_hash", "required", "code_hash is required"));
+        }
+        // `code_hash_length` (@length(64) on BackupCode.code_hash)
+        if (create || (update && r::changed(old.as_ref(), row, &["code_hash"]))) && !r::holds(&r::eq(r::length(r::field(row, "code_hash")), r::Val::Num(64.0_f64))) {
+            shadow.push(Violation::new("code_hash", "length", "code_hash must be exactly 64 characters").with_param("length", 64_i64));
+        }
+        // `code_index_min` (@min(1) on BackupCode.code_index)
+        if (create || (update && r::changed(old.as_ref(), row, &["code_index"]))) && !r::holds(&r::ge(r::field(row, "code_index"), r::Val::Num(1.0_f64))) {
+            shadow.push(Violation::new("code_index", "min", "code_index must be at least 1").with_param("min", 1_i64));
+        }
+        // `code_index_max` (@max(10) on BackupCode.code_index)
+        if (create || (update && r::changed(old.as_ref(), row, &["code_index"]))) && !r::holds(&r::le(r::field(row, "code_index"), r::Val::Num(10.0_f64))) {
+            shadow.push(Violation::new("code_index", "max", "code_index must be at most 10").with_param("max", 10_i64));
+        }
+        // `used_user_agent_max_length` (@max(500) on BackupCode.used_user_agent)
+        if (create || (update && r::changed(old.as_ref(), row, &["used_user_agent"]))) && !r::holds(&r::le(r::length(r::field(row, "used_user_agent")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("used_user_agent", "max_length", "used_user_agent must be at most 500 characters").with_param("max", 500_i64));
+        }
         // `valid_code_index` (backup_code.hook.yaml:17)
         if (create) && !r::holds(&r::and(r::ge(r::field(row, "code_index"), r::Val::Num(1.0_f64)), r::le(r::field(row, "code_index"), r::Val::Num(10.0_f64)))) {
             shadow.push(Violation::new("code_index", "invalid_code_index", "Code index must be between 1 and 10"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

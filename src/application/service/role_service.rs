@@ -32,9 +32,10 @@ pub type RoleService = GenericCrudService<
     RoleRepository,
 >;
 
-/// The row rules the schema declares for Role, checked against the row a create or
-/// update would store. The generated build attaches it to [`RoleService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for Role, checked against the row a create or update
+/// would store. The generated build attaches it to [`RoleService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct RoleRowRules;
 
 #[async_trait::async_trait]
@@ -65,12 +66,26 @@ impl backbone_core::write_guard::WriteGuard<Role> for RoleRowRules {
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `name_required` (@required on Role.name)
+        if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "name")), r::not(r::is_empty(r::trim(r::field(row, "name")))))) {
+            refuse.push(Violation::new("name", "required", "name is required"));
+        }
+        // `name_max_length` (@max(50) on Role.name)
+        if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::le(r::length(r::field(row, "name")), r::Val::Num(50.0_f64))) {
+            shadow.push(Violation::new("name", "max_length", "name must be at most 50 characters").with_param("max", 50_i64));
+        }
+        // `description_max_length` (@max(1000) on Role.description)
+        if (create || (update && r::changed(old.as_ref(), row, &["description"]))) && !r::holds(&r::le(r::length(r::field(row, "description")), r::Val::Num(1000.0_f64))) {
+            shadow.push(Violation::new("description", "max_length", "description must be at most 1000 characters").with_param("max", 1000_i64));
+        }
         // `reserved_names` (role.hook.yaml:39)
         if (create || update) && !r::holds(&r::not_in(r::field(row, "name"), r::Val::List(vec![r::text("SYSTEM"), r::text("ROOT"), r::text("ANONYMOUS")]))) {
             shadow.push(Violation::new("name", "reserved_role_name", "This role name is reserved"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

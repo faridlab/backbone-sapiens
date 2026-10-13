@@ -13,7 +13,6 @@
 
 pub mod service;
 pub mod middleware;
-pub mod validator;
 
 // Re-exports
 pub use service::*;

@@ -32,3 +32,53 @@ pub type OrganizationPermissionService = GenericCrudService<
     OrganizationPermissionRepository,
 >;
 
+/// The rules the schema declares for OrganizationPermission, checked against the row a create or update
+/// would store. The generated build attaches it to [`OrganizationPermissionService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct OrganizationPermissionRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<OrganizationPermission> for OrganizationPermissionRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, OrganizationPermission>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `permission_id_required` (@required on OrganizationPermission.permission_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["permission_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "permission_id")), r::not(r::is_empty(r::trim(r::field(row, "permission_id")))))) {
+            refuse.push(Violation::new("permission_id", "required", "permission_id is required"));
+        }
+        // `permission_name_max_length` (@max(100) on OrganizationPermission.permission_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["permission_name"]))) && !r::holds(&r::le(r::length(r::field(row, "permission_name")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("permission_name", "max_length", "permission_name must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `resource_type_max_length` (@max(100) on OrganizationPermission.resource_type)
+        if (create || (update && r::changed(old.as_ref(), row, &["resource_type"]))) && !r::holds(&r::le(r::length(r::field(row, "resource_type")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("resource_type", "max_length", "resource_type must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `granted_by_required` (@required on OrganizationPermission.granted_by)
+        if (create || (update && r::changed(old.as_ref(), row, &["granted_by"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "granted_by")), r::not(r::is_empty(r::trim(r::field(row, "granted_by")))))) {
+            refuse.push(Violation::new("granted_by", "required", "granted_by is required"));
+        }
+        // `reason_max_length` (@max(1000) on OrganizationPermission.reason)
+        if (create || (update && r::changed(old.as_ref(), row, &["reason"]))) && !r::holds(&r::le(r::length(r::field(row, "reason")), r::Val::Num(1000.0_f64))) {
+            shadow.push(Violation::new("reason", "max_length", "reason must be at most 1000 characters").with_param("max", 1000_i64));
+        }
+        GuardOutcome { refuse, shadow }
+    }
+}
+

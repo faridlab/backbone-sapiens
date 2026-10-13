@@ -32,3 +32,61 @@ pub type AnalyticsReportService = GenericCrudService<
     AnalyticsReportRepository,
 >;
 
+/// The rules the schema declares for AnalyticsReport, checked against the row a create or update
+/// would store. The generated build attaches it to [`AnalyticsReportService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct AnalyticsReportRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<AnalyticsReport> for AnalyticsReportRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, AnalyticsReport>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `report_name_required` (@required on AnalyticsReport.report_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["report_name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "report_name")), r::not(r::is_empty(r::trim(r::field(row, "report_name")))))) {
+            refuse.push(Violation::new("report_name", "required", "report_name is required"));
+        }
+        // `report_name_max_length` (@max(100) on AnalyticsReport.report_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["report_name"]))) && !r::holds(&r::le(r::length(r::field(row, "report_name")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("report_name", "max_length", "report_name must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `description_max_length` (@max(500) on AnalyticsReport.description)
+        if (create || (update && r::changed(old.as_ref(), row, &["description"]))) && !r::holds(&r::le(r::length(r::field(row, "description")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("description", "max_length", "description must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `generated_by_required` (@required on AnalyticsReport.generated_by)
+        if (create || (update && r::changed(old.as_ref(), row, &["generated_by"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "generated_by")), r::not(r::is_empty(r::trim(r::field(row, "generated_by")))))) {
+            refuse.push(Violation::new("generated_by", "required", "generated_by is required"));
+        }
+        // `file_path_max_length` (@max(500) on AnalyticsReport.file_path)
+        if (create || (update && r::changed(old.as_ref(), row, &["file_path"]))) && !r::holds(&r::le(r::length(r::field(row, "file_path")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("file_path", "max_length", "file_path must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `file_size_non_negative` (@non_negative on AnalyticsReport.file_size)
+        if (create || (update && r::changed(old.as_ref(), row, &["file_size"]))) && !r::holds(&r::ge(r::field(row, "file_size"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("file_size", "non_negative", "file_size must not be negative"));
+        }
+        // `download_count_non_negative` (@non_negative on AnalyticsReport.download_count)
+        if (create || (update && r::changed(old.as_ref(), row, &["download_count"]))) && !r::holds(&r::ge(r::field(row, "download_count"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("download_count", "non_negative", "download_count must not be negative"));
+        }
+        GuardOutcome { refuse, shadow }
+    }
+}
+

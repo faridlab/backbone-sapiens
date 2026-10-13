@@ -32,9 +32,10 @@ pub type ResourcePermissionService = GenericCrudService<
     ResourcePermissionRepository,
 >;
 
-/// The row rules the schema declares for ResourcePermission, checked against the row a create or
-/// update would store. The generated build attaches it to [`ResourcePermissionService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for ResourcePermission, checked against the row a create or update
+/// would store. The generated build attaches it to [`ResourcePermissionService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct ResourcePermissionRowRules;
 
 #[async_trait::async_trait]
@@ -56,9 +57,38 @@ impl backbone_core::write_guard::WriteGuard<ResourcePermission> for ResourcePerm
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `status` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
             shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `permission_id_required` (@required on ResourcePermission.permission_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["permission_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "permission_id")), r::not(r::is_empty(r::trim(r::field(row, "permission_id")))))) {
+            refuse.push(Violation::new("permission_id", "required", "permission_id is required"));
+        }
+        // `resource_type_required` (@required on ResourcePermission.resource_type)
+        if (create || (update && r::changed(old.as_ref(), row, &["resource_type"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "resource_type")), r::not(r::is_empty(r::trim(r::field(row, "resource_type")))))) {
+            refuse.push(Violation::new("resource_type", "required", "resource_type is required"));
+        }
+        // `resource_type_max_length` (@max(100) on ResourcePermission.resource_type)
+        if (create || (update && r::changed(old.as_ref(), row, &["resource_type"]))) && !r::holds(&r::le(r::length(r::field(row, "resource_type")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("resource_type", "max_length", "resource_type must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `resource_id_required` (@required on ResourcePermission.resource_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["resource_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "resource_id")), r::not(r::is_empty(r::trim(r::field(row, "resource_id")))))) {
+            refuse.push(Violation::new("resource_id", "required", "resource_id is required"));
+        }
+        // `resource_id_max_length` (@max(100) on ResourcePermission.resource_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["resource_id"]))) && !r::holds(&r::le(r::length(r::field(row, "resource_id")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("resource_id", "max_length", "resource_id must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `granted_by_required` (@required on ResourcePermission.granted_by)
+        if (create || (update && r::changed(old.as_ref(), row, &["granted_by"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "granted_by")), r::not(r::is_empty(r::trim(r::field(row, "granted_by")))))) {
+            refuse.push(Violation::new("granted_by", "required", "granted_by is required"));
+        }
+        // `reason_max_length` (@max(1000) on ResourcePermission.reason)
+        if (create || (update && r::changed(old.as_ref(), row, &["reason"]))) && !r::holds(&r::le(r::length(r::field(row, "reason")), r::Val::Num(1000.0_f64))) {
+            shadow.push(Violation::new("reason", "max_length", "reason must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `grant_to_user_or_role` (resource_permission.hook.yaml:51)
         if (create || update) && !r::holds(&r::ne(r::is_null(r::field(row, "granted_to_user_id")), r::is_null(r::field(row, "granted_to_role_id")))) {
@@ -76,7 +106,7 @@ impl backbone_core::write_guard::WriteGuard<ResourcePermission> for ResourcePerm
         if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "expires_at")), r::gt(r::field(row, "expires_at"), r::field(row, "granted_at")))) {
             shadow.push(Violation::new("expires_at", "invalid_expiration", "Expiration must be in the future"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

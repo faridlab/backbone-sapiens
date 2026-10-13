@@ -32,3 +32,85 @@ pub type PasswordResetService = GenericCrudService<
     PasswordResetRepository,
 >;
 
+/// The rules the schema declares for PasswordReset, checked against the row a create or update
+/// would store. The generated build attaches it to [`PasswordResetService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct PasswordResetRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<PasswordReset> for PasswordResetRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, PasswordReset>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `user_id_required` (@required on PasswordReset.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `token_required` (@required on PasswordReset.token)
+        if (create || (update && r::changed(old.as_ref(), row, &["token"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "token")), r::not(r::is_empty(r::trim(r::field(row, "token")))))) {
+            refuse.push(Violation::new("token", "required", "token is required"));
+        }
+        // `token_max_length` (@max(255) on PasswordReset.token)
+        if (create || (update && r::changed(old.as_ref(), row, &["token"]))) && !r::holds(&r::le(r::length(r::field(row, "token")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("token", "max_length", "token must be at most 255 characters").with_param("max", 255_i64));
+        }
+        // `token_hash_required` (@required on PasswordReset.token_hash)
+        if (create || (update && r::changed(old.as_ref(), row, &["token_hash"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "token_hash")), r::not(r::is_empty(r::trim(r::field(row, "token_hash")))))) {
+            refuse.push(Violation::new("token_hash", "required", "token_hash is required"));
+        }
+        // `token_hash_max_length` (@max(255) on PasswordReset.token_hash)
+        if (create || (update && r::changed(old.as_ref(), row, &["token_hash"]))) && !r::holds(&r::le(r::length(r::field(row, "token_hash")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("token_hash", "max_length", "token_hash must be at most 255 characters").with_param("max", 255_i64));
+        }
+        // `email_required` (@required on PasswordReset.email)
+        if (create || (update && r::changed(old.as_ref(), row, &["email"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "email")), r::not(r::is_empty(r::trim(r::field(row, "email")))))) {
+            refuse.push(Violation::new("email", "required", "email is required"));
+        }
+        // `email_email` (type email on PasswordReset.email)
+        if (create || (update && r::changed(old.as_ref(), row, &["email"]))) && !r::holds(&r::matches(r::field(row, "email"), "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            shadow.push(Violation::new("email", "email", "email must be an email address"));
+        }
+        // `max_attempts_min` (@min(1) on PasswordReset.max_attempts)
+        if (create || (update && r::changed(old.as_ref(), row, &["max_attempts"]))) && !r::holds(&r::ge(r::field(row, "max_attempts"), r::Val::Num(1.0_f64))) {
+            shadow.push(Violation::new("max_attempts", "min", "max_attempts must be at least 1").with_param("min", 1_i64));
+        }
+        // `max_attempts_max` (@max(10) on PasswordReset.max_attempts)
+        if (create || (update && r::changed(old.as_ref(), row, &["max_attempts"]))) && !r::holds(&r::le(r::field(row, "max_attempts"), r::Val::Num(10.0_f64))) {
+            shadow.push(Violation::new("max_attempts", "max", "max_attempts must be at most 10").with_param("max", 10_i64));
+        }
+        // `attempts_remaining_min` (@min(0) on PasswordReset.attempts_remaining)
+        if (create || (update && r::changed(old.as_ref(), row, &["attempts_remaining"]))) && !r::holds(&r::ge(r::field(row, "attempts_remaining"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("attempts_remaining", "min", "attempts_remaining must be at least 0").with_param("min", 0_i64));
+        }
+        // `device_fingerprint_max_length` (@max(255) on PasswordReset.device_fingerprint)
+        if (create || (update && r::changed(old.as_ref(), row, &["device_fingerprint"]))) && !r::holds(&r::le(r::length(r::field(row, "device_fingerprint")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("device_fingerprint", "max_length", "device_fingerprint must be at most 255 characters").with_param("max", 255_i64));
+        }
+        // `ip_address_max_length` (@max(45) on PasswordReset.ip_address)
+        if (create || (update && r::changed(old.as_ref(), row, &["ip_address"]))) && !r::holds(&r::le(r::length(r::field(row, "ip_address")), r::Val::Num(45.0_f64))) {
+            shadow.push(Violation::new("ip_address", "max_length", "ip_address must be at most 45 characters").with_param("max", 45_i64));
+        }
+        // `user_agent_max_length` (@max(500) on PasswordReset.user_agent)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_agent"]))) && !r::holds(&r::le(r::length(r::field(row, "user_agent")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("user_agent", "max_length", "user_agent must be at most 500 characters").with_param("max", 500_i64));
+        }
+        GuardOutcome { refuse, shadow }
+    }
+}
+

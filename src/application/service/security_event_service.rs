@@ -32,9 +32,10 @@ pub type SecurityEventService = GenericCrudService<
     SecurityEventRepository,
 >;
 
-/// The row rules the schema declares for SecurityEvent, checked against the row a create or
-/// update would store. The generated build attaches it to [`SecurityEventService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for SecurityEvent, checked against the row a create or update
+/// would store. The generated build attaches it to [`SecurityEventService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct SecurityEventRowRules;
 
 #[async_trait::async_trait]
@@ -59,6 +60,22 @@ impl backbone_core::write_guard::WriteGuard<SecurityEvent> for SecurityEventRowR
         // `resolved` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["resolved"]) {
             shadow.push(Violation::new("resolved", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `ip_address_max_length` (@max(45) on SecurityEvent.ip_address)
+        if (create || (update && r::changed(old.as_ref(), row, &["ip_address"]))) && !r::holds(&r::le(r::length(r::field(row, "ip_address")), r::Val::Num(45.0_f64))) {
+            shadow.push(Violation::new("ip_address", "max_length", "ip_address must be at most 45 characters").with_param("max", 45_i64));
+        }
+        // `user_agent_max_length` (@max(500) on SecurityEvent.user_agent)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_agent"]))) && !r::holds(&r::le(r::length(r::field(row, "user_agent")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("user_agent", "max_length", "user_agent must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `description_max_length` (@max(1000) on SecurityEvent.description)
+        if (create || (update && r::changed(old.as_ref(), row, &["description"]))) && !r::holds(&r::le(r::length(r::field(row, "description")), r::Val::Num(1000.0_f64))) {
+            shadow.push(Violation::new("description", "max_length", "description must be at most 1000 characters").with_param("max", 1000_i64));
+        }
+        // `resolution_notes_max_length` (@max(1000) on SecurityEvent.resolution_notes)
+        if (create || (update && r::changed(old.as_ref(), row, &["resolution_notes"]))) && !r::holds(&r::le(r::length(r::field(row, "resolution_notes")), r::Val::Num(1000.0_f64))) {
+            shadow.push(Violation::new("resolution_notes", "max_length", "resolution_notes must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `event_type_required` (security_event.hook.yaml:46)
         if (create) && !r::holds(&r::is_not_null(r::field(row, "event_type"))) {

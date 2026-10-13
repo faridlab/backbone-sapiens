@@ -32,3 +32,117 @@ pub type MFABackupCodeService = GenericCrudService<
     MFABackupCodeRepository,
 >;
 
+/// The rules the schema declares for MFABackupCode, checked against the row a create or update
+/// would store. The generated build attaches it to [`MFABackupCodeService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct MFABackupCodeRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<MFABackupCode> for MFABackupCodeRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, MFABackupCode>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `user_id_required` (@required on MFABackupCode.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `batch_id_required` (@required on MFABackupCode.batch_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["batch_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "batch_id")), r::not(r::is_empty(r::trim(r::field(row, "batch_id")))))) {
+            refuse.push(Violation::new("batch_id", "required", "batch_id is required"));
+        }
+        // `code_required` (@required on MFABackupCode.code)
+        if (create || (update && r::changed(old.as_ref(), row, &["code"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "code")), r::not(r::is_empty(r::trim(r::field(row, "code")))))) {
+            refuse.push(Violation::new("code", "required", "code is required"));
+        }
+        // `code_max_length` (@max(10) on MFABackupCode.code)
+        if (create || (update && r::changed(old.as_ref(), row, &["code"]))) && !r::holds(&r::le(r::length(r::field(row, "code")), r::Val::Num(10.0_f64))) {
+            shadow.push(Violation::new("code", "max_length", "code must be at most 10 characters").with_param("max", 10_i64));
+        }
+        // `code_hash_required` (@required on MFABackupCode.code_hash)
+        if (create || (update && r::changed(old.as_ref(), row, &["code_hash"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "code_hash")), r::not(r::is_empty(r::trim(r::field(row, "code_hash")))))) {
+            refuse.push(Violation::new("code_hash", "required", "code_hash is required"));
+        }
+        // `code_hash_max_length` (@max(64) on MFABackupCode.code_hash)
+        if (create || (update && r::changed(old.as_ref(), row, &["code_hash"]))) && !r::holds(&r::le(r::length(r::field(row, "code_hash")), r::Val::Num(64.0_f64))) {
+            shadow.push(Violation::new("code_hash", "max_length", "code_hash must be at most 64 characters").with_param("max", 64_i64));
+        }
+        // `code_index_min` (@min(1) on MFABackupCode.code_index)
+        if (create || (update && r::changed(old.as_ref(), row, &["code_index"]))) && !r::holds(&r::ge(r::field(row, "code_index"), r::Val::Num(1.0_f64))) {
+            shadow.push(Violation::new("code_index", "min", "code_index must be at least 1").with_param("min", 1_i64));
+        }
+        // `code_index_max` (@max(10) on MFABackupCode.code_index)
+        if (create || (update && r::changed(old.as_ref(), row, &["code_index"]))) && !r::holds(&r::le(r::field(row, "code_index"), r::Val::Num(10.0_f64))) {
+            shadow.push(Violation::new("code_index", "max", "code_index must be at most 10").with_param("max", 10_i64));
+        }
+        // `generation_ip_required` (@required on MFABackupCode.generation_ip)
+        if (create || (update && r::changed(old.as_ref(), row, &["generation_ip"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "generation_ip")), r::not(r::is_empty(r::trim(r::field(row, "generation_ip")))))) {
+            refuse.push(Violation::new("generation_ip", "required", "generation_ip is required"));
+        }
+        // `generation_ip_max_length` (@max(45) on MFABackupCode.generation_ip)
+        if (create || (update && r::changed(old.as_ref(), row, &["generation_ip"]))) && !r::holds(&r::le(r::length(r::field(row, "generation_ip")), r::Val::Num(45.0_f64))) {
+            shadow.push(Violation::new("generation_ip", "max_length", "generation_ip must be at most 45 characters").with_param("max", 45_i64));
+        }
+        // `algorithm_version_max_length` (@max(20) on MFABackupCode.algorithm_version)
+        if (create || (update && r::changed(old.as_ref(), row, &["algorithm_version"]))) && !r::holds(&r::le(r::length(r::field(row, "algorithm_version")), r::Val::Num(20.0_f64))) {
+            shadow.push(Violation::new("algorithm_version", "max_length", "algorithm_version must be at most 20 characters").with_param("max", 20_i64));
+        }
+        // `used_ip_max_length` (@max(45) on MFABackupCode.used_ip)
+        if (create || (update && r::changed(old.as_ref(), row, &["used_ip"]))) && !r::holds(&r::le(r::length(r::field(row, "used_ip")), r::Val::Num(45.0_f64))) {
+            shadow.push(Violation::new("used_ip", "max_length", "used_ip must be at most 45 characters").with_param("max", 45_i64));
+        }
+        // `used_user_agent_max_length` (@max(500) on MFABackupCode.used_user_agent)
+        if (create || (update && r::changed(old.as_ref(), row, &["used_user_agent"]))) && !r::holds(&r::le(r::length(r::field(row, "used_user_agent")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("used_user_agent", "max_length", "used_user_agent must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `usage_risk_score_min` (@min(0) on MFABackupCode.usage_risk_score)
+        if (create || (update && r::changed(old.as_ref(), row, &["usage_risk_score"]))) && !r::holds(&r::ge(r::field(row, "usage_risk_score"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("usage_risk_score", "min", "usage_risk_score must be at least 0").with_param("min", 0_i64));
+        }
+        // `usage_risk_score_max` (@max(100) on MFABackupCode.usage_risk_score)
+        if (create || (update && r::changed(old.as_ref(), row, &["usage_risk_score"]))) && !r::holds(&r::le(r::field(row, "usage_risk_score"), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("usage_risk_score", "max", "usage_risk_score must be at most 100").with_param("max", 100_i64));
+        }
+        // `consumption_attempts_non_negative` (@non_negative on MFABackupCode.consumption_attempts)
+        if (create || (update && r::changed(old.as_ref(), row, &["consumption_attempts"]))) && !r::holds(&r::ge(r::field(row, "consumption_attempts"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("consumption_attempts", "non_negative", "consumption_attempts must not be negative"));
+        }
+        // `revocation_reason_max_length` (@max(500) on MFABackupCode.revocation_reason)
+        if (create || (update && r::changed(old.as_ref(), row, &["revocation_reason"]))) && !r::holds(&r::le(r::length(r::field(row, "revocation_reason")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("revocation_reason", "max_length", "revocation_reason must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `grace_period_hours_min` (@min(0) on MFABackupCode.grace_period_hours)
+        if (create || (update && r::changed(old.as_ref(), row, &["grace_period_hours"]))) && !r::holds(&r::ge(r::field(row, "grace_period_hours"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("grace_period_hours", "min", "grace_period_hours must be at least 0").with_param("min", 0_i64));
+        }
+        // `grace_period_hours_max` (@max(168) on MFABackupCode.grace_period_hours)
+        if (create || (update && r::changed(old.as_ref(), row, &["grace_period_hours"]))) && !r::holds(&r::le(r::field(row, "grace_period_hours"), r::Val::Num(168.0_f64))) {
+            shadow.push(Violation::new("grace_period_hours", "max", "grace_period_hours must be at most 168").with_param("max", 168_i64));
+        }
+        // `data_retention_days_min` (@min(30) on MFABackupCode.data_retention_days)
+        if (create || (update && r::changed(old.as_ref(), row, &["data_retention_days"]))) && !r::holds(&r::ge(r::field(row, "data_retention_days"), r::Val::Num(30.0_f64))) {
+            shadow.push(Violation::new("data_retention_days", "min", "data_retention_days must be at least 30").with_param("min", 30_i64));
+        }
+        // `data_retention_days_max` (@max(1825) on MFABackupCode.data_retention_days)
+        if (create || (update && r::changed(old.as_ref(), row, &["data_retention_days"]))) && !r::holds(&r::le(r::field(row, "data_retention_days"), r::Val::Num(1825.0_f64))) {
+            shadow.push(Violation::new("data_retention_days", "max", "data_retention_days must be at most 1825").with_param("max", 1825_i64));
+        }
+        GuardOutcome { refuse, shadow }
+    }
+}
+

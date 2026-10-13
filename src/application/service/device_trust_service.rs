@@ -32,9 +32,10 @@ pub type DeviceTrustService = GenericCrudService<
     DeviceTrustRepository,
 >;
 
-/// The row rules the schema declares for DeviceTrust, checked against the row a create or
-/// update would store. The generated build attaches it to [`DeviceTrustService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for DeviceTrust, checked against the row a create or update
+/// would store. The generated build attaches it to [`DeviceTrustService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct DeviceTrustRowRules;
 
 #[async_trait::async_trait]
@@ -54,7 +55,41 @@ impl backbone_core::write_guard::WriteGuard<DeviceTrust> for DeviceTrustRowRules
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `user_id_required` (@required on DeviceTrust.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `device_fingerprint_required` (@required on DeviceTrust.device_fingerprint)
+        if (create || (update && r::changed(old.as_ref(), row, &["device_fingerprint"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "device_fingerprint")), r::not(r::is_empty(r::trim(r::field(row, "device_fingerprint")))))) {
+            refuse.push(Violation::new("device_fingerprint", "required", "device_fingerprint is required"));
+        }
+        // `device_fingerprint_length` (@length(128) on DeviceTrust.device_fingerprint)
+        if (create || (update && r::changed(old.as_ref(), row, &["device_fingerprint"]))) && !r::holds(&r::eq(r::length(r::field(row, "device_fingerprint")), r::Val::Num(128.0_f64))) {
+            shadow.push(Violation::new("device_fingerprint", "length", "device_fingerprint must be exactly 128 characters").with_param("length", 128_i64));
+        }
+        // `device_name_required` (@required on DeviceTrust.device_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["device_name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "device_name")), r::not(r::is_empty(r::trim(r::field(row, "device_name")))))) {
+            refuse.push(Violation::new("device_name", "required", "device_name is required"));
+        }
+        // `device_name_max_length` (@max(100) on DeviceTrust.device_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["device_name"]))) && !r::holds(&r::le(r::length(r::field(row, "device_name")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("device_name", "max_length", "device_name must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `usage_count_non_negative` (@non_negative on DeviceTrust.usage_count)
+        if (create || (update && r::changed(old.as_ref(), row, &["usage_count"]))) && !r::holds(&r::ge(r::field(row, "usage_count"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("usage_count", "non_negative", "usage_count must not be negative"));
+        }
+        // `risk_score_min` (@min(0) on DeviceTrust.risk_score)
+        if (create || (update && r::changed(old.as_ref(), row, &["risk_score"]))) && !r::holds(&r::ge(r::field(row, "risk_score"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("risk_score", "min", "risk_score must be at least 0").with_param("min", 0_i64));
+        }
+        // `risk_score_max` (@max(1) on DeviceTrust.risk_score)
+        if (create || (update && r::changed(old.as_ref(), row, &["risk_score"]))) && !r::holds(&r::le(r::field(row, "risk_score"), r::Val::Num(1.0_f64))) {
+            shadow.push(Violation::new("risk_score", "max", "risk_score must be at most 1").with_param("max", 1_i64));
+        }
         // `valid_risk_score` (device_trust.hook.yaml:25)
         if (create || update) && !r::holds(&r::and(r::ge(r::field(row, "risk_score"), r::Val::Num(0.0_f64)), r::le(r::field(row, "risk_score"), r::Val::Num(1.0_f64)))) {
             shadow.push(Violation::new("risk_score", "invalid_risk_score", "Risk score must be between 0.0 and 1.0"));
@@ -67,7 +102,7 @@ impl backbone_core::write_guard::WriteGuard<DeviceTrust> for DeviceTrustRowRules
         if (create || update) && !r::holds(&r::in_list(r::field(row, "device_type"), r::Val::List(vec![r::text("desktop"), r::text("laptop"), r::text("mobile"), r::text("tablet"), r::text("browser"), r::text("application")]))) {
             shadow.push(Violation::new("device_type", "invalid_device_type", "Invalid device type"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

@@ -32,9 +32,10 @@ pub type PermissionService = GenericCrudService<
     PermissionRepository,
 >;
 
-/// The row rules the schema declares for Permission, checked against the row a create or
-/// update would store. The generated build attaches it to [`PermissionService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for Permission, checked against the row a create or update
+/// would store. The generated build attaches it to [`PermissionService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct PermissionRowRules;
 
 #[async_trait::async_trait]
@@ -65,12 +66,54 @@ impl backbone_core::write_guard::WriteGuard<Permission> for PermissionRowRules {
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `name_required` (@required on Permission.name)
+        if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "name")), r::not(r::is_empty(r::trim(r::field(row, "name")))))) {
+            refuse.push(Violation::new("name", "required", "name is required"));
+        }
+        // `name_max_length` (@max(100) on Permission.name)
+        if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::le(r::length(r::field(row, "name")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("name", "max_length", "name must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `name_pattern` (@pattern on Permission.name)
+        if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::matches(r::field(row, "name"), "^[a-z_]+:[a-z_*]+$")) {
+            shadow.push(Violation::new("name", "pattern", "name does not have the expected form").with_param("pattern", "^[a-z_]+:[a-z_*]+$"));
+        }
+        // `description_max_length` (@max(500) on Permission.description)
+        if (create || (update && r::changed(old.as_ref(), row, &["description"]))) && !r::holds(&r::le(r::length(r::field(row, "description")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("description", "max_length", "description must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `resource_required` (@required on Permission.resource)
+        if (create || (update && r::changed(old.as_ref(), row, &["resource"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "resource")), r::not(r::is_empty(r::trim(r::field(row, "resource")))))) {
+            refuse.push(Violation::new("resource", "required", "resource is required"));
+        }
+        // `resource_max_length` (@max(250) on Permission.resource)
+        if (create || (update && r::changed(old.as_ref(), row, &["resource"]))) && !r::holds(&r::le(r::length(r::field(row, "resource")), r::Val::Num(250.0_f64))) {
+            shadow.push(Violation::new("resource", "max_length", "resource must be at most 250 characters").with_param("max", 250_i64));
+        }
+        // `resource_pattern` (@pattern on Permission.resource)
+        if (create || (update && r::changed(old.as_ref(), row, &["resource"]))) && !r::holds(&r::matches(r::field(row, "resource"), "^[a-z_*]+$")) {
+            shadow.push(Violation::new("resource", "pattern", "resource does not have the expected form").with_param("pattern", "^[a-z_*]+$"));
+        }
+        // `action_required` (@required on Permission.action)
+        if (create || (update && r::changed(old.as_ref(), row, &["action"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "action")), r::not(r::is_empty(r::trim(r::field(row, "action")))))) {
+            refuse.push(Violation::new("action", "required", "action is required"));
+        }
+        // `action_max_length` (@max(250) on Permission.action)
+        if (create || (update && r::changed(old.as_ref(), row, &["action"]))) && !r::holds(&r::le(r::length(r::field(row, "action")), r::Val::Num(250.0_f64))) {
+            shadow.push(Violation::new("action", "max_length", "action must be at most 250 characters").with_param("max", 250_i64));
+        }
+        // `action_pattern` (@pattern on Permission.action)
+        if (create || (update && r::changed(old.as_ref(), row, &["action"]))) && !r::holds(&r::matches(r::field(row, "action"), "^[a-z_]+$")) {
+            shadow.push(Violation::new("action", "pattern", "action does not have the expected form").with_param("pattern", "^[a-z_]+$"));
+        }
         // `name_format` (permission.hook.yaml:11)
         if (create || update) && !r::holds(&r::matches(r::field(row, "name"), "^[a-z_]+:[a-z_]+$")) {
             shadow.push(Violation::new("name", "invalid_permission_format", "Permission name must be in format 'action:resource' (e.g., read:users, write:posts)"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

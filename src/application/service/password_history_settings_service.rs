@@ -32,3 +32,40 @@ pub type PasswordHistorySettingsService = GenericCrudService<
     PasswordHistorySettingsRepository,
 >;
 
+/// The rules the schema declares for PasswordHistorySettings, checked against the row a create or update
+/// would store. The generated build attaches it to [`PasswordHistorySettingsService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct PasswordHistorySettingsRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<PasswordHistorySettings> for PasswordHistorySettingsRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, PasswordHistorySettings>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        // `history_count_min` (@min(3) on PasswordHistorySettings.history_count)
+        if (create || (update && r::changed(old.as_ref(), row, &["history_count"]))) && !r::holds(&r::ge(r::field(row, "history_count"), r::Val::Num(3.0_f64))) {
+            shadow.push(Violation::new("history_count", "min", "history_count must be at least 3").with_param("min", 3_i64));
+        }
+        // `history_count_max` (@max(24) on PasswordHistorySettings.history_count)
+        if (create || (update && r::changed(old.as_ref(), row, &["history_count"]))) && !r::holds(&r::le(r::field(row, "history_count"), r::Val::Num(24.0_f64))) {
+            shadow.push(Violation::new("history_count", "max", "history_count must be at most 24").with_param("max", 24_i64));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

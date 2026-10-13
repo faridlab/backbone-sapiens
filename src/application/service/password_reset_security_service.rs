@@ -32,3 +32,52 @@ pub type PasswordResetSecurityService = GenericCrudService<
     PasswordResetSecurityRepository,
 >;
 
+/// The rules the schema declares for PasswordResetSecurity, checked against the row a create or update
+/// would store. The generated build attaches it to [`PasswordResetSecurityService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct PasswordResetSecurityRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<PasswordResetSecurity> for PasswordResetSecurityRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, PasswordResetSecurity>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        // `max_attempts_min` (@min(1) on PasswordResetSecurity.max_attempts)
+        if (create || (update && r::changed(old.as_ref(), row, &["max_attempts"]))) && !r::holds(&r::ge(r::field(row, "max_attempts"), r::Val::Num(1.0_f64))) {
+            shadow.push(Violation::new("max_attempts", "min", "max_attempts must be at least 1").with_param("min", 1_i64));
+        }
+        // `max_attempts_max` (@max(10) on PasswordResetSecurity.max_attempts)
+        if (create || (update && r::changed(old.as_ref(), row, &["max_attempts"]))) && !r::holds(&r::le(r::field(row, "max_attempts"), r::Val::Num(10.0_f64))) {
+            shadow.push(Violation::new("max_attempts", "max", "max_attempts must be at most 10").with_param("max", 10_i64));
+        }
+        // `attempts_remaining_min` (@min(0) on PasswordResetSecurity.attempts_remaining)
+        if (create || (update && r::changed(old.as_ref(), row, &["attempts_remaining"]))) && !r::holds(&r::ge(r::field(row, "attempts_remaining"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("attempts_remaining", "min", "attempts_remaining must be at least 0").with_param("min", 0_i64));
+        }
+        // `risk_score_min` (@min(0) on PasswordResetSecurity.risk_score)
+        if (create || (update && r::changed(old.as_ref(), row, &["risk_score"]))) && !r::holds(&r::ge(r::field(row, "risk_score"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("risk_score", "min", "risk_score must be at least 0").with_param("min", 0_i64));
+        }
+        // `risk_score_max` (@max(100) on PasswordResetSecurity.risk_score)
+        if (create || (update && r::changed(old.as_ref(), row, &["risk_score"]))) && !r::holds(&r::le(r::field(row, "risk_score"), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("risk_score", "max", "risk_score must be at most 100").with_param("max", 100_i64));
+        }
+        GuardOutcome { refuse: Vec::new(), shadow }
+    }
+}
+

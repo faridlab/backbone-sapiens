@@ -32,9 +32,10 @@ pub type UserOAuthLinkService = GenericCrudService<
     UserOAuthLinkRepository,
 >;
 
-/// The row rules the schema declares for UserOAuthLink, checked against the row a create or
-/// update would store. The generated build attaches it to [`UserOAuthLinkService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for UserOAuthLink, checked against the row a create or update
+/// would store. The generated build attaches it to [`UserOAuthLinkService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct UserOAuthLinkRowRules;
 
 #[async_trait::async_trait]
@@ -56,9 +57,38 @@ impl backbone_core::write_guard::WriteGuard<UserOAuthLink> for UserOAuthLinkRowR
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `status` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["status"]) {
             shadow.push(Violation::new("status", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `user_id_required` (@required on UserOAuthLink.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `oauth_provider_id_required` (@required on UserOAuthLink.oauth_provider_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["oauth_provider_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "oauth_provider_id")), r::not(r::is_empty(r::trim(r::field(row, "oauth_provider_id")))))) {
+            refuse.push(Violation::new("oauth_provider_id", "required", "oauth_provider_id is required"));
+        }
+        // `provider_user_id_required` (@required on UserOAuthLink.provider_user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["provider_user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider_user_id")), r::not(r::is_empty(r::trim(r::field(row, "provider_user_id")))))) {
+            refuse.push(Violation::new("provider_user_id", "required", "provider_user_id is required"));
+        }
+        // `provider_user_id_max_length` (@max(255) on UserOAuthLink.provider_user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["provider_user_id"]))) && !r::holds(&r::le(r::length(r::field(row, "provider_user_id")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("provider_user_id", "max_length", "provider_user_id must be at most 255 characters").with_param("max", 255_i64));
+        }
+        // `provider_email_required` (@required on UserOAuthLink.provider_email)
+        if (create || (update && r::changed(old.as_ref(), row, &["provider_email"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider_email")), r::not(r::is_empty(r::trim(r::field(row, "provider_email")))))) {
+            refuse.push(Violation::new("provider_email", "required", "provider_email is required"));
+        }
+        // `provider_email_email` (type email on UserOAuthLink.provider_email)
+        if (create || (update && r::changed(old.as_ref(), row, &["provider_email"]))) && !r::holds(&r::matches(r::field(row, "provider_email"), "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            shadow.push(Violation::new("provider_email", "email", "provider_email must be an email address"));
+        }
+        // `provider_username_max_length` (@max(255) on UserOAuthLink.provider_username)
+        if (create || (update && r::changed(old.as_ref(), row, &["provider_username"]))) && !r::holds(&r::le(r::length(r::field(row, "provider_username")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("provider_username", "max_length", "provider_username must be at most 255 characters").with_param("max", 255_i64));
         }
         // `valid_provider_user_id` (user_oauth_link.hook.yaml:70)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider_user_id")), r::gt(r::length(r::field(row, "provider_user_id")), r::Val::Num(0.0_f64)))) {
@@ -68,7 +98,7 @@ impl backbone_core::write_guard::WriteGuard<UserOAuthLink> for UserOAuthLinkRowR
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider_email")), r::matches(r::field(row, "provider_email"), "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))) {
             shadow.push(Violation::new("provider_email", "invalid_provider_email", "Invalid provider email format"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

@@ -32,9 +32,10 @@ pub type NotificationService = GenericCrudService<
     NotificationRepository,
 >;
 
-/// The row rules the schema declares for Notification, checked against the row a create or
-/// update would store. The generated build attaches it to [`NotificationService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for Notification, checked against the row a create or update
+/// would store. The generated build attaches it to [`NotificationService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct NotificationRowRules;
 
 #[async_trait::async_trait]
@@ -54,7 +55,45 @@ impl backbone_core::write_guard::WriteGuard<Notification> for NotificationRowRul
             return GuardOutcome::allow();
         };
         let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `user_id_required` (@required on Notification.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `title_required` (@required on Notification.title)
+        if (create || (update && r::changed(old.as_ref(), row, &["title"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "title")), r::not(r::is_empty(r::trim(r::field(row, "title")))))) {
+            refuse.push(Violation::new("title", "required", "title is required"));
+        }
+        // `title_max_length` (@max(255) on Notification.title)
+        if (create || (update && r::changed(old.as_ref(), row, &["title"]))) && !r::holds(&r::le(r::length(r::field(row, "title")), r::Val::Num(255.0_f64))) {
+            shadow.push(Violation::new("title", "max_length", "title must be at most 255 characters").with_param("max", 255_i64));
+        }
+        // `message_required` (@required on Notification.message)
+        if (create || (update && r::changed(old.as_ref(), row, &["message"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "message")), r::not(r::is_empty(r::trim(r::field(row, "message")))))) {
+            refuse.push(Violation::new("message", "required", "message is required"));
+        }
+        // `message_max_length` (@max(2000) on Notification.message)
+        if (create || (update && r::changed(old.as_ref(), row, &["message"]))) && !r::holds(&r::le(r::length(r::field(row, "message")), r::Val::Num(2000.0_f64))) {
+            shadow.push(Violation::new("message", "max_length", "message must be at most 2000 characters").with_param("max", 2000_i64));
+        }
+        // `action_url_max_length` (@max(500) on Notification.action_url)
+        if (create || (update && r::changed(old.as_ref(), row, &["action_url"]))) && !r::holds(&r::le(r::length(r::field(row, "action_url")), r::Val::Num(500.0_f64))) {
+            shadow.push(Violation::new("action_url", "max_length", "action_url must be at most 500 characters").with_param("max", 500_i64));
+        }
+        // `action_url_url` (type url on Notification.action_url)
+        if (create || (update && r::changed(old.as_ref(), row, &["action_url"]))) && !r::holds(&r::matches(r::field(row, "action_url"), "^[a-zA-Z][a-zA-Z0-9+.-]*://\\S+$")) {
+            shadow.push(Violation::new("action_url", "url", "action_url must be an absolute URL"));
+        }
+        // `action_text_max_length` (@max(100) on Notification.action_text)
+        if (create || (update && r::changed(old.as_ref(), row, &["action_text"]))) && !r::holds(&r::le(r::length(r::field(row, "action_text")), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("action_text", "max_length", "action_text must be at most 100 characters").with_param("max", 100_i64));
+        }
+        // `category_max_length` (@max(50) on Notification.category)
+        if (create || (update && r::changed(old.as_ref(), row, &["category"]))) && !r::holds(&r::le(r::length(r::field(row, "category")), r::Val::Num(50.0_f64))) {
+            shadow.push(Violation::new("category", "max_length", "category must be at most 50 characters").with_param("max", 50_i64));
+        }
         // `valid_channel` (notification.hook.yaml:17)
         if (create || update) && !r::holds(&r::in_list(r::field(row, "channel"), r::Val::List(vec![r::text("in_app"), r::text("email"), r::text("sms"), r::text("push"), r::text("webhook")]))) {
             shadow.push(Violation::new("channel", "invalid_channel", "Invalid notification channel"));
@@ -63,7 +102,7 @@ impl backbone_core::write_guard::WriteGuard<Notification> for NotificationRowRul
         if (create || update) && !r::holds(&r::in_list(r::field(row, "priority"), r::Val::List(vec![r::text("low"), r::text("normal"), r::text("high"), r::text("urgent")]))) {
             shadow.push(Violation::new("priority", "invalid_priority", "Invalid priority level"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

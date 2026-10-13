@@ -32,9 +32,10 @@ pub type SessionLimitService = GenericCrudService<
     SessionLimitRepository,
 >;
 
-/// The row rules the schema declares for SessionLimit, checked against the row a create or
-/// update would store. The generated build attaches it to [`SessionLimitService`]. Every rule
-/// runs in shadow: a break is logged under `backbone::write_guard` and the write goes ahead.
+/// The rules the schema declares for SessionLimit, checked against the row a create or update
+/// would store. The generated build attaches it to [`SessionLimitService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
 pub struct SessionLimitRowRules;
 
 #[async_trait::async_trait]
@@ -56,9 +57,34 @@ impl backbone_core::write_guard::WriteGuard<SessionLimit> for SessionLimitRowRul
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `enforce_limit` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["enforce_limit"]) {
             shadow.push(Violation::new("enforce_limit", "state_field_verbs_only", "the state field moves only through its verbs"));
+        }
+        // `user_id_required` (@required on SessionLimit.user_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
+            refuse.push(Violation::new("user_id", "required", "user_id is required"));
+        }
+        // `max_sessions_min` (@min(1) on SessionLimit.max_sessions)
+        if (create || (update && r::changed(old.as_ref(), row, &["max_sessions"]))) && !r::holds(&r::ge(r::field(row, "max_sessions"), r::Val::Num(1.0_f64))) {
+            shadow.push(Violation::new("max_sessions", "min", "max_sessions must be at least 1").with_param("min", 1_i64));
+        }
+        // `max_sessions_max` (@max(100) on SessionLimit.max_sessions)
+        if (create || (update && r::changed(old.as_ref(), row, &["max_sessions"]))) && !r::holds(&r::le(r::field(row, "max_sessions"), r::Val::Num(100.0_f64))) {
+            shadow.push(Violation::new("max_sessions", "max", "max_sessions must be at most 100").with_param("max", 100_i64));
+        }
+        // `max_sessions_per_device_min` (@min(1) on SessionLimit.max_sessions_per_device)
+        if (create || (update && r::changed(old.as_ref(), row, &["max_sessions_per_device"]))) && !r::holds(&r::ge(r::field(row, "max_sessions_per_device"), r::Val::Num(1.0_f64))) {
+            shadow.push(Violation::new("max_sessions_per_device", "min", "max_sessions_per_device must be at least 1").with_param("min", 1_i64));
+        }
+        // `max_sessions_per_device_max` (@max(50) on SessionLimit.max_sessions_per_device)
+        if (create || (update && r::changed(old.as_ref(), row, &["max_sessions_per_device"]))) && !r::holds(&r::le(r::field(row, "max_sessions_per_device"), r::Val::Num(50.0_f64))) {
+            shadow.push(Violation::new("max_sessions_per_device", "max", "max_sessions_per_device must be at most 50").with_param("max", 50_i64));
+        }
+        // `current_session_count_non_negative` (@non_negative on SessionLimit.current_session_count)
+        if (create || (update && r::changed(old.as_ref(), row, &["current_session_count"]))) && !r::holds(&r::ge(r::field(row, "current_session_count"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("current_session_count", "non_negative", "current_session_count must not be negative"));
         }
         // `max_sessions_positive` (session_limit.hook.yaml:40)
         if (create || update) && !r::holds(&r::gt(r::field(row, "max_sessions"), r::Val::Num(0.0_f64))) {
@@ -72,7 +98,7 @@ impl backbone_core::write_guard::WriteGuard<SessionLimit> for SessionLimitRowRul
         if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "max_sessions_per_device")), r::le(r::field(row, "max_sessions_per_device"), r::field(row, "max_sessions")))) {
             shadow.push(Violation::new("max_sessions_per_device", "invalid_per_device_limit", "Per-device limit cannot exceed total session limit"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 
