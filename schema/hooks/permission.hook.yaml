@@ -10,8 +10,8 @@ model: permission.model.yaml
 rules:
   name_format:
     when: [create, update]
-    condition: "name matches '^[a-z_]+:[a-z_]+$'"
-    message: "Permission name must be in format 'action:resource' (e.g., read:users, write:posts)"
+    condition: "name matches '^[a-z_*]+:[a-z_*]+$'"
+    message: "Permission name must be in format 'action:resource' (e.g., read:users, write:posts, *:*)"
     code: INVALID_PERMISSION_FORMAT
 
   unique_name:

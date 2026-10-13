@@ -74,8 +74,8 @@ states:
 rules:
   username_format:
     when: [create, update]
-    condition: "username matches '^[a-zA-Z0-9_-]{3,50}$'"
-    message: "Username must be 3-50 characters, alphanumeric with underscore/hyphen"
+    condition: "username matches '^[a-zA-Z0-9._-]{3,50}$'"
+    message: "Username must be 3-50 characters: letters, digits, dot, underscore or hyphen"
     code: INVALID_USERNAME_FORMAT
 
   username_lowercase_check:

@@ -16,8 +16,8 @@ models:
       # Authentication credentials
       username:
         type: string
-        attributes: ["@unique", "@required", "@min(3)", "@max(50)", "@alpha_dash"]
-        description: "Unique username, alphanumeric + underscore/hyphen"
+        attributes: ["@unique", "@required", "@min(3)", "@max(50)", "@pattern(^[a-zA-Z0-9._-]+$)"]
+        description: "Unique username: letters, digits, dot, underscore or hyphen"
 
       email:
         type: email

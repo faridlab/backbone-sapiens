@@ -47,7 +47,7 @@ models:
 
       name:
         type: string
-        attributes: ["@unique", "@required", "@max(100)", "@pattern(^[a-z_]+:[a-z_*]+$)"]
+        attributes: ["@unique", "@required", "@max(100)", "@pattern(^[a-z_*]+:[a-z_*]+$)"]
         description: "Format: action:resource (e.g., read:users, admin:*, export:reports)"
 
       description:
@@ -62,7 +62,7 @@ models:
 
       action:
         type: string
-        attributes: ["@required", "@max(250)", "@pattern(^[a-z_]+$)"]
+        attributes: ["@required", "@max(250)", "@pattern(^[a-z_*]+$)"]
         description: "Action verb (e.g., read, write, export, approve). See conventions above."
 
       metadata:

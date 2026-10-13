@@ -69,9 +69,9 @@ models:
         description: "Notification priority"
 
       action_url:
-        type: url?
+        type: string?
         attributes: ["@max(500)"]
-        description: "Action URL for notification"
+        description: "Where the notification leads: an absolute URL or an in-app path"
 
       action_text:
         type: string?

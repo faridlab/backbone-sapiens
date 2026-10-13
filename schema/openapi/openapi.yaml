@@ -27980,7 +27980,6 @@ components:
         action_url:
           nullable: true
           type: string
-          format: uri
           maxLength: 500
         action_text:
           nullable: true
@@ -28057,7 +28056,6 @@ components:
         action_url:
           nullable: true
           type: string
-          format: uri
           maxLength: 500
         action_text:
           nullable: true
@@ -28121,7 +28119,6 @@ components:
         action_url:
           nullable: true
           type: string
-          format: uri
           maxLength: 500
         action_text:
           nullable: true
@@ -28176,7 +28173,6 @@ components:
         action_url:
           nullable: true
           type: string
-          format: uri
           maxLength: 500
         action_text:
           nullable: true
