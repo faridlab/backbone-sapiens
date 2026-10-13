@@ -220,11 +220,12 @@ impl backbone_orm::EntityRepoMeta for UserRole {
         match relation {
             "user" => &["passwordHash"],
             "assigner" => &["passwordHash"],
+            "assignedByUser" => &["passwordHash"],
             _ => &[],
         }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
-        &[("user", "users", "userId"), ("role", "roles", "roleId"), ("assigner", "users", "assignedBy")]
+        &[("user", "users", "userId"), ("role", "roles", "roleId"), ("assigner", "users", "assignedBy"), ("assignedByUser", "users", "assignedBy")]
     }
 }
 

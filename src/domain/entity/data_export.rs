@@ -306,11 +306,12 @@ impl backbone_orm::EntityRepoMeta for DataExport {
         match relation {
             "user" => &["passwordHash"],
             "requester" => &["passwordHash"],
+            "requestedByUser" => &["passwordHash"],
             _ => &[],
         }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
-        &[("user", "users", "userId"), ("requester", "users", "requestedBy")]
+        &[("user", "users", "userId"), ("requester", "users", "requestedBy"), ("requestedByUser", "users", "requestedBy")]
     }
 }
 

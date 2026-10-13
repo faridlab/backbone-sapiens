@@ -335,11 +335,13 @@ impl backbone_orm::EntityRepoMeta for DirectPermissionGrant {
             "user" => &["passwordHash"],
             "granter" => &["passwordHash"],
             "revoker" => &["passwordHash"],
+            "grantedByUser" => &["passwordHash"],
+            "revokedByUser" => &["passwordHash"],
             _ => &[],
         }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
-        &[("user", "users", "userId"), ("permission", "permissions", "permissionId"), ("granter", "users", "grantedBy"), ("revoker", "users", "revokedBy")]
+        &[("user", "users", "userId"), ("permission", "permissions", "permissionId"), ("granter", "users", "grantedBy"), ("revoker", "users", "revokedBy"), ("grantedByUser", "users", "grantedBy"), ("revokedByUser", "users", "revokedBy")]
     }
 }
 

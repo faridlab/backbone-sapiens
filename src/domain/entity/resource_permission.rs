@@ -294,11 +294,13 @@ impl backbone_orm::EntityRepoMeta for ResourcePermission {
         match relation {
             "grantedUser" => &["passwordHash"],
             "granter" => &["passwordHash"],
+            "grantedToUser" => &["passwordHash"],
+            "grantedByUser" => &["passwordHash"],
             _ => &[],
         }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
-        &[("permission", "permissions", "permissionId"), ("grantedUser", "users", "grantedToUserId"), ("grantedRole", "roles", "grantedToRoleId"), ("granter", "users", "grantedBy")]
+        &[("permission", "permissions", "permissionId"), ("grantedUser", "users", "grantedToUserId"), ("grantedRole", "roles", "grantedToRoleId"), ("granter", "users", "grantedBy"), ("grantedToUser", "users", "grantedToUserId"), ("grantedToRole", "roles", "grantedToRoleId"), ("grantedByUser", "users", "grantedBy")]
     }
 }
 

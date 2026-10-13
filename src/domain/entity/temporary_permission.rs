@@ -288,11 +288,13 @@ impl backbone_orm::EntityRepoMeta for TemporaryPermission {
         match relation {
             "user" => &["passwordHash"],
             "granter" => &["passwordHash"],
+            "grantedByUser" => &["passwordHash"],
+            "revokedByUser" => &["passwordHash"],
             _ => &[],
         }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
-        &[("user", "users", "userId"), ("permission", "permissions", "permissionId"), ("granter", "users", "grantedBy")]
+        &[("user", "users", "userId"), ("permission", "permissions", "permissionId"), ("granter", "users", "grantedBy"), ("grantedByUser", "users", "grantedBy"), ("revokedByUser", "users", "revokedBy")]
     }
 }
 

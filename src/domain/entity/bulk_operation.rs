@@ -343,11 +343,12 @@ impl backbone_orm::EntityRepoMeta for BulkOperation {
     fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
         match relation {
             "creator" => &["passwordHash"],
+            "createdByUser" => &["passwordHash"],
             _ => &[],
         }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
-        &[("creator", "users", "createdBy")]
+        &[("creator", "users", "createdBy"), ("createdByUser", "users", "createdBy")]
     }
 }
 

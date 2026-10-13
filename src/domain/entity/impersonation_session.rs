@@ -295,11 +295,12 @@ impl backbone_orm::EntityRepoMeta for ImpersonationSession {
             "targetUser" => &["passwordHash"],
             "session" => &["tokenHash"],
             "terminator" => &["passwordHash"],
+            "terminatedByUser" => &["passwordHash"],
             _ => &[],
         }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
-        &[("admin", "users", "adminId"), ("targetUser", "users", "targetUserId"), ("session", "sessions", "sessionId"), ("terminator", "users", "terminatedBy")]
+        &[("admin", "users", "adminId"), ("targetUser", "users", "targetUserId"), ("session", "sessions", "sessionId"), ("terminator", "users", "terminatedBy"), ("terminatedByUser", "users", "terminatedBy")]
     }
 }
 

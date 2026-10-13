@@ -300,11 +300,12 @@ impl backbone_orm::EntityRepoMeta for AnalyticsReport {
     fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
         match relation {
             "generator" => &["passwordHash"],
+            "generatedByUser" => &["passwordHash"],
             _ => &[],
         }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
-        &[("generator", "users", "generatedBy")]
+        &[("generator", "users", "generatedBy"), ("generatedByUser", "users", "generatedBy")]
     }
 }
 

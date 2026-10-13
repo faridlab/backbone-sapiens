@@ -295,11 +295,12 @@ impl backbone_orm::EntityRepoMeta for OrganizationPermission {
     fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
         match relation {
             "granter" => &["passwordHash"],
+            "grantedByUser" => &["passwordHash"],
             _ => &[],
         }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
-        &[("permission", "permissions", "permissionId"), ("role", "roles", "roleId"), ("granter", "users", "grantedBy")]
+        &[("permission", "permissions", "permissionId"), ("role", "roles", "roleId"), ("granter", "users", "grantedBy"), ("grantedByUser", "users", "grantedBy")]
     }
 }
 

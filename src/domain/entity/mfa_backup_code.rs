@@ -519,11 +519,13 @@ impl backbone_orm::EntityRepoMeta for MFABackupCode {
         match relation {
             "user" => &["passwordHash"],
             "device" => &["totpSecret", "secret", "pushToken", "backupCodesData"],
+            "generatedByUser" => &["passwordHash"],
+            "revokedByUser" => &["passwordHash"],
             _ => &[],
         }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
-        &[("user", "users", "userId"), ("device", "mfa_devices", "deviceId")]
+        &[("user", "users", "userId"), ("device", "mfa_devices", "deviceId"), ("generatedByUser", "users", "generatedBy"), ("revokedByUser", "users", "revokedBy")]
     }
 }
 

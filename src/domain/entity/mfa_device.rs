@@ -544,11 +544,12 @@ impl backbone_orm::EntityRepoMeta for MFADevice {
     fn relation_secret_fields(relation: &str) -> &'static [&'static str] {
         match relation {
             "user" => &["passwordHash"],
+            "enrolledByUser" => &["passwordHash"],
             _ => &[],
         }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
-        &[("user", "users", "userId")]
+        &[("user", "users", "userId"), ("enrolledByUser", "users", "enrolledBy")]
     }
 }
 

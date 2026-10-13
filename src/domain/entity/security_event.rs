@@ -331,11 +331,12 @@ impl backbone_orm::EntityRepoMeta for SecurityEvent {
             "user" => &["passwordHash"],
             "session" => &["tokenHash"],
             "resolver" => &["passwordHash"],
+            "resolvedByUser" => &["passwordHash"],
             _ => &[],
         }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
-        &[("user", "users", "userId"), ("session", "sessions", "sessionId"), ("resolver", "users", "resolvedByUserId")]
+        &[("user", "users", "userId"), ("session", "sessions", "sessionId"), ("resolver", "users", "resolvedByUserId"), ("resolvedByUser", "users", "resolvedByUserId")]
     }
 }
 

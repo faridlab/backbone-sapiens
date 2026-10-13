@@ -254,11 +254,12 @@ impl backbone_orm::EntityRepoMeta for AnonymizationRecord {
         match relation {
             "user" => &["passwordHash"],
             "anonymizer" => &["passwordHash"],
+            "anonymizedByUser" => &["passwordHash"],
             _ => &[],
         }
     }
     fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
-        &[("user", "users", "userId"), ("anonymizer", "users", "anonymizedBy")]
+        &[("user", "users", "userId"), ("anonymizer", "users", "anonymizedBy"), ("anonymizedByUser", "users", "anonymizedBy")]
     }
 }
 
