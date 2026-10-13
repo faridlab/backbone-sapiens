@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<AnalyticsReport> for AnalyticsReport
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `report_name_required` (@required on AnalyticsReport.report_name)
         if (create || (update && r::changed(old.as_ref(), row, &["report_name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "report_name")), r::not(r::is_empty(r::trim(r::field(row, "report_name")))))) {
@@ -64,11 +64,11 @@ impl backbone_core::write_guard::WriteGuard<AnalyticsReport> for AnalyticsReport
         }
         // `report_name_max_length` (@max(100) on AnalyticsReport.report_name)
         if (create || (update && r::changed(old.as_ref(), row, &["report_name"]))) && !r::holds(&r::le(r::length(r::field(row, "report_name")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("report_name", "max_length", "report_name must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("report_name", "max_length", "report_name must be at most 100 characters").with_param("max", 100_i64));
         }
         // `description_max_length` (@max(500) on AnalyticsReport.description)
         if (create || (update && r::changed(old.as_ref(), row, &["description"]))) && !r::holds(&r::le(r::length(r::field(row, "description")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("description", "max_length", "description must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("description", "max_length", "description must be at most 500 characters").with_param("max", 500_i64));
         }
         // `generated_by_required` (@required on AnalyticsReport.generated_by)
         if (create || (update && r::changed(old.as_ref(), row, &["generated_by"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "generated_by")), r::not(r::is_empty(r::trim(r::field(row, "generated_by")))))) {
@@ -76,15 +76,15 @@ impl backbone_core::write_guard::WriteGuard<AnalyticsReport> for AnalyticsReport
         }
         // `file_path_max_length` (@max(500) on AnalyticsReport.file_path)
         if (create || (update && r::changed(old.as_ref(), row, &["file_path"]))) && !r::holds(&r::le(r::length(r::field(row, "file_path")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("file_path", "max_length", "file_path must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("file_path", "max_length", "file_path must be at most 500 characters").with_param("max", 500_i64));
         }
         // `file_size_non_negative` (@non_negative on AnalyticsReport.file_size)
         if (create || (update && r::changed(old.as_ref(), row, &["file_size"]))) && !r::holds(&r::ge(r::field(row, "file_size"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("file_size", "non_negative", "file_size must not be negative"));
+            refuse.push(Violation::new("file_size", "non_negative", "file_size must not be negative"));
         }
         // `download_count_non_negative` (@non_negative on AnalyticsReport.download_count)
         if (create || (update && r::changed(old.as_ref(), row, &["download_count"]))) && !r::holds(&r::ge(r::field(row, "download_count"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("download_count", "non_negative", "download_count must not be negative"));
+            refuse.push(Violation::new("download_count", "non_negative", "download_count must not be negative"));
         }
         GuardOutcome { refuse, shadow }
     }

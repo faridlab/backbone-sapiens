@@ -68,7 +68,7 @@ impl backbone_core::write_guard::WriteGuard<LDAPDirectory> for LDAPDirectoryRowR
         }
         // `name_max_length` (@max(100) on LDAPDirectory.name)
         if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::le(r::length(r::field(row, "name")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("name", "max_length", "name must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("name", "max_length", "name must be at most 100 characters").with_param("max", 100_i64));
         }
         // `display_name_required` (@required on LDAPDirectory.display_name)
         if (create || (update && r::changed(old.as_ref(), row, &["display_name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "display_name")), r::not(r::is_empty(r::trim(r::field(row, "display_name")))))) {
@@ -76,7 +76,7 @@ impl backbone_core::write_guard::WriteGuard<LDAPDirectory> for LDAPDirectoryRowR
         }
         // `display_name_max_length` (@max(200) on LDAPDirectory.display_name)
         if (create || (update && r::changed(old.as_ref(), row, &["display_name"]))) && !r::holds(&r::le(r::length(r::field(row, "display_name")), r::Val::Num(200.0_f64))) {
-            shadow.push(Violation::new("display_name", "max_length", "display_name must be at most 200 characters").with_param("max", 200_i64));
+            refuse.push(Violation::new("display_name", "max_length", "display_name must be at most 200 characters").with_param("max", 200_i64));
         }
         // `host_required` (@required on LDAPDirectory.host)
         if (create || (update && r::changed(old.as_ref(), row, &["host"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "host")), r::not(r::is_empty(r::trim(r::field(row, "host")))))) {
@@ -84,15 +84,15 @@ impl backbone_core::write_guard::WriteGuard<LDAPDirectory> for LDAPDirectoryRowR
         }
         // `host_max_length` (@max(255) on LDAPDirectory.host)
         if (create || (update && r::changed(old.as_ref(), row, &["host"]))) && !r::holds(&r::le(r::length(r::field(row, "host")), r::Val::Num(255.0_f64))) {
-            shadow.push(Violation::new("host", "max_length", "host must be at most 255 characters").with_param("max", 255_i64));
+            refuse.push(Violation::new("host", "max_length", "host must be at most 255 characters").with_param("max", 255_i64));
         }
         // `port_min` (@min(1) on LDAPDirectory.port)
         if (create || (update && r::changed(old.as_ref(), row, &["port"]))) && !r::holds(&r::ge(r::field(row, "port"), r::Val::Num(1.0_f64))) {
-            shadow.push(Violation::new("port", "min", "port must be at least 1").with_param("min", 1_i64));
+            refuse.push(Violation::new("port", "min", "port must be at least 1").with_param("min", 1_i64));
         }
         // `port_max` (@max(65535) on LDAPDirectory.port)
         if (create || (update && r::changed(old.as_ref(), row, &["port"]))) && !r::holds(&r::le(r::field(row, "port"), r::Val::Num(65535.0_f64))) {
-            shadow.push(Violation::new("port", "max", "port must be at most 65535").with_param("max", 65535_i64));
+            refuse.push(Violation::new("port", "max", "port must be at most 65535").with_param("max", 65535_i64));
         }
         // `bind_dn_required` (@required on LDAPDirectory.bind_dn)
         if (create || (update && r::changed(old.as_ref(), row, &["bind_dn"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "bind_dn")), r::not(r::is_empty(r::trim(r::field(row, "bind_dn")))))) {
@@ -100,7 +100,7 @@ impl backbone_core::write_guard::WriteGuard<LDAPDirectory> for LDAPDirectoryRowR
         }
         // `bind_dn_max_length` (@max(500) on LDAPDirectory.bind_dn)
         if (create || (update && r::changed(old.as_ref(), row, &["bind_dn"]))) && !r::holds(&r::le(r::length(r::field(row, "bind_dn")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("bind_dn", "max_length", "bind_dn must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("bind_dn", "max_length", "bind_dn must be at most 500 characters").with_param("max", 500_i64));
         }
         // `bind_password_required` (@required on LDAPDirectory.bind_password)
         if (create || (update && r::changed(old.as_ref(), row, &["bind_password"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "bind_password")), r::not(r::is_empty(r::trim(r::field(row, "bind_password")))))) {
@@ -108,7 +108,7 @@ impl backbone_core::write_guard::WriteGuard<LDAPDirectory> for LDAPDirectoryRowR
         }
         // `bind_password_max_length` (@max(255) on LDAPDirectory.bind_password)
         if (create || (update && r::changed(old.as_ref(), row, &["bind_password"]))) && !r::holds(&r::le(r::length(r::field(row, "bind_password")), r::Val::Num(255.0_f64))) {
-            shadow.push(Violation::new("bind_password", "max_length", "bind_password must be at most 255 characters").with_param("max", 255_i64));
+            refuse.push(Violation::new("bind_password", "max_length", "bind_password must be at most 255 characters").with_param("max", 255_i64));
         }
         // `search_base_required` (@required on LDAPDirectory.search_base)
         if (create || (update && r::changed(old.as_ref(), row, &["search_base"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "search_base")), r::not(r::is_empty(r::trim(r::field(row, "search_base")))))) {
@@ -116,27 +116,27 @@ impl backbone_core::write_guard::WriteGuard<LDAPDirectory> for LDAPDirectoryRowR
         }
         // `search_base_max_length` (@max(500) on LDAPDirectory.search_base)
         if (create || (update && r::changed(old.as_ref(), row, &["search_base"]))) && !r::holds(&r::le(r::length(r::field(row, "search_base")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("search_base", "max_length", "search_base must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("search_base", "max_length", "search_base must be at most 500 characters").with_param("max", 500_i64));
         }
         // `sync_interval_minutes_min` (@min(1) on LDAPDirectory.sync_interval_minutes)
         if (create || (update && r::changed(old.as_ref(), row, &["sync_interval_minutes"]))) && !r::holds(&r::ge(r::field(row, "sync_interval_minutes"), r::Val::Num(1.0_f64))) {
-            shadow.push(Violation::new("sync_interval_minutes", "min", "sync_interval_minutes must be at least 1").with_param("min", 1_i64));
+            refuse.push(Violation::new("sync_interval_minutes", "min", "sync_interval_minutes must be at least 1").with_param("min", 1_i64));
         }
         // `name_required` (ldap_directory.hook.yaml:56)
         if (create || update) && !r::holds(&r::and(r::is_not_null(r::field(row, "name")), r::ge(r::length(r::field(row, "name")), r::Val::Num(3.0_f64)))) {
-            shadow.push(Violation::new("name", "name_required", "Directory name (min 3 characters) is required"));
+            refuse.push(Violation::new("name", "name_required", "Directory name (min 3 characters) is required"));
         }
         // `port_valid` (ldap_directory.hook.yaml:68)
         if (create || update) && !r::holds(&r::and(r::gt(r::field(row, "port"), r::Val::Num(0.0_f64)), r::le(r::field(row, "port"), r::Val::Num(65535.0_f64)))) {
-            shadow.push(Violation::new("port", "invalid_port", "Port must be between 1 and 65535"));
+            refuse.push(Violation::new("port", "invalid_port", "Port must be between 1 and 65535"));
         }
         // `sync_interval_positive` (ldap_directory.hook.yaml:98)
         if (create || update) && !r::holds(&r::gt(r::field(row, "sync_interval_minutes"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("sync_interval_minutes", "invalid_sync_interval", "Sync interval must be positive"));
+            refuse.push(Violation::new("sync_interval_minutes", "invalid_sync_interval", "Sync interval must be positive"));
         }
         // `max_sync_interval` (ldap_directory.hook.yaml:104)
         if (create || update) && !r::holds(&r::le(r::field(row, "sync_interval_minutes"), r::Val::Num(1440.0_f64))) {
-            shadow.push(Violation::new("sync_interval_minutes", "sync_interval_too_long", "Sync interval cannot exceed 1440 minutes (24 hours)"));
+            refuse.push(Violation::new("sync_interval_minutes", "sync_interval_too_long", "Sync interval cannot exceed 1440 minutes (24 hours)"));
         }
         GuardOutcome { refuse, shadow }
     }

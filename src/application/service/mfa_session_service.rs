@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<MFASession> for MFASessionRowRules {
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `user_id_required` (@required on MFASession.user_id)
         if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
@@ -72,7 +72,7 @@ impl backbone_core::write_guard::WriteGuard<MFASession> for MFASessionRowRules {
         }
         // `session_token_max_length` (@max(128) on MFASession.session_token)
         if (create || (update && r::changed(old.as_ref(), row, &["session_token"]))) && !r::holds(&r::le(r::length(r::field(row, "session_token")), r::Val::Num(128.0_f64))) {
-            shadow.push(Violation::new("session_token", "max_length", "session_token must be at most 128 characters").with_param("max", 128_i64));
+            refuse.push(Violation::new("session_token", "max_length", "session_token must be at most 128 characters").with_param("max", 128_i64));
         }
         // `session_hash_required` (@required on MFASession.session_hash)
         if (create || (update && r::changed(old.as_ref(), row, &["session_hash"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "session_hash")), r::not(r::is_empty(r::trim(r::field(row, "session_hash")))))) {
@@ -80,51 +80,51 @@ impl backbone_core::write_guard::WriteGuard<MFASession> for MFASessionRowRules {
         }
         // `session_hash_max_length` (@max(64) on MFASession.session_hash)
         if (create || (update && r::changed(old.as_ref(), row, &["session_hash"]))) && !r::holds(&r::le(r::length(r::field(row, "session_hash")), r::Val::Num(64.0_f64))) {
-            shadow.push(Violation::new("session_hash", "max_length", "session_hash must be at most 64 characters").with_param("max", 64_i64));
+            refuse.push(Violation::new("session_hash", "max_length", "session_hash must be at most 64 characters").with_param("max", 64_i64));
         }
         // `risk_score_min` (@min(0) on MFASession.risk_score)
         if (create || (update && r::changed(old.as_ref(), row, &["risk_score"]))) && !r::holds(&r::ge(r::field(row, "risk_score"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("risk_score", "min", "risk_score must be at least 0").with_param("min", 0_i64));
+            refuse.push(Violation::new("risk_score", "min", "risk_score must be at least 0").with_param("min", 0_i64));
         }
         // `risk_score_max` (@max(100) on MFASession.risk_score)
         if (create || (update && r::changed(old.as_ref(), row, &["risk_score"]))) && !r::holds(&r::le(r::field(row, "risk_score"), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("risk_score", "max", "risk_score must be at most 100").with_param("max", 100_i64));
+            refuse.push(Violation::new("risk_score", "max", "risk_score must be at most 100").with_param("max", 100_i64));
         }
         // `additional_factors_required_min` (@min(0) on MFASession.additional_factors_required)
         if (create || (update && r::changed(old.as_ref(), row, &["additional_factors_required"]))) && !r::holds(&r::ge(r::field(row, "additional_factors_required"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("additional_factors_required", "min", "additional_factors_required must be at least 0").with_param("min", 0_i64));
+            refuse.push(Violation::new("additional_factors_required", "min", "additional_factors_required must be at least 0").with_param("min", 0_i64));
         }
         // `ip_risk_score_min` (@min(0) on MFASession.ip_risk_score)
         if (create || (update && r::changed(old.as_ref(), row, &["ip_risk_score"]))) && !r::holds(&r::ge(r::field(row, "ip_risk_score"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("ip_risk_score", "min", "ip_risk_score must be at least 0").with_param("min", 0_i64));
+            refuse.push(Violation::new("ip_risk_score", "min", "ip_risk_score must be at least 0").with_param("min", 0_i64));
         }
         // `ip_risk_score_max` (@max(100) on MFASession.ip_risk_score)
         if (create || (update && r::changed(old.as_ref(), row, &["ip_risk_score"]))) && !r::holds(&r::le(r::field(row, "ip_risk_score"), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("ip_risk_score", "max", "ip_risk_score must be at most 100").with_param("max", 100_i64));
+            refuse.push(Violation::new("ip_risk_score", "max", "ip_risk_score must be at most 100").with_param("max", 100_i64));
         }
         // `device_risk_score_min` (@min(0) on MFASession.device_risk_score)
         if (create || (update && r::changed(old.as_ref(), row, &["device_risk_score"]))) && !r::holds(&r::ge(r::field(row, "device_risk_score"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("device_risk_score", "min", "device_risk_score must be at least 0").with_param("min", 0_i64));
+            refuse.push(Violation::new("device_risk_score", "min", "device_risk_score must be at least 0").with_param("min", 0_i64));
         }
         // `device_risk_score_max` (@max(100) on MFASession.device_risk_score)
         if (create || (update && r::changed(old.as_ref(), row, &["device_risk_score"]))) && !r::holds(&r::le(r::field(row, "device_risk_score"), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("device_risk_score", "max", "device_risk_score must be at most 100").with_param("max", 100_i64));
+            refuse.push(Violation::new("device_risk_score", "max", "device_risk_score must be at most 100").with_param("max", 100_i64));
         }
         // `verification_attempts_non_negative` (@non_negative on MFASession.verification_attempts)
         if (create || (update && r::changed(old.as_ref(), row, &["verification_attempts"]))) && !r::holds(&r::ge(r::field(row, "verification_attempts"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("verification_attempts", "non_negative", "verification_attempts must not be negative"));
+            refuse.push(Violation::new("verification_attempts", "non_negative", "verification_attempts must not be negative"));
         }
         // `max_attempts_allowed_min` (@min(1) on MFASession.max_attempts_allowed)
         if (create || (update && r::changed(old.as_ref(), row, &["max_attempts_allowed"]))) && !r::holds(&r::ge(r::field(row, "max_attempts_allowed"), r::Val::Num(1.0_f64))) {
-            shadow.push(Violation::new("max_attempts_allowed", "min", "max_attempts_allowed must be at least 1").with_param("min", 1_i64));
+            refuse.push(Violation::new("max_attempts_allowed", "min", "max_attempts_allowed must be at least 1").with_param("min", 1_i64));
         }
         // `max_attempts_allowed_max` (@max(10) on MFASession.max_attempts_allowed)
         if (create || (update && r::changed(old.as_ref(), row, &["max_attempts_allowed"]))) && !r::holds(&r::le(r::field(row, "max_attempts_allowed"), r::Val::Num(10.0_f64))) {
-            shadow.push(Violation::new("max_attempts_allowed", "max", "max_attempts_allowed must be at most 10").with_param("max", 10_i64));
+            refuse.push(Violation::new("max_attempts_allowed", "max", "max_attempts_allowed must be at most 10").with_param("max", 10_i64));
         }
         // `termination_reason_max_length` (@max(500) on MFASession.termination_reason)
         if (create || (update && r::changed(old.as_ref(), row, &["termination_reason"]))) && !r::holds(&r::le(r::length(r::field(row, "termination_reason")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("termination_reason", "max_length", "termination_reason must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("termination_reason", "max_length", "termination_reason must be at most 500 characters").with_param("max", 500_i64));
         }
         // `ip_address_required` (@required on MFASession.ip_address)
         if (create || (update && r::changed(old.as_ref(), row, &["ip_address"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "ip_address")), r::not(r::is_empty(r::trim(r::field(row, "ip_address")))))) {
@@ -132,63 +132,63 @@ impl backbone_core::write_guard::WriteGuard<MFASession> for MFASessionRowRules {
         }
         // `ip_address_max_length` (@max(45) on MFASession.ip_address)
         if (create || (update && r::changed(old.as_ref(), row, &["ip_address"]))) && !r::holds(&r::le(r::length(r::field(row, "ip_address")), r::Val::Num(45.0_f64))) {
-            shadow.push(Violation::new("ip_address", "max_length", "ip_address must be at most 45 characters").with_param("max", 45_i64));
+            refuse.push(Violation::new("ip_address", "max_length", "ip_address must be at most 45 characters").with_param("max", 45_i64));
         }
         // `user_agent_max_length` (@max(500) on MFASession.user_agent)
         if (create || (update && r::changed(old.as_ref(), row, &["user_agent"]))) && !r::holds(&r::le(r::length(r::field(row, "user_agent")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("user_agent", "max_length", "user_agent must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("user_agent", "max_length", "user_agent must be at most 500 characters").with_param("max", 500_i64));
         }
         // `device_fingerprint_max_length` (@max(255) on MFASession.device_fingerprint)
         if (create || (update && r::changed(old.as_ref(), row, &["device_fingerprint"]))) && !r::holds(&r::le(r::length(r::field(row, "device_fingerprint")), r::Val::Num(255.0_f64))) {
-            shadow.push(Violation::new("device_fingerprint", "max_length", "device_fingerprint must be at most 255 characters").with_param("max", 255_i64));
+            refuse.push(Violation::new("device_fingerprint", "max_length", "device_fingerprint must be at most 255 characters").with_param("max", 255_i64));
         }
         // `country_max_length` (@max(2) on MFASession.country)
         if (create || (update && r::changed(old.as_ref(), row, &["country"]))) && !r::holds(&r::le(r::length(r::field(row, "country")), r::Val::Num(2.0_f64))) {
-            shadow.push(Violation::new("country", "max_length", "country must be at most 2 characters").with_param("max", 2_i64));
+            refuse.push(Violation::new("country", "max_length", "country must be at most 2 characters").with_param("max", 2_i64));
         }
         // `region_max_length` (@max(100) on MFASession.region)
         if (create || (update && r::changed(old.as_ref(), row, &["region"]))) && !r::holds(&r::le(r::length(r::field(row, "region")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("region", "max_length", "region must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("region", "max_length", "region must be at most 100 characters").with_param("max", 100_i64));
         }
         // `city_max_length` (@max(100) on MFASession.city)
         if (create || (update && r::changed(old.as_ref(), row, &["city"]))) && !r::holds(&r::le(r::length(r::field(row, "city")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("city", "max_length", "city must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("city", "max_length", "city must be at most 100 characters").with_param("max", 100_i64));
         }
         // `max_duration_minutes_min` (@min(5) on MFASession.max_duration_minutes)
         if (create || (update && r::changed(old.as_ref(), row, &["max_duration_minutes"]))) && !r::holds(&r::ge(r::field(row, "max_duration_minutes"), r::Val::Num(5.0_f64))) {
-            shadow.push(Violation::new("max_duration_minutes", "min", "max_duration_minutes must be at least 5").with_param("min", 5_i64));
+            refuse.push(Violation::new("max_duration_minutes", "min", "max_duration_minutes must be at least 5").with_param("min", 5_i64));
         }
         // `max_duration_minutes_max` (@max(1440) on MFASession.max_duration_minutes)
         if (create || (update && r::changed(old.as_ref(), row, &["max_duration_minutes"]))) && !r::holds(&r::le(r::field(row, "max_duration_minutes"), r::Val::Num(1440.0_f64))) {
-            shadow.push(Violation::new("max_duration_minutes", "max", "max_duration_minutes must be at most 1440").with_param("max", 1440_i64));
+            refuse.push(Violation::new("max_duration_minutes", "max", "max_duration_minutes must be at most 1440").with_param("max", 1440_i64));
         }
         // `idle_timeout_minutes_min` (@min(5) on MFASession.idle_timeout_minutes)
         if (create || (update && r::changed(old.as_ref(), row, &["idle_timeout_minutes"]))) && !r::holds(&r::ge(r::field(row, "idle_timeout_minutes"), r::Val::Num(5.0_f64))) {
-            shadow.push(Violation::new("idle_timeout_minutes", "min", "idle_timeout_minutes must be at least 5").with_param("min", 5_i64));
+            refuse.push(Violation::new("idle_timeout_minutes", "min", "idle_timeout_minutes must be at least 5").with_param("min", 5_i64));
         }
         // `idle_timeout_minutes_max` (@max(120) on MFASession.idle_timeout_minutes)
         if (create || (update && r::changed(old.as_ref(), row, &["idle_timeout_minutes"]))) && !r::holds(&r::le(r::field(row, "idle_timeout_minutes"), r::Val::Num(120.0_f64))) {
-            shadow.push(Violation::new("idle_timeout_minutes", "max", "idle_timeout_minutes must be at most 120").with_param("max", 120_i64));
+            refuse.push(Violation::new("idle_timeout_minutes", "max", "idle_timeout_minutes must be at most 120").with_param("max", 120_i64));
         }
         // `extension_count_non_negative` (@non_negative on MFASession.extension_count)
         if (create || (update && r::changed(old.as_ref(), row, &["extension_count"]))) && !r::holds(&r::ge(r::field(row, "extension_count"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("extension_count", "non_negative", "extension_count must not be negative"));
+            refuse.push(Violation::new("extension_count", "non_negative", "extension_count must not be negative"));
         }
         // `device_performance_score_min` (@min(1) on MFASession.device_performance_score)
         if (create || (update && r::changed(old.as_ref(), row, &["device_performance_score"]))) && !r::holds(&r::ge(r::field(row, "device_performance_score"), r::Val::Num(1.0_f64))) {
-            shadow.push(Violation::new("device_performance_score", "min", "device_performance_score must be at least 1").with_param("min", 1_i64));
+            refuse.push(Violation::new("device_performance_score", "min", "device_performance_score must be at least 1").with_param("min", 1_i64));
         }
         // `device_performance_score_max` (@max(100) on MFASession.device_performance_score)
         if (create || (update && r::changed(old.as_ref(), row, &["device_performance_score"]))) && !r::holds(&r::le(r::field(row, "device_performance_score"), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("device_performance_score", "max", "device_performance_score must be at most 100").with_param("max", 100_i64));
+            refuse.push(Violation::new("device_performance_score", "max", "device_performance_score must be at most 100").with_param("max", 100_i64));
         }
         // `data_retention_hours_min` (@min(720) on MFASession.data_retention_hours)
         if (create || (update && r::changed(old.as_ref(), row, &["data_retention_hours"]))) && !r::holds(&r::ge(r::field(row, "data_retention_hours"), r::Val::Num(720.0_f64))) {
-            shadow.push(Violation::new("data_retention_hours", "min", "data_retention_hours must be at least 720").with_param("min", 720_i64));
+            refuse.push(Violation::new("data_retention_hours", "min", "data_retention_hours must be at least 720").with_param("min", 720_i64));
         }
         // `data_retention_hours_max` (@max(87600) on MFASession.data_retention_hours)
         if (create || (update && r::changed(old.as_ref(), row, &["data_retention_hours"]))) && !r::holds(&r::le(r::field(row, "data_retention_hours"), r::Val::Num(87600.0_f64))) {
-            shadow.push(Violation::new("data_retention_hours", "max", "data_retention_hours must be at most 87600").with_param("max", 87600_i64));
+            refuse.push(Violation::new("data_retention_hours", "max", "data_retention_hours must be at most 87600").with_param("max", 87600_i64));
         }
         GuardOutcome { refuse, shadow }
     }

@@ -68,7 +68,7 @@ impl backbone_core::write_guard::WriteGuard<OAuthProvider> for OAuthProviderRowR
         }
         // `display_name_max_length` (@max(100) on OAuthProvider.display_name)
         if (create || (update && r::changed(old.as_ref(), row, &["display_name"]))) && !r::holds(&r::le(r::length(r::field(row, "display_name")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("display_name", "max_length", "display_name must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("display_name", "max_length", "display_name must be at most 100 characters").with_param("max", 100_i64));
         }
         // `client_id_required` (@required on OAuthProvider.client_id)
         if (create || (update && r::changed(old.as_ref(), row, &["client_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "client_id")), r::not(r::is_empty(r::trim(r::field(row, "client_id")))))) {
@@ -84,7 +84,7 @@ impl backbone_core::write_guard::WriteGuard<OAuthProvider> for OAuthProviderRowR
         }
         // `redirect_uri_url` (type url on OAuthProvider.redirect_uri)
         if (create || (update && r::changed(old.as_ref(), row, &["redirect_uri"]))) && !r::holds(&r::matches(r::field(row, "redirect_uri"), "^[a-zA-Z][a-zA-Z0-9+.-]*://\\S+$")) {
-            shadow.push(Violation::new("redirect_uri", "url", "redirect_uri must be an absolute URL"));
+            refuse.push(Violation::new("redirect_uri", "url", "redirect_uri must be an absolute URL"));
         }
         // `authorization_url_required` (@required on OAuthProvider.authorization_url)
         if (create || (update && r::changed(old.as_ref(), row, &["authorization_url"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "authorization_url")), r::not(r::is_empty(r::trim(r::field(row, "authorization_url")))))) {
@@ -92,7 +92,7 @@ impl backbone_core::write_guard::WriteGuard<OAuthProvider> for OAuthProviderRowR
         }
         // `authorization_url_url` (type url on OAuthProvider.authorization_url)
         if (create || (update && r::changed(old.as_ref(), row, &["authorization_url"]))) && !r::holds(&r::matches(r::field(row, "authorization_url"), "^[a-zA-Z][a-zA-Z0-9+.-]*://\\S+$")) {
-            shadow.push(Violation::new("authorization_url", "url", "authorization_url must be an absolute URL"));
+            refuse.push(Violation::new("authorization_url", "url", "authorization_url must be an absolute URL"));
         }
         // `token_url_required` (@required on OAuthProvider.token_url)
         if (create || (update && r::changed(old.as_ref(), row, &["token_url"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "token_url")), r::not(r::is_empty(r::trim(r::field(row, "token_url")))))) {
@@ -100,7 +100,7 @@ impl backbone_core::write_guard::WriteGuard<OAuthProvider> for OAuthProviderRowR
         }
         // `token_url_url` (type url on OAuthProvider.token_url)
         if (create || (update && r::changed(old.as_ref(), row, &["token_url"]))) && !r::holds(&r::matches(r::field(row, "token_url"), "^[a-zA-Z][a-zA-Z0-9+.-]*://\\S+$")) {
-            shadow.push(Violation::new("token_url", "url", "token_url must be an absolute URL"));
+            refuse.push(Violation::new("token_url", "url", "token_url must be an absolute URL"));
         }
         // `user_info_url_required` (@required on OAuthProvider.user_info_url)
         if (create || (update && r::changed(old.as_ref(), row, &["user_info_url"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_info_url")), r::not(r::is_empty(r::trim(r::field(row, "user_info_url")))))) {
@@ -108,15 +108,15 @@ impl backbone_core::write_guard::WriteGuard<OAuthProvider> for OAuthProviderRowR
         }
         // `user_info_url_url` (type url on OAuthProvider.user_info_url)
         if (create || (update && r::changed(old.as_ref(), row, &["user_info_url"]))) && !r::holds(&r::matches(r::field(row, "user_info_url"), "^[a-zA-Z][a-zA-Z0-9+.-]*://\\S+$")) {
-            shadow.push(Violation::new("user_info_url", "url", "user_info_url must be an absolute URL"));
+            refuse.push(Violation::new("user_info_url", "url", "user_info_url must be an absolute URL"));
         }
         // `valid_configuration` (oauth_provider.hook.yaml:42)
         if (create || update) && !r::holds(&r::and(r::and(r::and(r::and(r::and(r::is_not_null(r::field(row, "client_id")), r::is_not_null(r::field(row, "client_secret"))), r::is_not_null(r::field(row, "redirect_uri"))), r::is_not_null(r::field(row, "authorization_url"))), r::is_not_null(r::field(row, "token_url"))), r::is_not_null(r::field(row, "user_info_url")))) {
-            shadow.push(Violation::new("client_id", "incomplete_configuration", "Incomplete OAuth provider configuration"));
+            refuse.push(Violation::new("client_id", "incomplete_configuration", "Incomplete OAuth provider configuration"));
         }
         // `scopes_not_empty` (oauth_provider.hook.yaml:54)
         if (create || update) && !r::holds(&r::and(r::is_not_null(r::field(row, "scopes")), r::gt(r::length(r::field(row, "scopes")), r::Val::Num(0.0_f64)))) {
-            shadow.push(Violation::new("scopes", "empty_scopes", "OAuth scopes cannot be empty"));
+            refuse.push(Violation::new("scopes", "empty_scopes", "OAuth scopes cannot be empty"));
         }
         GuardOutcome { refuse, shadow }
     }

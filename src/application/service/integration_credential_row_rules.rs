@@ -29,7 +29,7 @@ impl backbone_core::write_guard::WriteGuard<IntegrationCredential> for Integrati
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `provider_required` (@required on IntegrationCredential.provider)
         if (create || (update && r::changed(old.as_ref(), row, &["provider"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider")), r::not(r::is_empty(r::trim(r::field(row, "provider")))))) {
@@ -37,7 +37,7 @@ impl backbone_core::write_guard::WriteGuard<IntegrationCredential> for Integrati
         }
         // `provider_max_length` (@max(60) on IntegrationCredential.provider)
         if (create || (update && r::changed(old.as_ref(), row, &["provider"]))) && !r::holds(&r::le(r::length(r::field(row, "provider")), r::Val::Num(60.0_f64))) {
-            shadow.push(Violation::new("provider", "max_length", "provider must be at most 60 characters").with_param("max", 60_i64));
+            refuse.push(Violation::new("provider", "max_length", "provider must be at most 60 characters").with_param("max", 60_i64));
         }
         // `account_ref_required` (@required on IntegrationCredential.account_ref)
         if (create || (update && r::changed(old.as_ref(), row, &["account_ref"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "account_ref")), r::not(r::is_empty(r::trim(r::field(row, "account_ref")))))) {
@@ -45,7 +45,7 @@ impl backbone_core::write_guard::WriteGuard<IntegrationCredential> for Integrati
         }
         // `account_ref_max_length` (@max(120) on IntegrationCredential.account_ref)
         if (create || (update && r::changed(old.as_ref(), row, &["account_ref"]))) && !r::holds(&r::le(r::length(r::field(row, "account_ref")), r::Val::Num(120.0_f64))) {
-            shadow.push(Violation::new("account_ref", "max_length", "account_ref must be at most 120 characters").with_param("max", 120_i64));
+            refuse.push(Violation::new("account_ref", "max_length", "account_ref must be at most 120 characters").with_param("max", 120_i64));
         }
         // `key_id_required` (@required on IntegrationCredential.key_id)
         if (create || (update && r::changed(old.as_ref(), row, &["key_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "key_id")), r::not(r::is_empty(r::trim(r::field(row, "key_id")))))) {
@@ -53,7 +53,7 @@ impl backbone_core::write_guard::WriteGuard<IntegrationCredential> for Integrati
         }
         // `key_id_max_length` (@max(60) on IntegrationCredential.key_id)
         if (create || (update && r::changed(old.as_ref(), row, &["key_id"]))) && !r::holds(&r::le(r::length(r::field(row, "key_id")), r::Val::Num(60.0_f64))) {
-            shadow.push(Violation::new("key_id", "max_length", "key_id must be at most 60 characters").with_param("max", 60_i64));
+            refuse.push(Violation::new("key_id", "max_length", "key_id must be at most 60 characters").with_param("max", 60_i64));
         }
         // `ciphertext_required` (@required on IntegrationCredential.ciphertext)
         if (create || (update && r::changed(old.as_ref(), row, &["ciphertext"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "ciphertext")), r::not(r::is_empty(r::trim(r::field(row, "ciphertext")))))) {

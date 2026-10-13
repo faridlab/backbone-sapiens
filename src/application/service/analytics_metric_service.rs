@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<AnalyticsMetric> for AnalyticsMetric
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `metric_name_required` (@required on AnalyticsMetric.metric_name)
         if (create || (update && r::changed(old.as_ref(), row, &["metric_name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "metric_name")), r::not(r::is_empty(r::trim(r::field(row, "metric_name")))))) {
@@ -64,15 +64,15 @@ impl backbone_core::write_guard::WriteGuard<AnalyticsMetric> for AnalyticsMetric
         }
         // `metric_name_max_length` (@max(100) on AnalyticsMetric.metric_name)
         if (create || (update && r::changed(old.as_ref(), row, &["metric_name"]))) && !r::holds(&r::le(r::length(r::field(row, "metric_name")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("metric_name", "max_length", "metric_name must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("metric_name", "max_length", "metric_name must be at most 100 characters").with_param("max", 100_i64));
         }
         // `unit_max_length` (@max(50) on AnalyticsMetric.unit)
         if (create || (update && r::changed(old.as_ref(), row, &["unit"]))) && !r::holds(&r::le(r::length(r::field(row, "unit")), r::Val::Num(50.0_f64))) {
-            shadow.push(Violation::new("unit", "max_length", "unit must be at most 50 characters").with_param("max", 50_i64));
+            refuse.push(Violation::new("unit", "max_length", "unit must be at most 50 characters").with_param("max", 50_i64));
         }
         // `valid_metric_type` (analytics.hook.yaml:23)
         if (create) && !r::holds(&r::in_list(r::field(row, "metric_type"), r::Val::List(vec![r::text("counter"), r::text("gauge"), r::text("histogram"), r::text("timer")]))) {
-            shadow.push(Violation::new("metric_type", "invalid_metric_type", "Invalid metric type"));
+            refuse.push(Violation::new("metric_type", "invalid_metric_type", "Invalid metric type"));
         }
         GuardOutcome { refuse, shadow }
     }

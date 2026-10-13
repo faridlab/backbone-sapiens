@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<NotificationTemplate> for Notificati
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `name_required` (@required on NotificationTemplate.name)
         if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "name")), r::not(r::is_empty(r::trim(r::field(row, "name")))))) {
@@ -64,11 +64,11 @@ impl backbone_core::write_guard::WriteGuard<NotificationTemplate> for Notificati
         }
         // `name_max_length` (@max(100) on NotificationTemplate.name)
         if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::le(r::length(r::field(row, "name")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("name", "max_length", "name must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("name", "max_length", "name must be at most 100 characters").with_param("max", 100_i64));
         }
         // `subject_template_max_length` (@max(255) on NotificationTemplate.subject_template)
         if (create || (update && r::changed(old.as_ref(), row, &["subject_template"]))) && !r::holds(&r::le(r::length(r::field(row, "subject_template")), r::Val::Num(255.0_f64))) {
-            shadow.push(Violation::new("subject_template", "max_length", "subject_template must be at most 255 characters").with_param("max", 255_i64));
+            refuse.push(Violation::new("subject_template", "max_length", "subject_template must be at most 255 characters").with_param("max", 255_i64));
         }
         // `message_template_required` (@required on NotificationTemplate.message_template)
         if (create || (update && r::changed(old.as_ref(), row, &["message_template"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "message_template")), r::not(r::is_empty(r::trim(r::field(row, "message_template")))))) {
@@ -76,7 +76,7 @@ impl backbone_core::write_guard::WriteGuard<NotificationTemplate> for Notificati
         }
         // `language_max_length` (@max(10) on NotificationTemplate.language)
         if (create || (update && r::changed(old.as_ref(), row, &["language"]))) && !r::holds(&r::le(r::length(r::field(row, "language")), r::Val::Num(10.0_f64))) {
-            shadow.push(Violation::new("language", "max_length", "language must be at most 10 characters").with_param("max", 10_i64));
+            refuse.push(Violation::new("language", "max_length", "language must be at most 10 characters").with_param("max", 10_i64));
         }
         GuardOutcome { refuse, shadow }
     }

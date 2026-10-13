@@ -72,19 +72,19 @@ impl backbone_core::write_guard::WriteGuard<Session> for SessionRowRules {
         }
         // `token_hash_length` (@length(64) on Session.token_hash)
         if (create || (update && r::changed(old.as_ref(), row, &["token_hash"]))) && !r::holds(&r::eq(r::length(r::field(row, "token_hash")), r::Val::Num(64.0_f64))) {
-            shadow.push(Violation::new("token_hash", "length", "token_hash must be exactly 64 characters").with_param("length", 64_i64));
+            refuse.push(Violation::new("token_hash", "length", "token_hash must be exactly 64 characters").with_param("length", 64_i64));
         }
         // `user_agent_max_length` (@max(500) on Session.user_agent)
         if (create || (update && r::changed(old.as_ref(), row, &["user_agent"]))) && !r::holds(&r::le(r::length(r::field(row, "user_agent")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("user_agent", "max_length", "user_agent must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("user_agent", "max_length", "user_agent must be at most 500 characters").with_param("max", 500_i64));
         }
         // `device_fingerprint_max_length` (@max(255) on Session.device_fingerprint)
         if (create || (update && r::changed(old.as_ref(), row, &["device_fingerprint"]))) && !r::holds(&r::le(r::length(r::field(row, "device_fingerprint")), r::Val::Num(255.0_f64))) {
-            shadow.push(Violation::new("device_fingerprint", "max_length", "device_fingerprint must be at most 255 characters").with_param("max", 255_i64));
+            refuse.push(Violation::new("device_fingerprint", "max_length", "device_fingerprint must be at most 255 characters").with_param("max", 255_i64));
         }
         // `expires_in_future` (session.hook.yaml:49)
         if (create) && !r::holds(&r::gt(r::field(row, "expires_at"), r::at(ctx.at))) {
-            shadow.push(Violation::new("expires_at", "invalid_expiry", "Session expiry must be in the future"));
+            refuse.push(Violation::new("expires_at", "invalid_expiry", "Session expiry must be in the future"));
         }
         GuardOutcome { refuse, shadow }
     }

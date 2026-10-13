@@ -80,39 +80,39 @@ impl backbone_core::write_guard::WriteGuard<UserPermission> for UserPermissionRo
         }
         // `reason_min_length` (@min(10) on UserPermission.reason)
         if (create || (update && r::changed(old.as_ref(), row, &["reason"]))) && !r::holds(&r::ge(r::length(r::field(row, "reason")), r::Val::Num(10.0_f64))) {
-            shadow.push(Violation::new("reason", "min_length", "reason must be at least 10 characters").with_param("min", 10_i64));
+            refuse.push(Violation::new("reason", "min_length", "reason must be at least 10 characters").with_param("min", 10_i64));
         }
         // `reason_max_length` (@max(500) on UserPermission.reason)
         if (create || (update && r::changed(old.as_ref(), row, &["reason"]))) && !r::holds(&r::le(r::length(r::field(row, "reason")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("reason", "max_length", "reason must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("reason", "max_length", "reason must be at most 500 characters").with_param("max", 500_i64));
         }
         // `resource_id_max_length` (@max(100) on UserPermission.resource_id)
         if (create || (update && r::changed(old.as_ref(), row, &["resource_id"]))) && !r::holds(&r::le(r::length(r::field(row, "resource_id")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("resource_id", "max_length", "resource_id must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("resource_id", "max_length", "resource_id must be at most 100 characters").with_param("max", 100_i64));
         }
         // `resource_type_max_length` (@max(50) on UserPermission.resource_type)
         if (create || (update && r::changed(old.as_ref(), row, &["resource_type"]))) && !r::holds(&r::le(r::length(r::field(row, "resource_type")), r::Val::Num(50.0_f64))) {
-            shadow.push(Violation::new("resource_type", "max_length", "resource_type must be at most 50 characters").with_param("max", 50_i64));
+            refuse.push(Violation::new("resource_type", "max_length", "resource_type must be at most 50 characters").with_param("max", 50_i64));
         }
         // `revoked_reason_max_length` (@max(500) on UserPermission.revoked_reason)
         if (create || (update && r::changed(old.as_ref(), row, &["revoked_reason"]))) && !r::holds(&r::le(r::length(r::field(row, "revoked_reason")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("revoked_reason", "max_length", "revoked_reason must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("revoked_reason", "max_length", "revoked_reason must be at most 500 characters").with_param("max", 500_i64));
         }
         // `reason_required` (user_permission.hook.yaml:44)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "reason")), r::ge(r::length(r::field(row, "reason")), r::Val::Num(10.0_f64)))) {
-            shadow.push(Violation::new("reason", "reason_required", "Reason is required for direct permission grants (min 10 characters)"));
+            refuse.push(Violation::new("reason", "reason_required", "Reason is required for direct permission grants (min 10 characters)"));
         }
         // `expires_in_future` (user_permission.hook.yaml:50)
         if (create || (update && r::changed(old.as_ref(), row, &["expires_at"]))) && !r::holds(&r::or(r::is_null(r::field(row, "expires_at")), r::gt(r::field(row, "expires_at"), r::at(ctx.at)))) {
-            shadow.push(Violation::new("expires_at", "invalid_expiry", "Expiry date must be in the future"));
+            refuse.push(Violation::new("expires_at", "invalid_expiry", "Expiry date must be in the future"));
         }
         // `no_self_grant` (user_permission.hook.yaml:56)
         if (create) && !r::holds(&r::ne(r::field(row, "user_id"), r::field(row, "granted_by"))) {
-            shadow.push(Violation::new("user_id", "self_grant_prohibited", "Cannot grant permissions to yourself"));
+            refuse.push(Violation::new("user_id", "self_grant_prohibited", "Cannot grant permissions to yourself"));
         }
         // `resource_scope_consistency` (user_permission.hook.yaml:68)
         if (create) && !r::holds(&r::or(r::and(r::is_null(r::field(row, "resource_id")), r::is_null(r::field(row, "resource_type"))), r::and(r::is_not_null(r::field(row, "resource_id")), r::is_not_null(r::field(row, "resource_type"))))) {
-            shadow.push(Violation::new("resource_id", "incomplete_resource_scope", "Resource ID and type must both be provided or both be null"));
+            refuse.push(Violation::new("resource_id", "incomplete_resource_scope", "Resource ID and type must both be provided or both be null"));
         }
         GuardOutcome { refuse, shadow }
     }

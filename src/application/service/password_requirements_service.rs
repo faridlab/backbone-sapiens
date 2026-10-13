@@ -56,32 +56,33 @@ impl backbone_core::write_guard::WriteGuard<PasswordRequirements> for PasswordRe
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `min_length_min` (@min(8) on PasswordRequirements.min_length)
         if (create || (update && r::changed(old.as_ref(), row, &["min_length"]))) && !r::holds(&r::ge(r::field(row, "min_length"), r::Val::Num(8.0_f64))) {
-            shadow.push(Violation::new("min_length", "min", "min_length must be at least 8").with_param("min", 8_i64));
+            refuse.push(Violation::new("min_length", "min", "min_length must be at least 8").with_param("min", 8_i64));
         }
         // `min_length_max` (@max(128) on PasswordRequirements.min_length)
         if (create || (update && r::changed(old.as_ref(), row, &["min_length"]))) && !r::holds(&r::le(r::field(row, "min_length"), r::Val::Num(128.0_f64))) {
-            shadow.push(Violation::new("min_length", "max", "min_length must be at most 128").with_param("max", 128_i64));
+            refuse.push(Violation::new("min_length", "max", "min_length must be at most 128").with_param("max", 128_i64));
         }
         // `max_length_min` (@min(64) on PasswordRequirements.max_length)
         if (create || (update && r::changed(old.as_ref(), row, &["max_length"]))) && !r::holds(&r::ge(r::field(row, "max_length"), r::Val::Num(64.0_f64))) {
-            shadow.push(Violation::new("max_length", "min", "max_length must be at least 64").with_param("min", 64_i64));
+            refuse.push(Violation::new("max_length", "min", "max_length must be at least 64").with_param("min", 64_i64));
         }
         // `max_length_max` (@max(1024) on PasswordRequirements.max_length)
         if (create || (update && r::changed(old.as_ref(), row, &["max_length"]))) && !r::holds(&r::le(r::field(row, "max_length"), r::Val::Num(1024.0_f64))) {
-            shadow.push(Violation::new("max_length", "max", "max_length must be at most 1024").with_param("max", 1024_i64));
+            refuse.push(Violation::new("max_length", "max", "max_length must be at most 1024").with_param("max", 1024_i64));
         }
         // `min_entropy_bits_min` (@min(30) on PasswordRequirements.min_entropy_bits)
         if (create || (update && r::changed(old.as_ref(), row, &["min_entropy_bits"]))) && !r::holds(&r::ge(r::field(row, "min_entropy_bits"), r::Val::Num(30.0_f64))) {
-            shadow.push(Violation::new("min_entropy_bits", "min", "min_entropy_bits must be at least 30").with_param("min", 30_i64));
+            refuse.push(Violation::new("min_entropy_bits", "min", "min_entropy_bits must be at least 30").with_param("min", 30_i64));
         }
         // `min_entropy_bits_max` (@max(128) on PasswordRequirements.min_entropy_bits)
         if (create || (update && r::changed(old.as_ref(), row, &["min_entropy_bits"]))) && !r::holds(&r::le(r::field(row, "min_entropy_bits"), r::Val::Num(128.0_f64))) {
-            shadow.push(Violation::new("min_entropy_bits", "max", "min_entropy_bits must be at most 128").with_param("max", 128_i64));
+            refuse.push(Violation::new("min_entropy_bits", "max", "min_entropy_bits must be at most 128").with_param("max", 128_i64));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

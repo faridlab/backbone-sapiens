@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<PasswordCreationContext> for Passwor
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `user_id_required` (@required on PasswordCreationContext.user_id)
         if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
@@ -64,11 +64,11 @@ impl backbone_core::write_guard::WriteGuard<PasswordCreationContext> for Passwor
         }
         // `user_agent_max_length` (@max(500) on PasswordCreationContext.user_agent)
         if (create || (update && r::changed(old.as_ref(), row, &["user_agent"]))) && !r::holds(&r::le(r::length(r::field(row, "user_agent")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("user_agent", "max_length", "user_agent must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("user_agent", "max_length", "user_agent must be at most 500 characters").with_param("max", 500_i64));
         }
         // `reason_max_length` (@max(500) on PasswordCreationContext.reason)
         if (create || (update && r::changed(old.as_ref(), row, &["reason"]))) && !r::holds(&r::le(r::length(r::field(row, "reason")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("reason", "max_length", "reason must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("reason", "max_length", "reason must be at most 500 characters").with_param("max", 500_i64));
         }
         GuardOutcome { refuse, shadow }
     }

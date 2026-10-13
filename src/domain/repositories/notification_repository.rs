@@ -51,6 +51,7 @@ pub struct NotificationFilter {
     pub message: Option<String>,
     pub is_read: Option<bool>,
     pub priority: Option<NotificationPriority>,
+    pub action_url: Option<String>,
     pub action_text: Option<String>,
     pub category: Option<String>,
 }
@@ -58,7 +59,7 @@ pub struct NotificationFilter {
 impl NotificationFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.user_id.is_some() || self.notification_type.is_some() || self.channel.is_some() || self.title.is_some() || self.message.is_some() || self.is_read.is_some() || self.priority.is_some() || self.action_text.is_some() || self.category.is_some()
+        self.user_id.is_some() || self.notification_type.is_some() || self.channel.is_some() || self.title.is_some() || self.message.is_some() || self.is_read.is_some() || self.priority.is_some() || self.action_url.is_some() || self.action_text.is_some() || self.category.is_some()
     }
 }
 

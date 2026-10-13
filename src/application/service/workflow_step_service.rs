@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<WorkflowStep> for WorkflowStepRowRul
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `workflow_id_required` (@required on WorkflowStep.workflow_id)
         if (create || (update && r::changed(old.as_ref(), row, &["workflow_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "workflow_id")), r::not(r::is_empty(r::trim(r::field(row, "workflow_id")))))) {
@@ -64,7 +64,7 @@ impl backbone_core::write_guard::WriteGuard<WorkflowStep> for WorkflowStepRowRul
         }
         // `step_number_positive` (@positive on WorkflowStep.step_number)
         if (create || (update && r::changed(old.as_ref(), row, &["step_number"]))) && !r::holds(&r::gt(r::field(row, "step_number"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("step_number", "positive", "step_number must be positive"));
+            refuse.push(Violation::new("step_number", "positive", "step_number must be positive"));
         }
         // `step_name_required` (@required on WorkflowStep.step_name)
         if (create || (update && r::changed(old.as_ref(), row, &["step_name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "step_name")), r::not(r::is_empty(r::trim(r::field(row, "step_name")))))) {
@@ -72,23 +72,23 @@ impl backbone_core::write_guard::WriteGuard<WorkflowStep> for WorkflowStepRowRul
         }
         // `step_name_max_length` (@max(100) on WorkflowStep.step_name)
         if (create || (update && r::changed(old.as_ref(), row, &["step_name"]))) && !r::holds(&r::le(r::length(r::field(row, "step_name")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("step_name", "max_length", "step_name must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("step_name", "max_length", "step_name must be at most 100 characters").with_param("max", 100_i64));
         }
         // `description_max_length` (@max(500) on WorkflowStep.description)
         if (create || (update && r::changed(old.as_ref(), row, &["description"]))) && !r::holds(&r::le(r::length(r::field(row, "description")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("description", "max_length", "description must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("description", "max_length", "description must be at most 500 characters").with_param("max", 500_i64));
         }
         // `duration_ms_non_negative` (@non_negative on WorkflowStep.duration_ms)
         if (create || (update && r::changed(old.as_ref(), row, &["duration_ms"]))) && !r::holds(&r::ge(r::field(row, "duration_ms"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("duration_ms", "non_negative", "duration_ms must not be negative"));
+            refuse.push(Violation::new("duration_ms", "non_negative", "duration_ms must not be negative"));
         }
         // `error_message_max_length` (@max(1000) on WorkflowStep.error_message)
         if (create || (update && r::changed(old.as_ref(), row, &["error_message"]))) && !r::holds(&r::le(r::length(r::field(row, "error_message")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("error_message", "max_length", "error_message must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("error_message", "max_length", "error_message must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `retry_count_non_negative` (@non_negative on WorkflowStep.retry_count)
         if (create || (update && r::changed(old.as_ref(), row, &["retry_count"]))) && !r::holds(&r::ge(r::field(row, "retry_count"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("retry_count", "non_negative", "retry_count must not be negative"));
+            refuse.push(Violation::new("retry_count", "non_negative", "retry_count must not be negative"));
         }
         GuardOutcome { refuse, shadow }
     }

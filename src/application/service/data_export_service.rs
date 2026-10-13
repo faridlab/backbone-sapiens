@@ -72,31 +72,31 @@ impl backbone_core::write_guard::WriteGuard<DataExport> for DataExportRowRules {
         }
         // `file_path_max_length` (@max(500) on DataExport.file_path)
         if (create || (update && r::changed(old.as_ref(), row, &["file_path"]))) && !r::holds(&r::le(r::length(r::field(row, "file_path")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("file_path", "max_length", "file_path must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("file_path", "max_length", "file_path must be at most 500 characters").with_param("max", 500_i64));
         }
         // `file_url_max_length` (@max(1000) on DataExport.file_url)
         if (create || (update && r::changed(old.as_ref(), row, &["file_url"]))) && !r::holds(&r::le(r::length(r::field(row, "file_url")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("file_url", "max_length", "file_url must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("file_url", "max_length", "file_url must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `record_count_non_negative` (@non_negative on DataExport.record_count)
         if (create || (update && r::changed(old.as_ref(), row, &["record_count"]))) && !r::holds(&r::ge(r::field(row, "record_count"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("record_count", "non_negative", "record_count must not be negative"));
+            refuse.push(Violation::new("record_count", "non_negative", "record_count must not be negative"));
         }
         // `justification_max_length` (@max(1000) on DataExport.justification)
         if (create || (update && r::changed(old.as_ref(), row, &["justification"]))) && !r::holds(&r::le(r::length(r::field(row, "justification")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("justification", "max_length", "justification must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("justification", "max_length", "justification must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `user_can_request_own_data` (data_export.hook.yaml:72)
         if (create) && !r::holds(&r::or(r::eq(r::field(row, "requested_by"), r::field(row, "user_id")), r::has_role(ctx.actor.as_deref(), "admin").await)) {
-            shadow.push(Violation::new("requested_by", "unauthorized_export", "Users can only export their own data"));
+            refuse.push(Violation::new("requested_by", "unauthorized_export", "Users can only export their own data"));
         }
         // `admin_requires_justification` (data_export.hook.yaml:78)
         if (create) && !r::holds(&r::or(r::eq(r::field(row, "requested_by"), r::field(row, "user_id")), r::and(r::is_not_null(r::field(row, "justification")), r::ge(r::length(r::field(row, "justification")), r::Val::Num(20.0_f64))))) {
-            shadow.push(Violation::new("requested_by", "justification_required", "Admins must provide justification (min 20 characters) when exporting another user's data"));
+            refuse.push(Violation::new("requested_by", "justification_required", "Admins must provide justification (min 20 characters) when exporting another user's data"));
         }
         // `export_format_valid` (data_export.hook.yaml:84)
         if (create) && !r::holds(&r::in_list(r::field(row, "format"), r::Val::List(vec![r::text("json"), r::text("csv"), r::text("pdf"), r::text("xml")]))) {
-            shadow.push(Violation::new("format", "invalid_format", "Invalid export format. Supported: json, csv, pdf, xml"));
+            refuse.push(Violation::new("format", "invalid_format", "Invalid export format. Supported: json, csv, pdf, xml"));
         }
         GuardOutcome { refuse, shadow }
     }

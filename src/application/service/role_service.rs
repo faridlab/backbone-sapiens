@@ -51,12 +51,13 @@ impl backbone_core::write_guard::WriteGuard<Role> for RoleRowRules {
             let Some(Ok(old)) = ctx.before.map(serde_json::to_value) else {
                 return GuardOutcome::allow();
             };
-            let mut shadow = Vec::new();
+            let mut refuse = Vec::new();
+            let shadow = Vec::new();
             // `no_users_on_delete` (role.hook.yaml:33)
             if !r::holds(&r::eq(r::referencing("SELECT count(*) FROM user_roles WHERE \"role_id\" = $1::uuid", r::field(&old, "id")).await, r::Val::Num(0.0_f64))) {
-                shadow.push(Violation::new("", "role_has_users", "Cannot delete role that is assigned to users. Remove all user assignments first."));
+                refuse.push(Violation::new("", "role_has_users", "Cannot delete role that is assigned to users. Remove all user assignments first."));
             }
-            return GuardOutcome { refuse: Vec::new(), shadow };
+            return GuardOutcome { refuse, shadow };
         }
         let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
         let Some(after) = ctx.after.filter(|_| create || update) else {
@@ -67,7 +68,7 @@ impl backbone_core::write_guard::WriteGuard<Role> for RoleRowRules {
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `name_required` (@required on Role.name)
         if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "name")), r::not(r::is_empty(r::trim(r::field(row, "name")))))) {
@@ -75,15 +76,15 @@ impl backbone_core::write_guard::WriteGuard<Role> for RoleRowRules {
         }
         // `name_max_length` (@max(50) on Role.name)
         if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::le(r::length(r::field(row, "name")), r::Val::Num(50.0_f64))) {
-            shadow.push(Violation::new("name", "max_length", "name must be at most 50 characters").with_param("max", 50_i64));
+            refuse.push(Violation::new("name", "max_length", "name must be at most 50 characters").with_param("max", 50_i64));
         }
         // `description_max_length` (@max(1000) on Role.description)
         if (create || (update && r::changed(old.as_ref(), row, &["description"]))) && !r::holds(&r::le(r::length(r::field(row, "description")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("description", "max_length", "description must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("description", "max_length", "description must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `reserved_names` (role.hook.yaml:39)
         if (create || update) && !r::holds(&r::not_in(r::field(row, "name"), r::Val::List(vec![r::text("SYSTEM"), r::text("ROOT"), r::text("ANONYMOUS")]))) {
-            shadow.push(Violation::new("name", "reserved_role_name", "This role name is reserved"));
+            refuse.push(Violation::new("name", "reserved_role_name", "This role name is reserved"));
         }
         GuardOutcome { refuse, shadow }
     }

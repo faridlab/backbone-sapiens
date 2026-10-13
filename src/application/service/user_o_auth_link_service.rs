@@ -76,7 +76,7 @@ impl backbone_core::write_guard::WriteGuard<UserOAuthLink> for UserOAuthLinkRowR
         }
         // `provider_user_id_max_length` (@max(255) on UserOAuthLink.provider_user_id)
         if (create || (update && r::changed(old.as_ref(), row, &["provider_user_id"]))) && !r::holds(&r::le(r::length(r::field(row, "provider_user_id")), r::Val::Num(255.0_f64))) {
-            shadow.push(Violation::new("provider_user_id", "max_length", "provider_user_id must be at most 255 characters").with_param("max", 255_i64));
+            refuse.push(Violation::new("provider_user_id", "max_length", "provider_user_id must be at most 255 characters").with_param("max", 255_i64));
         }
         // `provider_email_required` (@required on UserOAuthLink.provider_email)
         if (create || (update && r::changed(old.as_ref(), row, &["provider_email"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider_email")), r::not(r::is_empty(r::trim(r::field(row, "provider_email")))))) {
@@ -84,19 +84,19 @@ impl backbone_core::write_guard::WriteGuard<UserOAuthLink> for UserOAuthLinkRowR
         }
         // `provider_email_email` (type email on UserOAuthLink.provider_email)
         if (create || (update && r::changed(old.as_ref(), row, &["provider_email"]))) && !r::holds(&r::matches(r::field(row, "provider_email"), "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
-            shadow.push(Violation::new("provider_email", "email", "provider_email must be an email address"));
+            refuse.push(Violation::new("provider_email", "email", "provider_email must be an email address"));
         }
         // `provider_username_max_length` (@max(255) on UserOAuthLink.provider_username)
         if (create || (update && r::changed(old.as_ref(), row, &["provider_username"]))) && !r::holds(&r::le(r::length(r::field(row, "provider_username")), r::Val::Num(255.0_f64))) {
-            shadow.push(Violation::new("provider_username", "max_length", "provider_username must be at most 255 characters").with_param("max", 255_i64));
+            refuse.push(Violation::new("provider_username", "max_length", "provider_username must be at most 255 characters").with_param("max", 255_i64));
         }
         // `valid_provider_user_id` (user_oauth_link.hook.yaml:70)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider_user_id")), r::gt(r::length(r::field(row, "provider_user_id")), r::Val::Num(0.0_f64)))) {
-            shadow.push(Violation::new("provider_user_id", "missing_provider_user_id", "Provider user ID is required"));
+            refuse.push(Violation::new("provider_user_id", "missing_provider_user_id", "Provider user ID is required"));
         }
         // `valid_provider_email` (user_oauth_link.hook.yaml:76)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "provider_email")), r::matches(r::field(row, "provider_email"), "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))) {
-            shadow.push(Violation::new("provider_email", "invalid_provider_email", "Invalid provider email format"));
+            refuse.push(Violation::new("provider_email", "invalid_provider_email", "Invalid provider email format"));
         }
         GuardOutcome { refuse, shadow }
     }

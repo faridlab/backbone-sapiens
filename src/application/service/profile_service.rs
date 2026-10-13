@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<Profile> for ProfileRowRules {
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `first_name_required` (@required on Profile.first_name)
         if (create || (update && r::changed(old.as_ref(), row, &["first_name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "first_name")), r::not(r::is_empty(r::trim(r::field(row, "first_name")))))) {
@@ -64,43 +64,43 @@ impl backbone_core::write_guard::WriteGuard<Profile> for ProfileRowRules {
         }
         // `first_name_max_length` (@max(100) on Profile.first_name)
         if (create || (update && r::changed(old.as_ref(), row, &["first_name"]))) && !r::holds(&r::le(r::length(r::field(row, "first_name")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("first_name", "max_length", "first_name must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("first_name", "max_length", "first_name must be at most 100 characters").with_param("max", 100_i64));
         }
         // `middle_name_max_length` (@max(100) on Profile.middle_name)
         if (create || (update && r::changed(old.as_ref(), row, &["middle_name"]))) && !r::holds(&r::le(r::length(r::field(row, "middle_name")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("middle_name", "max_length", "middle_name must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("middle_name", "max_length", "middle_name must be at most 100 characters").with_param("max", 100_i64));
         }
         // `last_name_max_length` (@max(100) on Profile.last_name)
         if (create || (update && r::changed(old.as_ref(), row, &["last_name"]))) && !r::holds(&r::le(r::length(r::field(row, "last_name")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("last_name", "max_length", "last_name must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("last_name", "max_length", "last_name must be at most 100 characters").with_param("max", 100_i64));
         }
         // `profile_picture_url_max_length` (@max(500) on Profile.profile_picture_url)
         if (create || (update && r::changed(old.as_ref(), row, &["profile_picture_url"]))) && !r::holds(&r::le(r::length(r::field(row, "profile_picture_url")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("profile_picture_url", "max_length", "profile_picture_url must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("profile_picture_url", "max_length", "profile_picture_url must be at most 500 characters").with_param("max", 500_i64));
         }
         // `profile_picture_url_url` (type url on Profile.profile_picture_url)
         if (create || (update && r::changed(old.as_ref(), row, &["profile_picture_url"]))) && !r::holds(&r::matches(r::field(row, "profile_picture_url"), "^[a-zA-Z][a-zA-Z0-9+.-]*://\\S+$")) {
-            shadow.push(Violation::new("profile_picture_url", "url", "profile_picture_url must be an absolute URL"));
+            refuse.push(Violation::new("profile_picture_url", "url", "profile_picture_url must be an absolute URL"));
         }
         // `first_name_required` (profile.hook.yaml:16)
         if (create || update) && !r::holds(&r::and(r::is_not_null(r::field(row, "first_name")), r::ge(r::length(r::field(row, "first_name")), r::Val::Num(1.0_f64)))) {
-            shadow.push(Violation::new("first_name", "first_name_required", "First name is required"));
+            refuse.push(Violation::new("first_name", "first_name_required", "First name is required"));
         }
         // `phone_number_format` (profile.hook.yaml:23)
         if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "phone_number")), r::matches(r::field(row, "phone_number"), "^\\+?[1-9]\\d{1,14}$"))) {
-            shadow.push(Violation::new("phone_number", "invalid_phone_format", "Phone number must be in E.164 format"));
+            refuse.push(Violation::new("phone_number", "invalid_phone_format", "Phone number must be in E.164 format"));
         }
         // `profile_picture_url_valid` (profile.hook.yaml:30)
         if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "profile_picture_url")), r::matches(r::field(row, "profile_picture_url"), "^https?://"))) {
-            shadow.push(Violation::new("profile_picture_url", "invalid_url_format", "Profile picture URL must be a valid HTTP(S) URL"));
+            refuse.push(Violation::new("profile_picture_url", "invalid_url_format", "Profile picture URL must be a valid HTTP(S) URL"));
         }
         // `valid_gender` (profile.hook.yaml:51)
         if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "gender")), r::in_list(r::field(row, "gender"), r::Val::List(vec![r::text("male"), r::text("female")])))) {
-            shadow.push(Violation::new("gender", "invalid_gender", "Gender must be 'male' or 'female'"));
+            refuse.push(Violation::new("gender", "invalid_gender", "Gender must be 'male' or 'female'"));
         }
         // `dob_in_past` (profile.hook.yaml:58)
         if (create || (update && r::changed(old.as_ref(), row, &["dob"]))) && !r::holds(&r::or(r::is_null(r::field(row, "dob")), r::lt(r::field(row, "dob"), r::at(ctx.at)))) {
-            shadow.push(Violation::new("dob", "dob_in_future", "Date of birth must be in the past"));
+            refuse.push(Violation::new("dob", "dob_in_future", "Date of birth must be in the past"));
         }
         GuardOutcome { refuse, shadow }
     }

@@ -72,7 +72,7 @@ impl backbone_core::write_guard::WriteGuard<EmailVerificationToken> for EmailVer
         }
         // `token_length` (@length(64) on EmailVerificationToken.token)
         if (create || (update && r::changed(old.as_ref(), row, &["token"]))) && !r::holds(&r::eq(r::length(r::field(row, "token")), r::Val::Num(64.0_f64))) {
-            shadow.push(Violation::new("token", "length", "token must be exactly 64 characters").with_param("length", 64_i64));
+            refuse.push(Violation::new("token", "length", "token must be exactly 64 characters").with_param("length", 64_i64));
         }
         // `email_required` (@required on EmailVerificationToken.email)
         if (create || (update && r::changed(old.as_ref(), row, &["email"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "email")), r::not(r::is_empty(r::trim(r::field(row, "email")))))) {
@@ -80,39 +80,39 @@ impl backbone_core::write_guard::WriteGuard<EmailVerificationToken> for EmailVer
         }
         // `email_email` (type email on EmailVerificationToken.email)
         if (create || (update && r::changed(old.as_ref(), row, &["email"]))) && !r::holds(&r::matches(r::field(row, "email"), "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
-            shadow.push(Violation::new("email", "email", "email must be an email address"));
+            refuse.push(Violation::new("email", "email", "email must be an email address"));
         }
         // `old_email_email` (type email on EmailVerificationToken.old_email)
         if (create || (update && r::changed(old.as_ref(), row, &["old_email"]))) && !r::holds(&r::matches(r::field(row, "old_email"), "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
-            shadow.push(Violation::new("old_email", "email", "old_email must be an email address"));
+            refuse.push(Violation::new("old_email", "email", "old_email must be an email address"));
         }
         // `attempts_non_negative` (@non_negative on EmailVerificationToken.attempts)
         if (create || (update && r::changed(old.as_ref(), row, &["attempts"]))) && !r::holds(&r::ge(r::field(row, "attempts"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("attempts", "non_negative", "attempts must not be negative"));
+            refuse.push(Violation::new("attempts", "non_negative", "attempts must not be negative"));
         }
         // `max_attempts_positive` (@positive on EmailVerificationToken.max_attempts)
         if (create || (update && r::changed(old.as_ref(), row, &["max_attempts"]))) && !r::holds(&r::gt(r::field(row, "max_attempts"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("max_attempts", "positive", "max_attempts must be positive"));
+            refuse.push(Violation::new("max_attempts", "positive", "max_attempts must be positive"));
         }
         // `user_agent_max_length` (@max(500) on EmailVerificationToken.user_agent)
         if (create || (update && r::changed(old.as_ref(), row, &["user_agent"]))) && !r::holds(&r::le(r::length(r::field(row, "user_agent")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("user_agent", "max_length", "user_agent must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("user_agent", "max_length", "user_agent must be at most 500 characters").with_param("max", 500_i64));
         }
         // `valid_email` (email_verification.hook.yaml:77)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "email")), r::matches(r::field(row, "email"), "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))) {
-            shadow.push(Violation::new("email", "invalid_email", "Invalid email format"));
+            refuse.push(Violation::new("email", "invalid_email", "Invalid email format"));
         }
         // `valid_expiry` (email_verification.hook.yaml:83)
         if (create) && !r::holds(&r::gt(r::field(row, "expires_at"), r::at(ctx.at))) {
-            shadow.push(Violation::new("expires_at", "invalid_expiry", "Expiry time must be in the future"));
+            refuse.push(Violation::new("expires_at", "invalid_expiry", "Expiry time must be in the future"));
         }
         // `token_format` (email_verification.hook.yaml:89)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "token")), r::ge(r::length(r::field(row, "token")), r::Val::Num(32.0_f64)))) {
-            shadow.push(Violation::new("token", "invalid_token", "Invalid token format"));
+            refuse.push(Violation::new("token", "invalid_token", "Invalid token format"));
         }
         // `token_type_valid` (email_verification.hook.yaml:95)
         if (create) && !r::holds(&r::in_list(r::field(row, "token_type"), r::Val::List(vec![r::text("account_creation"), r::text("email_change"), r::text("password_reset"), r::text("account_reactivation")]))) {
-            shadow.push(Violation::new("token_type", "invalid_token_type", "Invalid verification token type"));
+            refuse.push(Violation::new("token_type", "invalid_token_type", "Invalid verification token type"));
         }
         GuardOutcome { refuse, shadow }
     }

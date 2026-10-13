@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<WorkflowActionExecution> for Workflo
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `workflow_execution_id_required` (@required on WorkflowActionExecution.workflow_execution_id)
         if (create || (update && r::changed(old.as_ref(), row, &["workflow_execution_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "workflow_execution_id")), r::not(r::is_empty(r::trim(r::field(row, "workflow_execution_id")))))) {
@@ -68,19 +68,19 @@ impl backbone_core::write_guard::WriteGuard<WorkflowActionExecution> for Workflo
         }
         // `action_order_non_negative` (@non_negative on WorkflowActionExecution.action_order)
         if (create || (update && r::changed(old.as_ref(), row, &["action_order"]))) && !r::holds(&r::ge(r::field(row, "action_order"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("action_order", "non_negative", "action_order must not be negative"));
+            refuse.push(Violation::new("action_order", "non_negative", "action_order must not be negative"));
         }
         // `duration_ms_non_negative` (@non_negative on WorkflowActionExecution.duration_ms)
         if (create || (update && r::changed(old.as_ref(), row, &["duration_ms"]))) && !r::holds(&r::ge(r::field(row, "duration_ms"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("duration_ms", "non_negative", "duration_ms must not be negative"));
+            refuse.push(Violation::new("duration_ms", "non_negative", "duration_ms must not be negative"));
         }
         // `error_message_max_length` (@max(1000) on WorkflowActionExecution.error_message)
         if (create || (update && r::changed(old.as_ref(), row, &["error_message"]))) && !r::holds(&r::le(r::length(r::field(row, "error_message")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("error_message", "max_length", "error_message must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("error_message", "max_length", "error_message must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `retry_count_non_negative` (@non_negative on WorkflowActionExecution.retry_count)
         if (create || (update && r::changed(old.as_ref(), row, &["retry_count"]))) && !r::holds(&r::ge(r::field(row, "retry_count"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("retry_count", "non_negative", "retry_count must not be negative"));
+            refuse.push(Violation::new("retry_count", "non_negative", "retry_count must not be negative"));
         }
         GuardOutcome { refuse, shadow }
     }

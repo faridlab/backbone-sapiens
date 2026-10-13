@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<WorkflowAction> for WorkflowActionRo
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `workflow_definition_id_required` (@required on WorkflowAction.workflow_definition_id)
         if (create || (update && r::changed(old.as_ref(), row, &["workflow_definition_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "workflow_definition_id")), r::not(r::is_empty(r::trim(r::field(row, "workflow_definition_id")))))) {
@@ -68,27 +68,27 @@ impl backbone_core::write_guard::WriteGuard<WorkflowAction> for WorkflowActionRo
         }
         // `action_name_max_length` (@max(100) on WorkflowAction.action_name)
         if (create || (update && r::changed(old.as_ref(), row, &["action_name"]))) && !r::holds(&r::le(r::length(r::field(row, "action_name")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("action_name", "max_length", "action_name must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("action_name", "max_length", "action_name must be at most 100 characters").with_param("max", 100_i64));
         }
         // `description_max_length` (@max(500) on WorkflowAction.description)
         if (create || (update && r::changed(old.as_ref(), row, &["description"]))) && !r::holds(&r::le(r::length(r::field(row, "description")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("description", "max_length", "description must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("description", "max_length", "description must be at most 500 characters").with_param("max", 500_i64));
         }
         // `step_order_non_negative` (@non_negative on WorkflowAction.step_order)
         if (create || (update && r::changed(old.as_ref(), row, &["step_order"]))) && !r::holds(&r::ge(r::field(row, "step_order"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("step_order", "non_negative", "step_order must not be negative"));
+            refuse.push(Violation::new("step_order", "non_negative", "step_order must not be negative"));
         }
         // `timeout_minutes_positive` (@positive on WorkflowAction.timeout_minutes)
         if (create || (update && r::changed(old.as_ref(), row, &["timeout_minutes"]))) && !r::holds(&r::gt(r::field(row, "timeout_minutes"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("timeout_minutes", "positive", "timeout_minutes must be positive"));
+            refuse.push(Violation::new("timeout_minutes", "positive", "timeout_minutes must be positive"));
         }
         // `valid_action_type` (workflow.hook.yaml:38)
         if (create || update) && !r::holds(&r::in_list(r::field(row, "action_type"), r::Val::List(vec![r::text("send_email"), r::text("create_task"), r::text("update_record"), r::text("call_api"), r::text("approve"), r::text("reject"), r::text("notify_user"), r::text("schedule_job")]))) {
-            shadow.push(Violation::new("action_type", "invalid_action_type", "Invalid action type"));
+            refuse.push(Violation::new("action_type", "invalid_action_type", "Invalid action type"));
         }
         // `valid_action_order` (workflow.hook.yaml:59)
         if (create || update) && !r::holds(&r::ge(r::field(row, "step_order"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("step_order", "invalid_action_order", "Action order must be non-negative"));
+            refuse.push(Violation::new("step_order", "invalid_action_order", "Action order must be non-negative"));
         }
         GuardOutcome { refuse, shadow }
     }

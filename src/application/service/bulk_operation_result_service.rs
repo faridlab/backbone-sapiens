@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<BulkOperationResult> for BulkOperati
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `bulk_operation_id_required` (@required on BulkOperationResult.bulk_operation_id)
         if (create || (update && r::changed(old.as_ref(), row, &["bulk_operation_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "bulk_operation_id")), r::not(r::is_empty(r::trim(r::field(row, "bulk_operation_id")))))) {
@@ -64,7 +64,7 @@ impl backbone_core::write_guard::WriteGuard<BulkOperationResult> for BulkOperati
         }
         // `row_number_positive` (@positive on BulkOperationResult.row_number)
         if (create || (update && r::changed(old.as_ref(), row, &["row_number"]))) && !r::holds(&r::gt(r::field(row, "row_number"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("row_number", "positive", "row_number must be positive"));
+            refuse.push(Violation::new("row_number", "positive", "row_number must be positive"));
         }
         // `record_type_required` (@required on BulkOperationResult.record_type)
         if (create || (update && r::changed(old.as_ref(), row, &["record_type"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "record_type")), r::not(r::is_empty(r::trim(r::field(row, "record_type")))))) {
@@ -72,19 +72,19 @@ impl backbone_core::write_guard::WriteGuard<BulkOperationResult> for BulkOperati
         }
         // `record_type_max_length` (@max(50) on BulkOperationResult.record_type)
         if (create || (update && r::changed(old.as_ref(), row, &["record_type"]))) && !r::holds(&r::le(r::length(r::field(row, "record_type")), r::Val::Num(50.0_f64))) {
-            shadow.push(Violation::new("record_type", "max_length", "record_type must be at most 50 characters").with_param("max", 50_i64));
+            refuse.push(Violation::new("record_type", "max_length", "record_type must be at most 50 characters").with_param("max", 50_i64));
         }
         // `error_message_max_length` (@max(1000) on BulkOperationResult.error_message)
         if (create || (update && r::changed(old.as_ref(), row, &["error_message"]))) && !r::holds(&r::le(r::length(r::field(row, "error_message")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("error_message", "max_length", "error_message must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("error_message", "max_length", "error_message must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `warning_message_max_length` (@max(1000) on BulkOperationResult.warning_message)
         if (create || (update && r::changed(old.as_ref(), row, &["warning_message"]))) && !r::holds(&r::le(r::length(r::field(row, "warning_message")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("warning_message", "max_length", "warning_message must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("warning_message", "max_length", "warning_message must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `processing_duration_ms_non_negative` (@non_negative on BulkOperationResult.processing_duration_ms)
         if (create || (update && r::changed(old.as_ref(), row, &["processing_duration_ms"]))) && !r::holds(&r::ge(r::field(row, "processing_duration_ms"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("processing_duration_ms", "non_negative", "processing_duration_ms must not be negative"));
+            refuse.push(Violation::new("processing_duration_ms", "non_negative", "processing_duration_ms must not be negative"));
         }
         GuardOutcome { refuse, shadow }
     }

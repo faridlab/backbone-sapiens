@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<Workflow> for WorkflowRowRules {
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `initiator_id_required` (@required on Workflow.initiator_id)
         if (create || (update && r::changed(old.as_ref(), row, &["initiator_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "initiator_id")), r::not(r::is_empty(r::trim(r::field(row, "initiator_id")))))) {
@@ -68,43 +68,43 @@ impl backbone_core::write_guard::WriteGuard<Workflow> for WorkflowRowRules {
         }
         // `title_max_length` (@max(255) on Workflow.title)
         if (create || (update && r::changed(old.as_ref(), row, &["title"]))) && !r::holds(&r::le(r::length(r::field(row, "title")), r::Val::Num(255.0_f64))) {
-            shadow.push(Violation::new("title", "max_length", "title must be at most 255 characters").with_param("max", 255_i64));
+            refuse.push(Violation::new("title", "max_length", "title must be at most 255 characters").with_param("max", 255_i64));
         }
         // `description_max_length` (@max(1000) on Workflow.description)
         if (create || (update && r::changed(old.as_ref(), row, &["description"]))) && !r::holds(&r::le(r::length(r::field(row, "description")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("description", "max_length", "description must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("description", "max_length", "description must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `current_step_non_negative` (@non_negative on Workflow.current_step)
         if (create || (update && r::changed(old.as_ref(), row, &["current_step"]))) && !r::holds(&r::ge(r::field(row, "current_step"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("current_step", "non_negative", "current_step must not be negative"));
+            refuse.push(Violation::new("current_step", "non_negative", "current_step must not be negative"));
         }
         // `total_steps_non_negative` (@non_negative on Workflow.total_steps)
         if (create || (update && r::changed(old.as_ref(), row, &["total_steps"]))) && !r::holds(&r::ge(r::field(row, "total_steps"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("total_steps", "non_negative", "total_steps must not be negative"));
+            refuse.push(Violation::new("total_steps", "non_negative", "total_steps must not be negative"));
         }
         // `progress_percentage_min` (@min(0) on Workflow.progress_percentage)
         if (create || (update && r::changed(old.as_ref(), row, &["progress_percentage"]))) && !r::holds(&r::ge(r::field(row, "progress_percentage"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("progress_percentage", "min", "progress_percentage must be at least 0").with_param("min", 0_i64));
+            refuse.push(Violation::new("progress_percentage", "min", "progress_percentage must be at least 0").with_param("min", 0_i64));
         }
         // `progress_percentage_max` (@max(100) on Workflow.progress_percentage)
         if (create || (update && r::changed(old.as_ref(), row, &["progress_percentage"]))) && !r::holds(&r::le(r::field(row, "progress_percentage"), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("progress_percentage", "max", "progress_percentage must be at most 100").with_param("max", 100_i64));
+            refuse.push(Violation::new("progress_percentage", "max", "progress_percentage must be at most 100").with_param("max", 100_i64));
         }
         // `retry_count_non_negative` (@non_negative on Workflow.retry_count)
         if (create || (update && r::changed(old.as_ref(), row, &["retry_count"]))) && !r::holds(&r::ge(r::field(row, "retry_count"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("retry_count", "non_negative", "retry_count must not be negative"));
+            refuse.push(Violation::new("retry_count", "non_negative", "retry_count must not be negative"));
         }
         // `max_retries_non_negative` (@non_negative on Workflow.max_retries)
         if (create || (update && r::changed(old.as_ref(), row, &["max_retries"]))) && !r::holds(&r::ge(r::field(row, "max_retries"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("max_retries", "non_negative", "max_retries must not be negative"));
+            refuse.push(Violation::new("max_retries", "non_negative", "max_retries must not be negative"));
         }
         // `error_message_max_length` (@max(1000) on Workflow.error_message)
         if (create || (update && r::changed(old.as_ref(), row, &["error_message"]))) && !r::holds(&r::le(r::length(r::field(row, "error_message")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("error_message", "max_length", "error_message must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("error_message", "max_length", "error_message must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `valid_workflow_type` (workflow.hook.yaml:11)
         if (create || update) && !r::holds(&r::in_list(r::field(row, "workflow_type"), r::Val::List(vec![r::text("user_registration"), r::text("email_verification"), r::text("password_reset"), r::text("account_suspension"), r::text("role_assignment"), r::text("permission_grant"), r::text("mfa_setup"), r::text("email_change"), r::text("account_recovery"), r::text("bulk_user_import"), r::text("oauth_linking"), r::text("device_trust"), r::text("security_review"), r::text("compliance_audit")]))) {
-            shadow.push(Violation::new("workflow_type", "invalid_workflow_type", "Invalid workflow type"));
+            refuse.push(Violation::new("workflow_type", "invalid_workflow_type", "Invalid workflow type"));
         }
         GuardOutcome { refuse, shadow }
     }

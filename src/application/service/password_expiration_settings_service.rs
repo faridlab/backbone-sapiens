@@ -56,32 +56,33 @@ impl backbone_core::write_guard::WriteGuard<PasswordExpirationSettings> for Pass
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `max_age_days_min` (@min(0) on PasswordExpirationSettings.max_age_days)
         if (create || (update && r::changed(old.as_ref(), row, &["max_age_days"]))) && !r::holds(&r::ge(r::field(row, "max_age_days"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("max_age_days", "min", "max_age_days must be at least 0").with_param("min", 0_i64));
+            refuse.push(Violation::new("max_age_days", "min", "max_age_days must be at least 0").with_param("min", 0_i64));
         }
         // `max_age_days_max` (@max(365) on PasswordExpirationSettings.max_age_days)
         if (create || (update && r::changed(old.as_ref(), row, &["max_age_days"]))) && !r::holds(&r::le(r::field(row, "max_age_days"), r::Val::Num(365.0_f64))) {
-            shadow.push(Violation::new("max_age_days", "max", "max_age_days must be at most 365").with_param("max", 365_i64));
+            refuse.push(Violation::new("max_age_days", "max", "max_age_days must be at most 365").with_param("max", 365_i64));
         }
         // `warning_days_min` (@min(1) on PasswordExpirationSettings.warning_days)
         if (create || (update && r::changed(old.as_ref(), row, &["warning_days"]))) && !r::holds(&r::ge(r::field(row, "warning_days"), r::Val::Num(1.0_f64))) {
-            shadow.push(Violation::new("warning_days", "min", "warning_days must be at least 1").with_param("min", 1_i64));
+            refuse.push(Violation::new("warning_days", "min", "warning_days must be at least 1").with_param("min", 1_i64));
         }
         // `warning_days_max` (@max(30) on PasswordExpirationSettings.warning_days)
         if (create || (update && r::changed(old.as_ref(), row, &["warning_days"]))) && !r::holds(&r::le(r::field(row, "warning_days"), r::Val::Num(30.0_f64))) {
-            shadow.push(Violation::new("warning_days", "max", "warning_days must be at most 30").with_param("max", 30_i64));
+            refuse.push(Violation::new("warning_days", "max", "warning_days must be at most 30").with_param("max", 30_i64));
         }
         // `grace_logins_min` (@min(0) on PasswordExpirationSettings.grace_logins)
         if (create || (update && r::changed(old.as_ref(), row, &["grace_logins"]))) && !r::holds(&r::ge(r::field(row, "grace_logins"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("grace_logins", "min", "grace_logins must be at least 0").with_param("min", 0_i64));
+            refuse.push(Violation::new("grace_logins", "min", "grace_logins must be at least 0").with_param("min", 0_i64));
         }
         // `grace_logins_max` (@max(10) on PasswordExpirationSettings.grace_logins)
         if (create || (update && r::changed(old.as_ref(), row, &["grace_logins"]))) && !r::holds(&r::le(r::field(row, "grace_logins"), r::Val::Num(10.0_f64))) {
-            shadow.push(Violation::new("grace_logins", "max", "grace_logins must be at most 10").with_param("max", 10_i64));
+            refuse.push(Violation::new("grace_logins", "max", "grace_logins must be at most 10").with_param("max", 10_i64));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

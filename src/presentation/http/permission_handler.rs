@@ -40,7 +40,7 @@ pub enum PermissionError {
     #[error("Internal error: {0}")]
     Internal(String),
     // Domain-specific errors from hook rules
-    #[error("Permission name must be in format 'action:resource' (e.g., read:users, write:posts): {0}")]
+    #[error("Permission name must be in format 'action:resource' (e.g., read:users, write:posts, *:*): {0}")]
     InvalidPermissionFormat(String),
     #[error("Permission already exists: {0}")]
     PermissionExists(String),

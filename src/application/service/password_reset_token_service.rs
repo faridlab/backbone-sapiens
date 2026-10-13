@@ -73,15 +73,15 @@ impl backbone_core::write_guard::WriteGuard<PasswordResetToken> for PasswordRese
         }
         // `token_hash_length` (@length(64) on PasswordResetToken.token_hash)
         if (create || (update && r::changed(old.as_ref(), row, &["token_hash"]))) && !r::holds(&r::eq(r::length(r::field(row, "token_hash")), r::Val::Num(64.0_f64))) {
-            shadow.push(Violation::new("token_hash", "length", "token_hash must be exactly 64 characters").with_param("length", 64_i64));
+            refuse.push(Violation::new("token_hash", "length", "token_hash must be exactly 64 characters").with_param("length", 64_i64));
         }
         // `expires_in_future` (password_reset_token.hook.yaml:46)
         if (create) && !r::holds(&r::gt(r::field(row, "expires_at"), r::at(ctx.at))) {
-            shadow.push(Violation::new("expires_at", "invalid_expiry", "Token expiry must be in the future"));
+            refuse.push(Violation::new("expires_at", "invalid_expiry", "Token expiry must be in the future"));
         }
         // `no_modify_used` (password_reset_token.hook.yaml:65)
         if (update) && !r::holds(&r::eq(r::field(old_row, "is_used"), r::Val::Bool(false))) {
-            shadow.push(Violation::new("is_used", "token_already_used", "Cannot modify used reset tokens"));
+            refuse.push(Violation::new("is_used", "token_already_used", "Cannot modify used reset tokens"));
         }
         GuardOutcome { refuse, shadow }
     }

@@ -68,35 +68,35 @@ impl backbone_core::write_guard::WriteGuard<SessionLimit> for SessionLimitRowRul
         }
         // `max_sessions_min` (@min(1) on SessionLimit.max_sessions)
         if (create || (update && r::changed(old.as_ref(), row, &["max_sessions"]))) && !r::holds(&r::ge(r::field(row, "max_sessions"), r::Val::Num(1.0_f64))) {
-            shadow.push(Violation::new("max_sessions", "min", "max_sessions must be at least 1").with_param("min", 1_i64));
+            refuse.push(Violation::new("max_sessions", "min", "max_sessions must be at least 1").with_param("min", 1_i64));
         }
         // `max_sessions_max` (@max(100) on SessionLimit.max_sessions)
         if (create || (update && r::changed(old.as_ref(), row, &["max_sessions"]))) && !r::holds(&r::le(r::field(row, "max_sessions"), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("max_sessions", "max", "max_sessions must be at most 100").with_param("max", 100_i64));
+            refuse.push(Violation::new("max_sessions", "max", "max_sessions must be at most 100").with_param("max", 100_i64));
         }
         // `max_sessions_per_device_min` (@min(1) on SessionLimit.max_sessions_per_device)
         if (create || (update && r::changed(old.as_ref(), row, &["max_sessions_per_device"]))) && !r::holds(&r::ge(r::field(row, "max_sessions_per_device"), r::Val::Num(1.0_f64))) {
-            shadow.push(Violation::new("max_sessions_per_device", "min", "max_sessions_per_device must be at least 1").with_param("min", 1_i64));
+            refuse.push(Violation::new("max_sessions_per_device", "min", "max_sessions_per_device must be at least 1").with_param("min", 1_i64));
         }
         // `max_sessions_per_device_max` (@max(50) on SessionLimit.max_sessions_per_device)
         if (create || (update && r::changed(old.as_ref(), row, &["max_sessions_per_device"]))) && !r::holds(&r::le(r::field(row, "max_sessions_per_device"), r::Val::Num(50.0_f64))) {
-            shadow.push(Violation::new("max_sessions_per_device", "max", "max_sessions_per_device must be at most 50").with_param("max", 50_i64));
+            refuse.push(Violation::new("max_sessions_per_device", "max", "max_sessions_per_device must be at most 50").with_param("max", 50_i64));
         }
         // `current_session_count_non_negative` (@non_negative on SessionLimit.current_session_count)
         if (create || (update && r::changed(old.as_ref(), row, &["current_session_count"]))) && !r::holds(&r::ge(r::field(row, "current_session_count"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("current_session_count", "non_negative", "current_session_count must not be negative"));
+            refuse.push(Violation::new("current_session_count", "non_negative", "current_session_count must not be negative"));
         }
         // `max_sessions_positive` (session_limit.hook.yaml:40)
         if (create || update) && !r::holds(&r::gt(r::field(row, "max_sessions"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("max_sessions", "invalid_max_sessions", "Maximum sessions must be at least 1"));
+            refuse.push(Violation::new("max_sessions", "invalid_max_sessions", "Maximum sessions must be at least 1"));
         }
         // `max_sessions_reasonable` (session_limit.hook.yaml:46)
         if (create || update) && !r::holds(&r::le(r::field(row, "max_sessions"), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("max_sessions", "max_sessions_exceeded", "Maximum sessions cannot exceed 100"));
+            refuse.push(Violation::new("max_sessions", "max_sessions_exceeded", "Maximum sessions cannot exceed 100"));
         }
         // `per_device_within_limit` (session_limit.hook.yaml:52)
         if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "max_sessions_per_device")), r::le(r::field(row, "max_sessions_per_device"), r::field(row, "max_sessions")))) {
-            shadow.push(Violation::new("max_sessions_per_device", "invalid_per_device_limit", "Per-device limit cannot exceed total session limit"));
+            refuse.push(Violation::new("max_sessions_per_device", "invalid_per_device_limit", "Per-device limit cannot exceed total session limit"));
         }
         GuardOutcome { refuse, shadow }
     }

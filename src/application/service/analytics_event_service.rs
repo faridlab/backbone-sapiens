@@ -56,24 +56,25 @@ impl backbone_core::write_guard::WriteGuard<AnalyticsEvent> for AnalyticsEventRo
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `resource_type_max_length` (@max(50) on AnalyticsEvent.resource_type)
         if (create || (update && r::changed(old.as_ref(), row, &["resource_type"]))) && !r::holds(&r::le(r::length(r::field(row, "resource_type")), r::Val::Num(50.0_f64))) {
-            shadow.push(Violation::new("resource_type", "max_length", "resource_type must be at most 50 characters").with_param("max", 50_i64));
+            refuse.push(Violation::new("resource_type", "max_length", "resource_type must be at most 50 characters").with_param("max", 50_i64));
         }
         // `resource_id_max_length` (@max(100) on AnalyticsEvent.resource_id)
         if (create || (update && r::changed(old.as_ref(), row, &["resource_id"]))) && !r::holds(&r::le(r::length(r::field(row, "resource_id")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("resource_id", "max_length", "resource_id must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("resource_id", "max_length", "resource_id must be at most 100 characters").with_param("max", 100_i64));
         }
         // `user_agent_max_length` (@max(500) on AnalyticsEvent.user_agent)
         if (create || (update && r::changed(old.as_ref(), row, &["user_agent"]))) && !r::holds(&r::le(r::length(r::field(row, "user_agent")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("user_agent", "max_length", "user_agent must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("user_agent", "max_length", "user_agent must be at most 500 characters").with_param("max", 500_i64));
         }
         // `valid_event_type` (analytics.hook.yaml:11)
         if (create) && !r::holds(&r::in_list(r::field(row, "event_type"), r::Val::List(vec![r::text("user_login"), r::text("user_logout"), r::text("user_registration"), r::text("password_change"), r::text("mfa_enabled"), r::text("mfa_disabled"), r::text("role_assigned"), r::text("permission_granted"), r::text("organization_created"), r::text("api_access"), r::text("security_event"), r::text("system_event")]))) {
-            shadow.push(Violation::new("event_type", "invalid_event_type", "Invalid event type"));
+            refuse.push(Violation::new("event_type", "invalid_event_type", "Invalid event type"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

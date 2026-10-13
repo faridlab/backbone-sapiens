@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<AnonymizationRecord> for Anonymizati
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `user_id_required` (@required on AnonymizationRecord.user_id)
         if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
@@ -68,7 +68,7 @@ impl backbone_core::write_guard::WriteGuard<AnonymizationRecord> for Anonymizati
         }
         // `original_email_max_length` (@max(255) on AnonymizationRecord.original_email)
         if (create || (update && r::changed(old.as_ref(), row, &["original_email"]))) && !r::holds(&r::le(r::length(r::field(row, "original_email")), r::Val::Num(255.0_f64))) {
-            shadow.push(Violation::new("original_email", "max_length", "original_email must be at most 255 characters").with_param("max", 255_i64));
+            refuse.push(Violation::new("original_email", "max_length", "original_email must be at most 255 characters").with_param("max", 255_i64));
         }
         // `original_username_required` (@required on AnonymizationRecord.original_username)
         if (create || (update && r::changed(old.as_ref(), row, &["original_username"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "original_username")), r::not(r::is_empty(r::trim(r::field(row, "original_username")))))) {
@@ -76,7 +76,7 @@ impl backbone_core::write_guard::WriteGuard<AnonymizationRecord> for Anonymizati
         }
         // `original_username_max_length` (@max(100) on AnonymizationRecord.original_username)
         if (create || (update && r::changed(old.as_ref(), row, &["original_username"]))) && !r::holds(&r::le(r::length(r::field(row, "original_username")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("original_username", "max_length", "original_username must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("original_username", "max_length", "original_username must be at most 100 characters").with_param("max", 100_i64));
         }
         // `anonymized_by_required` (@required on AnonymizationRecord.anonymized_by)
         if (create || (update && r::changed(old.as_ref(), row, &["anonymized_by"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "anonymized_by")), r::not(r::is_empty(r::trim(r::field(row, "anonymized_by")))))) {
@@ -88,11 +88,11 @@ impl backbone_core::write_guard::WriteGuard<AnonymizationRecord> for Anonymizati
         }
         // `reason_max_length` (@max(1000) on AnonymizationRecord.reason)
         if (create || (update && r::changed(old.as_ref(), row, &["reason"]))) && !r::holds(&r::le(r::length(r::field(row, "reason")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("reason", "max_length", "reason must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("reason", "max_length", "reason must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `retention_period_days_min` (@min(0) on AnonymizationRecord.retention_period_days)
         if (create || (update && r::changed(old.as_ref(), row, &["retention_period_days"]))) && !r::holds(&r::ge(r::field(row, "retention_period_days"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("retention_period_days", "min", "retention_period_days must be at least 0").with_param("min", 0_i64));
+            refuse.push(Violation::new("retention_period_days", "min", "retention_period_days must be at least 0").with_param("min", 0_i64));
         }
         GuardOutcome { refuse, shadow }
     }

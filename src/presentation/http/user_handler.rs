@@ -41,7 +41,7 @@ pub enum UserError {
     #[error("Internal error: {0}")]
     Internal(String),
     // Domain-specific errors from hook rules
-    #[error("Username must be 3-50 characters, alphanumeric with underscore/hyphen: {0}")]
+    #[error("Username must be 3-50 characters: letters, digits, dot, underscore or hyphen: {0}")]
     InvalidUsernameFormat(String),
     #[error("Email is already registered: {0}")]
     EmailAlreadyExists(String),

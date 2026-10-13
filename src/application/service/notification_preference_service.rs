@@ -72,23 +72,23 @@ impl backbone_core::write_guard::WriteGuard<NotificationPreference> for Notifica
         }
         // `notification_type_max_length` (@max(100) on NotificationPreference.notification_type)
         if (create || (update && r::changed(old.as_ref(), row, &["notification_type"]))) && !r::holds(&r::le(r::length(r::field(row, "notification_type")), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("notification_type", "max_length", "notification_type must be at most 100 characters").with_param("max", 100_i64));
+            refuse.push(Violation::new("notification_type", "max_length", "notification_type must be at most 100 characters").with_param("max", 100_i64));
         }
         // `quiet_hours_start_max_length` (@max(5) on NotificationPreference.quiet_hours_start)
         if (create || (update && r::changed(old.as_ref(), row, &["quiet_hours_start"]))) && !r::holds(&r::le(r::length(r::field(row, "quiet_hours_start")), r::Val::Num(5.0_f64))) {
-            shadow.push(Violation::new("quiet_hours_start", "max_length", "quiet_hours_start must be at most 5 characters").with_param("max", 5_i64));
+            refuse.push(Violation::new("quiet_hours_start", "max_length", "quiet_hours_start must be at most 5 characters").with_param("max", 5_i64));
         }
         // `quiet_hours_end_max_length` (@max(5) on NotificationPreference.quiet_hours_end)
         if (create || (update && r::changed(old.as_ref(), row, &["quiet_hours_end"]))) && !r::holds(&r::le(r::length(r::field(row, "quiet_hours_end")), r::Val::Num(5.0_f64))) {
-            shadow.push(Violation::new("quiet_hours_end", "max_length", "quiet_hours_end must be at most 5 characters").with_param("max", 5_i64));
+            refuse.push(Violation::new("quiet_hours_end", "max_length", "quiet_hours_end must be at most 5 characters").with_param("max", 5_i64));
         }
         // `quiet_timezone_max_length` (@max(50) on NotificationPreference.quiet_timezone)
         if (create || (update && r::changed(old.as_ref(), row, &["quiet_timezone"]))) && !r::holds(&r::le(r::length(r::field(row, "quiet_timezone")), r::Val::Num(50.0_f64))) {
-            shadow.push(Violation::new("quiet_timezone", "max_length", "quiet_timezone must be at most 50 characters").with_param("max", 50_i64));
+            refuse.push(Violation::new("quiet_timezone", "max_length", "quiet_timezone must be at most 50 characters").with_param("max", 50_i64));
         }
         // `digest_frequency_valid` (notification_preference.hook.yaml:40)
         if (create || update) && !r::holds(&r::in_list(r::field(row, "digest_frequency"), r::Val::List(vec![r::text("immediate"), r::text("hourly"), r::text("daily"), r::text("weekly")]))) {
-            shadow.push(Violation::new("digest_frequency", "invalid_digest_frequency", "Invalid digest frequency. Valid: immediate, hourly, daily, weekly"));
+            refuse.push(Violation::new("digest_frequency", "invalid_digest_frequency", "Invalid digest frequency. Valid: immediate, hourly, daily, weekly"));
         }
         GuardOutcome { refuse, shadow }
     }

@@ -76,19 +76,19 @@ impl backbone_core::write_guard::WriteGuard<TemporaryPermission> for TemporaryPe
         }
         // `reason_max_length` (@max(1000) on TemporaryPermission.reason)
         if (create || (update && r::changed(old.as_ref(), row, &["reason"]))) && !r::holds(&r::le(r::length(r::field(row, "reason")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("reason", "max_length", "reason must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("reason", "max_length", "reason must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `expires_after_granted` (temporary_permission.hook.yaml:66)
         if (create) && !r::holds(&r::gt(r::field(row, "expires_at"), r::field(row, "granted_at"))) {
-            shadow.push(Violation::new("expires_at", "invalid_expiration", "Expiration time must be after grant time"));
+            refuse.push(Violation::new("expires_at", "invalid_expiration", "Expiration time must be after grant time"));
         }
         // `reason_required` (temporary_permission.hook.yaml:78)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "reason")), r::gt(r::length(r::field(row, "reason")), r::Val::Num(10.0_f64)))) {
-            shadow.push(Violation::new("reason", "reason_required", "A reason (min 10 characters) is required for temporary permissions"));
+            refuse.push(Violation::new("reason", "reason_required", "A reason (min 10 characters) is required for temporary permissions"));
         }
         // `cannot_modify_revoked` (temporary_permission.hook.yaml:84)
         if (update) && !r::holds(&r::is_null(r::field(row, "revoked_at"))) {
-            shadow.push(Violation::new("revoked_at", "permission_revoked", "Cannot modify a revoked or expired permission"));
+            refuse.push(Violation::new("revoked_at", "permission_revoked", "Cannot modify a revoked or expired permission"));
         }
         GuardOutcome { refuse, shadow }
     }

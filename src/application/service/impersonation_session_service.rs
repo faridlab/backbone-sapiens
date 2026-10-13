@@ -76,11 +76,11 @@ impl backbone_core::write_guard::WriteGuard<ImpersonationSession> for Impersonat
         }
         // `max_duration_minutes_min` (@min(1) on ImpersonationSession.max_duration_minutes)
         if (create || (update && r::changed(old.as_ref(), row, &["max_duration_minutes"]))) && !r::holds(&r::ge(r::field(row, "max_duration_minutes"), r::Val::Num(1.0_f64))) {
-            shadow.push(Violation::new("max_duration_minutes", "min", "max_duration_minutes must be at least 1").with_param("min", 1_i64));
+            refuse.push(Violation::new("max_duration_minutes", "min", "max_duration_minutes must be at least 1").with_param("min", 1_i64));
         }
         // `max_duration_minutes_max` (@max(480) on ImpersonationSession.max_duration_minutes)
         if (create || (update && r::changed(old.as_ref(), row, &["max_duration_minutes"]))) && !r::holds(&r::le(r::field(row, "max_duration_minutes"), r::Val::Num(480.0_f64))) {
-            shadow.push(Violation::new("max_duration_minutes", "max", "max_duration_minutes must be at most 480").with_param("max", 480_i64));
+            refuse.push(Violation::new("max_duration_minutes", "max", "max_duration_minutes must be at most 480").with_param("max", 480_i64));
         }
         // `reason_required` (@required on ImpersonationSession.reason)
         if (create || (update && r::changed(old.as_ref(), row, &["reason"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "reason")), r::not(r::is_empty(r::trim(r::field(row, "reason")))))) {
@@ -88,31 +88,31 @@ impl backbone_core::write_guard::WriteGuard<ImpersonationSession> for Impersonat
         }
         // `reason_max_length` (@max(1000) on ImpersonationSession.reason)
         if (create || (update && r::changed(old.as_ref(), row, &["reason"]))) && !r::holds(&r::le(r::length(r::field(row, "reason")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("reason", "max_length", "reason must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("reason", "max_length", "reason must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `actions_performed_non_negative` (@non_negative on ImpersonationSession.actions_performed)
         if (create || (update && r::changed(old.as_ref(), row, &["actions_performed"]))) && !r::holds(&r::ge(r::field(row, "actions_performed"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("actions_performed", "non_negative", "actions_performed must not be negative"));
+            refuse.push(Violation::new("actions_performed", "non_negative", "actions_performed must not be negative"));
         }
         // `termination_reason_max_length` (@max(500) on ImpersonationSession.termination_reason)
         if (create || (update && r::changed(old.as_ref(), row, &["termination_reason"]))) && !r::holds(&r::le(r::length(r::field(row, "termination_reason")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("termination_reason", "max_length", "termination_reason must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("termination_reason", "max_length", "termination_reason must be at most 500 characters").with_param("max", 500_i64));
         }
         // `cannot_impersonate_self` (impersonation_session.hook.yaml:74)
         if (create) && !r::holds(&r::ne(r::field(row, "admin_id"), r::field(row, "target_user_id"))) {
-            shadow.push(Violation::new("admin_id", "self_impersonation_forbidden", "Cannot impersonate yourself"));
+            refuse.push(Violation::new("admin_id", "self_impersonation_forbidden", "Cannot impersonate yourself"));
         }
         // `reason_required` (impersonation_session.hook.yaml:80)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "reason")), r::ge(r::length(r::field(row, "reason")), r::Val::Num(20.0_f64)))) {
-            shadow.push(Violation::new("reason", "reason_required", "A detailed reason (min 20 characters) is required for impersonation"));
+            refuse.push(Violation::new("reason", "reason_required", "A detailed reason (min 20 characters) is required for impersonation"));
         }
         // `max_duration_reasonable` (impersonation_session.hook.yaml:86)
         if (create) && !r::holds(&r::and(r::gt(r::field(row, "max_duration_minutes"), r::Val::Num(0.0_f64)), r::le(r::field(row, "max_duration_minutes"), r::Val::Num(480.0_f64)))) {
-            shadow.push(Violation::new("max_duration_minutes", "invalid_duration", "Duration must be between 1 and 480 minutes (8 hours)"));
+            refuse.push(Violation::new("max_duration_minutes", "invalid_duration", "Duration must be between 1 and 480 minutes (8 hours)"));
         }
         // `admin_has_impersonate_role` (impersonation_session.hook.yaml:92)
         if (create) && !r::holds(&r::or(r::has_role(ctx.actor.as_deref(), "admin").await, r::has_role(ctx.actor.as_deref(), "super_admin").await)) {
-            shadow.push(Violation::new("", "unauthorized_impersonation", "Only administrators can start impersonation sessions"));
+            refuse.push(Violation::new("", "unauthorized_impersonation", "Only administrators can start impersonation sessions"));
         }
         GuardOutcome { refuse, shadow }
     }

@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<EffectivePermissionCache> for Effect
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `user_id_required` (@required on EffectivePermissionCache.user_id)
         if (create || (update && r::changed(old.as_ref(), row, &["user_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "user_id")), r::not(r::is_empty(r::trim(r::field(row, "user_id")))))) {
@@ -68,7 +68,7 @@ impl backbone_core::write_guard::WriteGuard<EffectivePermissionCache> for Effect
         }
         // `permission_key_max_length` (@max(255) on EffectivePermissionCache.permission_key)
         if (create || (update && r::changed(old.as_ref(), row, &["permission_key"]))) && !r::holds(&r::le(r::length(r::field(row, "permission_key")), r::Val::Num(255.0_f64))) {
-            shadow.push(Violation::new("permission_key", "max_length", "permission_key must be at most 255 characters").with_param("max", 255_i64));
+            refuse.push(Violation::new("permission_key", "max_length", "permission_key must be at most 255 characters").with_param("max", 255_i64));
         }
         GuardOutcome { refuse, shadow }
     }

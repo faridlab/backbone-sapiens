@@ -76,15 +76,15 @@ impl backbone_core::write_guard::WriteGuard<UserSAMLLink> for UserSAMLLinkRowRul
         }
         // `name_id_max_length` (@max(255) on UserSAMLLink.name_id)
         if (create || (update && r::changed(old.as_ref(), row, &["name_id"]))) && !r::holds(&r::le(r::length(r::field(row, "name_id")), r::Val::Num(255.0_f64))) {
-            shadow.push(Violation::new("name_id", "max_length", "name_id must be at most 255 characters").with_param("max", 255_i64));
+            refuse.push(Violation::new("name_id", "max_length", "name_id must be at most 255 characters").with_param("max", 255_i64));
         }
         // `session_index_max_length` (@max(255) on UserSAMLLink.session_index)
         if (create || (update && r::changed(old.as_ref(), row, &["session_index"]))) && !r::holds(&r::le(r::length(r::field(row, "session_index")), r::Val::Num(255.0_f64))) {
-            shadow.push(Violation::new("session_index", "max_length", "session_index must be at most 255 characters").with_param("max", 255_i64));
+            refuse.push(Violation::new("session_index", "max_length", "session_index must be at most 255 characters").with_param("max", 255_i64));
         }
         // `provider_required` (user_saml_link.hook.yaml:63)
         if (create) && !r::holds(&r::is_not_null(r::field(row, "provider_id"))) {
-            shadow.push(Violation::new("provider_id", "provider_required", "Provider ID is required"));
+            refuse.push(Violation::new("provider_id", "provider_required", "Provider ID is required"));
         }
         GuardOutcome { refuse, shadow }
     }

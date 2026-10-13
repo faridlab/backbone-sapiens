@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<WorkflowExecution> for WorkflowExecu
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `workflow_id_required` (@required on WorkflowExecution.workflow_id)
         if (create || (update && r::changed(old.as_ref(), row, &["workflow_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "workflow_id")), r::not(r::is_empty(r::trim(r::field(row, "workflow_id")))))) {
@@ -68,31 +68,31 @@ impl backbone_core::write_guard::WriteGuard<WorkflowExecution> for WorkflowExecu
         }
         // `current_action_non_negative` (@non_negative on WorkflowExecution.current_action)
         if (create || (update && r::changed(old.as_ref(), row, &["current_action"]))) && !r::holds(&r::ge(r::field(row, "current_action"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("current_action", "non_negative", "current_action must not be negative"));
+            refuse.push(Violation::new("current_action", "non_negative", "current_action must not be negative"));
         }
         // `total_actions_non_negative` (@non_negative on WorkflowExecution.total_actions)
         if (create || (update && r::changed(old.as_ref(), row, &["total_actions"]))) && !r::holds(&r::ge(r::field(row, "total_actions"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("total_actions", "non_negative", "total_actions must not be negative"));
+            refuse.push(Violation::new("total_actions", "non_negative", "total_actions must not be negative"));
         }
         // `progress_percentage_min` (@min(0) on WorkflowExecution.progress_percentage)
         if (create || (update && r::changed(old.as_ref(), row, &["progress_percentage"]))) && !r::holds(&r::ge(r::field(row, "progress_percentage"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("progress_percentage", "min", "progress_percentage must be at least 0").with_param("min", 0_i64));
+            refuse.push(Violation::new("progress_percentage", "min", "progress_percentage must be at least 0").with_param("min", 0_i64));
         }
         // `progress_percentage_max` (@max(100) on WorkflowExecution.progress_percentage)
         if (create || (update && r::changed(old.as_ref(), row, &["progress_percentage"]))) && !r::holds(&r::le(r::field(row, "progress_percentage"), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("progress_percentage", "max", "progress_percentage must be at most 100").with_param("max", 100_i64));
+            refuse.push(Violation::new("progress_percentage", "max", "progress_percentage must be at most 100").with_param("max", 100_i64));
         }
         // `timeout_minutes_positive` (@positive on WorkflowExecution.timeout_minutes)
         if (create || (update && r::changed(old.as_ref(), row, &["timeout_minutes"]))) && !r::holds(&r::gt(r::field(row, "timeout_minutes"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("timeout_minutes", "positive", "timeout_minutes must be positive"));
+            refuse.push(Violation::new("timeout_minutes", "positive", "timeout_minutes must be positive"));
         }
         // `error_message_max_length` (@max(1000) on WorkflowExecution.error_message)
         if (create || (update && r::changed(old.as_ref(), row, &["error_message"]))) && !r::holds(&r::le(r::length(r::field(row, "error_message")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("error_message", "max_length", "error_message must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("error_message", "max_length", "error_message must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `reasonable_timeout` (workflow.hook.yaml:45)
         if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "timeout_minutes")), r::and(r::gt(r::field(row, "timeout_minutes"), r::Val::Num(0.0_f64)), r::le(r::field(row, "timeout_minutes"), r::Val::Num(10080.0_f64))))) {
-            shadow.push(Violation::new("timeout_minutes", "invalid_timeout", "Timeout must be between 1 and 10080 minutes"));
+            refuse.push(Violation::new("timeout_minutes", "invalid_timeout", "Timeout must be between 1 and 10080 minutes"));
         }
         GuardOutcome { refuse, shadow }
     }

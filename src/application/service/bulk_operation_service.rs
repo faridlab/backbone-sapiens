@@ -56,60 +56,61 @@ impl backbone_core::write_guard::WriteGuard<BulkOperation> for BulkOperationRowR
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `total_records_positive` (@positive on BulkOperation.total_records)
         if (create || (update && r::changed(old.as_ref(), row, &["total_records"]))) && !r::holds(&r::gt(r::field(row, "total_records"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("total_records", "positive", "total_records must be positive"));
+            refuse.push(Violation::new("total_records", "positive", "total_records must be positive"));
         }
         // `processed_records_non_negative` (@non_negative on BulkOperation.processed_records)
         if (create || (update && r::changed(old.as_ref(), row, &["processed_records"]))) && !r::holds(&r::ge(r::field(row, "processed_records"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("processed_records", "non_negative", "processed_records must not be negative"));
+            refuse.push(Violation::new("processed_records", "non_negative", "processed_records must not be negative"));
         }
         // `successful_records_non_negative` (@non_negative on BulkOperation.successful_records)
         if (create || (update && r::changed(old.as_ref(), row, &["successful_records"]))) && !r::holds(&r::ge(r::field(row, "successful_records"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("successful_records", "non_negative", "successful_records must not be negative"));
+            refuse.push(Violation::new("successful_records", "non_negative", "successful_records must not be negative"));
         }
         // `failed_records_non_negative` (@non_negative on BulkOperation.failed_records)
         if (create || (update && r::changed(old.as_ref(), row, &["failed_records"]))) && !r::holds(&r::ge(r::field(row, "failed_records"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("failed_records", "non_negative", "failed_records must not be negative"));
+            refuse.push(Violation::new("failed_records", "non_negative", "failed_records must not be negative"));
         }
         // `skipped_records_non_negative` (@non_negative on BulkOperation.skipped_records)
         if (create || (update && r::changed(old.as_ref(), row, &["skipped_records"]))) && !r::holds(&r::ge(r::field(row, "skipped_records"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("skipped_records", "non_negative", "skipped_records must not be negative"));
+            refuse.push(Violation::new("skipped_records", "non_negative", "skipped_records must not be negative"));
         }
         // `input_file_path_max_length` (@max(500) on BulkOperation.input_file_path)
         if (create || (update && r::changed(old.as_ref(), row, &["input_file_path"]))) && !r::holds(&r::le(r::length(r::field(row, "input_file_path")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("input_file_path", "max_length", "input_file_path must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("input_file_path", "max_length", "input_file_path must be at most 500 characters").with_param("max", 500_i64));
         }
         // `output_file_path_max_length` (@max(500) on BulkOperation.output_file_path)
         if (create || (update && r::changed(old.as_ref(), row, &["output_file_path"]))) && !r::holds(&r::le(r::length(r::field(row, "output_file_path")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("output_file_path", "max_length", "output_file_path must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("output_file_path", "max_length", "output_file_path must be at most 500 characters").with_param("max", 500_i64));
         }
         // `error_file_path_max_length` (@max(500) on BulkOperation.error_file_path)
         if (create || (update && r::changed(old.as_ref(), row, &["error_file_path"]))) && !r::holds(&r::le(r::length(r::field(row, "error_file_path")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("error_file_path", "max_length", "error_file_path must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("error_file_path", "max_length", "error_file_path must be at most 500 characters").with_param("max", 500_i64));
         }
         // `progress_percentage_min` (@min(0) on BulkOperation.progress_percentage)
         if (create || (update && r::changed(old.as_ref(), row, &["progress_percentage"]))) && !r::holds(&r::ge(r::field(row, "progress_percentage"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("progress_percentage", "min", "progress_percentage must be at least 0").with_param("min", 0_i64));
+            refuse.push(Violation::new("progress_percentage", "min", "progress_percentage must be at least 0").with_param("min", 0_i64));
         }
         // `progress_percentage_max` (@max(100) on BulkOperation.progress_percentage)
         if (create || (update && r::changed(old.as_ref(), row, &["progress_percentage"]))) && !r::holds(&r::le(r::field(row, "progress_percentage"), r::Val::Num(100.0_f64))) {
-            shadow.push(Violation::new("progress_percentage", "max", "progress_percentage must be at most 100").with_param("max", 100_i64));
+            refuse.push(Violation::new("progress_percentage", "max", "progress_percentage must be at most 100").with_param("max", 100_i64));
         }
         // `error_message_max_length` (@max(1000) on BulkOperation.error_message)
         if (create || (update && r::changed(old.as_ref(), row, &["error_message"]))) && !r::holds(&r::le(r::length(r::field(row, "error_message")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("error_message", "max_length", "error_message must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("error_message", "max_length", "error_message must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `retry_count_non_negative` (@non_negative on BulkOperation.retry_count)
         if (create || (update && r::changed(old.as_ref(), row, &["retry_count"]))) && !r::holds(&r::ge(r::field(row, "retry_count"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("retry_count", "non_negative", "retry_count must not be negative"));
+            refuse.push(Violation::new("retry_count", "non_negative", "retry_count must not be negative"));
         }
         // `max_retries_positive` (@positive on BulkOperation.max_retries)
         if (create || (update && r::changed(old.as_ref(), row, &["max_retries"]))) && !r::holds(&r::gt(r::field(row, "max_retries"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("max_retries", "positive", "max_retries must be positive"));
+            refuse.push(Violation::new("max_retries", "positive", "max_retries must be positive"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

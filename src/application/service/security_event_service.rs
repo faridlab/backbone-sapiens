@@ -57,35 +57,36 @@ impl backbone_core::write_guard::WriteGuard<SecurityEvent> for SecurityEventRowR
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
         let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
         // `resolved` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["resolved"]) {
             shadow.push(Violation::new("resolved", "state_field_verbs_only", "the state field moves only through its verbs"));
         }
         // `ip_address_max_length` (@max(45) on SecurityEvent.ip_address)
         if (create || (update && r::changed(old.as_ref(), row, &["ip_address"]))) && !r::holds(&r::le(r::length(r::field(row, "ip_address")), r::Val::Num(45.0_f64))) {
-            shadow.push(Violation::new("ip_address", "max_length", "ip_address must be at most 45 characters").with_param("max", 45_i64));
+            refuse.push(Violation::new("ip_address", "max_length", "ip_address must be at most 45 characters").with_param("max", 45_i64));
         }
         // `user_agent_max_length` (@max(500) on SecurityEvent.user_agent)
         if (create || (update && r::changed(old.as_ref(), row, &["user_agent"]))) && !r::holds(&r::le(r::length(r::field(row, "user_agent")), r::Val::Num(500.0_f64))) {
-            shadow.push(Violation::new("user_agent", "max_length", "user_agent must be at most 500 characters").with_param("max", 500_i64));
+            refuse.push(Violation::new("user_agent", "max_length", "user_agent must be at most 500 characters").with_param("max", 500_i64));
         }
         // `description_max_length` (@max(1000) on SecurityEvent.description)
         if (create || (update && r::changed(old.as_ref(), row, &["description"]))) && !r::holds(&r::le(r::length(r::field(row, "description")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("description", "max_length", "description must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("description", "max_length", "description must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `resolution_notes_max_length` (@max(1000) on SecurityEvent.resolution_notes)
         if (create || (update && r::changed(old.as_ref(), row, &["resolution_notes"]))) && !r::holds(&r::le(r::length(r::field(row, "resolution_notes")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("resolution_notes", "max_length", "resolution_notes must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("resolution_notes", "max_length", "resolution_notes must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `event_type_required` (security_event.hook.yaml:46)
         if (create) && !r::holds(&r::is_not_null(r::field(row, "event_type"))) {
-            shadow.push(Violation::new("event_type", "event_type_required", "Event type is required"));
+            refuse.push(Violation::new("event_type", "event_type_required", "Event type is required"));
         }
         // `severity_required` (security_event.hook.yaml:52)
         if (create) && !r::holds(&r::in_list(r::field(row, "severity"), r::Val::List(vec![r::text("low"), r::text("medium"), r::text("high"), r::text("critical")]))) {
-            shadow.push(Violation::new("severity", "invalid_severity", "Valid severity required: low, medium, high, critical"));
+            refuse.push(Violation::new("severity", "invalid_severity", "Valid severity required: low, medium, high, critical"));
         }
-        GuardOutcome { refuse: Vec::new(), shadow }
+        GuardOutcome { refuse, shadow }
     }
 }
 

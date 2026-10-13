@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<NotificationLog> for NotificationLog
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `recipient_type_required` (@required on NotificationLog.recipient_type)
         if (create || (update && r::changed(old.as_ref(), row, &["recipient_type"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "recipient_type")), r::not(r::is_empty(r::trim(r::field(row, "recipient_type")))))) {
@@ -64,15 +64,15 @@ impl backbone_core::write_guard::WriteGuard<NotificationLog> for NotificationLog
         }
         // `recipient_type_max_length` (@max(50) on NotificationLog.recipient_type)
         if (create || (update && r::changed(old.as_ref(), row, &["recipient_type"]))) && !r::holds(&r::le(r::length(r::field(row, "recipient_type")), r::Val::Num(50.0_f64))) {
-            shadow.push(Violation::new("recipient_type", "max_length", "recipient_type must be at most 50 characters").with_param("max", 50_i64));
+            refuse.push(Violation::new("recipient_type", "max_length", "recipient_type must be at most 50 characters").with_param("max", 50_i64));
         }
         // `error_message_max_length` (@max(1000) on NotificationLog.error_message)
         if (create || (update && r::changed(old.as_ref(), row, &["error_message"]))) && !r::holds(&r::le(r::length(r::field(row, "error_message")), r::Val::Num(1000.0_f64))) {
-            shadow.push(Violation::new("error_message", "max_length", "error_message must be at most 1000 characters").with_param("max", 1000_i64));
+            refuse.push(Violation::new("error_message", "max_length", "error_message must be at most 1000 characters").with_param("max", 1000_i64));
         }
         // `external_id_max_length` (@max(255) on NotificationLog.external_id)
         if (create || (update && r::changed(old.as_ref(), row, &["external_id"]))) && !r::holds(&r::le(r::length(r::field(row, "external_id")), r::Val::Num(255.0_f64))) {
-            shadow.push(Violation::new("external_id", "max_length", "external_id must be at most 255 characters").with_param("max", 255_i64));
+            refuse.push(Violation::new("external_id", "max_length", "external_id must be at most 255 characters").with_param("max", 255_i64));
         }
         GuardOutcome { refuse, shadow }
     }
