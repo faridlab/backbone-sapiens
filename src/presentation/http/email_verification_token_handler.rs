@@ -246,13 +246,9 @@ pub async fn verify_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("email_verification_token:transition:verify");
-        let has_update_perm = granted("email_verification_token:update");
         let _ = &allowed_roles;
         if !has_specific_perm {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for verify transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "EmailVerificationToken", verb = "verify", code = "transition_by_update_permission", "a transition granted only by email_verification_token:update, running in shadow; it needs email_verification_token:transition:verify");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("verify needs email_verification_token:transition:verify")));
         }
     }
 
@@ -310,13 +306,9 @@ pub async fn expire_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("email_verification_token:transition:expire");
-        let has_update_perm = granted("email_verification_token:update");
         let _ = &allowed_roles;
         if !has_specific_perm {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for expire transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "EmailVerificationToken", verb = "expire", code = "transition_by_update_permission", "a transition granted only by email_verification_token:update, running in shadow; it needs email_verification_token:transition:expire");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("expire needs email_verification_token:transition:expire")));
         }
     }
 
@@ -374,13 +366,9 @@ pub async fn revoke_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("email_verification_token:transition:revoke");
-        let has_update_perm = granted("email_verification_token:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for revoke transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "EmailVerificationToken", verb = "revoke", code = "transition_by_update_permission", "a transition granted only by email_verification_token:update, running in shadow; it needs email_verification_token:transition:revoke or one of the roles admin, system");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("revoke needs email_verification_token:transition:revoke or one of the roles admin, system")));
         }
     }
 

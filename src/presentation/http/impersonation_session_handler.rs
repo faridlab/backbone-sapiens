@@ -246,13 +246,9 @@ pub async fn end_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("impersonation_session:transition:end");
-        let has_update_perm = granted("impersonation_session:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for end transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "end", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:end or one of the roles admin");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("end needs impersonation_session:transition:end or one of the roles admin")));
         }
     }
 
@@ -310,13 +306,9 @@ pub async fn auto_expire_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("impersonation_session:transition:auto_expire");
-        let has_update_perm = granted("impersonation_session:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for auto_expire transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "auto_expire", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:auto_expire or one of the roles system");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("auto_expire needs impersonation_session:transition:auto_expire or one of the roles system")));
         }
     }
 
@@ -374,13 +366,9 @@ pub async fn terminate_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("impersonation_session:transition:terminate");
-        let has_update_perm = granted("impersonation_session:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for terminate transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "terminate", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:terminate or one of the roles super_admin");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("terminate needs impersonation_session:transition:terminate or one of the roles super_admin")));
         }
     }
 
@@ -437,13 +425,9 @@ pub async fn force_terminate_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("impersonation_session:transition:force_terminate");
-        let has_update_perm = granted("impersonation_session:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("Insufficient permissions for force_terminate transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "ImpersonationSession", verb = "force_terminate", code = "transition_by_update_permission", "a transition granted only by impersonation_session:update, running in shadow; it needs impersonation_session:transition:force_terminate or one of the roles admin");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<ImpersonationSessionResponseDto>::error("force_terminate needs impersonation_session:transition:force_terminate or one of the roles admin")));
         }
     }
 

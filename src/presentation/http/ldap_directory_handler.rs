@@ -262,13 +262,9 @@ pub async fn activate_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("ldap_directory:transition:activate");
-        let has_update_perm = granted("ldap_directory:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for activate transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "LDAPDirectory", verb = "activate", code = "transition_by_update_permission", "a transition granted only by ldap_directory:update, running in shadow; it needs ldap_directory:transition:activate or one of the roles admin");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("activate needs ldap_directory:transition:activate or one of the roles admin")));
         }
     }
 
@@ -326,13 +322,9 @@ pub async fn deactivate_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("ldap_directory:transition:deactivate");
-        let has_update_perm = granted("ldap_directory:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for deactivate transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "LDAPDirectory", verb = "deactivate", code = "transition_by_update_permission", "a transition granted only by ldap_directory:update, running in shadow; it needs ldap_directory:transition:deactivate or one of the roles admin");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("deactivate needs ldap_directory:transition:deactivate or one of the roles admin")));
         }
     }
 
@@ -389,13 +381,9 @@ pub async fn report_error_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("ldap_directory:transition:report_error");
-        let has_update_perm = granted("ldap_directory:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for report_error transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "LDAPDirectory", verb = "report_error", code = "transition_by_update_permission", "a transition granted only by ldap_directory:update, running in shadow; it needs ldap_directory:transition:report_error or one of the roles system");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("report_error needs ldap_directory:transition:report_error or one of the roles system")));
         }
     }
 

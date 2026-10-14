@@ -56,11 +56,11 @@ impl backbone_core::write_guard::WriteGuard<SecurityEvent> for SecurityEventRowR
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `resolved` belongs to a state machine: only its verbs move it
         if update && ctx.transition.is_none() && r::changed(old.as_ref(), row, &["resolved"]) {
-            shadow.push(Violation::new("resolved", "state_field_verbs_only", "the state field moves only through its verbs"));
+            refuse.push(Violation::new("resolved", "state_field_verbs_only", "the state field moves only through its verbs"));
         }
         // `ip_address_max_length` (@max(45) on SecurityEvent.ip_address)
         if (create || (update && r::changed(old.as_ref(), row, &["ip_address"]))) && !r::holds(&r::le(r::length(r::field(row, "ip_address")), r::Val::Num(45.0_f64))) {

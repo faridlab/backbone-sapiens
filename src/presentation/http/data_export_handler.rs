@@ -246,13 +246,9 @@ pub async fn start_processing_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("data_export:transition:start_processing");
-        let has_update_perm = granted("data_export:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for start_processing transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "start_processing", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:start_processing or one of the roles system");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("start_processing needs data_export:transition:start_processing or one of the roles system")));
         }
     }
 
@@ -309,13 +305,9 @@ pub async fn complete_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("data_export:transition:complete");
-        let has_update_perm = granted("data_export:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for complete transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "complete", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:complete or one of the roles system");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("complete needs data_export:transition:complete or one of the roles system")));
         }
     }
 
@@ -372,13 +364,9 @@ pub async fn fail_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("data_export:transition:fail");
-        let has_update_perm = granted("data_export:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for fail transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "fail", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:fail or one of the roles system");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("fail needs data_export:transition:fail or one of the roles system")));
         }
     }
 
@@ -435,13 +423,9 @@ pub async fn expire_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("data_export:transition:expire");
-        let has_update_perm = granted("data_export:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("Insufficient permissions for expire transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "DataExport", verb = "expire", code = "transition_by_update_permission", "a transition granted only by data_export:update, running in shadow; it needs data_export:transition:expire or one of the roles system");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<DataExportResponseDto>::error("expire needs data_export:transition:expire or one of the roles system")));
         }
     }
 

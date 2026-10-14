@@ -246,13 +246,9 @@ pub async fn deactivate_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("user_saml_link:transition:deactivate");
-        let has_update_perm = granted("user_saml_link:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("Insufficient permissions for deactivate transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "UserSAMLLink", verb = "deactivate", code = "transition_by_update_permission", "a transition granted only by user_saml_link:update, running in shadow; it needs user_saml_link:transition:deactivate or one of the roles admin, owner");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("deactivate needs user_saml_link:transition:deactivate or one of the roles admin, owner")));
         }
     }
 
@@ -310,13 +306,9 @@ pub async fn reactivate_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("user_saml_link:transition:reactivate");
-        let has_update_perm = granted("user_saml_link:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("Insufficient permissions for reactivate transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "UserSAMLLink", verb = "reactivate", code = "transition_by_update_permission", "a transition granted only by user_saml_link:update, running in shadow; it needs user_saml_link:transition:reactivate or one of the roles admin");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<UserSAMLLinkResponseDto>::error("reactivate needs user_saml_link:transition:reactivate or one of the roles admin")));
         }
     }
 

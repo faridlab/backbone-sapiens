@@ -242,13 +242,9 @@ pub async fn activate_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("temporary_permission:transition:activate");
-        let has_update_perm = granted("temporary_permission:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Insufficient permissions for activate transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "TemporaryPermission", verb = "activate", code = "transition_by_update_permission", "a transition granted only by temporary_permission:update, running in shadow; it needs temporary_permission:transition:activate or one of the roles admin");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("activate needs temporary_permission:transition:activate or one of the roles admin")));
         }
     }
 
@@ -306,13 +302,9 @@ pub async fn revoke_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("temporary_permission:transition:revoke");
-        let has_update_perm = granted("temporary_permission:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Insufficient permissions for revoke transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "TemporaryPermission", verb = "revoke", code = "transition_by_update_permission", "a transition granted only by temporary_permission:update, running in shadow; it needs temporary_permission:transition:revoke or one of the roles admin, granter");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("revoke needs temporary_permission:transition:revoke or one of the roles admin, granter")));
         }
     }
 
@@ -370,13 +362,9 @@ pub async fn auto_expire_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("temporary_permission:transition:auto_expire");
-        let has_update_perm = granted("temporary_permission:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("Insufficient permissions for auto_expire transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "TemporaryPermission", verb = "auto_expire", code = "transition_by_update_permission", "a transition granted only by temporary_permission:update, running in shadow; it needs temporary_permission:transition:auto_expire or one of the roles system");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<TemporaryPermissionResponseDto>::error("auto_expire needs temporary_permission:transition:auto_expire or one of the roles system")));
         }
     }
 

@@ -250,13 +250,9 @@ pub async fn verify_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("user:transition:verify");
-        let has_update_perm = granted("user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for verify transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "User", verb = "verify", code = "transition_by_update_permission", "a transition granted only by user:update, running in shadow; it needs user:transition:verify or one of the roles system");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("verify needs user:transition:verify or one of the roles system")));
         }
     }
 
@@ -314,13 +310,9 @@ pub async fn activate_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("user:transition:activate");
-        let has_update_perm = granted("user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for activate transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "User", verb = "activate", code = "transition_by_update_permission", "a transition granted only by user:update, running in shadow; it needs user:transition:activate or one of the roles admin");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("activate needs user:transition:activate or one of the roles admin")));
         }
     }
 
@@ -377,13 +369,9 @@ pub async fn deactivate_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("user:transition:deactivate");
-        let has_update_perm = granted("user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for deactivate transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "User", verb = "deactivate", code = "transition_by_update_permission", "a transition granted only by user:update, running in shadow; it needs user:transition:deactivate or one of the roles admin, owner");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("deactivate needs user:transition:deactivate or one of the roles admin, owner")));
         }
     }
 
@@ -441,13 +429,9 @@ pub async fn reactivate_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("user:transition:reactivate");
-        let has_update_perm = granted("user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for reactivate transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "User", verb = "reactivate", code = "transition_by_update_permission", "a transition granted only by user:update, running in shadow; it needs user:transition:reactivate or one of the roles admin, owner");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("reactivate needs user:transition:reactivate or one of the roles admin, owner")));
         }
     }
 
@@ -504,13 +488,9 @@ pub async fn suspend_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("user:transition:suspend");
-        let has_update_perm = granted("user:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("Insufficient permissions for suspend transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "User", verb = "suspend", code = "transition_by_update_permission", "a transition granted only by user:update, running in shadow; it needs user:transition:suspend or one of the roles admin");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<serde_json::Value>::error("suspend needs user:transition:suspend or one of the roles admin")));
         }
     }
 

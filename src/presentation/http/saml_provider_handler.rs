@@ -257,13 +257,9 @@ pub async fn activate_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("saml_provider:transition:activate");
-        let has_update_perm = granted("saml_provider:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<SAMLProviderResponseDto>::error("Insufficient permissions for activate transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "SAMLProvider", verb = "activate", code = "transition_by_update_permission", "a transition granted only by saml_provider:update, running in shadow; it needs saml_provider:transition:activate or one of the roles admin");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<SAMLProviderResponseDto>::error("activate needs saml_provider:transition:activate or one of the roles admin")));
         }
     }
 
@@ -321,13 +317,9 @@ pub async fn deactivate_transition(
                 && (have.len() == want.len() || (have.len() < want.len() && have.last() == Some(&"*")))
         });
         let has_specific_perm = granted("saml_provider:transition:deactivate");
-        let has_update_perm = granted("saml_provider:update");
         let has_role = auth.roles.iter().any(|r| allowed_roles.contains(&r.as_str()));
         if !has_specific_perm && !has_role {
-            if !has_update_perm {
-                return (StatusCode::FORBIDDEN, Json(ApiResponse::<SAMLProviderResponseDto>::error("Insufficient permissions for deactivate transition")));
-            }
-            tracing::warn!(target: "backbone::write_guard", entity = "SAMLProvider", verb = "deactivate", code = "transition_by_update_permission", "a transition granted only by saml_provider:update, running in shadow; it needs saml_provider:transition:deactivate or one of the roles admin");
+            return (StatusCode::FORBIDDEN, Json(ApiResponse::<SAMLProviderResponseDto>::error("deactivate needs saml_provider:transition:deactivate or one of the roles admin")));
         }
     }
 
