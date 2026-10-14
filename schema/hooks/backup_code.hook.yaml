@@ -8,12 +8,6 @@ model: backup_code.model.yaml
 # PRIORITY 1: Validation Rules
 # =============================================================================
 rules:
-  unique_active_codes:
-    when: [create]
-    condition: "count(BackupCode, user_id == $this.user_id && batch_id == $this.batch_id && is_used == false && (metadata.deleted_at == null)) == 0"
-    message: "Backup codes already exist for this batch"
-    code: BACKUP_CODES_EXIST
-
   valid_code_index:
     when: [create]
     condition: "code_index >= 1 && code_index <= 10"

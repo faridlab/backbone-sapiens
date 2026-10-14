@@ -57,7 +57,7 @@ rules:
 
   resolution_notes_for_resolve:
     when: [update]
-    condition: "resolved == false || resolution_note != null"
+    condition: "resolved == false || resolution_notes != null"
     message: "Resolution notes are required when marking event as resolved"
     code: RESOLUTION_NOTES_REQUIRED
 

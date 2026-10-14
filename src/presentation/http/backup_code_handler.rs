@@ -41,8 +41,6 @@ pub enum BackupCodeError {
     #[error("Internal error: {0}")]
     Internal(String),
     // Domain-specific errors from hook rules
-    #[error("Backup codes already exist for this batch: {0}")]
-    BackupCodesExist(String),
     #[error("Code index must be between 1 and 10: {0}")]
     InvalidCodeIndex(String),
     #[error("Backup code batch must contain at least 8 codes: {0}")]
@@ -76,7 +74,6 @@ impl axum::response::IntoResponse for BackupCodeError {
             Self::Validation(_) => (StatusCode::BAD_REQUEST, "BACKUPCODE_VALIDATION_ERROR"),
             Self::Database(_) => (StatusCode::INTERNAL_SERVER_ERROR, "BACKUPCODE_DATABASE_ERROR"),
             Self::Internal(_) => (StatusCode::INTERNAL_SERVER_ERROR, "BACKUPCODE_INTERNAL_ERROR"),
-            Self::BackupCodesExist(_) => (StatusCode::UNPROCESSABLE_ENTITY, "BACKUPCODE_BACKUP_CODES_EXIST"),
             Self::InvalidCodeIndex(_) => (StatusCode::UNPROCESSABLE_ENTITY, "BACKUPCODE_INVALID_CODE_INDEX"),
             Self::InsufficientBatchSize(_) => (StatusCode::UNPROCESSABLE_ENTITY, "BACKUPCODE_INSUFFICIENT_BATCH_SIZE"),
             Self::InvalidExpiry(_) => (StatusCode::UNPROCESSABLE_ENTITY, "BACKUPCODE_INVALID_EXPIRY"),
@@ -95,7 +92,6 @@ impl axum::response::IntoResponse for BackupCodeError {
 
 /// Domain-specific error codes for BackupCode
 pub mod backup_code_errors {
-    pub const BACKUP_CODES_EXIST: &str = "BACKUPCODE_BACKUP_CODES_EXIST";
     pub const INVALID_CODE_INDEX: &str = "BACKUPCODE_INVALID_CODE_INDEX";
     pub const INSUFFICIENT_BATCH_SIZE: &str = "BACKUPCODE_INSUFFICIENT_BATCH_SIZE";
     pub const INVALID_EXPIRY: &str = "BACKUPCODE_INVALID_EXPIRY";

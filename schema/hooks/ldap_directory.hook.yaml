@@ -73,7 +73,7 @@ rules:
 
   base_dn_required:
     when: [create, update]
-    condition: "base_dn != null && is_valid_dn(base_dn)"
+    condition: "search_base != null && is_valid_dn(search_base)"
     message: "Valid base DN is required"
     code: BASE_DN_REQUIRED
 
@@ -85,13 +85,13 @@ rules:
 
   user_search_filter_valid:
     when: [create, update]
-    condition: "user_search_filter == null || is_valid_ldap_filter(user_search_filter)"
+    condition: "search_filter == null || is_valid_ldap_filter(search_filter)"
     message: "Invalid LDAP search filter syntax"
     code: INVALID_FILTER
 
   use_tls_or_ssl:
     when: [create]
-    condition: "use_ssl || use_tls || use_starttls"
+    condition: "use_ssl || use_tls"
     message: "At least one encryption method (SSL, TLS, or StartTLS) must be enabled"
     code: ENCRYPTION_REQUIRED
 

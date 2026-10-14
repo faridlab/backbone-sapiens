@@ -48,15 +48,15 @@ rules:
 
   unique_saml_user:
     when: [create]
-    condition: "count(UserSAMLLink, provider_id == $this.provider_id && saml_user_id == $this.saml_user_id && status == 'active') == 0"
+    condition: "count(UserSAMLLink, provider_id == $this.provider_id && name_id == $this.name_id && status == 'active') == 0"
     message: "SAML user ID is already linked to another account"
     code: SAML_USER_ALREADY_LINKED
     enforced_by: "migrations/20260426220055_create_user_saml_link_table.up.sql::idx_user_saml_links_provider_id_name_id"
-    justification: "The column is name_id, not saml_user_id; the index ignores the link's status."
+    justification: "The existing index on (provider_id, name_id) ignores the link's status, so it is stricter than this rule: a revoked link still holds its name_id."
 
   saml_user_id_required:
     when: [create]
-    condition: "saml_user_id != null && saml_user_id.length > 0"
+    condition: "name_id != null && name_id.length > 0"
     message: "SAML user ID is required"
     code: SAML_USER_ID_REQUIRED
 

@@ -51,7 +51,7 @@ rules:
 
   timezone_valid:
     when: [create, update]
-    condition: "timezone == null || is_valid_timezone(timezone)"
+    condition: "quiet_timezone == null || is_valid_timezone(quiet_timezone)"
     message: "Invalid timezone"
     code: INVALID_TIMEZONE
 

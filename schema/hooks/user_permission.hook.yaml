@@ -61,7 +61,7 @@ rules:
 
   no_duplicate_grant:
     when: [create]
-    condition: "count(UserPermission, user_id == $this.user_id && permission_id == $this.permission_id && is_active == true) == 0"
+    condition: "count(UserPermission, user_id == $this.user_id && permission_id == $this.permission_id && status == 'active') == 0"
     message: "User already has this permission granted directly"
     code: DUPLICATE_GRANT
 

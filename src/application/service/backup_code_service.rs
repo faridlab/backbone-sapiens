@@ -90,7 +90,7 @@ impl backbone_core::write_guard::WriteGuard<BackupCode> for BackupCodeRowRules {
         if (create || (update && r::changed(old.as_ref(), row, &["used_user_agent"]))) && !r::holds(&r::le(r::length(r::field(row, "used_user_agent")), r::Val::Num(500.0_f64))) {
             refuse.push(Violation::new("used_user_agent", "max_length", "used_user_agent must be at most 500 characters").with_param("max", 500_i64));
         }
-        // `valid_code_index` (backup_code.hook.yaml:17)
+        // `valid_code_index` (backup_code.hook.yaml:11)
         if (create) && !r::holds(&r::and(r::ge(r::field(row, "code_index"), r::Val::Num(1.0_f64)), r::le(r::field(row, "code_index"), r::Val::Num(10.0_f64)))) {
             refuse.push(Violation::new("code_index", "invalid_code_index", "Code index must be between 1 and 10"));
         }

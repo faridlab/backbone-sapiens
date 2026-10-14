@@ -588,6 +588,8 @@ user_owned:
   # scoping. The generator-emitted create files stay as history so fresh
   # databases replay create-then-strip and converge.
   - "migrations/*strip_tenancy*"
+  - "migrations/20261013090018_drop_backup_code_one_unused_per_batch_index.up.sql"
+  - "migrations/20261013090018_drop_backup_code_one_unused_per_batch_index.down.sql"
 
   # Hand-written tests and module documentation.
   - "tests/**"

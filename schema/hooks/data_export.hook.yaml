@@ -89,7 +89,7 @@ rules:
 
   expires_after_completion:
     when: [create, update]
-    condition: "expires_at > (completed_at ?? now())"
+    condition: "expires_at > coalesce(completed_at, now())"
     message: "Expiration must be after completion time"
     code: INVALID_EXPIRATION
 

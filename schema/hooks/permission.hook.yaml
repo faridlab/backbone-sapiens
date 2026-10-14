@@ -37,7 +37,7 @@ rules:
 
   no_users_on_delete:
     when: [delete]
-    condition: "count(UserPermission, permission_id == $this.id && is_active == true) == 0"
+    condition: "count(UserPermission, permission_id == $this.id && status == 'active') == 0"
     message: "Cannot delete permission that is directly assigned to users"
     code: PERMISSION_HAS_USER_GRANTS
 

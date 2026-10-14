@@ -86,6 +86,10 @@ impl backbone_core::write_guard::WriteGuard<SecurityEvent> for SecurityEventRowR
         if (create) && !r::holds(&r::in_list(r::field(row, "severity"), r::Val::List(vec![r::text("low"), r::text("medium"), r::text("high"), r::text("critical")]))) {
             refuse.push(Violation::new("severity", "invalid_severity", "Valid severity required: low, medium, high, critical"));
         }
+        // `resolution_notes_for_resolve` (security_event.hook.yaml:58)
+        if (update) && !r::holds(&r::or(r::eq(r::field(row, "resolved"), r::Val::Bool(false)), r::is_not_null(r::field(row, "resolution_notes")))) {
+            refuse.push(Violation::new("resolved", "resolution_notes_required", "Resolution notes are required when marking event as resolved"));
+        }
         GuardOutcome { refuse, shadow }
     }
 }

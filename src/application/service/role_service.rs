@@ -82,6 +82,10 @@ impl backbone_core::write_guard::WriteGuard<Role> for RoleRowRules {
         if (create || (update && r::changed(old.as_ref(), row, &["description"]))) && !r::holds(&r::le(r::length(r::field(row, "description")), r::Val::Num(1000.0_f64))) {
             refuse.push(Violation::new("description", "max_length", "description must be at most 1000 characters").with_param("max", 1000_i64));
         }
+        // `name_uppercase` (role.hook.yaml:11)
+        if (create || update) && !r::holds(&r::eq(r::field(row, "name"), r::upper(r::field(row, "name")))) {
+            refuse.push(Violation::new("name", "role_name_not_uppercase", "Role name must be uppercase (e.g., ADMIN, EDITOR)"));
+        }
         // `reserved_names` (role.hook.yaml:39)
         if (create || update) && !r::holds(&r::not_in(r::field(row, "name"), r::Val::List(vec![r::text("SYSTEM"), r::text("ROOT"), r::text("ANONYMOUS")]))) {
             refuse.push(Violation::new("name", "reserved_role_name", "This role name is reserved"));

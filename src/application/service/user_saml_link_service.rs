@@ -82,6 +82,10 @@ impl backbone_core::write_guard::WriteGuard<UserSAMLLink> for UserSAMLLinkRowRul
         if (create || (update && r::changed(old.as_ref(), row, &["session_index"]))) && !r::holds(&r::le(r::length(r::field(row, "session_index")), r::Val::Num(255.0_f64))) {
             refuse.push(Violation::new("session_index", "max_length", "session_index must be at most 255 characters").with_param("max", 255_i64));
         }
+        // `saml_user_id_required` (user_saml_link.hook.yaml:57)
+        if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "name_id")), r::gt(r::length(r::field(row, "name_id")), r::Val::Num(0.0_f64)))) {
+            refuse.push(Violation::new("name_id", "saml_user_id_required", "SAML user ID is required"));
+        }
         // `provider_required` (user_saml_link.hook.yaml:63)
         if (create) && !r::holds(&r::is_not_null(r::field(row, "provider_id"))) {
             refuse.push(Violation::new("provider_id", "provider_required", "Provider ID is required"));

@@ -47,7 +47,7 @@ rules:
 
   valid_redirect_uri:
     when: [create, update]
-    condition: "redirect_uri starts_with 'https://' || redirect_uri starts_with 'http://localhost'"
+    condition: "redirect_uri.starts_with('https://') || redirect_uri.starts_with('http://localhost')"
     message: "Invalid redirect URI - must use HTTPS or localhost"
     code: INVALID_REDIRECT_URI
 

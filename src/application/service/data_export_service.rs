@@ -98,6 +98,10 @@ impl backbone_core::write_guard::WriteGuard<DataExport> for DataExportRowRules {
         if (create) && !r::holds(&r::in_list(r::field(row, "format"), r::Val::List(vec![r::text("json"), r::text("csv"), r::text("pdf"), r::text("xml")]))) {
             refuse.push(Violation::new("format", "invalid_format", "Invalid export format. Supported: json, csv, pdf, xml"));
         }
+        // `expires_after_completion` (data_export.hook.yaml:90)
+        if (create || (update && r::changed(old.as_ref(), row, &["expires_at", "completed_at"]))) && !r::holds(&r::gt(r::field(row, "expires_at"), r::coalesce(vec![r::field(row, "completed_at"), r::at(ctx.at)]))) {
+            refuse.push(Violation::new("expires_at", "invalid_expiration", "Expiration must be after completion time"));
+        }
         GuardOutcome { refuse, shadow }
     }
 }

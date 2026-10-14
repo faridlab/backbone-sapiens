@@ -57,13 +57,13 @@ states:
 rules:
   unique_provider_link:
     when: [create]
-    condition: "count(UserOAuthLink, user_id == $this.user_id && oauth_provider_id == $this.oauth_provider_id && is_active == true && (metadata.deleted_at == null)) == 0"
+    condition: "count(UserOAuthLink, user_id == $this.user_id && oauth_provider_id == $this.oauth_provider_id && status == 'active' && (metadata.deleted_at == null)) == 0"
     message: "User already has an active link with this OAuth provider"
     code: PROVIDER_ALREADY_LINKED
 
   unique_provider_user:
     when: [create]
-    condition: "count(UserOAuthLink, provider_user_id == $this.provider_user_id && oauth_provider_id == $this.oauth_provider_id && is_active == true && (metadata.deleted_at == null)) == 0"
+    condition: "count(UserOAuthLink, provider_user_id == $this.provider_user_id && oauth_provider_id == $this.oauth_provider_id && status == 'active' && (metadata.deleted_at == null)) == 0"
     message: "OAuth provider user ID is already linked to another account"
     code: PROVIDER_USER_ALREADY_LINKED
 

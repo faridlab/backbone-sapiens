@@ -130,6 +130,10 @@ impl backbone_core::write_guard::WriteGuard<LDAPDirectory> for LDAPDirectoryRowR
         if (create || update) && !r::holds(&r::and(r::gt(r::field(row, "port"), r::Val::Num(0.0_f64)), r::le(r::field(row, "port"), r::Val::Num(65535.0_f64)))) {
             refuse.push(Violation::new("port", "invalid_port", "Port must be between 1 and 65535"));
         }
+        // `use_tls_or_ssl` (ldap_directory.hook.yaml:92)
+        if (create) && !r::holds(&r::or(r::field(row, "use_ssl"), r::field(row, "use_tls"))) {
+            refuse.push(Violation::new("use_ssl", "encryption_required", "At least one encryption method (SSL, TLS, or StartTLS) must be enabled"));
+        }
         // `sync_interval_positive` (ldap_directory.hook.yaml:98)
         if (create || update) && !r::holds(&r::gt(r::field(row, "sync_interval_minutes"), r::Val::Num(0.0_f64))) {
             refuse.push(Violation::new("sync_interval_minutes", "invalid_sync_interval", "Sync interval must be positive"));

@@ -57,6 +57,10 @@ impl backbone_core::write_guard::WriteGuard<Permission> for PermissionRowRules {
             if !r::holds(&r::eq(r::referencing("SELECT count(*) FROM role_permissions WHERE \"permission_id\" = $1::uuid", r::field(&old, "id")).await, r::Val::Num(0.0_f64))) {
                 refuse.push(Violation::new("", "permission_has_roles", "Cannot delete permission that is assigned to roles"));
             }
+            // `no_users_on_delete` (permission.hook.yaml:38)
+            if !r::holds(&r::eq(r::referencing("SELECT count(*) FROM user_permissions WHERE \"permission_id\" = $1::uuid AND (\"status\"::text = 'active')", r::field(&old, "id")).await, r::Val::Num(0.0_f64))) {
+                refuse.push(Violation::new("", "permission_has_user_grants", "Cannot delete permission that is directly assigned to users"));
+            }
             return GuardOutcome { refuse, shadow };
         }
         let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);

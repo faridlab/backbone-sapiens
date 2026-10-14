@@ -115,30 +115,24 @@ events:
       user_id: uuid
       reason: string?
 
-  UserStatusChangedEvent:
-    fields:
-      user_id: uuid
-      old_status: string
-      new_status: string
-
-  UserEmailChangedEvent:
+  UserEmailChanged:
     fields:
       user_id: uuid
       old_email: string
       new_email: string
 
-  UserPasswordChangedEvent:
+  UserPasswordChanged:
     fields:
       user_id: uuid
       reason: string?
 
-  UserLoggedInEvent:
+  UserLoggedIn:
     fields:
       user_id: uuid
       session_id: uuid
       ip_address: string?
 
-  LoginFailedEvent:
+  LoginFailed:
     fields:
       email_or_username: string
       reason: string
@@ -175,17 +169,11 @@ events:
       role_id: uuid
       name: string
 
-  RoleAssignedEvent:
+  RoleAssigned:
     fields:
       user_id: uuid
       role_id: uuid
       assigned_by: uuid?
-
-  RoleRevokedEvent:
-    fields:
-      user_id: uuid
-      role_id: uuid
-      revoked_by: uuid?
 
   # Permission events
   PermissionCreatedEvent:
@@ -200,67 +188,17 @@ events:
       permission_id: uuid
       name: string
 
-  UserPermissionGrantedEvent:
-    fields:
-      user_id: uuid
-      permission_id: uuid
-      granted_by: uuid
-      expires_at: datetime?
-      resource_id: string?
-      resource_type: string?
-
-  UserPermissionRevokedEvent:
-    fields:
-      user_id: uuid
-      permission_id: uuid
-      revoked_by: uuid?
-      reason: string?
-
   # Session events
   SessionCreatedEvent:
     fields:
       session_id: uuid
       user_id: uuid
 
-  SessionRevokedEvent:
-    fields:
-      session_id: uuid
-      user_id: uuid
-
   # MFA events
-  MFADeviceEnrolledEvent:
-    fields:
-      user_id: uuid
-      device_type: string
-      device_name: string
-
-  MFADeviceStatusChangedEvent:
-    fields:
-      user_id: uuid
-      device_id: uuid
-      is_active: bool
-
-  MFAVerificationEvent:
-    fields:
-      user_id: uuid
-      device_id: uuid
-      success: bool
 
   # Password reset events
-  PasswordResetRequestedEvent:
-    fields:
-      user_id: uuid
-      ip_address: string?
-
-  PasswordResetCompletedEvent:
-    fields:
-      user_id: uuid
 
   # v2.0 Session Limit events
-  SessionLimitEnforcedEvent:
-    fields:
-      user_id: uuid
-      max_sessions: int32
 
   SessionLimitUpdatedEvent:
     fields:
@@ -269,32 +207,9 @@ events:
       new_max: int32
 
   # v2.0 Temporary Permission events
-  TemporaryPermissionGrantedEvent:
-    fields:
-      user_id: uuid
-      permission_id: uuid
-      expires_at: datetime
-      granted_by: uuid
-
-  TemporaryPermissionActivatedEvent:
-    fields:
-      user_id: uuid
-      permission_id: uuid
-      expires_at: datetime
-
-  TemporaryPermissionExpiredEvent:
-    fields:
-      user_id: uuid
-      permission_id: uuid
-
-  TemporaryPermissionRevokedEvent:
-    fields:
-      user_id: uuid
-      permission_id: uuid
-      revoked_by: uuid
 
   # v2.0 Impersonation Session events
-  ImpersonationStartedEvent:
+  ImpersonationStarted:
     fields:
       admin_id: uuid
       target_user_id: uuid
@@ -302,72 +217,16 @@ events:
       reason: string
       max_duration_minutes: int32
 
-  ImpersonationEndedEvent:
+  ImpersonationEnded:
     fields:
       admin_id: uuid
       target_user_id: uuid
       session_id: uuid
       duration_minutes: int32
 
-  ImpersonationExpiredEvent:
-    fields:
-      admin_id: uuid
-      target_user_id: uuid
-      session_id: uuid
-
-  ImpersonationTerminatedEvent:
-    fields:
-      admin_id: uuid
-      target_user_id: uuid
-      terminated_by: uuid
-      reason: string?
-
   # v2.0 Data Export events
-  DataExportRequestedEvent:
-    fields:
-      user_id: uuid
-      requested_by: uuid
-      format: string
-      includes: string?
-
-  DataExportCompletedEvent:
-    fields:
-      user_id: uuid
-      export_id: uuid
-      file_url: string
-      expires_at: datetime
-
-  DataExportFailedEvent:
-    fields:
-      user_id: uuid
-      export_id: uuid
-      error: string
 
   # v2.0 Resource Permission events
-  ResourcePermissionGrantedEvent:
-    fields:
-      permission_id: uuid
-      resource_type: string
-      resource_id: string
-      granted_to_user_id: uuid?
-      granted_to_role_id: uuid?
-      granted_by: uuid
-      expires_at: datetime?
-
-  ResourcePermissionExpiredEvent:
-    fields:
-      permission_id: uuid
-      resource_type: string
-      resource_id: string
-      granted_to: string
-
-  ResourcePermissionRevokedEvent:
-    fields:
-      permission_id: uuid
-      resource_type: string
-      resource_id: string
-      granted_to: string
-      revoked_by: uuid
 
   # v2.0 Security Event events
   SecurityEventCreatedEvent:
@@ -378,30 +237,7 @@ events:
       user_id: uuid?
       ip_address: string?
 
-  SecurityEventResolvedEvent:
-    fields:
-      event_id: uuid
-      resolved_by: uuid
-      resolution_notes: string
-
   # v2.0 Anonymization events
-  AnonymizationRequestedEvent:
-    fields:
-      user_id: uuid
-      method: string
-      requested_by: uuid
-      retention_days: int32?
-
-  AnonymizationCompletedEvent:
-    fields:
-      user_id: uuid
-      method: string
-      anonymized_by: uuid
-
-  AnonymizationFailedEvent:
-    fields:
-      user_id: uuid
-      error: string
 
   # v2.0 SAML events
   SAMLProviderCreatedEvent:
@@ -410,39 +246,12 @@ events:
       provider_name: string
       entity_id: string
 
-  SAMLProviderActivatedEvent:
-    fields:
-      provider_id: uuid
-      provider_name: string
-
-  SAMLLinkCreatedEvent:
-    fields:
-      user_id: uuid
-      provider_id: uuid
-      saml_user_id: string
-
-  SAMLLinkDeactivatedEvent:
-    fields:
-      user_id: uuid
-      provider_id: uuid
-
   # v2.0 LDAP events
   LDAPDirectoryCreatedEvent:
     fields:
       directory_id: uuid
       directory_name: string
       host: string
-
-  LDAPDirectoryActivatedEvent:
-    fields:
-      directory_id: uuid
-      directory_name: string
-
-  LDAPDirectorySyncedEvent:
-    fields:
-      directory_id: uuid
-      users_synced: int32
-      users_failed: int32
 
 # =============================================================================
 # Scheduled jobs

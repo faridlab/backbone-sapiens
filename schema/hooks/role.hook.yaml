@@ -10,7 +10,7 @@ model: role.model.yaml
 rules:
   name_uppercase:
     when: [create, update]
-    condition: "name == name.uppercase()"
+    condition: "name == name.upper()"
     message: "Role name must be uppercase (e.g., ADMIN, EDITOR)"
     code: ROLE_NAME_NOT_UPPERCASE
 
