@@ -669,7 +669,13 @@ impl AuthService {
         .await
         .map_err(|e| AuthError::Internal(e.into()))?;
 
-        sqlx::query("UPDATE users SET status = 'active', email_verified = true WHERE id = $1")
+        // Verifying the address activates only an account awaiting verification. A suspended
+        // or deactivated account keeps its status: only an administrator's verb restores it.
+        sqlx::query(
+            "UPDATE users SET email_verified = true, \
+             status = CASE WHEN status = 'pending_verification' THEN 'active' ELSE status END \
+             WHERE id = $1",
+        )
             .bind(token_row.user_id)
             .execute(&mut *tx)
             .await

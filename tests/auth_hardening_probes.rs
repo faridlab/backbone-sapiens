@@ -389,6 +389,59 @@ async fn verified_user(pool: &PgPool, auth: &AuthService, prefix: &str) -> (Uuid
     (id, email)
 }
 
+/// Point the user's pending verification token at a code the test knows.
+async fn known_code(pool: &PgPool, email: &str, code: &str) {
+    sqlx::query(
+        "UPDATE sapiens.email_verification_tokens SET token = $1 \
+         WHERE email = $2 AND status = 'pending'",
+    )
+    .bind(backbone_sapiens::infrastructure::auth::crypto::hash_token(code))
+    .bind(email)
+    .execute(pool)
+    .await
+    .expect("set a known verification code");
+}
+
+/// Verifying an address activates an account awaiting verification, and nothing else: a
+/// suspended account that verifies an address stays suspended.
+#[tokio::test]
+async fn verifying_an_email_never_lifts_a_suspension() {
+    let pool = pool().await;
+    let auth = auth_service(&pool).await;
+    for (prefix, before, after) in [("pending", None, "active"), ("suspended", Some("suspended"), "suspended")] {
+        let t = tag();
+        let email = format!("verify-{prefix}-{t}@probe.example");
+        auth.register(RegisterInput {
+            email: email.clone(),
+            password: "Passw0rd-long".into(),
+            confirm_password: "Passw0rd-long".into(),
+            first_name: None,
+            last_name: None,
+            accept_terms: true,
+            username: Some(format!("verify_{prefix}_{t}")),
+        })
+        .await
+        .expect("register probe user");
+        if let Some(status) = before {
+            sqlx::query("UPDATE users SET status = $1::text::user_status WHERE email = $2")
+                .bind(status)
+                .bind(&email)
+                .execute(&pool)
+                .await
+                .expect("suspend probe user");
+        }
+        known_code(&pool, &email, "424242").await;
+        auth.verify_email(&email, "424242").await.expect("the code verifies");
+        let (status, verified): (String, bool) =
+            sqlx::query_as("SELECT status::text, email_verified FROM users WHERE email = $1")
+                .bind(&email)
+                .fetch_one(&pool)
+                .await
+                .expect("read probe user");
+        assert_eq!((status.as_str(), verified), (after, true), "{prefix} user after verifying");
+    }
+}
+
 #[tokio::test]
 async fn password_change_revokes_other_sessions_and_device_keys() {
     let pool = pool().await;
