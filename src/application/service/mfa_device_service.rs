@@ -162,11 +162,15 @@ impl backbone_core::write_guard::WriteGuard<MFADevice> for MFADeviceRowRules {
         if (create || (update && r::changed(old.as_ref(), row, &["risk_score"]))) && !r::holds(&r::le(r::field(row, "risk_score"), r::Val::Num(100.0_f64))) {
             refuse.push(Violation::new("risk_score", "max", "risk_score must be at most 100").with_param("max", 100_i64));
         }
-        // `device_name_required` (mfa_device.hook.yaml:38)
+        // `backup_codes_not_stored` (mfa_device.hook.yaml:41)
+        if (create || update) && !r::holds(&r::Val::Bool(row.get("backup_codes_data").map_or(true, |v| v.is_null()))) {
+            refuse.push(Violation::new("backup_codes_data", "backup_codes_not_stored", "Backup codes are not stored on the device; they are kept hashed as backup code records"));
+        }
+        // `device_name_required` (mfa_device.hook.yaml:47)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "device_name")), r::ge(r::length(r::field(row, "device_name")), r::Val::Num(1.0_f64)))) {
             refuse.push(Violation::new("device_name", "device_name_required", "Device name is required"));
         }
-        // `secret_required` (mfa_device.hook.yaml:62)
+        // `secret_required` (mfa_device.hook.yaml:71)
         if (create) && !r::holds(&r::and(r::is_not_null(r::field(row, "secret")), r::ge(r::length(r::field(row, "secret")), r::Val::Num(16.0_f64)))) {
             refuse.push(Violation::new("secret", "secret_required", "Device secret is required"));
         }

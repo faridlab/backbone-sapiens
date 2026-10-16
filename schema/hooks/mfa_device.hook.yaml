@@ -35,6 +35,15 @@ states:
 # PRIORITY 2: Validation Rules
 # =============================================================================
 rules:
+  # Backup codes live hashed, one row each, in MFABackupCode; this column held a plaintext copy.
+  # Nothing writes it, and it is dropped at the next breaking release; until then no write may
+  # store a value in it.
+  backup_codes_not_stored:
+    when: [create, update]
+    condition: "backup_codes_data == null"
+    message: "Backup codes are not stored on the device; they are kept hashed as backup code records"
+    code: BACKUP_CODES_NOT_STORED
+
   device_name_required:
     when: [create]
     condition: "device_name != null && device_name.length >= 1"
