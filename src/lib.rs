@@ -623,7 +623,7 @@ impl SapiensModuleBuilder {
 
         // Session service
         let session_repository = Arc::new(SessionRepository::new(db_pool.clone()));
-        let session_service = Arc::new(SessionService::with_repository(session_repository.clone()));
+        let session_service = Arc::new(SessionService::with_repository(session_repository.clone()).with_guard(Arc::new(crate::application::service::session_service::SessionRowRules)));
 
         // SessionLimit service
         let session_limit_repository = Arc::new(SessionLimitRepository::new(db_pool.clone()));
