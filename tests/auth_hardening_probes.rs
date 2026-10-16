@@ -648,7 +648,6 @@ async fn lifecycle_outbox_stages_deactivated_anonymized_deleted() {
             username: format!("lcuser{}", tag()),
             email: email.clone(),
             password_hash: "probe-hash-only".repeat(6),
-            status: UserStatus::Active,
             email_verified: false,
             failed_login_attempts: 0,
             locked_until: None,
@@ -656,6 +655,15 @@ async fn lifecycle_outbox_stages_deactivated_anonymized_deleted() {
         })
         .await
         .expect("create user");
+    assert_eq!(*user.status(), UserStatus::PendingVerification, "a user is born awaiting verification");
+
+    // Verified first: the machine moves an account to inactive only from active.
+    let mut verified = std::collections::HashMap::new();
+    verified.insert("status".to_string(), serde_json::json!("active"));
+    users
+        .partial_update(&user.id.to_string(), verified)
+        .await
+        .expect("activate user");
 
     // LC-1a: a status write into Inactive stages UserDeactivated
     let mut fields = std::collections::HashMap::new();

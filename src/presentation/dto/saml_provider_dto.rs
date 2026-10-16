@@ -54,7 +54,6 @@ pub struct CreateSAMLProviderDto {
     pub name_id_format: String,
     #[serde(alias = "attribute_mapping")]
     pub attribute_mapping: serde_json::Value,
-    pub status: SAMLProviderStatus,
 }
 
 // =============================================================================
@@ -293,7 +292,7 @@ impl From<CreateSAMLProviderDto> for SAMLProvider {
             sls_url: dto.sls_url,
             name_id_format: dto.name_id_format,
             attribute_mapping: dto.attribute_mapping,
-            status: dto.status,
+            status: SAMLProviderStatus::Draft,
             metadata: AuditMetadata::default(),
         }
     }

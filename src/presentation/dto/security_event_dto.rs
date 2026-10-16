@@ -45,8 +45,6 @@ pub struct CreateSecurityEventDto {
     pub description: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub details: Option<serde_json::Value>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub resolved: bool,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "resolved_at")]
     pub resolved_at: Option<DateTime<Utc>>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "resolved_by_user_id")]
@@ -278,7 +276,7 @@ impl From<CreateSecurityEventDto> for SecurityEvent {
             user_agent: dto.user_agent,
             description: dto.description,
             details: dto.details,
-            resolved: dto.resolved,
+            resolved: false,
             resolved_at: dto.resolved_at,
             resolved_by_user_id: dto.resolved_by_user_id,
             resolution_notes: dto.resolution_notes,

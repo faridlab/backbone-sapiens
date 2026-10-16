@@ -67,7 +67,6 @@ pub struct CreateLDAPDirectoryDto {
     pub last_sync_at: Option<DateTime<Utc>>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "last_sync_result")]
     pub last_sync_result: Option<serde_json::Value>,
-    pub status: LDAPDirectoryStatus,
 }
 
 // =============================================================================
@@ -352,7 +351,7 @@ impl From<CreateLDAPDirectoryDto> for LDAPDirectory {
             sync_interval_minutes: dto.sync_interval_minutes,
             last_sync_at: dto.last_sync_at,
             last_sync_result: dto.last_sync_result,
-            status: dto.status,
+            status: LDAPDirectoryStatus::Draft,
             metadata: AuditMetadata::default(),
         }
     }

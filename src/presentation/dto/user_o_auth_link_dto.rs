@@ -52,7 +52,6 @@ pub struct CreateUserOAuthLinkDto {
     #[cfg_attr(feature = "openapi", schema(example = true))]
     #[serde(alias = "is_primary")]
     pub is_primary: bool,
-    pub status: UserOAuthLinkStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "last_synced")]
     pub last_synced: Option<DateTime<Utc>>,
     #[cfg_attr(feature = "openapi", schema(example = true))]
@@ -300,7 +299,7 @@ impl From<CreateUserOAuthLinkDto> for UserOAuthLink {
             refresh_token: dto.refresh_token,
             token_expires_at: dto.token_expires_at,
             is_primary: dto.is_primary,
-            status: dto.status,
+            status: UserOAuthLinkStatus::PendingVerification,
             last_synced: dto.last_synced,
             sync_enabled: dto.sync_enabled,
             metadata: AuditMetadata::default(),

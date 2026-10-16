@@ -28,7 +28,6 @@ use uuid::Uuid;
 
 use backbone_sapiens::UserCreatedOutboxPublisher;
 use backbone_sapiens::application::service::{AuthService, RegisterInput, UserService};
-use backbone_sapiens::domain::entity::UserStatus;
 use backbone_sapiens::infrastructure::auth::email::AuthEmailService;
 use backbone_sapiens::infrastructure::auth::jwt::{JwtConfig, JwtService};
 use backbone_sapiens::infrastructure::messaging::{
@@ -134,7 +133,6 @@ fn create_user_dto(email: &str, username: &str) -> CreateUserDto {
         username: username.to_string(),
         email: email.to_string(),
         password_hash: d("argon2idph").repeat(6),
-        status: UserStatus::Active,
         email_verified: false,
         failed_login_attempts: 0,
         locked_until: None,

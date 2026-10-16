@@ -52,7 +52,6 @@ pub struct CreateResourcePermissionDto {
     pub expires_at: Option<DateTime<Utc>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
-    pub status: ResourcePermissionStatus,
 }
 
 // =============================================================================
@@ -280,7 +279,7 @@ impl From<CreateResourcePermissionDto> for ResourcePermission {
             granted_at: dto.granted_at,
             expires_at: dto.expires_at,
             reason: dto.reason,
-            status: dto.status,
+            status: ResourcePermissionStatus::Active,
             metadata: AuditMetadata::default(),
         }
     }

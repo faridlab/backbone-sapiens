@@ -53,7 +53,6 @@ pub struct CreateTemporaryPermissionDto {
     #[cfg_attr(feature = "openapi", schema(example = true))]
     #[serde(alias = "notified_before_expiry")]
     pub notified_before_expiry: bool,
-    pub status: TemporaryPermissionStatus,
 }
 
 // =============================================================================
@@ -284,7 +283,7 @@ impl From<CreateTemporaryPermissionDto> for TemporaryPermission {
             revoked_by: dto.revoked_by,
             reason: dto.reason,
             notified_before_expiry: dto.notified_before_expiry,
-            status: dto.status,
+            status: TemporaryPermissionStatus::Pending,
             metadata: AuditMetadata::default(),
         }
     }

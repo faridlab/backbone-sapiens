@@ -117,7 +117,6 @@ pub struct CreateMFADeviceDto {
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     #[serde(alias = "risk_score")]
     pub risk_score: i32,
-    pub status: MFADeviceStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "backup_codes_data")]
     pub backup_codes_data: Option<serde_json::Value>,
 }
@@ -569,7 +568,7 @@ impl From<CreateMFADeviceDto> for MFADevice {
             locked_until: dto.locked_until,
             lock_reason: dto.lock_reason,
             risk_score: dto.risk_score,
-            status: dto.status,
+            status: MFADeviceStatus::Active,
             backup_codes_data: dto.backup_codes_data,
             metadata: AuditMetadata::default(),
         }

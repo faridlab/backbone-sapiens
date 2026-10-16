@@ -51,7 +51,6 @@ pub struct CreateEmailVerificationTokenDto {
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     #[serde(alias = "max_attempts")]
     pub max_attempts: i32,
-    pub status: EmailVerificationTokenStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "ip_address")]
     pub ip_address: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "user_agent")]
@@ -295,7 +294,7 @@ impl From<CreateEmailVerificationTokenDto> for EmailVerificationToken {
             verified_at: dto.verified_at,
             attempts: dto.attempts,
             max_attempts: dto.max_attempts,
-            status: dto.status,
+            status: EmailVerificationTokenStatus::Pending,
             ip_address: dto.ip_address,
             user_agent: dto.user_agent,
             metadata: AuditMetadata::default(),

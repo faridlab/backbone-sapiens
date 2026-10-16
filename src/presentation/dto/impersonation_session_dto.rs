@@ -55,7 +55,6 @@ pub struct CreateImpersonationSessionDto {
     pub terminated_by: Option<Uuid>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "termination_reason")]
     pub termination_reason: Option<String>,
-    pub status: ImpersonationSessionStatus,
 }
 
 // =============================================================================
@@ -295,7 +294,7 @@ impl From<CreateImpersonationSessionDto> for ImpersonationSession {
             actions_performed: dto.actions_performed,
             terminated_by: dto.terminated_by,
             termination_reason: dto.termination_reason,
-            status: dto.status,
+            status: ImpersonationSessionStatus::Active,
             metadata: AuditMetadata::default(),
         }
     }

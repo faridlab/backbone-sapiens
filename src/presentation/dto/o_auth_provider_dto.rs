@@ -54,7 +54,6 @@ pub struct CreateOAuthProviderDto {
     #[cfg_attr(feature = "openapi", schema(example = "https://example.com"))]
     #[serde(alias = "user_info_url")]
     pub user_info_url: String,
-    pub status: OAuthProviderStatus,
 }
 
 // =============================================================================
@@ -287,7 +286,7 @@ impl From<CreateOAuthProviderDto> for OAuthProvider {
             authorization_url: dto.authorization_url,
             token_url: dto.token_url,
             user_info_url: dto.user_info_url,
-            status: dto.status,
+            status: OAuthProviderStatus::Active,
             metadata: AuditMetadata::default(),
         }
     }

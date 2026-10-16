@@ -36,7 +36,6 @@ pub struct CreateUserDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(alias = "password_hash")]
     pub password_hash: String,
-    pub status: UserStatus,
     #[cfg_attr(feature = "openapi", schema(example = true))]
     #[serde(alias = "email_verified")]
     pub email_verified: bool,
@@ -254,7 +253,7 @@ impl From<CreateUserDto> for User {
             username: dto.username,
             email: dto.email,
             password_hash: dto.password_hash,
-            status: dto.status,
+            status: UserStatus::PendingVerification,
             email_verified: dto.email_verified,
             failed_login_attempts: dto.failed_login_attempts,
             locked_until: dto.locked_until,

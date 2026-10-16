@@ -50,7 +50,6 @@ pub struct CreateUserSAMLLinkDto {
     #[cfg_attr(feature = "openapi", schema(example = true))]
     #[serde(alias = "is_primary")]
     pub is_primary: bool,
-    pub status: UserSAMLLinkStatus,
 }
 
 // =============================================================================
@@ -273,7 +272,7 @@ impl From<CreateUserSAMLLinkDto> for UserSAMLLink {
             last_login_at: dto.last_login_at,
             attributes: dto.attributes,
             is_primary: dto.is_primary,
-            status: dto.status,
+            status: UserSAMLLinkStatus::Active,
             metadata: AuditMetadata::default(),
         }
     }

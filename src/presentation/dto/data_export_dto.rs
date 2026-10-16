@@ -39,7 +39,6 @@ pub struct CreateDataExportDto {
     #[cfg_attr(feature = "openapi", schema(example = "2024-01-01T00:00:00Z"))]
     #[serde(alias = "requested_at")]
     pub requested_at: DateTime<Utc>,
-    pub status: DataExportStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "file_path")]
     pub file_path: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "file_url")]
@@ -277,7 +276,7 @@ impl From<CreateDataExportDto> for DataExport {
             user_id: dto.user_id,
             requested_by: dto.requested_by,
             requested_at: dto.requested_at,
-            status: dto.status,
+            status: DataExportStatus::Pending,
             file_path: dto.file_path,
             file_url: dto.file_url,
             expires_at: dto.expires_at,
