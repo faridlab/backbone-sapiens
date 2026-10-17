@@ -86,15 +86,15 @@ impl backbone_core::write_guard::WriteGuard<SessionLimit> for SessionLimitRowRul
         if (create || (update && r::changed(old.as_ref(), row, &["current_session_count"]))) && !r::holds(&r::ge(r::field(row, "current_session_count"), r::Val::Num(0.0_f64))) {
             refuse.push(Violation::new("current_session_count", "non_negative", "current_session_count must not be negative"));
         }
-        // `max_sessions_positive` (session_limit.hook.yaml:40)
+        // `max_sessions_positive` (session_limit.hook.yaml:41)
         if (create || update) && !r::holds(&r::gt(r::field(row, "max_sessions"), r::Val::Num(0.0_f64))) {
             refuse.push(Violation::new("max_sessions", "invalid_max_sessions", "Maximum sessions must be at least 1"));
         }
-        // `max_sessions_reasonable` (session_limit.hook.yaml:46)
+        // `max_sessions_reasonable` (session_limit.hook.yaml:47)
         if (create || update) && !r::holds(&r::le(r::field(row, "max_sessions"), r::Val::Num(100.0_f64))) {
             refuse.push(Violation::new("max_sessions", "max_sessions_exceeded", "Maximum sessions cannot exceed 100"));
         }
-        // `per_device_within_limit` (session_limit.hook.yaml:52)
+        // `per_device_within_limit` (session_limit.hook.yaml:53)
         if (create || update) && !r::holds(&r::or(r::is_null(r::field(row, "max_sessions_per_device")), r::le(r::field(row, "max_sessions_per_device"), r::field(row, "max_sessions")))) {
             refuse.push(Violation::new("max_sessions_per_device", "invalid_per_device_limit", "Per-device limit cannot exceed total session limit"));
         }

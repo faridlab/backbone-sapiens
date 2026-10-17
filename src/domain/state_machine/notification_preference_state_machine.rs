@@ -11,22 +11,22 @@ use std::str::FromStr;
 pub enum NotificationPreferenceState {
     /// Initial state
     /// Final state
-    Enabled,
+    True,
     /// Final state
-    Disabled,
+    False,
 }
 
 impl Default for NotificationPreferenceState {
     fn default() -> Self {
-        Self::Enabled
+        Self::True
     }
 }
 
 impl std::fmt::Display for NotificationPreferenceState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Enabled => write!(f, "enabled"),
-            Self::Disabled => write!(f, "disabled"),
+            Self::True => write!(f, "true"),
+            Self::False => write!(f, "false"),
         }
     }
 }
@@ -36,8 +36,8 @@ impl FromStr for NotificationPreferenceState {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
-            "enabled" => Ok(Self::Enabled),
-            "disabled" => Ok(Self::Disabled),
+            "true" => Ok(Self::True),
+            "false" => Ok(Self::False),
             _ => Err(StateMachineError::InvalidState(s.to_string())),
         }
     }
@@ -46,19 +46,19 @@ impl FromStr for NotificationPreferenceState {
 impl NotificationPreferenceState {
     /// Check if this is the initial state
     pub fn is_initial(&self) -> bool {
-        matches!(self, Self::Enabled)
+        matches!(self, Self::True)
     }
 
     /// Check if this is a final state
     pub fn is_final(&self) -> bool {
-        matches!(self, Self::Enabled | Self::Disabled)
+        matches!(self, Self::True | Self::False)
     }
 
     /// Get all possible states
     pub fn all() -> Vec<Self> {
         vec![
-            Self::Enabled,
-            Self::Disabled,
+            Self::True,
+            Self::False,
         ]
     }
 }
@@ -67,9 +67,9 @@ impl NotificationPreferenceState {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum NotificationPreferenceTransition {
-    /// disabled -> enabled
+    /// false -> true
     Enable,
-    /// enabled -> disabled
+    /// true -> false
     Disable,
 }
 
@@ -98,8 +98,8 @@ impl NotificationPreferenceTransition {
     /// Get the target state of this transition
     pub fn target_state(&self) -> NotificationPreferenceState {
         match self {
-            Self::Enable => NotificationPreferenceState::Enabled,
-            Self::Disable => NotificationPreferenceState::Disabled,
+            Self::Enable => NotificationPreferenceState::True,
+            Self::Disable => NotificationPreferenceState::False,
         }
     }
 
@@ -149,8 +149,8 @@ impl NotificationPreferenceStateMachine {
     /// Check if a transition is allowed from the current state
     pub fn can_transition(&self, transition: NotificationPreferenceTransition) -> bool {
         match (self.current_state, transition) {
-            (NotificationPreferenceState::Disabled, NotificationPreferenceTransition::Enable) => true,
-            (NotificationPreferenceState::Enabled, NotificationPreferenceTransition::Disable) => true,
+            (NotificationPreferenceState::False, NotificationPreferenceTransition::Enable) => true,
+            (NotificationPreferenceState::True, NotificationPreferenceTransition::Disable) => true,
             _ => false,
         }
     }
@@ -251,31 +251,31 @@ mod tests {
     #[test]
     fn test_initial_state() {
         let sm = NotificationPreferenceStateMachine::new();
-        assert_eq!(sm.current_state(), NotificationPreferenceState::Enabled);
+        assert_eq!(sm.current_state(), NotificationPreferenceState::True);
         assert!(sm.current_state().is_initial());
     }
 
     #[test]
     fn test_valid_transition() {
-        let mut sm = NotificationPreferenceStateMachine::from_state(NotificationPreferenceState::Disabled);
+        let mut sm = NotificationPreferenceStateMachine::from_state(NotificationPreferenceState::False);
         assert!(sm.can_transition(NotificationPreferenceTransition::Enable));
         let result = sm.transition(NotificationPreferenceTransition::Enable);
         assert!(result.is_ok());
-        assert_eq!(sm.current_state(), NotificationPreferenceState::Enabled);
+        assert_eq!(sm.current_state(), NotificationPreferenceState::True);
     }
 
     #[test]
     fn test_invalid_transition() {
-        let mut sm = NotificationPreferenceStateMachine::from_state(NotificationPreferenceState::Enabled);
-        // Enable is not valid from Enabled state
+        let mut sm = NotificationPreferenceStateMachine::from_state(NotificationPreferenceState::True);
+        // Enable is not valid from True state
         let result = sm.transition(NotificationPreferenceTransition::Enable);
         assert!(result.is_err());
     }
 
     #[test]
     fn test_state_parsing() {
-        let state: NotificationPreferenceState = "enabled".parse().unwrap();
-        assert_eq!(state, NotificationPreferenceState::Enabled);
+        let state: NotificationPreferenceState = "true".parse().unwrap();
+        assert_eq!(state, NotificationPreferenceState::True);
     }
 
     #[test]

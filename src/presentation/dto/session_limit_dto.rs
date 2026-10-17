@@ -36,9 +36,6 @@ pub struct CreateSessionLimitDto {
     pub max_sessions: i32,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "max_sessions_per_device")]
     pub max_sessions_per_device: Option<i32>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "enforce_limit")]
-    pub enforce_limit: bool,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
     #[serde(alias = "current_session_count")]
     pub current_session_count: i32,
@@ -239,7 +236,7 @@ impl From<CreateSessionLimitDto> for SessionLimit {
             user_id: dto.user_id,
             max_sessions: dto.max_sessions,
             max_sessions_per_device: dto.max_sessions_per_device,
-            enforce_limit: dto.enforce_limit,
+            enforce_limit: true,
             current_session_count: dto.current_session_count,
             last_session_revoke_at: dto.last_session_revoke_at,
             metadata: AuditMetadata::default(),

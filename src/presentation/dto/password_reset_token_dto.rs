@@ -37,9 +37,6 @@ pub struct CreatePasswordResetTokenDto {
     #[cfg_attr(feature = "openapi", schema(example = "2024-01-01T00:00:00Z"))]
     #[serde(alias = "expires_at")]
     pub expires_at: DateTime<Utc>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_used")]
-    pub is_used: bool,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "used_at")]
     pub used_at: Option<DateTime<Utc>>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "ip_address")]
@@ -233,7 +230,7 @@ impl From<CreatePasswordResetTokenDto> for PasswordResetToken {
             user_id: dto.user_id,
             token_hash: dto.token_hash,
             expires_at: dto.expires_at,
-            is_used: dto.is_used,
+            is_used: false,
             used_at: dto.used_at,
             ip_address: dto.ip_address,
             metadata: AuditMetadata::default(),

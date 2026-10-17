@@ -10,22 +10,22 @@ use std::str::FromStr;
 #[serde(rename_all = "snake_case")]
 pub enum PasswordResetTokenState {
     /// Initial state
-    Valid,
+    False,
     /// Final state
-    Used,
+    True,
 }
 
 impl Default for PasswordResetTokenState {
     fn default() -> Self {
-        Self::Valid
+        Self::False
     }
 }
 
 impl std::fmt::Display for PasswordResetTokenState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Valid => write!(f, "valid"),
-            Self::Used => write!(f, "used"),
+            Self::False => write!(f, "false"),
+            Self::True => write!(f, "true"),
         }
     }
 }
@@ -35,8 +35,8 @@ impl FromStr for PasswordResetTokenState {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
-            "valid" => Ok(Self::Valid),
-            "used" => Ok(Self::Used),
+            "false" => Ok(Self::False),
+            "true" => Ok(Self::True),
             _ => Err(StateMachineError::InvalidState(s.to_string())),
         }
     }
@@ -45,19 +45,19 @@ impl FromStr for PasswordResetTokenState {
 impl PasswordResetTokenState {
     /// Check if this is the initial state
     pub fn is_initial(&self) -> bool {
-        matches!(self, Self::Valid)
+        matches!(self, Self::False)
     }
 
     /// Check if this is a final state
     pub fn is_final(&self) -> bool {
-        matches!(self, Self::Used)
+        matches!(self, Self::True)
     }
 
     /// Get all possible states
     pub fn all() -> Vec<Self> {
         vec![
-            Self::Valid,
-            Self::Used,
+            Self::False,
+            Self::True,
         ]
     }
 }
@@ -66,7 +66,7 @@ impl PasswordResetTokenState {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum PasswordResetTokenTransition {
-    /// valid -> used
+    /// false -> true
     Use,
 }
 
@@ -93,7 +93,7 @@ impl PasswordResetTokenTransition {
     /// Get the target state of this transition
     pub fn target_state(&self) -> PasswordResetTokenState {
         match self {
-            Self::Use => PasswordResetTokenState::Used,
+            Self::Use => PasswordResetTokenState::True,
         }
     }
 
@@ -140,12 +140,12 @@ impl PasswordResetTokenStateMachine {
 
     /// Check if a transition is allowed from the current state
     pub fn can_transition(&self, transition: PasswordResetTokenTransition) -> bool {
-        if matches!(self.current_state, PasswordResetTokenState::Used) {
+        if matches!(self.current_state, PasswordResetTokenState::True) {
             return false;
         }
 
         match (self.current_state, transition) {
-            (PasswordResetTokenState::Valid, PasswordResetTokenTransition::Use) => true,
+            (PasswordResetTokenState::False, PasswordResetTokenTransition::Use) => true,
             _ => false,
         }
     }
@@ -246,31 +246,31 @@ mod tests {
     #[test]
     fn test_initial_state() {
         let sm = PasswordResetTokenStateMachine::new();
-        assert_eq!(sm.current_state(), PasswordResetTokenState::Valid);
+        assert_eq!(sm.current_state(), PasswordResetTokenState::False);
         assert!(sm.current_state().is_initial());
     }
 
     #[test]
     fn test_valid_transition() {
-        let mut sm = PasswordResetTokenStateMachine::from_state(PasswordResetTokenState::Valid);
+        let mut sm = PasswordResetTokenStateMachine::from_state(PasswordResetTokenState::False);
         assert!(sm.can_transition(PasswordResetTokenTransition::Use));
         let result = sm.transition(PasswordResetTokenTransition::Use);
         assert!(result.is_ok());
-        assert_eq!(sm.current_state(), PasswordResetTokenState::Used);
+        assert_eq!(sm.current_state(), PasswordResetTokenState::True);
     }
 
     #[test]
     fn test_invalid_transition() {
-        let mut sm = PasswordResetTokenStateMachine::from_state(PasswordResetTokenState::Used);
-        // Use is not valid from Used state
+        let mut sm = PasswordResetTokenStateMachine::from_state(PasswordResetTokenState::True);
+        // Use is not valid from True state
         let result = sm.transition(PasswordResetTokenTransition::Use);
         assert!(result.is_err());
     }
 
     #[test]
     fn test_state_parsing() {
-        let state: PasswordResetTokenState = "valid".parse().unwrap();
-        assert_eq!(state, PasswordResetTokenState::Valid);
+        let state: PasswordResetTokenState = "false".parse().unwrap();
+        assert_eq!(state, PasswordResetTokenState::False);
     }
 
     #[test]

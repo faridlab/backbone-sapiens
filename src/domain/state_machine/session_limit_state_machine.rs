@@ -11,22 +11,22 @@ use std::str::FromStr;
 pub enum SessionLimitState {
     /// Initial state
     /// Final state
-    Enforced,
+    True,
     /// Final state
-    Unenforced,
+    False,
 }
 
 impl Default for SessionLimitState {
     fn default() -> Self {
-        Self::Enforced
+        Self::True
     }
 }
 
 impl std::fmt::Display for SessionLimitState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Enforced => write!(f, "enforced"),
-            Self::Unenforced => write!(f, "unenforced"),
+            Self::True => write!(f, "true"),
+            Self::False => write!(f, "false"),
         }
     }
 }
@@ -36,8 +36,8 @@ impl FromStr for SessionLimitState {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
-            "enforced" => Ok(Self::Enforced),
-            "unenforced" => Ok(Self::Unenforced),
+            "true" => Ok(Self::True),
+            "false" => Ok(Self::False),
             _ => Err(StateMachineError::InvalidState(s.to_string())),
         }
     }
@@ -46,19 +46,19 @@ impl FromStr for SessionLimitState {
 impl SessionLimitState {
     /// Check if this is the initial state
     pub fn is_initial(&self) -> bool {
-        matches!(self, Self::Enforced)
+        matches!(self, Self::True)
     }
 
     /// Check if this is a final state
     pub fn is_final(&self) -> bool {
-        matches!(self, Self::Enforced | Self::Unenforced)
+        matches!(self, Self::True | Self::False)
     }
 
     /// Get all possible states
     pub fn all() -> Vec<Self> {
         vec![
-            Self::Enforced,
-            Self::Unenforced,
+            Self::True,
+            Self::False,
         ]
     }
 }
@@ -67,9 +67,9 @@ impl SessionLimitState {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SessionLimitTransition {
-    /// unenforced -> enforced
+    /// false -> true
     Enable,
-    /// enforced -> unenforced
+    /// true -> false
     Disable,
 }
 
@@ -98,8 +98,8 @@ impl SessionLimitTransition {
     /// Get the target state of this transition
     pub fn target_state(&self) -> SessionLimitState {
         match self {
-            Self::Enable => SessionLimitState::Enforced,
-            Self::Disable => SessionLimitState::Unenforced,
+            Self::Enable => SessionLimitState::True,
+            Self::Disable => SessionLimitState::False,
         }
     }
 
@@ -149,8 +149,8 @@ impl SessionLimitStateMachine {
     /// Check if a transition is allowed from the current state
     pub fn can_transition(&self, transition: SessionLimitTransition) -> bool {
         match (self.current_state, transition) {
-            (SessionLimitState::Unenforced, SessionLimitTransition::Enable) => true,
-            (SessionLimitState::Enforced, SessionLimitTransition::Disable) => true,
+            (SessionLimitState::False, SessionLimitTransition::Enable) => true,
+            (SessionLimitState::True, SessionLimitTransition::Disable) => true,
             _ => false,
         }
     }
@@ -251,31 +251,31 @@ mod tests {
     #[test]
     fn test_initial_state() {
         let sm = SessionLimitStateMachine::new();
-        assert_eq!(sm.current_state(), SessionLimitState::Enforced);
+        assert_eq!(sm.current_state(), SessionLimitState::True);
         assert!(sm.current_state().is_initial());
     }
 
     #[test]
     fn test_valid_transition() {
-        let mut sm = SessionLimitStateMachine::from_state(SessionLimitState::Unenforced);
+        let mut sm = SessionLimitStateMachine::from_state(SessionLimitState::False);
         assert!(sm.can_transition(SessionLimitTransition::Enable));
         let result = sm.transition(SessionLimitTransition::Enable);
         assert!(result.is_ok());
-        assert_eq!(sm.current_state(), SessionLimitState::Enforced);
+        assert_eq!(sm.current_state(), SessionLimitState::True);
     }
 
     #[test]
     fn test_invalid_transition() {
-        let mut sm = SessionLimitStateMachine::from_state(SessionLimitState::Enforced);
-        // Enable is not valid from Enforced state
+        let mut sm = SessionLimitStateMachine::from_state(SessionLimitState::True);
+        // Enable is not valid from True state
         let result = sm.transition(SessionLimitTransition::Enable);
         assert!(result.is_err());
     }
 
     #[test]
     fn test_state_parsing() {
-        let state: SessionLimitState = "enforced".parse().unwrap();
-        assert_eq!(state, SessionLimitState::Enforced);
+        let state: SessionLimitState = "true".parse().unwrap();
+        assert_eq!(state, SessionLimitState::True);
     }
 
     #[test]

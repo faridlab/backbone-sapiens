@@ -86,7 +86,7 @@ impl backbone_core::write_guard::WriteGuard<NotificationPreference> for Notifica
         if (create || (update && r::changed(old.as_ref(), row, &["quiet_timezone"]))) && !r::holds(&r::le(r::length(r::field(row, "quiet_timezone")), r::Val::Num(50.0_f64))) {
             refuse.push(Violation::new("quiet_timezone", "max_length", "quiet_timezone must be at most 50 characters").with_param("max", 50_i64));
         }
-        // `digest_frequency_valid` (notification_preference.hook.yaml:40)
+        // `digest_frequency_valid` (notification_preference.hook.yaml:41)
         if (create || update) && !r::holds(&r::in_list(r::field(row, "digest_frequency"), r::Val::List(vec![r::text("immediate"), r::text("hourly"), r::text("daily"), r::text("weekly")]))) {
             refuse.push(Violation::new("digest_frequency", "invalid_digest_frequency", "Invalid digest frequency. Valid: immediate, hourly, daily, weekly"));
         }

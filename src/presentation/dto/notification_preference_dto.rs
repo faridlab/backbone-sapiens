@@ -51,8 +51,6 @@ pub struct CreateNotificationPreferenceDto {
     pub digest_enabled: bool,
     #[serde(alias = "digest_frequency")]
     pub digest_frequency: DigestFrequency,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub enabled: bool,
 }
 
 // =============================================================================
@@ -282,7 +280,7 @@ impl From<CreateNotificationPreferenceDto> for NotificationPreference {
             quiet_timezone: dto.quiet_timezone,
             digest_enabled: dto.digest_enabled,
             digest_frequency: dto.digest_frequency,
-            enabled: dto.enabled,
+            enabled: true,
             metadata: AuditMetadata::default(),
         }
     }

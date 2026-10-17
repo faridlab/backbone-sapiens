@@ -8,29 +8,30 @@ model: notification_preference.model.yaml
 # PRIORITY 1: State Machine - Preference Lifecycle
 # =============================================================================
 states:
+  # States are the field's own values, so the generated trigger can refuse an undeclared move.
   field: enabled
 
   values:
-    enabled:
+    "true":
       initial: true
       final: true
       on_enter:
         - "log(notification.preferences_enabled, { user_id: user_id })"
 
-    disabled:
+    "false":
       final: true
       on_enter:
         - "log(notification.preferences_disabled, { user_id: user_id })"
 
   transitions:
     enable:
-      from: disabled
-      to: enabled
+      from: "false"
+      to: "true"
       roles: [owner, admin]
 
     disable:
-      from: enabled
-      to: disabled
+      from: "true"
+      to: "false"
       roles: [owner, admin]
 
 # =============================================================================

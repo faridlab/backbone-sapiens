@@ -8,29 +8,30 @@ model: session_limit.model.yaml
 # PRIORITY 1: State Machine - Session Limit Lifecycle
 # =============================================================================
 states:
+  # States are the field's own values, so the generated trigger can refuse an undeclared move.
   field: enforce_limit
 
   values:
-    enforced:
+    "true":
       initial: true
       final: true
       on_enter:
         - "log(session_limit.enforced, { user_id: user_id, max_sessions: max_sessions })"
 
-    unenforced:
+    "false":
       final: true
       on_enter:
         - "log(session_limit.unenforced, { user_id: user_id })"
 
   transitions:
     enable:
-      from: unenforced
-      to: enforced
+      from: "false"
+      to: "true"
       roles: [admin]
 
     disable:
-      from: enforced
-      to: unenforced
+      from: "true"
+      to: "false"
       roles: [admin]
 
 # =============================================================================
